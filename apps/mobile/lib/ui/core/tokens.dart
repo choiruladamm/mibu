@@ -184,3 +184,29 @@ abstract final class AppText {
     height: 0.82,
   );
 }
+
+/// Icons the design draws itself (hugeicons format, use with HugeIcon).
+abstract final class AppIcons {
+  static const _stroke = {
+    'stroke': 'currentColor',
+    'strokeWidth': '1.5',
+    'strokeLinecap': 'round',
+    'strokeLinejoin': 'round',
+  };
+
+  /// Keypad backspace (03.1).
+  static const backspace = [
+    [
+      'path',
+      {
+        'key': '0',
+        'd': 'M9.5 5H18a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H9.5a2 2 0 0 1-1.5-.68L3.6 13.3a2 2 0 0 1 0-2.6L8 5.68A2 2 0 0 1 9.5 5z',
+        ..._stroke,
+      },
+    ],
+    [
+      'path',
+      {'key': '1', 'd': 'M12.5 9.5l5 5M17.5 9.5l-5 5', ..._stroke},
+    ],
+  ];
+}

@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../domain/models/finance.dart';
+
 part 'app_database.g.dart';
 
 const _uuid = Uuid();
@@ -19,8 +21,6 @@ mixin SyncColumns on Table {
   @override
   Set<Column> get primaryKey => {id};
 }
-
-enum CategoryKind { expense, income }
 
 @DataClassName('ProfileRow')
 class Profiles extends Table with SyncColumns {
@@ -120,11 +120,13 @@ class AppDatabase extends _$AppDatabase {
         String cat,
         String place,
         DateTime at,
-        int amount,
-      ) => TransactionsCompanion.insert(
+        int amount, {
+        String note = '',
+      }) => TransactionsCompanion.insert(
         amount: amount,
         categoryId: Value(cats[cat]),
         place: Value(place),
+        note: Value(note),
         at: at,
       );
 
@@ -149,8 +151,20 @@ class AppDatabase extends _$AppDatabase {
           ),
         ],
         // This month: pockets at 90 / 60 / 38 / 26 %.
-        tx('belanja', 'tokopedia', thisMonth(now.day - 5, 20, 0), -2399000),
-        tx('makan', 'warteg', thisMonth(now.day - 4, 12, 30), -390000),
+        tx(
+          'belanja',
+          'tokopedia',
+          thisMonth(now.day - 3, 20, 0),
+          -2399000,
+          note: 'titip beliin ibu',
+        ),
+        tx(
+          'makan',
+          'warteg',
+          thisMonth(now.day - 1, 12, 30),
+          -390000,
+          note: 'makan siang bareng tim',
+        ),
         tx('ojol', 'gojek', thisMonth(now.day - 3, 8, 15), -163000),
         tx('anabul', 'dokter hewan', thisMonth(now.day - 2, 17, 0), -450000),
         tx('ngopi', 'kopi kenangan', thisMonth(now.day - 1, 9, 0), -180000),

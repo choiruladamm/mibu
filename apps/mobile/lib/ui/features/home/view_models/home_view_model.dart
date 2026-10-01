@@ -3,9 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../data/repositories/finance_repository.dart';
 import '../../../../domain/models/finance.dart';
-
-/// Overridable clock (tests pin it).
-final nowProvider = Provider<DateTime>((ref) => DateTime.now());
+import '../../../core/clock.dart';
 
 final profileProvider = StreamProvider<Profile>(
   (ref) => ref.watch(financeRepositoryProvider).watchProfile(),

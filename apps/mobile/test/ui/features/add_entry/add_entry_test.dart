@@ -1,0 +1,231 @@
+import 'package:drift/drift.dart' hide isNull;
+import 'package:drift/native.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mibu/data/database/app_database.dart';
+import 'package:mibu/l10n/app_localizations.dart';
+import 'package:mibu/ui/core/clock.dart';
+import 'package:mibu/ui/core/theme.dart';
+import 'package:mibu/ui/features/add_entry/view_models/add_entry_view_model.dart';
+import 'package:mibu/ui/features/add_entry/views/add_entry_view.dart';
+
+void main() {
+  test('pressKey: no leading zeros, 000, max 10 digits', () {
+    expect(pressKey('', '0'), '');
+    expect(pressKey('', '000'), '');
+    expect(pressKey('5', '000'), '5000');
+    expect(pressKey('12', '3'), '123');
+    expect(pressKey('123456789', '0'), '1234567890');
+    expect(pressKey('1234567890', '1'), '1234567890'); // full
+    expect(pressKey('12345678', '000'), '12345678'); // would be 11
+  });
+
+  testWidgets('catat: type amount, pick a category, save → db', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    final now = DateTime(2026, 10, 14, 14, 50);
+    final db = AppDatabase(
+      DatabaseConnection(
+        NativeDatabase.memory(),
+        closeStreamsSynchronously: true,
+      ),
+      () => now,
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          appDatabaseProvider.overrideWithValue(db),
+          clockProvider.overrideWithValue(() => now),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.light,
+          locale: const Locale('id'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const AddEntryView(),
+        ),
+      ),
+    );
+    Future<void> settle() async {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 50)),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+    }
+
+    await settle();
+
+    // Nothing typed: save is disabled.
+    final save = find.widgetWithText(FilledButton, 'simpan pengeluaran');
+    expect(tester.widget<FilledButton>(save).onPressed, isNull);
+
+    for (final k in ['5', '000']) {
+      await tester.tap(
+        find.bySemanticsLabel(k == '000' ? 'tambah tiga nol' : k),
+      );
+      await tester.pump();
+    }
+    expect(find.text('5.000'), findsOneWidget);
+    await tester.tap(find.bySemanticsLabel('0'));
+    await tester.pump();
+    expect(find.text('50.000'), findsOneWidget);
+
+    // Pick makan in the sheet.
+    await tester.tap(find.text('pilih kategori'));
+    await settle();
+    await tester.tap(find.bySemanticsLabel('makan'));
+    await tester.pump();
+    expect(find.text('pakai 🍜 makan'), findsOneWidget);
+    // Tapping it again unpicks.
+    await tester.tap(find.bySemanticsLabel('makan'));
+    await tester.pump();
+    expect(find.text('pakai 🍜 makan'), findsNothing);
+    await tester.tap(find.bySemanticsLabel('makan'));
+    await tester.pump();
+    await tester.tap(find.text('pakai 🍜 makan'));
+    await settle();
+
+    // makan pocket: 1,5jt − 390K − 50K left.
+    expect(find.text('🍜 kantong makan abis ini'), findsOneWidget);
+    expect(find.text('sisa Rp1,06jt'), findsOneWidget);
+
+    await tester.tap(save);
+    await settle();
+
+    final rows = await (db.select(
+      db.transactions,
+    )..where((t) => t.amount.equals(-50000))).get();
+    expect(rows, hasLength(1));
+    expect(rows.single.at, now);
+
+    await tester.pumpWidget(const SizedBox());
+    await db.close();
+  });
+
+  testWidgets('catat + date / note sheets fit a short screen (375×667)', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(375, 667);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final now = DateTime(2026, 10, 14, 14, 50);
+    final db = AppDatabase(
+      DatabaseConnection(
+        NativeDatabase.memory(),
+        closeStreamsSynchronously: true,
+      ),
+      () => now,
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          appDatabaseProvider.overrideWithValue(db),
+          clockProvider.overrideWithValue(() => now),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.light,
+          locale: const Locale('id'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const AddEntryView(),
+        ),
+      ),
+    );
+    Future<void> settle() async {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 50)),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+    }
+
+    await settle();
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(find.bySemanticsLabel('pilih tanggal lain'));
+    await settle();
+    expect(find.text('kapan kejadiannya?'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.tap(find.bySemanticsLabel('tutup').last);
+    await settle();
+
+    await tester.tap(find.text('catatan'));
+    await settle();
+    expect(find.text('tag cepet · maks 3'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(const SizedBox());
+    await db.close();
+  });
+
+  testWidgets('picker: switching category clears a prefilled place only', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final now = DateTime(2026, 10, 14, 14, 50);
+    final db = AppDatabase(
+      DatabaseConnection(
+        NativeDatabase.memory(),
+        closeStreamsSynchronously: true,
+      ),
+      () => now,
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          appDatabaseProvider.overrideWithValue(db),
+          clockProvider.overrideWithValue(() => now),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.light,
+          locale: const Locale('id'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const AddEntryView(),
+        ),
+      ),
+    );
+    Future<void> settle() async {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 50)),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+    }
+
+    String place() =>
+        tester.widget<TextField>(find.byType(TextField).last).controller!.text;
+
+    await settle();
+    // Recent chip (newest: ojol + gojek) fills both in one tap.
+    await tester.tap(find.text('pilih kategori'));
+    await settle();
+    await tester.tap(find.text('gojek'));
+    await settle();
+    expect(find.text('ini buat apa?'), findsNothing); // sheet closed
+    expect(find.text('gojek'), findsOneWidget); // chip on 03.1
+
+    // Reopen: gojek is prefilled; picking ngopi drops it.
+    await tester.tap(find.text('gojek'));
+    await settle();
+    expect(place(), 'gojek');
+    await tester.tap(find.bySemanticsLabel('ngopi'));
+    await tester.pump();
+    expect(place(), '');
+
+    // A place typed here survives a category change.
+    await tester.enterText(find.byType(TextField).last, 'kopken');
+    await tester.tap(find.bySemanticsLabel('anabul'));
+    await tester.pump();
+    expect(place(), 'kopken');
+
+    await tester.pumpWidget(const SizedBox());
+    await db.close();
+  });
+}

@@ -2,11 +2,13 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../domain/models/finance.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../routing/router.dart';
 import '../../../core/dashed.dart';
 import '../../../core/money.dart';
 import '../../../core/tokens.dart';
@@ -174,7 +176,7 @@ class HomeView extends ConsumerWidget {
             child: AppTabBar(
               active: AppTab.home,
               onSelect: (_) {},
-              onAdd: () {}, // → 03.1 catat
+              onAdd: () => context.push(Routes.addEntry),
             ),
           ),
         ],

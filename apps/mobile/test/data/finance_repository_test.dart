@@ -68,4 +68,37 @@ void main() {
     expect(recent.first.category, isNull);
     expect(recent.first.emoji, '🧾');
   });
+
+  test('add, recent picks / notes, per-day counts', () async {
+    final makan = await (db.select(
+      db.categories,
+    )..where((c) => c.name.equals('makan'))).getSingle();
+    await repo.addTransaction(
+      amount: -25000,
+      categoryId: makan.id,
+      place: ' warteg ',
+      note: 'makan siang',
+      tags: const ['#kantor'],
+      at: now,
+    );
+
+    final picks = await repo.watchRecentPicks().first;
+    expect(picks.first.place, 'warteg'); // trimmed, newest first
+    expect(picks.first.category.name, 'makan');
+    expect(
+      picks.map((p) => '${p.category.name}/${p.place}').toSet().length,
+      picks.length,
+    ); // distinct
+
+    final notes = await repo.watchRecentNotes().first;
+    expect(notes.map((n) => n.text), [
+      'makan siang', // newest first, limit 2
+      'makan siang bareng tim',
+    ]);
+
+    final days = await repo
+        .watchDays(DateTime(2026, 10), DateTime(2026, 11))
+        .first;
+    expect(days[DateTime(2026, 10, 14)], (count: 2, net: -52000)); // + gojek
+  });
 }

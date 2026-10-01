@@ -1,0 +1,200 @@
+import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
+
+import '../../../l10n/app_localizations.dart';
+import '../tokens.dart';
+
+/// Opens [child] as a mibu bottom sheet (radius 32, scrim 45% from theme).
+Future<T?> showAppSheet<T>(BuildContext context, Widget child) =>
+    showModalBottomSheet<T>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (_) => child,
+    );
+
+/// Handle + title + close disc; [height] is the design's sheet height.
+class SheetFrame extends StatelessWidget {
+  const SheetFrame({
+    super.key,
+    required this.title,
+    required this.height,
+    required this.child,
+    this.actions = const [],
+    this.titleSize = 22,
+    this.scrollable = true,
+  });
+
+  final String title;
+  final double height, titleSize;
+  final List<Widget> actions;
+  final Widget child;
+
+  /// Scroll [child] when the screen is shorter than [height]. Turn off when
+  /// [child] scrolls itself (e.g. holds a GridView).
+  final bool scrollable;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    final bottom = MediaQuery.viewInsetsOf(context).bottom;
+    final compact = titleSize < 26; // 00.12 / 00.13: smaller handle + close
+    return Padding(
+      padding: EdgeInsets.only(bottom: bottom),
+      child: SizedBox(
+        height: height,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 10, 20, 28),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: compact ? 36 : 40,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: AppColors.line,
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
+              ),
+              SizedBox(height: compact ? 14 : 12),
+              Row(
+                spacing: 8,
+                children: [
+                  Expanded(
+                    child: Semantics(
+                      header: true,
+                      child: Text(
+                        title,
+                        style: AppText.sheetTitle.copyWith(fontSize: titleSize),
+                      ),
+                    ),
+                  ),
+                  ...actions,
+                  CircleButton(
+                    icon: HugeIcons.strokeRoundedCancel01,
+                    label: l.close,
+                    size: compact ? 40 : 44,
+                    onTap: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+              Expanded(
+                child: scrollable
+                    ? CustomScrollView(
+                        slivers: [
+                          SliverFillRemaining(
+                            hasScrollBody: false,
+                            child: child,
+                          ),
+                        ],
+                      )
+                    : child,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Mist icon disc (close, calendar, arrows).
+class CircleButton extends StatelessWidget {
+  const CircleButton({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.size = 44,
+    this.iconSize = 18,
+    this.ink = false,
+    this.color = AppColors.mist,
+  });
+
+  final List<List<dynamic>> icon;
+  final String label;
+  final VoidCallback? onTap;
+  final double size, iconSize;
+  final bool ink; // filled ink (e.g. calendar while its sheet is open)
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final enabled = onTap != null;
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: label,
+      excludeSemantics: true,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: size,
+          height: size,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: ink ? AppColors.ink : (enabled ? color : Colors.transparent),
+          ),
+          child: HugeIcon(
+            icon: icon,
+            size: iconSize,
+            strokeWidth: AppStroke.icon,
+            color: ink
+                ? AppColors.paper
+                : enabled
+                ? AppColors.ink
+                : AppColors.line,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 56 ink pill — the one primary action per screen/sheet.
+class PrimaryButton extends StatelessWidget {
+  const PrimaryButton({
+    super.key,
+    required this.label,
+    required this.onPressed,
+    this.icon,
+  });
+
+  final String label;
+  final VoidCallback? onPressed; // null = disabled
+  final List<List<dynamic>>? icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final fg = onPressed == null ? AppColors.subtle : AppColors.paper;
+    return FilledButton(
+      onPressed: onPressed,
+      style: FilledButton.styleFrom(
+        backgroundColor: AppColors.ink,
+        disabledBackgroundColor: AppColors.mist,
+        foregroundColor: AppColors.paper,
+        disabledForegroundColor: AppColors.subtle,
+        minimumSize: const Size.fromHeight(56),
+        shape: const StadiumBorder(),
+        textStyle: AppText.body.copyWith(fontSize: 17),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 10,
+        children: [
+          if (icon != null)
+            HugeIcon(
+              icon: icon!,
+              size: 20,
+              strokeWidth: AppStroke.iconOnInkSmall,
+              color: fg,
+            ),
+          Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
+        ],
+      ),
+    );
+  }
+}

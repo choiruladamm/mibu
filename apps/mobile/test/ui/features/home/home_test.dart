@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mibu/data/database/app_database.dart';
 import 'package:mibu/l10n/app_localizations.dart';
+import 'package:mibu/ui/core/clock.dart';
 import 'package:mibu/ui/core/theme.dart';
 import 'package:mibu/ui/features/home/view_models/home_view_model.dart';
 import 'package:mibu/ui/features/home/views/home_view.dart';
@@ -29,7 +30,7 @@ void main() {
       ProviderScope(
         overrides: [
           appDatabaseProvider.overrideWithValue(db),
-          nowProvider.overrideWithValue(now),
+          clockProvider.overrideWithValue(() => now),
         ],
         child: MaterialApp(
           theme: AppTheme.light,

@@ -1,4 +1,29 @@
-/// Amounts are whole rupiah (IDR has no decimals).
+// Amounts are whole rupiah (IDR has no decimals).
+
+enum CategoryKind { expense, income }
+
+class Category {
+  const Category({
+    required this.id,
+    required this.emoji,
+    required this.name,
+    required this.kind,
+    this.monthlyLimit,
+  });
+
+  final String id, emoji, name;
+  final CategoryKind kind;
+  final int? monthlyLimit; // set = kantong
+}
+
+/// "terakhir" in 03.2: a category + place logged recently.
+class RecentPick {
+  const RecentPick({required this.category, required this.place});
+
+  final Category category;
+  final String place;
+}
+
 class MonthBalance {
   const MonthBalance({required this.month, required this.amount});
 

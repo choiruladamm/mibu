@@ -119,4 +119,163 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get homeRecent => 'baru aja';
+
+  @override
+  String get close => 'tutup';
+
+  @override
+  String get expense => 'pengeluaran';
+
+  @override
+  String get income => 'pemasukan';
+
+  @override
+  String saveEntry(String kind) {
+    return 'simpan $kind';
+  }
+
+  @override
+  String get pickOtherDate => 'pilih tanggal lain';
+
+  @override
+  String get pickCategory => 'pilih kategori';
+
+  @override
+  String get noteButton => 'catatan';
+
+  @override
+  String editNote(String note) {
+    return 'edit catatan: $note';
+  }
+
+  @override
+  String get clearNote => 'hapus catatan';
+
+  @override
+  String pocketAfter(String emoji, String name) {
+    return '$emoji kantong $name abis ini';
+  }
+
+  @override
+  String get balanceAfter => 'saldo abis ini';
+
+  @override
+  String leftAmount(String amount) {
+    return 'sisa $amount';
+  }
+
+  @override
+  String overAmount(String amount) {
+    return 'kelebihan $amount';
+  }
+
+  @override
+  String get keyThreeZeros => 'tambah tiga nol';
+
+  @override
+  String get keyBackspace => 'hapus satu angka';
+
+  @override
+  String get pickerTitle => 'ini buat apa?';
+
+  @override
+  String get pickerSearch => 'cari kategori';
+
+  @override
+  String get pickerRecent => 'terakhir · sekali tap langsung keisi';
+
+  @override
+  String get pickerWhere => 'di mana';
+
+  @override
+  String pickerUse(String emoji, String name) {
+    return 'pakai $emoji $name';
+  }
+
+  @override
+  String get pickerNoMatch => 'nggak ada kategori yang cocok';
+
+  @override
+  String get yesterday => 'kemarin';
+
+  @override
+  String get twoDaysAgo => 'kemarin lusa';
+
+  @override
+  String daysAgo(int n) {
+    return '$n hari lalu';
+  }
+
+  @override
+  String get thisWeek => 'minggu ini';
+
+  @override
+  String get lastWeek => 'minggu lalu';
+
+  @override
+  String weeksAgo(int n) {
+    return '$n minggu lalu';
+  }
+
+  @override
+  String backTo(String day) {
+    return 'balik ke $day';
+  }
+
+  @override
+  String get prevWeek => 'minggu sebelumnya';
+
+  @override
+  String get nextWeek => 'minggu berikutnya';
+
+  @override
+  String get notYet => 'belum kejadian';
+
+  @override
+  String pickDayIn(String range) {
+    return 'pilih hari, $range';
+  }
+
+  @override
+  String get dateSheetTitle => 'kapan kejadiannya?';
+
+  @override
+  String get startOfMonth => 'awal bulan';
+
+  @override
+  String get prevMonth => 'bulan sebelumnya';
+
+  @override
+  String get nextMonth => 'bulan berikutnya';
+
+  @override
+  String entriesThatDay(int n) {
+    return 'udah ada $n catatan — jangan dobel ya';
+  }
+
+  @override
+  String get noEntriesThatDay => 'belum ada catatan di hari ini';
+
+  @override
+  String useDate(String date) {
+    return 'pakai $date';
+  }
+
+  @override
+  String get noteFor => 'buat';
+
+  @override
+  String get notePlaceholder => 'buat apa, sama siapa, kenapa…';
+
+  @override
+  String get noteQuickTags => 'tag cepet · maks 3';
+
+  @override
+  String get noteWroteBefore => 'pernah kamu tulis';
+
+  @override
+  String get noteSave => 'simpan catatan';
+
+  @override
+  String get noteLeaveEmpty => 'nggak jadi, kosongin';
 }

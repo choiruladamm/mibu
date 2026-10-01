@@ -13,7 +13,7 @@ Personal finance app (Indonesia, IDR). Flutter app lives in `apps/mobile`; Flutt
 
 After changing Drift tables: `fvm dart run build_runner build`. Pre-release: edit schema in place at `schemaVersion` 1 (wipe app data on dev devices); after first release bump it + add a migration.
 
-Riverpod providers are written by hand (no `riverpod_generator`), declared next to the class they expose. Pin time via `nowProvider`; in tests override `appDatabaseProvider` with `AppDatabase(DatabaseConnection(NativeDatabase.memory(), closeStreamsSynchronously: true), () => now)` — the clock positions the debug seed, keep it equal to `nowProvider`.
+Riverpod providers are written by hand (no `riverpod_generator`), declared next to the class they expose. Pin time via `clockProvider` (`ui/core/clock.dart`; `nowProvider` = app-start now for queries); in tests override `appDatabaseProvider` with `AppDatabase(DatabaseConnection(NativeDatabase.memory(), closeStreamsSynchronously: true), () => now)` — the clock positions the debug seed, keep it equal to the pinned clock.
 
 ## MVP scope (see `docs/MVP_PLAN.md`, features in `docs/FEATURES.md`)
 
@@ -28,7 +28,8 @@ Riverpod providers are written by hand (no `riverpod_generator`), declared next 
 - `data/database/` — Drift `AppDatabase` (seeds design sample data in debug only, until 01.4 setup exists)
 - `data/repositories/` — map Drift rows → domain models, expose streams
 - `routing/router.dart` — go_router `routerProvider`, `Routes` paths
-- `ui/core/` — `tokens.dart` (design tokens), `theme.dart`, `money.dart` (`rupiah`, `rupiahCompact`), `dashed.dart`, shared `widgets/`
+- `ui/core/` — `tokens.dart` (design tokens + `AppIcons` for custom-drawn icons), `theme.dart`, `money.dart` (`rupiah`, `rupiahCompact`), `dates.dart` (`dayLabel`, `relativeDay`, Monday weeks), `clock.dart`, `dashed.dart`, shared `widgets/`
+  - sheets: `showAppSheet` + `SheetFrame` (`widgets/sheet.dart`); reuse `PrimaryButton` / `CircleButton` from there
 - `ui/features/<feature>/{views,view_models}/`
 
 ## Design

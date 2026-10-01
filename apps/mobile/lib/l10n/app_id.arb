@@ -54,5 +54,140 @@
   },
   "homeMonthlyBalance": "saldo per bulan",
   "homeTapMonthHint": "tap bulannya buat intip",
-  "homeRecent": "baru aja"
+  "homeRecent": "baru aja",
+  "close": "tutup",
+  "expense": "pengeluaran",
+  "income": "pemasukan",
+  "saveEntry": "simpan {kind}",
+  "@saveEntry": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "pickOtherDate": "pilih tanggal lain",
+  "pickCategory": "pilih kategori",
+  "noteButton": "catatan",
+  "editNote": "edit catatan: {note}",
+  "@editNote": {
+    "placeholders": {
+      "note": {
+        "type": "String"
+      }
+    }
+  },
+  "clearNote": "hapus catatan",
+  "pocketAfter": "{emoji} kantong {name} abis ini",
+  "@pocketAfter": {
+    "placeholders": {
+      "emoji": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "balanceAfter": "saldo abis ini",
+  "leftAmount": "sisa {amount}",
+  "@leftAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "overAmount": "kelebihan {amount}",
+  "@overAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "keyThreeZeros": "tambah tiga nol",
+  "keyBackspace": "hapus satu angka",
+  "pickerTitle": "ini buat apa?",
+  "pickerSearch": "cari kategori",
+  "pickerRecent": "terakhir · sekali tap langsung keisi",
+  "pickerWhere": "di mana",
+  "pickerUse": "pakai {emoji} {name}",
+  "@pickerUse": {
+    "placeholders": {
+      "emoji": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pickerNoMatch": "nggak ada kategori yang cocok",
+  "yesterday": "kemarin",
+  "twoDaysAgo": "kemarin lusa",
+  "daysAgo": "{n} hari lalu",
+  "@daysAgo": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "thisWeek": "minggu ini",
+  "lastWeek": "minggu lalu",
+  "weeksAgo": "{n} minggu lalu",
+  "@weeksAgo": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "backTo": "balik ke {day}",
+  "@backTo": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "prevWeek": "minggu sebelumnya",
+  "nextWeek": "minggu berikutnya",
+  "notYet": "belum kejadian",
+  "pickDayIn": "pilih hari, {range}",
+  "@pickDayIn": {
+    "placeholders": {
+      "range": {
+        "type": "String"
+      }
+    }
+  },
+  "dateSheetTitle": "kapan kejadiannya?",
+  "startOfMonth": "awal bulan",
+  "prevMonth": "bulan sebelumnya",
+  "nextMonth": "bulan berikutnya",
+  "entriesThatDay": "udah ada {n} catatan — jangan dobel ya",
+  "@entriesThatDay": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "noEntriesThatDay": "belum ada catatan di hari ini",
+  "useDate": "pakai {date}",
+  "@useDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "noteFor": "buat",
+  "notePlaceholder": "buat apa, sama siapa, kenapa…",
+  "noteQuickTags": "tag cepet · maks 3",
+  "noteWroteBefore": "pernah kamu tulis",
+  "noteSave": "simpan catatan",
+  "noteLeaveEmpty": "nggak jadi, kosongin"
 }
