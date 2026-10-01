@@ -65,4 +65,26 @@ void main() {
     await tester.pumpWidget(const SizedBox());
     await db.close();
   });
+
+  // Regression: a failing query (e.g. stale dev DB missing a table) used to
+  // leave a blank screen with nothing in the console.
+  test('stream errors surface instead of a blank beranda', () async {
+    final db = AppDatabase(
+      DatabaseConnection(
+        NativeDatabase.memory(),
+        closeStreamsSynchronously: true,
+      ),
+    );
+    addTearDown(db.close);
+    final container = ProviderContainer(
+      overrides: [
+        appDatabaseProvider.overrideWithValue(db),
+        profileProvider.overrideWith((ref) => Stream.error(StateError('boom'))),
+      ],
+    );
+    addTearDown(container.dispose);
+    container.listen(profileProvider, (_, _) {});
+    await Future<void>.delayed(Duration.zero);
+    expect(container.read(homeProvider), isA<AsyncError<HomeState>>());
+  });
 }

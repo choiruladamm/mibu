@@ -23,8 +23,23 @@ class HomeView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final s = ref.watch(homeProvider);
-    if (s == null) return const Scaffold();
+    final HomeState s;
+    switch (ref.watch(homeProvider)) {
+      case AsyncData(:final value):
+        s = value;
+      case AsyncError(:final error):
+        // ponytail: no error state in the design yet; plain text for now.
+        return Scaffold(
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpace.gutter),
+              child: Text('$error', style: AppText.caption),
+            ),
+          ),
+        );
+      default:
+        return const Scaffold();
+    }
     final l = AppLocalizations.of(context)!;
     final caption = AppText.caption.copyWith(color: AppColors.muted);
     final link = AppText.caption.copyWith(
