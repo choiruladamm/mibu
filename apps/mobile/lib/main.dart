@@ -1,23 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'l10n/app_localizations.dart';
+import 'routing/router.dart';
 import 'ui/core/theme.dart';
-import 'ui/features/home/view_models/home_view_model.dart';
-import 'ui/features/home/views/home_view.dart';
 
 void main() {
-  runApp(const MibuApp());
+  runApp(const ProviderScope(child: MibuApp()));
 }
 
-class MibuApp extends StatelessWidget {
+class MibuApp extends ConsumerWidget {
   const MibuApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+  Widget build(BuildContext context, WidgetRef ref) {
+    return MaterialApp.router(
       onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
       theme: AppTheme.light,
+      routerConfig: ref.watch(routerProvider),
       locale: const Locale('id', 'ID'),
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: const [
@@ -26,7 +27,6 @@ class MibuApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: HomeView(viewModel: HomeViewModel()),
     );
   }
 }

@@ -135,6 +135,156 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'aman jajan hari ini'**
   String get safeToSpendToday;
+
+  /// No description provided for @onboardingSkip.
+  ///
+  /// In id, this message translates to:
+  /// **'lewati'**
+  String get onboardingSkip;
+
+  /// No description provided for @onboardingNext.
+  ///
+  /// In id, this message translates to:
+  /// **'lanjut'**
+  String get onboardingNext;
+
+  /// No description provided for @onboardingStart.
+  ///
+  /// In id, this message translates to:
+  /// **'mulai sekarang'**
+  String get onboardingStart;
+
+  /// No description provided for @onboardingFooter.
+  ///
+  /// In id, this message translates to:
+  /// **'masuk pakai google / apple · tanpa password'**
+  String get onboardingFooter;
+
+  /// No description provided for @onboardingCounter.
+  ///
+  /// In id, this message translates to:
+  /// **'0{step} / 03'**
+  String onboardingCounter(int step);
+
+  /// No description provided for @onboardingStepLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'langkah {step}'**
+  String onboardingStepLabel(int step);
+
+  /// No description provided for @onboarding1Title.
+  ///
+  /// In id, this message translates to:
+  /// **'duit kamu, ada kantongnya.'**
+  String get onboarding1Title;
+
+  /// No description provided for @onboarding1Body.
+  ///
+  /// In id, this message translates to:
+  /// **'bagi gaji ke kantong-kantong kecil. makan, ngopi, liburan — semuanya jelas jatahnya.'**
+  String get onboarding1Body;
+
+  /// No description provided for @onboarding2Title.
+  ///
+  /// In id, this message translates to:
+  /// **'tau jatah jajan hari ini.'**
+  String get onboarding2Title;
+
+  /// No description provided for @onboarding2Body.
+  ///
+  /// In id, this message translates to:
+  /// **'mibu ngitungin berapa yang aman dipake hari ini, biar tanggal tua nggak makan mie terus.'**
+  String get onboarding2Body;
+
+  /// No description provided for @onboarding3Title.
+  ///
+  /// In id, this message translates to:
+  /// **'catat 3 detik, beres.'**
+  String get onboarding3Title;
+
+  /// No description provided for @onboarding3Body.
+  ///
+  /// In id, this message translates to:
+  /// **'ketik nominal, pilih kategori, simpan. nggak perlu spreadsheet, nggak perlu ribet.'**
+  String get onboarding3Body;
+
+  /// No description provided for @onboardingSalaryIn.
+  ///
+  /// In id, this message translates to:
+  /// **'gajian masuk'**
+  String get onboardingSalaryIn;
+
+  /// No description provided for @pocketFood.
+  ///
+  /// In id, this message translates to:
+  /// **'makan'**
+  String get pocketFood;
+
+  /// No description provided for @pocketCoffee.
+  ///
+  /// In id, this message translates to:
+  /// **'ngopi'**
+  String get pocketCoffee;
+
+  /// No description provided for @pocketHoliday.
+  ///
+  /// In id, this message translates to:
+  /// **'liburan'**
+  String get pocketHoliday;
+
+  /// No description provided for @addEntry.
+  ///
+  /// In id, this message translates to:
+  /// **'catat'**
+  String get addEntry;
+
+  /// No description provided for @search.
+  ///
+  /// In id, this message translates to:
+  /// **'cari'**
+  String get search;
+
+  /// No description provided for @seeAll.
+  ///
+  /// In id, this message translates to:
+  /// **'lihat semua'**
+  String get seeAll;
+
+  /// No description provided for @today.
+  ///
+  /// In id, this message translates to:
+  /// **'hari ini'**
+  String get today;
+
+  /// No description provided for @prediction.
+  ///
+  /// In id, this message translates to:
+  /// **'prediksi'**
+  String get prediction;
+
+  /// No description provided for @monthPickerLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'ganti bulan, sekarang {month}'**
+  String monthPickerLabel(String month);
+
+  /// No description provided for @homeMonthlyBalance.
+  ///
+  /// In id, this message translates to:
+  /// **'saldo per bulan'**
+  String get homeMonthlyBalance;
+
+  /// No description provided for @homeTapMonthHint.
+  ///
+  /// In id, this message translates to:
+  /// **'tap bulannya buat intip'**
+  String get homeTapMonthHint;
+
+  /// No description provided for @homeRecent.
+  ///
+  /// In id, this message translates to:
+  /// **'baru aja'**
+  String get homeRecent;
 }
 
 class _AppLocalizationsDelegate

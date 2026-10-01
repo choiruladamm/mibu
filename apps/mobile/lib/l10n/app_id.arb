@@ -6,5 +6,51 @@
   "tabStats": "statistik",
   "tabSettings": "pengaturan",
   "balanceLabel": "saldo kamu",
-  "safeToSpendToday": "aman jajan hari ini"
+  "safeToSpendToday": "aman jajan hari ini",
+  "onboardingSkip": "lewati",
+  "onboardingNext": "lanjut",
+  "onboardingStart": "mulai sekarang",
+  "onboardingFooter": "masuk pakai google / apple · tanpa password",
+  "onboardingCounter": "0{step} / 03",
+  "@onboardingCounter": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingStepLabel": "langkah {step}",
+  "@onboardingStepLabel": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      }
+    }
+  },
+  "onboarding1Title": "duit kamu, ada kantongnya.",
+  "onboarding1Body": "bagi gaji ke kantong-kantong kecil. makan, ngopi, liburan — semuanya jelas jatahnya.",
+  "onboarding2Title": "tau jatah jajan hari ini.",
+  "onboarding2Body": "mibu ngitungin berapa yang aman dipake hari ini, biar tanggal tua nggak makan mie terus.",
+  "onboarding3Title": "catat 3 detik, beres.",
+  "onboarding3Body": "ketik nominal, pilih kategori, simpan. nggak perlu spreadsheet, nggak perlu ribet.",
+  "onboardingSalaryIn": "gajian masuk",
+  "pocketFood": "makan",
+  "pocketCoffee": "ngopi",
+  "pocketHoliday": "liburan",
+  "addEntry": "catat",
+  "search": "cari",
+  "seeAll": "lihat semua",
+  "today": "hari ini",
+  "prediction": "prediksi",
+  "monthPickerLabel": "ganti bulan, sekarang {month}",
+  "@monthPickerLabel": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "homeMonthlyBalance": "saldo per bulan",
+  "homeTapMonthHint": "tap bulannya buat intip",
+  "homeRecent": "baru aja"
 }
