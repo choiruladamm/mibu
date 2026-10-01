@@ -14,7 +14,8 @@ String rupiah(int v) => '${_sign(v)}Rp${_full.format(v.abs())}';
 String rupiahCompact(int v) {
   final a = v.abs();
   if (a < 1000) return rupiah(v);
-  final k = (a / 100).round() / 10;
+  // One decimal under 100K (Rp6,7K), whole K from there (Rp387K).
+  final k = a < 99950 ? (a / 100).round() / 10 : (a / 1000).roundToDouble();
   if (k < 1000) return '${_sign(v)}Rp${_k.format(k)}K';
   return '${_sign(v)}Rp${_jt.format((a / 10000).round() / 100)}jt';
 }

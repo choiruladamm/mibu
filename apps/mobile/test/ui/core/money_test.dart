@@ -15,6 +15,9 @@ void main() {
     expect(rupiahCompact(28000), 'Rp28K');
     expect(rupiahCompact(186000), 'Rp186K');
     expect(rupiahCompact(580000), 'Rp580K');
+    expect(rupiahCompact(387272), 'Rp387K'); // whole K from 100K
+    expect(rupiahCompact(99960), 'Rp100K');
+    expect(rupiahCompact(12340), 'Rp12,3K');
     expect(rupiahCompact(-450000), '-Rp450K');
     expect(rupiahCompact(999960), 'Rp1jt');
     expect(rupiahCompact(1000000), 'Rp1jt');
