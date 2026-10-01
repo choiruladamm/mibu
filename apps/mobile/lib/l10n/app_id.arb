@@ -1,0 +1,10 @@
+{
+  "@@locale": "id",
+  "appTitle": "mibu",
+  "tabHome": "beranda",
+  "tabPockets": "kantong",
+  "tabStats": "statistik",
+  "tabSettings": "pengaturan",
+  "balanceLabel": "saldo kamu",
+  "safeToSpendToday": "aman jajan hari ini"
+}
