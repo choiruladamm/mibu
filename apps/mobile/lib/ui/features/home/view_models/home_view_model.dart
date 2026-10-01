@@ -6,11 +6,19 @@ import '../../../../domain/models/finance.dart';
 /// Overridable clock (tests pin it).
 final nowProvider = Provider<DateTime>((ref) => DateTime.now());
 
-final monthBalancesProvider = StreamProvider<List<MonthBalance>>(
-  (ref) => ref.watch(financeRepositoryProvider).watchMonths(),
+final profileProvider = StreamProvider<Profile>(
+  (ref) => ref.watch(financeRepositoryProvider).watchProfile(),
 );
+final totalsProvider = StreamProvider<Totals>((ref) {
+  final profile = ref.watch(profileProvider).value;
+  if (profile == null) return const Stream.empty();
+  return ref
+      .watch(financeRepositoryProvider)
+      .watchTotals(profile, ref.watch(nowProvider));
+});
 final pocketsProvider = StreamProvider<List<Pocket>>(
-  (ref) => ref.watch(financeRepositoryProvider).watchPockets(),
+  (ref) =>
+      ref.watch(financeRepositoryProvider).watchPockets(ref.watch(nowProvider)),
 );
 final recentTransactionsProvider = StreamProvider<List<Transaction>>(
   (ref) => ref.watch(financeRepositoryProvider).watchRecent(),
@@ -30,42 +38,51 @@ final selectedMonthProvider = NotifierProvider<SelectedMonth, int?>(
 
 class HomeState {
   const HomeState({
+    required this.balance,
     required this.months,
-    required this.nowIndex,
     required this.selected,
     required this.pockets,
     required this.recent,
     required this.safeToSpendToday,
   });
 
-  final List<MonthBalance> months;
-  final int nowIndex; // -1 when there's no data yet
-  final int selected;
-  final List<Pocket> pockets;
-  final List<Transaction> recent;
-  final int safeToSpendToday;
+  static const nowIndex = 3; // balanceSeries: 3 past, now, 2 predicted
 
-  int get balance => nowIndex < 0 ? 0 : months[nowIndex].amount;
+  final int balance;
+  final List<MonthBalance> months;
+  final int selected;
+  final List<Pocket> pockets; // top 4 by usage
+  final List<Transaction> recent;
+  final int safeToSpendToday; // negative = overspent today
+
   bool get selectedIsPrediction => selected > nowIndex;
-  MonthBalance? get selectedMonth => months.isEmpty ? null : months[selected];
+  MonthBalance get selectedMonth => months[selected];
 }
 
 /// 02.1 beranda state; null while the streams are loading.
 final homeProvider = Provider<HomeState?>((ref) {
-  final months = ref.watch(monthBalancesProvider).value;
+  final profile = ref.watch(profileProvider).value;
+  final totals = ref.watch(totalsProvider).value;
   final pockets = ref.watch(pocketsProvider).value;
   final recent = ref.watch(recentTransactionsProvider).value;
-  if (months == null || pockets == null || recent == null) return null;
+  if (profile == null || totals == null || pockets == null || recent == null) {
+    return null;
+  }
 
   final now = ref.watch(nowProvider);
-  final nowIndex = months.lastIndexWhere((m) => !m.month.isAfter(now));
   return HomeState(
-    months: months,
-    nowIndex: nowIndex,
-    selected: ref.watch(selectedMonthProvider) ?? (nowIndex < 0 ? 0 : nowIndex),
-    pockets: pockets,
+    balance: totals.balance,
+    months: balanceSeries(now: now, balance: totals.balance, nets: totals.nets),
+    selected: ref.watch(selectedMonthProvider) ?? HomeState.nowIndex,
+    pockets: ([
+      ...pockets,
+    ]..sort((a, b) => b.usedPct.compareTo(a.usedPct))).take(4).toList(),
     recent: recent,
-    // ponytail: mock until the daily-allowance calc exists.
-    safeToSpendToday: 580000,
+    safeToSpendToday: safeToSpendToday(
+      balance: totals.balance,
+      spentToday: totals.spentToday,
+      payday: profile.payday,
+      now: now,
+    ),
   );
 });

@@ -31,6 +31,12 @@ class AppLocalizationsId extends AppLocalizations {
   String get safeToSpendToday => 'aman jajan hari ini';
 
   @override
+  String get overspentToday => 'kebablasan hari ini';
+
+  @override
+  String get uncategorized => 'tanpa kategori';
+
+  @override
   String get onboardingSkip => 'lewati';
 
   @override

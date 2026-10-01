@@ -17,17 +17,19 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
+    final now = DateTime(2026, 10, 14, 14, 50);
     final db = AppDatabase(
       DatabaseConnection(
         NativeDatabase.memory(),
         closeStreamsSynchronously: true,
       ),
+      () => now,
     );
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           appDatabaseProvider.overrideWithValue(db),
-          nowProvider.overrideWithValue(DateTime(2026, 10, 14)),
+          nowProvider.overrideWithValue(now),
         ],
         child: MaterialApp(
           theme: AppTheme.light,
@@ -48,13 +50,16 @@ void main() {
     expect(find.text('oktober'), findsOneWidget);
     expect(find.text('hari ini · okt'), findsOneWidget);
     expect(find.text('🐶 90%'), findsOneWidget);
+    expect(find.text('-Rp27K'), findsOneWidget); // gojek today, newest
     expect(find.text('-Rp450K'), findsOneWidget);
+    // (4.530.000 + 27.000) ÷ 11 days to payday − 27.000
+    expect(find.textContaining('Rp387K', findRichText: true), findsOneWidget);
 
     await tester.tap(find.text('nov'));
     await tester.pumpAndSettle();
 
     expect(find.text('prediksi · nov'), findsOneWidget);
-    expect(find.text('± Rp7,02jt'), findsOneWidget);
+    expect(find.text('± Rp6,39jt'), findsOneWidget);
     expect(find.text('november'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox());

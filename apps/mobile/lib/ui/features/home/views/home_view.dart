@@ -51,11 +51,9 @@ class HomeView extends ConsumerWidget {
                           const Spacer(),
                           // ponytail: 00.8 MonthMenu not sliced yet.
                           MonthPicker(
-                            label: switch (s.selectedMonth) {
-                              final m? =>
-                                _monthFull.format(m.month).toLowerCase(),
-                              null => '',
-                            },
+                            label: _monthFull
+                                .format(s.selectedMonth.month)
+                                .toLowerCase(),
                             onTap: null,
                           ),
                           const SizedBox(width: 8),
@@ -265,8 +263,10 @@ class _Hero extends StatelessWidget {
                   color: AppColors.paper,
                   shape: BoxShape.circle,
                 ),
-                child: const HugeIcon(
-                  icon: HugeIcons.strokeRoundedTick02,
+                child: HugeIcon(
+                  icon: safeToSpend < 0
+                      ? HugeIcons.strokeRoundedAlert02
+                      : HugeIcons.strokeRoundedTick02,
                   size: 14,
                   strokeWidth: AppStroke.iconOnInkSmall,
                   color: AppColors.ink,
@@ -276,10 +276,11 @@ class _Hero extends StatelessWidget {
                 child: Text.rich(
                   overflow: TextOverflow.ellipsis,
                   TextSpan(
-                    text: '${l.safeToSpendToday} · ',
+                    text:
+                        '${safeToSpend < 0 ? l.overspentToday : l.safeToSpendToday} · ',
                     children: [
                       TextSpan(
-                        text: rupiahCompact(safeToSpend),
+                        text: rupiahCompact(safeToSpend.abs()),
                         style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                     ],
@@ -350,7 +351,7 @@ class _BalanceChart extends StatelessWidget {
     final l = AppLocalizations.of(context)!;
     final months = state.months;
     final sel = state.selected;
-    final now = state.nowIndex;
+    const now = HomeState.nowIndex;
     if (months.length < 2) return const SizedBox(height: _height);
 
     return LayoutBuilder(

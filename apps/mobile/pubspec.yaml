@@ -18,6 +18,7 @@ dependencies:
   go_router: ^18.0.2
   hugeicons: ^1.2.0
   intl: any
+  uuid: ^4.6.0
 
 dev_dependencies:
   flutter_test:

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../domain/models/finance.dart';
+import '../../../l10n/app_localizations.dart';
 import '../money.dart';
 import '../tokens.dart';
 
@@ -42,12 +43,15 @@ class TxRow extends StatelessWidget {
                 spacing: 1,
                 children: [
                   Text(
-                    tx.category,
+                    tx.category ?? AppLocalizations.of(context)!.uncategorized,
                     style: _text,
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
-                    '${tx.place} · ${_time.format(tx.at)}',
+                    [
+                      if (tx.place.isNotEmpty) tx.place,
+                      _time.format(tx.at),
+                    ].join(' · '),
                     style: AppText.caption.copyWith(color: AppColors.muted),
                     overflow: TextOverflow.ellipsis,
                   ),

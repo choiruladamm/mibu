@@ -7,6 +7,8 @@
   "tabSettings": "pengaturan",
   "balanceLabel": "saldo kamu",
   "safeToSpendToday": "aman jajan hari ini",
+  "overspentToday": "kebablasan hari ini",
+  "uncategorized": "tanpa kategori",
   "onboardingSkip": "lewati",
   "onboardingNext": "lanjut",
   "onboardingStart": "mulai sekarang",

@@ -13,7 +13,7 @@ Personal finance app (Indonesia, IDR). Flutter app lives in `apps/mobile`; Flutt
 
 After changing Drift tables: `fvm dart run build_runner build`. Pre-release: edit schema in place at `schemaVersion` 1 (wipe app data on dev devices); after first release bump it + add a migration.
 
-Riverpod providers are written by hand (no `riverpod_generator`), declared next to the class they expose. Pin time via `nowProvider`; in tests override `appDatabaseProvider` with `AppDatabase(DatabaseConnection(NativeDatabase.memory(), closeStreamsSynchronously: true))`.
+Riverpod providers are written by hand (no `riverpod_generator`), declared next to the class they expose. Pin time via `nowProvider`; in tests override `appDatabaseProvider` with `AppDatabase(DatabaseConnection(NativeDatabase.memory(), closeStreamsSynchronously: true), () => now)` — the clock positions the debug seed, keep it equal to `nowProvider`.
 
 ## MVP scope (see `docs/MVP_PLAN.md`, features in `docs/FEATURES.md`)
 

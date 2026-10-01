@@ -7,7 +7,8 @@ import 'package:mibu/ui/features/onboarding/views/onboarding_view.dart';
 // Test font (Ahem) wraps wider than Instrument Sans, so scroll before tapping.
 Future<void> _tap(WidgetTester tester, String text) async {
   await tester.ensureVisible(find.text(text));
-  await tester.pump(); // relayout after the jump, else tap() hits the old offset
+  // Relayout after the jump, else tap() hits the old offset.
+  await tester.pump();
   await tester.tap(find.text(text));
   await tester.pumpAndSettle();
 }

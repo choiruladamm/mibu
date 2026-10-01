@@ -136,6 +136,18 @@ abstract class AppLocalizations {
   /// **'aman jajan hari ini'**
   String get safeToSpendToday;
 
+  /// No description provided for @overspentToday.
+  ///
+  /// In id, this message translates to:
+  /// **'kebablasan hari ini'**
+  String get overspentToday;
+
+  /// No description provided for @uncategorized.
+  ///
+  /// In id, this message translates to:
+  /// **'tanpa kategori'**
+  String get uncategorized;
+
   /// No description provided for @onboardingSkip.
   ///
   /// In id, this message translates to:

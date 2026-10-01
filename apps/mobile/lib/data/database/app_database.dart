@@ -1,99 +1,164 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 
 part 'app_database.g.dart';
 
-@DataClassName('MonthBalanceRow')
-class MonthBalances extends Table {
-  DateTimeColumn get month => dateTime()(); // first day of month
-  IntColumn get amount => integer()();
+const _uuid = Uuid();
+
+/// UUID id + timestamps on every table so a backend can sync rows later
+/// (upload where updatedAt > lastSync, deletedAt included). See MVP_PLAN.md.
+mixin SyncColumns on Table {
+  TextColumn get id => text().clientDefault(_uuid.v4)();
+  DateTimeColumn get createdAt => dateTime().clientDefault(DateTime.now)();
+  DateTimeColumn get updatedAt => dateTime().clientDefault(DateTime.now)();
+  DateTimeColumn get deletedAt => dateTime().nullable()();
 
   @override
-  Set<Column> get primaryKey => {month};
+  Set<Column> get primaryKey => {id};
 }
 
-@DataClassName('PocketRow')
-class Pockets extends Table {
-  IntColumn get id => integer().autoIncrement()();
+enum CategoryKind { expense, income }
+
+@DataClassName('ProfileRow')
+class Profiles extends Table with SyncColumns {
+  IntColumn get openingBalance => integer()();
+  DateTimeColumn get openingAt => dateTime()();
+  IntColumn get payday => integer()(); // 1–28, 0 = last day of month
+  BoolColumn get hideAmounts => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get onboardedAt => dateTime().nullable()();
+}
+
+@DataClassName('CategoryRow')
+class Categories extends Table with SyncColumns {
   TextColumn get emoji => text()();
   TextColumn get name => text()();
-  IntColumn get budget => integer()();
-  IntColumn get spent => integer().withDefault(const Constant(0))();
+  TextColumn get kind => textEnum<CategoryKind>()();
+  IntColumn get monthlyLimit => integer().nullable()(); // set = kantong
   IntColumn get sortOrder => integer().withDefault(const Constant(0))();
 }
 
 @DataClassName('TransactionRow')
-class Transactions extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  TextColumn get emoji => text()();
-  TextColumn get category => text()();
-  TextColumn get place => text()();
-  DateTimeColumn get at => dateTime()();
+@TableIndex(name: 'transactions_at', columns: {#at})
+@TableIndex(name: 'transactions_category', columns: {#categoryId})
+class Transactions extends Table with SyncColumns {
   IntColumn get amount => integer()(); // negative = pengeluaran
+  TextColumn get categoryId =>
+      text().nullable().references(Categories, #id)(); // null = tanpa kategori
+  TextColumn get place => text().withDefault(const Constant(''))();
+  TextColumn get note => text().withDefault(const Constant(''))();
+  TextColumn get tags =>
+      text().withDefault(const Constant(''))(); // comma-separated, ≤ 3
+  DateTimeColumn get at => dateTime()();
 }
 
-@DriftDatabase(tables: [MonthBalances, Pockets, Transactions])
+@DriftDatabase(tables: [Profiles, Categories, Transactions])
 class AppDatabase extends _$AppDatabase {
-  AppDatabase([QueryExecutor? executor])
+  AppDatabase([QueryExecutor? executor, this._now = DateTime.now])
     : super(executor ?? driftDatabase(name: 'mibu'));
 
+  final DateTime Function() _now;
+
+  // Pre-release: schema edited in place; wipe app data on dev devices.
   @override
   int get schemaVersion => 1;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     beforeOpen: (details) async {
-      if (details.wasCreated) await _seed();
+      await customStatement('PRAGMA foreign_keys = ON');
+      if (details.wasCreated && kDebugMode) await _seed(_now());
     },
   );
 
-  // ponytail: sample data from the design board so screens aren't empty;
-  // drop once onboarding/setup (01.4) writes real data.
-  Future<void> _seed() => batch((b) {
-    b.insertAll(monthBalances, [
-      for (final (m, v) in [
-        (7, 3546000),
-        (8, 2701500),
-        (9, 8589000),
-        (10, 4530000),
-        (11, 7020000),
-        (12, 2820000),
-      ])
-        MonthBalancesCompanion.insert(month: DateTime(2026, m), amount: v),
-    ]);
-    b.insertAll(pockets, [
-      for (final (i, (e, n, budget, spent)) in [
-        ('🐶', 'anabul', 1000000, 900000),
-        ('☕', 'ngopi', 300000, 180000),
-        ('🛵', 'ojol', 500000, 190000),
-        ('🍜', 'makan', 1500000, 390000),
-      ].indexed)
-        PocketsCompanion.insert(
-          emoji: e,
-          name: n,
-          budget: budget,
-          spent: Value(spent),
-          sortOrder: Value(i),
+  // ponytail: design sample data (debug only) so screens aren't empty;
+  // drop once 01.4 atur awal writes real data. Dates are relative to [now]
+  // so nothing lands in the future: 3 past months + this month.
+  Future<void> _seed(DateTime now) async {
+    DateTime thisMonth(int day, int h, int m) {
+      final at = DateTime(now.year, now.month, day.clamp(1, now.day), h, m);
+      return at.isAfter(now) ? now : at;
+    }
+
+    final cats = <String, String>{}; // name → id
+    await batch((b) {
+      b.insert(
+        profiles,
+        ProfilesCompanion.insert(
+          openingBalance: 3000000,
+          openingAt: DateTime(now.year, now.month - 3),
+          payday: 25,
+          onboardedAt: Value(now),
         ),
-    ]);
-    b.insertAll(transactions, [
-      TransactionsCompanion.insert(
-        emoji: '🐶',
-        category: 'anabul',
-        place: 'petshop',
-        at: DateTime(2026, 10, 14, 14, 32),
-        amount: -450000,
-      ),
-      TransactionsCompanion.insert(
-        emoji: '🛵',
-        category: 'ojol',
-        place: 'gojek',
-        at: DateTime(2026, 10, 14, 11, 5),
-        amount: -27000,
-      ),
-    ]);
-  });
+      );
+      for (final (i, (emoji, name, kind, limit)) in [
+        ('🐶', 'anabul', CategoryKind.expense, 1000000),
+        ('☕', 'ngopi', CategoryKind.expense, 300000),
+        ('🛵', 'ojol', CategoryKind.expense, 500000),
+        ('🍜', 'makan', CategoryKind.expense, 1500000),
+        ('🛍️', 'belanja', CategoryKind.expense, null),
+        ('💰', 'gajian', CategoryKind.income, null),
+      ].indexed) {
+        final id = _uuid.v4();
+        cats[name] = id;
+        b.insert(
+          categories,
+          CategoriesCompanion.insert(
+            id: Value(id),
+            emoji: emoji,
+            name: name,
+            kind: kind,
+            monthlyLimit: Value(limit),
+            sortOrder: Value(i),
+          ),
+        );
+      }
+
+      TransactionsCompanion tx(
+        String cat,
+        String place,
+        DateTime at,
+        int amount,
+      ) => TransactionsCompanion.insert(
+        amount: amount,
+        categoryId: Value(cats[cat]),
+        place: Value(place),
+        at: at,
+      );
+
+      b.insertAll(transactions, [
+        // Past months: gajian in, belanja out → design's month balances.
+        for (final (offset, out) in [
+          (-3, 7954000),
+          (-2, 9344500),
+          (-1, 2612500),
+        ]) ...[
+          tx(
+            'gajian',
+            'kantor',
+            DateTime(now.year, now.month + offset, 25, 9),
+            8500000,
+          ),
+          tx(
+            'belanja',
+            'tokopedia',
+            DateTime(now.year, now.month + offset, 5, 20),
+            -out,
+          ),
+        ],
+        // This month: pockets at 90 / 60 / 38 / 26 %.
+        tx('belanja', 'tokopedia', thisMonth(now.day - 5, 20, 0), -2399000),
+        tx('makan', 'warteg', thisMonth(now.day - 4, 12, 30), -390000),
+        tx('ojol', 'gojek', thisMonth(now.day - 3, 8, 15), -163000),
+        tx('anabul', 'dokter hewan', thisMonth(now.day - 2, 17, 0), -450000),
+        tx('ngopi', 'kopi kenangan', thisMonth(now.day - 1, 9, 0), -180000),
+        tx('anabul', 'petshop', thisMonth(now.day - 1, 14, 32), -450000),
+        tx('ojol', 'gojek', thisMonth(now.day, 11, 5), -27000),
+      ]);
+    });
+  }
 }
 
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
