@@ -19,3 +19,6 @@ String rupiahCompact(int v) {
   if (k < 1000) return '${_sign(v)}Rp${_k.format(k)}K';
   return '${_sign(v)}Rp${_jt.format((a / 10000).round() / 100)}jt';
 }
+
+/// +Rp8,5jt · -Rp450K · Rp0 — compact with the sign spelled out.
+String rupiahSigned(int v) => v > 0 ? '+${rupiahCompact(v)}' : rupiahCompact(v);

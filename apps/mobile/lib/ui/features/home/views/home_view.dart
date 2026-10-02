@@ -149,7 +149,7 @@ class HomeView extends ConsumerWidget {
                               ),
                             ),
                             GestureDetector(
-                              onTap: () {}, // → 04.1 semua transaksi
+                              onTap: () => context.push(Routes.transactions),
                               child: Text(l.seeAll, style: link),
                             ),
                           ],

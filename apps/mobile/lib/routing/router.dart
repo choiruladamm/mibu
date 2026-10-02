@@ -7,12 +7,14 @@ import '../ui/features/add_entry/views/add_entry_view.dart';
 import '../ui/features/home/views/home_view.dart';
 import '../ui/features/onboarding/views/onboarding_view.dart';
 import '../ui/features/pockets/views/pockets_view.dart';
+import '../ui/features/transactions/views/transactions_view.dart';
 
 abstract final class Routes {
   static const onboarding = '/onboarding';
   static const home = '/';
   static const pockets = '/kantong';
   static const addEntry = '/catat';
+  static const transactions = '/transaksi';
 }
 
 /// Tab bar → tab route. Stats / settings land in M6.
@@ -47,6 +49,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       _tab(Routes.home, const HomeView()),
       _tab(Routes.pockets, const PocketsView()),
       GoRoute(path: Routes.addEntry, builder: (_, _) => const AddEntryView()),
+      GoRoute(
+        path: Routes.transactions,
+        builder: (_, _) => const TransactionsView(),
+      ),
     ],
   );
   ref.onDispose(router.dispose);

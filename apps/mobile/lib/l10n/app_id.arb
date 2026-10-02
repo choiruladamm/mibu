@@ -546,5 +546,50 @@
   },
   "deleteDoneEmpty": "nggak ada catatan yang ikut pindah.",
   "deleteCategory": "hapus kategori",
-  "limitLabel": "batas per bulan"
+  "limitLabel": "batas per bulan",
+  "txTitle": "transaksi",
+  "home": "beranda",
+  "txCount": "{count} catatan",
+  "@txCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "txAll": "semua",
+  "txNet": "selisih",
+  "txEmpty": "belum ada catatan di {month}",
+  "@txEmpty": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "txAllShown": "udah semua buat {month}",
+  "@txAllShown": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "txSeeMonth": "liat {month}",
+  "@txSeeMonth": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "txNoPrev": "nggak ada bulan sebelumnya",
+  "txNotYet": "{month} belum kejadian",
+  "@txNotYet": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  }
 }

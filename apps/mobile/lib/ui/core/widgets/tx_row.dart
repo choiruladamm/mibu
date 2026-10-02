@@ -62,7 +62,7 @@ class TxRow extends StatelessWidget {
               alignment: Alignment.topCenter,
               child: Padding(
                 padding: const EdgeInsets.only(top: 12),
-                child: Text(rupiahCompact(tx.amount), style: _text),
+                child: Text(rupiahSigned(tx.amount), style: _text),
               ),
             ),
           ],

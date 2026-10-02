@@ -615,4 +615,44 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get limitLabel => 'batas per bulan';
+
+  @override
+  String get txTitle => 'transaksi';
+
+  @override
+  String get home => 'beranda';
+
+  @override
+  String txCount(int count) {
+    return '$count catatan';
+  }
+
+  @override
+  String get txAll => 'semua';
+
+  @override
+  String get txNet => 'selisih';
+
+  @override
+  String txEmpty(String month) {
+    return 'belum ada catatan di $month';
+  }
+
+  @override
+  String txAllShown(String month) {
+    return 'udah semua buat $month';
+  }
+
+  @override
+  String txSeeMonth(String month) {
+    return 'liat $month';
+  }
+
+  @override
+  String get txNoPrev => 'nggak ada bulan sebelumnya';
+
+  @override
+  String txNotYet(String month) {
+    return '$month belum kejadian';
+  }
 }

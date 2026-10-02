@@ -1101,6 +1101,66 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'batas per bulan'**
   String get limitLabel;
+
+  /// No description provided for @txTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'transaksi'**
+  String get txTitle;
+
+  /// No description provided for @home.
+  ///
+  /// In id, this message translates to:
+  /// **'beranda'**
+  String get home;
+
+  /// No description provided for @txCount.
+  ///
+  /// In id, this message translates to:
+  /// **'{count} catatan'**
+  String txCount(int count);
+
+  /// No description provided for @txAll.
+  ///
+  /// In id, this message translates to:
+  /// **'semua'**
+  String get txAll;
+
+  /// No description provided for @txNet.
+  ///
+  /// In id, this message translates to:
+  /// **'selisih'**
+  String get txNet;
+
+  /// No description provided for @txEmpty.
+  ///
+  /// In id, this message translates to:
+  /// **'belum ada catatan di {month}'**
+  String txEmpty(String month);
+
+  /// No description provided for @txAllShown.
+  ///
+  /// In id, this message translates to:
+  /// **'udah semua buat {month}'**
+  String txAllShown(String month);
+
+  /// No description provided for @txSeeMonth.
+  ///
+  /// In id, this message translates to:
+  /// **'liat {month}'**
+  String txSeeMonth(String month);
+
+  /// No description provided for @txNoPrev.
+  ///
+  /// In id, this message translates to:
+  /// **'nggak ada bulan sebelumnya'**
+  String get txNoPrev;
+
+  /// No description provided for @txNotYet.
+  ///
+  /// In id, this message translates to:
+  /// **'{month} belum kejadian'**
+  String txNotYet(String month);
 }
 
 class _AppLocalizationsDelegate
