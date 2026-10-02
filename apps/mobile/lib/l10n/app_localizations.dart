@@ -298,6 +298,126 @@ abstract class AppLocalizations {
   /// **'baru aja'**
   String get homeRecent;
 
+  /// No description provided for @homePockets.
+  ///
+  /// In id, this message translates to:
+  /// **'kantong · paling kepake duluan'**
+  String get homePockets;
+
+  /// No description provided for @homeTodayTotal.
+  ///
+  /// In id, this message translates to:
+  /// **'{total} hari ini'**
+  String homeTodayTotal(String total);
+
+  /// No description provided for @homeRecentIn.
+  ///
+  /// In id, this message translates to:
+  /// **'terakhir di {month}'**
+  String homeRecentIn(String month);
+
+  /// No description provided for @homeAllCount.
+  ///
+  /// In id, this message translates to:
+  /// **'liat semua transaksi ({n})'**
+  String homeAllCount(int n);
+
+  /// No description provided for @homeAllIn.
+  ///
+  /// In id, this message translates to:
+  /// **'liat semua di {month} ({n})'**
+  String homeAllIn(String month, int n);
+
+  /// No description provided for @homeTodayEmpty.
+  ///
+  /// In id, this message translates to:
+  /// **'belum ada catatan hari ini'**
+  String get homeTodayEmpty;
+
+  /// No description provided for @homeNoEntriesTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'belum ada catatan'**
+  String get homeNoEntriesTitle;
+
+  /// No description provided for @homeNoEntriesBody.
+  ///
+  /// In id, this message translates to:
+  /// **'catat jajan pertama kamu, cuma 3 detik.'**
+  String get homeNoEntriesBody;
+
+  /// No description provided for @homeMonthEmpty.
+  ///
+  /// In id, this message translates to:
+  /// **'belum ada catatan di {month}'**
+  String homeMonthEmpty(String month);
+
+  /// No description provided for @homeBalanceEnd.
+  ///
+  /// In id, this message translates to:
+  /// **'saldo akhir {month}'**
+  String homeBalanceEnd(String month);
+
+  /// No description provided for @homeLeftEnd.
+  ///
+  /// In id, this message translates to:
+  /// **'sisa akhir bulan'**
+  String get homeLeftEnd;
+
+  /// No description provided for @homeOverEnd.
+  ///
+  /// In id, this message translates to:
+  /// **'lewat budget'**
+  String get homeOverEnd;
+
+  /// No description provided for @homePocketPill.
+  ///
+  /// In id, this message translates to:
+  /// **'buka kantong {name}, {pct}% kepake'**
+  String homePocketPill(String name, int pct);
+
+  /// No description provided for @monthMenuTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'pilih bulan'**
+  String get monthMenuTitle;
+
+  /// No description provided for @monthMenuPrevYear.
+  ///
+  /// In id, this message translates to:
+  /// **'tahun sebelumnya'**
+  String get monthMenuPrevYear;
+
+  /// No description provided for @monthMenuNextYear.
+  ///
+  /// In id, this message translates to:
+  /// **'tahun berikutnya'**
+  String get monthMenuNextYear;
+
+  /// No description provided for @monthMenuLegend.
+  ///
+  /// In id, this message translates to:
+  /// **'total pengeluaran'**
+  String get monthMenuLegend;
+
+  /// No description provided for @monthMenuNow.
+  ///
+  /// In id, this message translates to:
+  /// **'bulan ini'**
+  String get monthMenuNow;
+
+  /// No description provided for @monthMenuCell.
+  ///
+  /// In id, this message translates to:
+  /// **'{month} {year}'**
+  String monthMenuCell(String month, int year);
+
+  /// No description provided for @monthMenuFuture.
+  ///
+  /// In id, this message translates to:
+  /// **'belum kejadian'**
+  String get monthMenuFuture;
+
   /// No description provided for @close.
   ///
   /// In id, this message translates to:

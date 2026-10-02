@@ -15,13 +15,32 @@ import '../../categories/views/category_form_sheet.dart';
 import '../view_models/pockets_view_model.dart';
 
 /// 02.2 kantong. Isi ulang and impian are post-MVP.
-class PocketsView extends ConsumerWidget {
-  const PocketsView({super.key});
+class PocketsView extends ConsumerStatefulWidget {
+  const PocketsView({super.key, this.initial});
 
-  static final _monthFull = DateFormat.MMMM('id');
+  /// Pocket (category id) to open on, from 02.1; unknown = most used.
+  final String? initial;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PocketsView> createState() => _PocketsViewState();
+}
+
+final _monthFull = DateFormat.MMMM('id');
+
+class _PocketsViewState extends ConsumerState<PocketsView> {
+  @override
+  void initState() {
+    super.initState();
+    final id = widget.initial;
+    if (id != null) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => ref.read(selectedPocketProvider.notifier).select(id),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final PocketsState s;
     switch (ref.watch(pocketsScreenProvider)) {
       case AsyncData(:final value):
@@ -320,7 +339,7 @@ class _Amount extends StatelessWidget {
 }
 
 /// Toples per kantong: fill = % kepake.
-class _Jars extends StatelessWidget {
+class _Jars extends StatefulWidget {
   const _Jars({
     required this.pockets,
     required this.selected,
@@ -334,27 +353,60 @@ class _Jars extends StatelessWidget {
   final ValueChanged<String> onSelect;
 
   @override
+  State<_Jars> createState() => _JarsState();
+}
+
+class _JarsState extends State<_Jars> {
+  final _selectedKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    _reveal();
+  }
+
+  @override
+  void didUpdateWidget(_Jars old) {
+    super.didUpdateWidget(old);
+    if (old.selected.id != widget.selected.id) _reveal();
+  }
+
+  /// A deep link (02.1 pill) can select a jar scrolled off to the right.
+  void _reveal() => WidgetsBinding.instance.addPostFrameCallback((_) {
+    final ctx = _selectedKey.currentContext;
+    if (ctx != null && ctx.mounted) {
+      Scrollable.ensureVisible(
+        ctx,
+        alignment: 0.5,
+        duration: AppMotion.select,
+        curve: AppMotion.ease,
+      );
+    }
+  });
+
+  @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
     return LayoutBuilder(
       builder: (context, box) {
         // Spread like the design; scroll sideways once they don't fit.
-        final n = pockets.length;
+        final n = widget.pockets.length;
         final gap = n < 2
             ? 0.0
-            : ((box.maxWidth - n * _width) / (n - 1)).clamp(12.0, 80.0);
+            : ((box.maxWidth - n * _Jars._width) / (n - 1)).clamp(12.0, 80.0);
         return SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           clipBehavior: Clip.none,
           child: Row(
             spacing: gap,
             children: [
-              for (final p in pockets)
+              for (final p in widget.pockets)
                 _Jar(
+                  key: p.id == widget.selected.id ? _selectedKey : null,
                   pocket: p,
-                  on: p.id == selected.id,
+                  on: p.id == widget.selected.id,
                   label: l.pocketJarLabel(p.name, p.usedPct),
-                  onTap: () => onSelect(p.id),
+                  onTap: () => widget.onSelect(p.id),
                 ),
             ],
           ),
@@ -366,6 +418,7 @@ class _Jars extends StatelessWidget {
 
 class _Jar extends StatelessWidget {
   const _Jar({
+    super.key,
     required this.pocket,
     required this.on,
     required this.label,

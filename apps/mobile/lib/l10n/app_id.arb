@@ -55,6 +55,91 @@
   "homeMonthlyBalance": "saldo per bulan",
   "homeTapMonthHint": "tap bulannya buat intip",
   "homeRecent": "baru aja",
+  "homePockets": "kantong · paling kepake duluan",
+  "homeTodayTotal": "{total} hari ini",
+  "@homeTodayTotal": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "homeRecentIn": "terakhir di {month}",
+  "@homeRecentIn": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "homeAllCount": "liat semua transaksi ({n})",
+  "@homeAllCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "homeAllIn": "liat semua di {month} ({n})",
+  "@homeAllIn": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "homeTodayEmpty": "belum ada catatan hari ini",
+  "homeNoEntriesTitle": "belum ada catatan",
+  "homeNoEntriesBody": "catat jajan pertama kamu, cuma 3 detik.",
+  "homeMonthEmpty": "belum ada catatan di {month}",
+  "@homeMonthEmpty": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "homeBalanceEnd": "saldo akhir {month}",
+  "@homeBalanceEnd": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "homeLeftEnd": "sisa akhir bulan",
+  "homeOverEnd": "lewat budget",
+  "homePocketPill": "buka kantong {name}, {pct}% kepake",
+  "@homePocketPill": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "monthMenuTitle": "pilih bulan",
+  "monthMenuPrevYear": "tahun sebelumnya",
+  "monthMenuNextYear": "tahun berikutnya",
+  "monthMenuLegend": "total pengeluaran",
+  "monthMenuNow": "bulan ini",
+  "monthMenuCell": "{month} {year}",
+  "@monthMenuCell": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "monthMenuFuture": "belum kejadian",
   "close": "tutup",
   "expense": "pengeluaran",
   "income": "pemasukan",

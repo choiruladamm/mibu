@@ -11,7 +11,11 @@ import 'package:mibu/ui/core/theme.dart';
 import 'package:mibu/ui/features/pockets/views/pockets_view.dart';
 
 void main() {
-  Future<AppDatabase> pump(WidgetTester tester, Size size) async {
+  Future<AppDatabase> pump(
+    WidgetTester tester,
+    Size size, {
+    Future<String?> Function(AppDatabase db)? initial,
+  }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -24,6 +28,9 @@ void main() {
       ),
       () => now,
     );
+    final initialId = initial == null
+        ? null
+        : await tester.runAsync(() => initial(db));
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -35,7 +42,7 @@ void main() {
           locale: const Locale('id'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: const PocketsView(),
+          home: PocketsView(initial: initialId),
         ),
       ),
     );
@@ -190,5 +197,29 @@ void main() {
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox());
     await db.close();
+  });
+
+  testWidgets('kantong: opens on the pocket from a 02.1 pill link', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      const Size(390, 844),
+      initial: (db) async => (await (db.select(
+        db.categories,
+      )..where((c) => c.name.equals('ojol'))).getSingle()).id,
+    );
+
+    expect(find.text('ojol'), findsOneWidget); // detail card title
+    expect(find.text('hampir abis'), findsNothing);
+  });
+
+  testWidgets('kantong: an unknown pocket id falls back to most used', (
+    tester,
+  ) async {
+    await pump(tester, const Size(390, 844), initial: (_) async => 'gone');
+
+    expect(find.text('anabul'), findsOneWidget);
+    expect(find.text('hampir abis'), findsOneWidget);
   });
 }

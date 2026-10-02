@@ -8,6 +8,7 @@ import '../ui/features/home/views/home_view.dart';
 import '../ui/features/onboarding/views/onboarding_view.dart';
 import '../ui/features/pockets/views/pockets_view.dart';
 import '../domain/models/finance.dart';
+import '../ui/features/transactions/view_models/transactions_view_model.dart';
 import '../ui/features/transactions/views/edit_entry_view.dart';
 import '../ui/features/transactions/views/transaction_detail_view.dart';
 import '../ui/features/transactions/views/transactions_view.dart';
@@ -16,8 +17,11 @@ abstract final class Routes {
   static const onboarding = '/onboarding';
   static const home = '/';
   static const pockets = '/kantong';
+  static String pocketsAt(String id) => '$pockets?pocket=$id';
   static const addEntry = '/catat';
   static const transactions = '/transaksi';
+  static String transactionsIn(DateTime month) =>
+      '$transactions?month=${month.year}-${month.month.toString().padLeft(2, '0')}';
   static String transaction(String id) => '$transactions/$id';
   static String editEntry(String id) => '$transactions/$id/edit';
 }
@@ -39,6 +43,12 @@ GoRoute _tab(String path, Widget child) => GoRoute(
   pageBuilder: (_, state) => NoTransitionPage(key: state.pageKey, child: child),
 );
 
+DateTime? _monthParam(String? s) {
+  final m = RegExp(r'^(\d{4})-(\d{2})$').firstMatch(s ?? '');
+  if (m == null) return null;
+  return DateTime(int.parse(m[1]!), int.parse(m[2]!));
+}
+
 final routerProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
     // ponytail: always starts at onboarding; redirect on a "seen onboarding"
@@ -52,7 +62,14 @@ final routerProvider = Provider<GoRouter>((ref) {
             OnboardingView(onDone: () => context.go(Routes.home)),
       ),
       _tab(Routes.home, const HomeView()),
-      _tab(Routes.pockets, const PocketsView()),
+      GoRoute(
+        path: Routes.pockets,
+        pageBuilder: (_, state) => NoTransitionPage(
+          key: state.pageKey,
+          // ?pocket=<id> from 02.1 pills; unknown id falls back to default.
+          child: PocketsView(initial: state.uri.queryParameters['pocket']),
+        ),
+      ),
       GoRoute(
         path: Routes.addEntry,
         // extra: an entry to "catat lagi" from (04.3).
@@ -60,8 +77,16 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: Routes.transactions,
-        builder: (context, _) => TransactionsView(
-          onOpen: (t) => context.push(Routes.transaction(t.id)),
+        builder: (context, state) => ProviderScope(
+          // ?month=2026-09 from 02.1 "liat semua di september".
+          overrides: [
+            txMonthProvider.overrideWith(
+              () => TxMonth(_monthParam(state.uri.queryParameters['month'])),
+            ),
+          ],
+          child: TransactionsView(
+            onOpen: (t) => context.push(Routes.transaction(t.id)),
+          ),
         ),
         routes: [
           GoRoute(

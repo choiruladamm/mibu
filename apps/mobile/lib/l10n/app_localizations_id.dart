@@ -121,6 +121,82 @@ class AppLocalizationsId extends AppLocalizations {
   String get homeRecent => 'baru aja';
 
   @override
+  String get homePockets => 'kantong · paling kepake duluan';
+
+  @override
+  String homeTodayTotal(String total) {
+    return '$total hari ini';
+  }
+
+  @override
+  String homeRecentIn(String month) {
+    return 'terakhir di $month';
+  }
+
+  @override
+  String homeAllCount(int n) {
+    return 'liat semua transaksi ($n)';
+  }
+
+  @override
+  String homeAllIn(String month, int n) {
+    return 'liat semua di $month ($n)';
+  }
+
+  @override
+  String get homeTodayEmpty => 'belum ada catatan hari ini';
+
+  @override
+  String get homeNoEntriesTitle => 'belum ada catatan';
+
+  @override
+  String get homeNoEntriesBody => 'catat jajan pertama kamu, cuma 3 detik.';
+
+  @override
+  String homeMonthEmpty(String month) {
+    return 'belum ada catatan di $month';
+  }
+
+  @override
+  String homeBalanceEnd(String month) {
+    return 'saldo akhir $month';
+  }
+
+  @override
+  String get homeLeftEnd => 'sisa akhir bulan';
+
+  @override
+  String get homeOverEnd => 'lewat budget';
+
+  @override
+  String homePocketPill(String name, int pct) {
+    return 'buka kantong $name, $pct% kepake';
+  }
+
+  @override
+  String get monthMenuTitle => 'pilih bulan';
+
+  @override
+  String get monthMenuPrevYear => 'tahun sebelumnya';
+
+  @override
+  String get monthMenuNextYear => 'tahun berikutnya';
+
+  @override
+  String get monthMenuLegend => 'total pengeluaran';
+
+  @override
+  String get monthMenuNow => 'bulan ini';
+
+  @override
+  String monthMenuCell(String month, int year) {
+    return '$month $year';
+  }
+
+  @override
+  String get monthMenuFuture => 'belum kejadian';
+
+  @override
   String get close => 'tutup';
 
   @override

@@ -7,12 +7,17 @@ import '../../../core/dates.dart';
 
 enum TxFilter { all, expenses, income }
 
-/// Month shown in 04.1; starts at the current month.
+/// Month shown in 04.1; starts at [initial] (a deep link from 02.1) or the
+/// current month.
 class TxMonth extends Notifier<DateTime> {
+  TxMonth([this.initial]);
+
+  final DateTime? initial;
+
   @override
   DateTime build() {
     final now = ref.read(clockProvider)();
-    return DateTime(now.year, now.month);
+    return initial ?? DateTime(now.year, now.month);
   }
 
   void select(DateTime month) => state = month;

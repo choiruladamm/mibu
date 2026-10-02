@@ -9,22 +9,56 @@ import 'package:intl/intl.dart';
 import '../../../../domain/models/finance.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../routing/router.dart';
+import '../../../core/clock.dart';
 import '../../../core/dashed.dart';
+import '../../../core/dates.dart';
 import '../../../core/money.dart';
 import '../../../core/tokens.dart';
+import '../../../core/widgets/month_menu.dart';
 import '../../../core/widgets/month_picker.dart';
 import '../../../core/widgets/tab_bar.dart';
 import '../../../core/widgets/tx_row.dart';
+import '../../transactions/view_models/transactions_view_model.dart';
 import '../view_models/home_view_model.dart';
 
+final _monthFull = DateFormat.MMMM('id');
+final _dayTitle = DateFormat('EEE d MMM', 'id');
+
+String _name(DateTime m) => _monthFull.format(m).toLowerCase();
+
 /// 02.1 beranda.
-class HomeView extends ConsumerWidget {
+class HomeView extends ConsumerStatefulWidget {
   const HomeView({super.key});
 
-  static final _monthFull = DateFormat.MMMM('id');
+  @override
+  ConsumerState<HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends ConsumerState<HomeView> {
+  /// Scrolled past the hero → 02.1b compact header.
+  static const _stickyAt = 140.0;
+
+  final _scroll = ScrollController();
+  final _sticky = ValueNotifier(false);
+  bool _menuOpen = false;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void initState() {
+    super.initState();
+    _scroll.addListener(
+      () => _sticky.value = _scroll.hasClients && _scroll.offset > _stickyAt,
+    );
+  }
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    _sticky.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final HomeState s;
     switch (ref.watch(homeProvider)) {
       case AsyncData(:final value):
@@ -43,135 +77,109 @@ class HomeView extends ConsumerWidget {
         return const Scaffold();
     }
     final l = AppLocalizations.of(context)!;
+    final now = ref.watch(nowProvider);
     final caption = AppText.caption.copyWith(color: AppColors.muted);
     final link = AppText.caption.copyWith(
       decoration: TextDecoration.underline,
       decorationColor: AppColors.ink,
     );
+    final safeTop = MediaQuery.paddingOf(context).top;
+    final top = math.max(safeTop, AppSpace.contentTop);
+    final stickyTop = math.max(safeTop, AppSpace.contentTop - 4);
+    final label =
+        _name(s.selected) +
+        (s.selected.year != now.year ? ' ${s.selected.year}' : '');
+    final heroLabel = s.isCurrent
+        ? l.balanceLabel
+        : l.homeBalanceEnd(_name(s.month));
+    void toggleMenu() => setState(() => _menuOpen = !_menuOpen);
+    Widget picker() =>
+        MonthPicker(label: label, open: _menuOpen, onTap: toggleMenu);
 
     return Scaffold(
       body: Stack(
         children: [
           SingleChildScrollView(
+            controller: _scroll,
             padding: const EdgeInsets.only(bottom: AppSpace.tabBarClearance),
             child: SafeArea(
               bottom: false,
               minimum: const EdgeInsets.only(top: AppSpace.contentTop),
-              child: Builder(
-                builder: (context) => Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _gutter(
-                      Row(
-                        children: [
-                          Text('mibu', style: AppText.wordmark(30)),
-                          const Spacer(),
-                          // ponytail: 00.8 MonthMenu not sliced yet.
-                          MonthPicker(
-                            label: _monthFull
-                                .format(s.selectedMonth.month)
-                                .toLowerCase(),
-                            onTap: null,
-                          ),
-                          const SizedBox(width: 8),
-                          _SearchButton(label: l.search),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-                    _Hero(balance: s.balance, safeToSpend: s.safeToSpendToday),
-                    const SizedBox(height: 18),
-                    _gutter(
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(l.homeMonthlyBalance, style: caption),
-                          const SizedBox(width: 12),
-                          Flexible(
-                            child: Text(
-                              l.homeTapMonthHint,
-                              style: caption,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    _BalanceChart(
-                      state: s,
-                      onSelect: ref.read(selectedMonthProvider.notifier).select,
-                    ),
-                    const SizedBox(height: 18),
-                    _gutter(
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(l.tabPockets, style: caption),
-                          GestureDetector(
-                            onTap: () => goTab(context, AppTab.pockets),
-                            child: Text(l.seeAll, style: link),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    _gutter(
-                      Row(
-                        spacing: 8,
-                        children: [
-                          for (final (i, p) in s.pockets.indexed)
-                            Expanded(
-                              child: _PocketChip(pocket: p, ink: i == 0),
-                            ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-                    _gutter(
-                      Container(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        decoration: const BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(
-                              color: AppColors.line,
-                              width: AppStroke.hairline,
-                            ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _gutter(
+                    Row(
+                      children: [
+                        Text('mibu', style: AppText.wordmark(30)),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: picker(),
                           ),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              l.homeRecent,
-                              style: AppText.caption.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            GestureDetector(
-                              onTap: () => context.push(Routes.transactions),
-                              child: Text(l.seeAll, style: link),
-                            ),
-                          ],
+                        const SizedBox(width: 8),
+                        _SearchButton(label: l.search, size: 44),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  _Hero(
+                    label: heroLabel,
+                    balance: s.balance,
+                    chip: _chip(l, s),
+                  ),
+                  const SizedBox(height: 18),
+                  _gutter(
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(l.homeMonthlyBalance, style: caption),
+                        const SizedBox(width: 12),
+                        Flexible(
+                          child: Text(
+                            l.homeTapMonthHint,
+                            style: caption,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                    const SizedBox(height: 6),
-                    _gutter(
-                      Column(
-                        spacing: 2,
-                        children: [
-                          for (final tx in s.recent)
-                            TxRow(
-                              tx: tx,
-                              onTap: () =>
-                                  context.push(Routes.transaction(tx.id)),
-                            ),
-                        ],
-                      ),
+                  ),
+                  const SizedBox(height: 10),
+                  _BalanceChart(
+                    state: s,
+                    onSelect: ref.read(homeMonthProvider.notifier).select,
+                  ),
+                  const SizedBox(height: 22),
+                  _gutter(
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            l.homePockets,
+                            style: caption,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        GestureDetector(
+                          onTap: () => goTab(context, AppTab.pockets),
+                          child: Text(l.seeAll, style: link),
+                        ),
+                      ],
                     ),
+                  ),
+                  if (s.pockets.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    _PocketPills(pockets: s.pockets),
                   ],
-                ),
+                  if (s.noEntries) const _NoEntries() else _Recent(state: s),
+                ],
               ),
             ),
           ),
@@ -183,8 +191,123 @@ class HomeView extends ConsumerWidget {
               onAdd: () => context.push(Routes.addEntry),
             ),
           ),
+          Positioned(
+            left: 0,
+            right: 0,
+            top: 0,
+            child: ValueListenableBuilder(
+              valueListenable: _sticky,
+              builder: (context, on, _) => AnimatedSwitcher(
+                duration: AppMotion.select,
+                child: on
+                    ? Container(
+                        key: const ValueKey('sticky'),
+                        height: stickyTop + 40 + 16,
+                        padding: EdgeInsets.fromLTRB(
+                          AppSpace.gutter,
+                          stickyTop,
+                          AppSpace.gutter,
+                          0,
+                        ),
+                        decoration: const BoxDecoration(
+                          color: Color(0xF5FFFFFF), // paper 96%
+                          border: Border(
+                            bottom: BorderSide(
+                              color: AppColors.divider,
+                              width: AppStroke.hairline,
+                            ),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    heroLabel,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AppText.micro.copyWith(
+                                      color: AppColors.muted,
+                                    ),
+                                  ),
+                                  Text(
+                                    rupiahCompact(s.balance),
+                                    maxLines: 1,
+                                    style: AppText.label.copyWith(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: -0.4,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Flexible(child: picker()),
+                            const SizedBox(width: 8),
+                            _SearchButton(label: l.search, size: 40),
+                          ],
+                        ),
+                      )
+                    : const SizedBox(
+                        key: ValueKey('hero'),
+                        width: double.infinity,
+                      ),
+              ),
+            ),
+          ),
+          if (_menuOpen) ...[
+            Positioned.fill(
+              child: Semantics(
+                button: true,
+                label: l.close,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: toggleMenu,
+                ),
+              ),
+            ),
+            // Right edge lines up with the picker: gutter + search + gap.
+            Positioned(
+              right: AppSpace.gutter + 44 + 8,
+              top: (_sticky.value ? stickyTop + 40 : top + 44) + 8,
+              child: Consumer(
+                builder: (context, ref, _) => MonthMenu(
+                  selected: s.selected,
+                  now: now,
+                  spent: ref.watch(totalsProvider).value?.spent ?? const {},
+                  onPick: (month) {
+                    ref.read(homeMonthProvider.notifier).select(month);
+                    setState(() => _menuOpen = false);
+                  },
+                ),
+              ),
+            ),
+          ],
         ],
       ),
+    );
+  }
+
+  /// "aman jajan hari ini · Rp580K" now; "sisa akhir bulan · Rp…" for past
+  /// months (hidden without a budget); null = no chip.
+  static _ChipData? _chip(AppLocalizations l, HomeState s) {
+    if (s.isCurrent) {
+      final over = s.safeToSpendToday < 0;
+      return (
+        text: over ? l.overspentToday : l.safeToSpendToday,
+        value: rupiahCompact(s.safeToSpendToday.abs()),
+        alert: over,
+      );
+    }
+    final left = s.monthLeft;
+    if (left == null) return null;
+    return (
+      text: left < 0 ? l.homeOverEnd : l.homeLeftEnd,
+      value: rupiahCompact(left.abs()),
+      alert: left < 0,
     );
   }
 
@@ -195,9 +318,10 @@ class HomeView extends ConsumerWidget {
 }
 
 class _SearchButton extends StatelessWidget {
-  const _SearchButton({required this.label});
+  const _SearchButton({required this.label, required this.size});
 
   final String label;
+  final double size;
 
   @override
   Widget build(BuildContext context) {
@@ -208,15 +332,15 @@ class _SearchButton extends StatelessWidget {
         onTap: () {}, // → 04.2 cari
         child: Container(
           alignment: Alignment.center,
-          width: 44,
-          height: 44,
+          width: size,
+          height: size,
           decoration: const BoxDecoration(
             color: AppColors.mist,
             shape: BoxShape.circle,
           ),
-          child: const HugeIcon(
+          child: HugeIcon(
             icon: HugeIcons.strokeRoundedSearch01,
-            size: 20,
+            size: size == 44 ? 20 : 18,
             strokeWidth: AppStroke.icon,
             color: AppColors.ink,
           ),
@@ -226,19 +350,22 @@ class _SearchButton extends StatelessWidget {
   }
 }
 
-class _Hero extends StatelessWidget {
-  const _Hero({required this.balance, required this.safeToSpend});
+typedef _ChipData = ({String text, String value, bool alert});
 
-  final int balance, safeToSpend;
+class _Hero extends StatelessWidget {
+  const _Hero({required this.label, required this.balance, required this.chip});
+
+  final String label;
+  final int balance;
+  final _ChipData? chip;
 
   @override
   Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context)!;
     final digits = rupiah(balance).replaceFirst('Rp', '');
     return Column(
       children: [
         Text(
-          l.balanceLabel,
+          label,
           style: AppText.label.copyWith(fontSize: 14, color: AppColors.muted),
         ),
         const SizedBox(height: 6),
@@ -264,57 +391,58 @@ class _Hero extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 14),
-        Container(
-          height: 34,
-          padding: const EdgeInsets.only(left: 6, right: 14),
-          decoration: BoxDecoration(
-            color: AppColors.ink,
-            borderRadius: BorderRadius.circular(AppRadius.pill),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            spacing: 8,
-            children: [
-              Container(
-                alignment: Alignment.center,
-                width: 24,
-                height: 24,
-                decoration: const BoxDecoration(
-                  color: AppColors.paper,
-                  shape: BoxShape.circle,
-                ),
-                child: HugeIcon(
-                  icon: safeToSpend < 0
-                      ? HugeIcons.strokeRoundedAlert02
-                      : HugeIcons.strokeRoundedTick02,
-                  size: 14,
-                  strokeWidth: AppStroke.iconOnInkSmall,
-                  color: AppColors.ink,
-                ),
-              ),
-              Flexible(
-                child: Text.rich(
-                  overflow: TextOverflow.ellipsis,
-                  TextSpan(
-                    text:
-                        '${safeToSpend < 0 ? l.overspentToday : l.safeToSpendToday} · ',
-                    children: [
-                      TextSpan(
-                        text: rupiahCompact(safeToSpend.abs()),
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                    ],
-                  ),
-                  style: AppText.label.copyWith(
-                    fontSize: 14,
+        if (chip case final chip?) ...[
+          const SizedBox(height: 14),
+          Container(
+            height: 34,
+            padding: const EdgeInsets.only(left: 6, right: 14),
+            decoration: BoxDecoration(
+              color: AppColors.ink,
+              borderRadius: BorderRadius.circular(AppRadius.pill),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 8,
+              children: [
+                Container(
+                  alignment: Alignment.center,
+                  width: 24,
+                  height: 24,
+                  decoration: const BoxDecoration(
                     color: AppColors.paper,
+                    shape: BoxShape.circle,
+                  ),
+                  child: HugeIcon(
+                    icon: chip.alert
+                        ? HugeIcons.strokeRoundedAlert02
+                        : HugeIcons.strokeRoundedTick02,
+                    size: 14,
+                    strokeWidth: AppStroke.iconOnInkSmall,
+                    color: AppColors.ink,
                   ),
                 ),
-              ),
-            ],
+                Flexible(
+                  child: Text.rich(
+                    overflow: TextOverflow.ellipsis,
+                    TextSpan(
+                      text: '${chip.text} · ',
+                      children: [
+                        TextSpan(
+                          text: chip.value,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                    style: AppText.label.copyWith(
+                      fontSize: 14,
+                      color: AppColors.paper,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
+        ],
       ],
     );
   }
@@ -325,29 +453,295 @@ Widget _gutterFit(Widget child) => Padding(
   child: FittedBox(fit: BoxFit.scaleDown, child: child),
 );
 
-class _PocketChip extends StatelessWidget {
-  const _PocketChip({required this.pocket, required this.ink});
+/// Pockets as a row of pills, most used first; > 4 scroll under a fade.
+class _PocketPills extends StatelessWidget {
+  const _PocketPills({required this.pockets});
 
-  final Pocket pocket;
-  final bool ink; // most-used pocket is highlighted
+  final List<Pocket> pockets;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => goTab(context, AppTab.pockets),
-      child: Container(
-        height: 48,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: ink ? AppColors.ink : AppColors.mist,
-          borderRadius: BorderRadius.circular(24),
+    final l = AppLocalizations.of(context)!;
+    return SizedBox(
+      height: 48,
+      child: Stack(
+        children: [
+          ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: AppSpace.gutter),
+            itemCount: pockets.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 8),
+            itemBuilder: (context, i) {
+              final p = pockets[i];
+              final ink = p.status == PocketStatus.almostOut;
+              return Semantics(
+                button: true,
+                label: l.homePocketPill(p.name, p.usedPct),
+                excludeSemantics: true,
+                child: GestureDetector(
+                  onTap: () => context.go(Routes.pocketsAt(p.id)),
+                  child: Container(
+                    width: 76,
+                    height: 48,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: ink ? AppColors.ink : AppColors.mist,
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: Text(
+                      '${p.emoji} ${p.usedPct}%',
+                      style: AppText.label.copyWith(
+                        fontSize: 14,
+                        fontWeight: ink ? FontWeight.w600 : FontWeight.w400,
+                        color: ink ? AppColors.paper : AppColors.ink,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+          if (pockets.length > 4)
+            Positioned(
+              right: 0,
+              top: 0,
+              bottom: 0,
+              width: 40,
+              child: IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColors.paper.withValues(alpha: 0),
+                        AppColors.paper,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// "baru aja" / "terakhir di {bulan}": latest 5 entries by day, then the
+/// way into 04.1.
+class _Recent extends ConsumerWidget {
+  const _Recent({required this.state});
+
+  final HomeState state;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context)!;
+    final s = state;
+    final month = _name(s.month);
+    final muted = AppText.caption.copyWith(color: AppColors.muted);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 26),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpace.gutter),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                s.isCurrent ? l.homeRecent : l.homeRecentIn(month),
+                style: AppText.caption.copyWith(fontWeight: FontWeight.w600),
+              ),
+              if (s.isCurrent)
+                Text(l.homeTodayTotal(rupiahSigned(s.todayNet)), style: muted),
+            ],
+          ),
         ),
-        child: Text(
-          '${pocket.emoji} ${pocket.usedPct}%',
-          style: AppText.label.copyWith(
-            fontSize: 14,
-            fontWeight: ink ? FontWeight.w500 : FontWeight.w400,
-            color: ink ? AppColors.paper : AppColors.ink,
+        if (s.groups.isEmpty)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpace.gutter,
+              14,
+              AppSpace.gutter,
+              0,
+            ),
+            child: Text(l.homeMonthEmpty(month), style: muted),
+          ),
+        for (final g in s.groups) ...[
+          _DayHeader(group: g, today: s.today),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpace.gutter,
+              4,
+              AppSpace.gutter,
+              0,
+            ),
+            child: Column(
+              spacing: 2,
+              children: [
+                if (g.rows.isEmpty) const _TodayEmpty(),
+                for (final tx in g.rows)
+                  TxRow(
+                    tx: tx,
+                    onTap: () => context.push(Routes.transaction(tx.id)),
+                  ),
+              ],
+            ),
+          ),
+        ],
+        if (s.count > 0)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpace.gutter,
+              14,
+              AppSpace.gutter,
+              0,
+            ),
+            child: Semantics(
+              button: true,
+              child: GestureDetector(
+                onTap: () => context.push(
+                  s.isCurrent
+                      ? Routes.transactions
+                      : Routes.transactionsIn(s.month),
+                ),
+                child: Container(
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: AppColors.mist,
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    spacing: 4,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          s.isCurrent
+                              ? l.homeAllCount(s.count)
+                              : l.homeAllIn(month, s.count),
+                          overflow: TextOverflow.ellipsis,
+                          style: AppText.label.copyWith(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      const HugeIcon(
+                        icon: HugeIcons.strokeRoundedArrowRight01,
+                        size: 14,
+                        strokeWidth: AppStroke.iconOnInkSmall,
+                        color: AppColors.ink,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _DayHeader extends StatelessWidget {
+  const _DayHeader({required this.group, required this.today});
+
+  final DayGroup group;
+  final DateTime today;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    final date = _dayTitle.format(group.day).toLowerCase();
+    final title = switch (daysBetween(today, group.day)) {
+      0 => '${l.today} · $date',
+      -1 => '${l.yesterday} · $date',
+      _ => date,
+    };
+    final style = AppText.caption.copyWith(
+      fontSize: 12,
+      color: AppColors.muted,
+    );
+    return Semantics(
+      header: true,
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(
+          AppSpace.gutter,
+          14,
+          AppSpace.gutter,
+          0,
+        ),
+        padding: const EdgeInsets.only(bottom: 6),
+        decoration: const BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: AppColors.track,
+              width: AppStroke.hairline,
+            ),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Flexible(
+              child: Text(title, overflow: TextOverflow.ellipsis, style: style),
+            ),
+            if (group.rows.isNotEmpty)
+              Text(rupiahSigned(group.total), style: style),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 02.1d: today has no entries but other days do.
+class _TodayEmpty extends StatelessWidget {
+  const _TodayEmpty();
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    return Semantics(
+      button: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => context.push(Routes.addEntry),
+        child: SizedBox(
+          height: 52,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: Text(
+                  l.homeTodayEmpty,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppText.label.copyWith(
+                    fontSize: 14,
+                    color: AppColors.muted,
+                  ),
+                ),
+              ),
+              Row(
+                spacing: 2,
+                children: [
+                  Text(
+                    l.addEntry,
+                    style: AppText.label.copyWith(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const HugeIcon(
+                    icon: HugeIcons.strokeRoundedArrowRight01,
+                    size: 14,
+                    strokeWidth: AppStroke.iconOnInkSmall,
+                    color: AppColors.ink,
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
@@ -355,12 +749,101 @@ class _PocketChip extends StatelessWidget {
   }
 }
 
+/// 02.1c: a brand-new user, nothing logged yet.
+class _NoEntries extends StatelessWidget {
+  const _NoEntries();
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpace.gutter,
+        26,
+        AppSpace.gutter,
+        0,
+      ),
+      child: CustomPaint(
+        painter: _DashedCard(),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 8,
+            children: [
+              Text(
+                l.homeNoEntriesTitle,
+                style: AppText.label.copyWith(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                l.homeNoEntriesBody,
+                style: AppText.label.copyWith(
+                  fontSize: 14,
+                  height: 1.4,
+                  color: AppColors.muted,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Semantics(
+                button: true,
+                child: GestureDetector(
+                  onTap: () => context.push(Routes.addEntry),
+                  child: Container(
+                    height: 44,
+                    padding: const EdgeInsets.symmetric(horizontal: 18),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: AppColors.ink,
+                      borderRadius: BorderRadius.circular(22),
+                    ),
+                    child: Text(
+                      l.addEntry,
+                      style: AppText.label.copyWith(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.paper,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DashedCard extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final r = RRect.fromRectAndRadius(
+      (Offset.zero & size).deflate(AppStroke.outline / 2),
+      const Radius.circular(AppRadius.groupCard),
+    );
+    canvas.drawPath(
+      dashPath(Path()..addRRect(r)),
+      Paint()
+        ..color = AppColors.ink
+        ..strokeWidth = AppStroke.outline
+        ..style = PaintingStyle.stroke,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_DashedCard old) => false;
+}
+
 /// "saldo per bulan" — curve through month balances, tap a month to peek.
 class _BalanceChart extends StatelessWidget {
   const _BalanceChart({required this.state, required this.onSelect});
 
   final HomeState state;
-  final ValueChanged<int> onSelect;
+  final ValueChanged<DateTime> onSelect;
 
   static const _height = 186.0;
   static const _base = 150.0; // stems end here
@@ -371,8 +854,8 @@ class _BalanceChart extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
     final months = state.months;
-    final sel = state.selected;
-    const now = HomeState.nowIndex;
+    final sel = state.selectedIndex;
+    final now = state.nowIndex;
     if (months.length < 2) return const SizedBox(height: _height);
 
     return LayoutBuilder(
@@ -421,7 +904,7 @@ class _BalanceChart extends StatelessWidget {
                     label: _monthShort.format(months[i].month).toLowerCase(),
                     child: GestureDetector(
                       behavior: HitTestBehavior.opaque,
-                      onTap: () => onSelect(i),
+                      onTap: () => onSelect(months[i].month),
                       child: Align(
                         alignment: Alignment.bottomCenter,
                         child: Text(

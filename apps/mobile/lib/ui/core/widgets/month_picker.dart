@@ -42,9 +42,13 @@ class MonthPicker extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             spacing: 4,
             children: [
-              Text(
-                label,
-                style: AppText.label.copyWith(fontSize: 15, color: fg),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppText.label.copyWith(fontSize: 15, color: fg),
+                ),
               ),
               AnimatedRotation(
                 turns: open ? 0.5 : 0,

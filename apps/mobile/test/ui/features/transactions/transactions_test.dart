@@ -7,6 +7,7 @@ import 'package:mibu/data/database/app_database.dart';
 import 'package:mibu/l10n/app_localizations.dart';
 import 'package:mibu/ui/core/clock.dart';
 import 'package:mibu/ui/core/theme.dart';
+import 'package:mibu/ui/features/transactions/view_models/transactions_view_model.dart';
 import 'package:mibu/ui/features/transactions/views/transactions_view.dart';
 
 void main() {
@@ -69,6 +70,47 @@ void main() {
     expect(find.text('+Rp8,5jt'), findsNWidgets(3));
     await tester.scrollUntilVisible(find.text('liat agu'), 200);
     expect(find.text('udah semua buat september'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox());
+    await db.close();
+  });
+
+  testWidgets('04.1 opens on the month from a 02.1 deep link', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final now = DateTime(2026, 10, 14, 14, 50);
+    final db = AppDatabase(
+      DatabaseConnection(
+        NativeDatabase.memory(),
+        closeStreamsSynchronously: true,
+      ),
+      () => now,
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          appDatabaseProvider.overrideWithValue(db),
+          clockProvider.overrideWithValue(() => now),
+          txMonthProvider.overrideWith(() => TxMonth(DateTime(2026, 9))),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.light,
+          locale: const Locale('id'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const TransactionsView(),
+        ),
+      ),
+    );
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 50)),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.text('september'), findsOneWidget);
+    expect(find.text('2 catatan'), findsWidgets);
 
     await tester.pumpWidget(const SizedBox());
     await db.close();

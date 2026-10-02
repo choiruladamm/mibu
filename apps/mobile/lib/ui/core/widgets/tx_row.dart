@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:intl/intl.dart';
 
 import '../../../domain/models/finance.dart';
@@ -45,15 +46,33 @@ class TxRow extends StatelessWidget {
                   Text(
                     tx.category ?? AppLocalizations.of(context)!.uncategorized,
                     style: _text,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  Text(
-                    [
-                      if (tx.place.isNotEmpty) tx.place,
-                      _time.format(tx.at),
-                    ].join(' · '),
-                    style: AppText.caption.copyWith(color: AppColors.muted),
-                    overflow: TextOverflow.ellipsis,
+                  Row(
+                    spacing: 4,
+                    children: [
+                      if (tx.note.isNotEmpty)
+                        const HugeIcon(
+                          icon: HugeIcons.strokeRoundedNote,
+                          size: 12,
+                          strokeWidth: AppStroke.icon,
+                          color: AppColors.ink,
+                        ),
+                      Expanded(
+                        child: Text(
+                          [
+                            if (tx.place.isNotEmpty) tx.place,
+                            _time.format(tx.at),
+                          ].join(' · '),
+                          style: AppText.caption.copyWith(
+                            color: AppColors.muted,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
