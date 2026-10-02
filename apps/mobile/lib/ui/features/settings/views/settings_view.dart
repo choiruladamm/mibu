@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 
 import '../../../../data/repositories/finance_repository.dart';
+import '../../../../domain/models/finance.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../routing/router.dart';
 import '../../../core/money.dart';
@@ -13,6 +14,7 @@ import '../../../core/widgets/tab_bar.dart';
 import '../../budget/views/budget_sheet.dart';
 import '../../categories/views/category_manage_sheet.dart';
 import '../view_models/settings_view_model.dart';
+import 'payday_sheet.dart';
 
 /// 02.4 pengaturan. Reminder, rekap, face id, mode and backup are post-MVP.
 class SettingsView extends ConsumerWidget {
@@ -116,6 +118,25 @@ class SettingsView extends ConsumerWidget {
                         ),
                       ),
                       onTap: () => context.go(Routes.pockets),
+                    ),
+                    _Row(
+                      icon: HugeIcons.strokeRoundedMoney01,
+                      title: l.settingsPayday,
+                      hint: switch (s.paydayInfo.status) {
+                        PaydayStatus.today => l.paydayToday,
+                        PaydayStatus.late => l.paydayLate(
+                          s.paydayInfo.lateDays,
+                        ),
+                        PaydayStatus.upcoming => l.paydayIn(
+                          s.paydayInfo.daysLeft,
+                        ),
+                      },
+                      trailing: Text(
+                        s.payday == 31
+                            ? l.settingsPaydayEnd
+                            : l.settingsPaydayEvery(s.payday),
+                      ),
+                      onTap: () => editPayday(context, ref),
                     ),
                   ]),
                   section(l.settingsPrivacy, [

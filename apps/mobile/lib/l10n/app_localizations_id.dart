@@ -1225,6 +1225,97 @@ class AppLocalizationsId extends AppLocalizations {
   String get settingsCategories => 'buat apa aja';
 
   @override
+  String get settingsPayday => 'tanggal gajian';
+
+  @override
+  String settingsPaydayEvery(int day) {
+    return 'tiap tgl $day';
+  }
+
+  @override
+  String get settingsPaydayEnd => 'akhir bulan';
+
+  @override
+  String paydayIn(int n) {
+    return 'gajian lagi $n hari';
+  }
+
+  @override
+  String get paydayToday => 'gajian hari ini';
+
+  @override
+  String paydayLate(int n) {
+    return 'gajian telat $n hari';
+  }
+
+  @override
+  String get paydaySheetTitle => 'gajian tiap tanggal berapa?';
+
+  @override
+  String get paydaySheetBody =>
+      'buat ngitung aman jajan sampai gajian berikutnya.';
+
+  @override
+  String get paydayOther => 'lain…';
+
+  @override
+  String get paydayOtherLabel => 'tanggal lain';
+
+  @override
+  String paydayOtherDay(int day) {
+    return 'tgl $day';
+  }
+
+  @override
+  String paydayDayLabel(int n) {
+    return 'tanggal $n';
+  }
+
+  @override
+  String get paydayNext => 'gajian berikutnya';
+
+  @override
+  String get paydayNextToday => 'hari ini';
+
+  @override
+  String paydayNextIn(int n) {
+    return '$n hari lagi';
+  }
+
+  @override
+  String get paydayJajanBecomes => 'aman jajan jadi';
+
+  @override
+  String paydayPerDay(String amount) {
+    return '$amount/hari';
+  }
+
+  @override
+  String get paydayBudgetNote => 'budget & limit tetap per bulan, 1–31.';
+
+  @override
+  String paydaySave(String label) {
+    return 'simpan $label';
+  }
+
+  @override
+  String get paydayOk => 'oke';
+
+  @override
+  String paydaySavedTitle(String label) {
+    return 'gajian jadi $label';
+  }
+
+  @override
+  String get paydaySavedSubToday =>
+      'gajian hari ini, aman jajan dihitung ulang';
+
+  @override
+  String paydaySavedSub(int n) {
+    return 'aman jajan dihitung sampai $n hari lagi';
+  }
+
+  @override
   String get settingsLimitMonthly => 'limit bulanan';
 
   @override

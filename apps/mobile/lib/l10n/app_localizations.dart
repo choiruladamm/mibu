@@ -2038,6 +2038,144 @@ abstract class AppLocalizations {
   /// **'buat apa aja'**
   String get settingsCategories;
 
+  /// No description provided for @settingsPayday.
+  ///
+  /// In id, this message translates to:
+  /// **'tanggal gajian'**
+  String get settingsPayday;
+
+  /// No description provided for @settingsPaydayEvery.
+  ///
+  /// In id, this message translates to:
+  /// **'tiap tgl {day}'**
+  String settingsPaydayEvery(int day);
+
+  /// No description provided for @settingsPaydayEnd.
+  ///
+  /// In id, this message translates to:
+  /// **'akhir bulan'**
+  String get settingsPaydayEnd;
+
+  /// No description provided for @paydayIn.
+  ///
+  /// In id, this message translates to:
+  /// **'gajian lagi {n} hari'**
+  String paydayIn(int n);
+
+  /// No description provided for @paydayToday.
+  ///
+  /// In id, this message translates to:
+  /// **'gajian hari ini'**
+  String get paydayToday;
+
+  /// No description provided for @paydayLate.
+  ///
+  /// In id, this message translates to:
+  /// **'gajian telat {n} hari'**
+  String paydayLate(int n);
+
+  /// No description provided for @paydaySheetTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'gajian tiap tanggal berapa?'**
+  String get paydaySheetTitle;
+
+  /// No description provided for @paydaySheetBody.
+  ///
+  /// In id, this message translates to:
+  /// **'buat ngitung aman jajan sampai gajian berikutnya.'**
+  String get paydaySheetBody;
+
+  /// No description provided for @paydayOther.
+  ///
+  /// In id, this message translates to:
+  /// **'lain…'**
+  String get paydayOther;
+
+  /// No description provided for @paydayOtherLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'tanggal lain'**
+  String get paydayOtherLabel;
+
+  /// No description provided for @paydayOtherDay.
+  ///
+  /// In id, this message translates to:
+  /// **'tgl {day}'**
+  String paydayOtherDay(int day);
+
+  /// No description provided for @paydayDayLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'tanggal {n}'**
+  String paydayDayLabel(int n);
+
+  /// No description provided for @paydayNext.
+  ///
+  /// In id, this message translates to:
+  /// **'gajian berikutnya'**
+  String get paydayNext;
+
+  /// No description provided for @paydayNextToday.
+  ///
+  /// In id, this message translates to:
+  /// **'hari ini'**
+  String get paydayNextToday;
+
+  /// No description provided for @paydayNextIn.
+  ///
+  /// In id, this message translates to:
+  /// **'{n} hari lagi'**
+  String paydayNextIn(int n);
+
+  /// No description provided for @paydayJajanBecomes.
+  ///
+  /// In id, this message translates to:
+  /// **'aman jajan jadi'**
+  String get paydayJajanBecomes;
+
+  /// No description provided for @paydayPerDay.
+  ///
+  /// In id, this message translates to:
+  /// **'{amount}/hari'**
+  String paydayPerDay(String amount);
+
+  /// No description provided for @paydayBudgetNote.
+  ///
+  /// In id, this message translates to:
+  /// **'budget & limit tetap per bulan, 1–31.'**
+  String get paydayBudgetNote;
+
+  /// No description provided for @paydaySave.
+  ///
+  /// In id, this message translates to:
+  /// **'simpan {label}'**
+  String paydaySave(String label);
+
+  /// No description provided for @paydayOk.
+  ///
+  /// In id, this message translates to:
+  /// **'oke'**
+  String get paydayOk;
+
+  /// No description provided for @paydaySavedTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'gajian jadi {label}'**
+  String paydaySavedTitle(String label);
+
+  /// No description provided for @paydaySavedSubToday.
+  ///
+  /// In id, this message translates to:
+  /// **'gajian hari ini, aman jajan dihitung ulang'**
+  String get paydaySavedSubToday;
+
+  /// No description provided for @paydaySavedSub.
+  ///
+  /// In id, this message translates to:
+  /// **'aman jajan dihitung sampai {n} hari lagi'**
+  String paydaySavedSub(int n);
+
   /// No description provided for @settingsLimitMonthly.
   ///
   /// In id, this message translates to:

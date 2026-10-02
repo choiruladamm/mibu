@@ -116,4 +116,73 @@ void main() {
     expect(find.text('Rp•••'), findsOneWidget);
     expect(find.text('Rp8jt'), findsNothing);
   });
+
+  testWidgets('02.4e–g tanggal gajian: row, sheet, simpan + batalin', (
+    tester,
+  ) async {
+    final db = await pump(tester);
+    Future<void> settle() async {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 50)),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    Future<int> saved() async =>
+        (await tester.runAsync(() => db.select(db.profiles).getSingle()))!
+            .payday;
+
+    // 25 okt 2026 is a Sunday → paid Fri 23: 14 → 23 okt = 9 days.
+    expect(find.text('tiap tgl 25'), findsOneWidget);
+    expect(find.text('gajian lagi 9 hari'), findsOneWidget);
+
+    await tester.tap(find.text('tanggal gajian'));
+    await settle();
+    expect(find.text('gajian tiap tanggal berapa?'), findsOneWidget);
+    expect(find.text('umum'), findsOneWidget); // tag on 25
+    expect(find.text('oke'), findsOneWidget); // nothing changed yet
+    expect(find.text('jum 23 okt'), findsOneWidget);
+    expect(find.text('9 hari lagi'), findsOneWidget);
+
+    // 28 okt is a Wednesday, 14 days out; aman jajan shrinks to match.
+    await tester.tap(find.text('28'));
+    await tester.pump();
+    expect(find.text('rab 28 okt'), findsOneWidget);
+    expect(find.text('14 hari lagi'), findsOneWidget);
+    expect(find.textContaining('/hari', findRichText: true), findsOneWidget);
+    expect(find.text('budget & limit tetap per bulan, 1–31.'), findsOneWidget);
+    await tester.tap(find.text('simpan tgl 28'));
+    await settle();
+    expect(await saved(), 28);
+    expect(find.text('gajian jadi tgl 28'), findsOneWidget);
+    expect(
+      find.text('aman jajan dihitung sampai 14 hari lagi'),
+      findsOneWidget,
+    );
+    expect(find.text('tiap tgl 28'), findsOneWidget);
+
+    await tester.tap(find.text('batalin'));
+    await settle();
+    expect(await saved(), 25);
+
+    // lain… → grid 1–31; akhir; nggak jadi changes nothing.
+    await tester.tap(find.text('tanggal gajian'));
+    await settle();
+    await tester.tap(find.text('lain…'));
+    await tester.pump();
+    await tester.tap(find.bySemanticsLabel('tanggal 7'));
+    await tester.pump();
+    expect(find.text('tgl 7'), findsOneWidget); // the chip took the pick
+    expect(find.text('simpan tgl 7'), findsOneWidget);
+    await tester.tap(find.bySemanticsLabel('akhir bulan'));
+    await tester.pump();
+    // 31 okt is a Saturday → paid Fri 30.
+    expect(find.text('jum 30 okt'), findsOneWidget);
+    await tester.tap(find.text('nggak jadi'));
+    await settle();
+    expect(await saved(), 25);
+
+    await tester.pumpWidget(const SizedBox());
+    await db.close();
+  });
 }

@@ -613,6 +613,12 @@ class FinanceRepository {
   Future<void> setMonthlyBudget(int? budget, Period period) =>
       _setBudgetRow(period, budget);
 
+  /// 02.4 tanggal gajian (00.24): 1–31, 31 = akhir.
+  Future<void> setPayday(int day) =>
+      (_db.update(_db.profiles)..where((p) => p.deletedAt.isNull())).write(
+        ProfilesCompanion(payday: Value(day), updatedAt: Value(DateTime.now())),
+      );
+
   /// 02.4 sembunyiin nominal.
   Future<void> setHideAmounts(bool hide) =>
       (_db.update(_db.profiles)..where((p) => p.deletedAt.isNull())).write(

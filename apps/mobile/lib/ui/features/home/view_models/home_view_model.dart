@@ -188,11 +188,9 @@ final homeProvider = Provider<AsyncValue<HomeState>>((ref) {
         safeToSpendToday: safeToSpendToday(
           balance: totals.balance,
           spentToday: totals.spentToday,
-          // ponytail: on payday / telat the hero swaps the chip for "catat
-          // gajian" (02.1p o–q); until then, keep counting to the next one.
-          days: payday.daysLeft > 0
-              ? payday.daysLeft
-              : daysBetween(today, payday.next),
+          // On payday / telat the hero swaps the chip for "catat gajian"
+          // (02.1p o–q); the figure still counts to the next payday.
+          days: payday.daysToNext,
         ),
         monthLeft: profile.monthlyBudget == null
             ? null

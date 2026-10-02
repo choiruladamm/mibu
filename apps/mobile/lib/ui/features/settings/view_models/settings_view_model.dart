@@ -7,6 +7,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../../data/repositories/finance_repository.dart';
 import '../../../../domain/csv.dart';
+import '../../../../domain/models/finance.dart';
 import '../../../core/clock.dart';
 import '../../../core/finance_providers.dart';
 
@@ -17,12 +18,16 @@ class SettingsState {
     required this.categories,
     required this.limits,
     required this.limitTotal,
+    required this.payday,
+    required this.paydayInfo,
   });
 
   final int? budget; // budget bulanan; null = not set
   final bool hideAmounts;
   final int categories, limits; // all categories / those with a limit
   final int limitTotal; // Σ monthly limits
+  final int payday; // 1–31, 31 = akhir
+  final PaydayInfo paydayInfo; // "gajian lagi n hari" / hari ini / telat
 }
 
 /// 02.4 pengaturan state.
@@ -41,6 +46,12 @@ final settingsProvider = Provider<AsyncValue<SettingsState>>((ref) {
       categories: categories.value!.length,
       limits: limits.length,
       limitTotal: limits.fold(0, (sum, p) => sum + p.budget),
+      payday: profile.value!.payday == 0 ? 31 : profile.value!.payday,
+      paydayInfo: paydayInfo(
+        now: ref.watch(nowProvider),
+        payday: profile.value!.payday,
+        salaries: ref.watch(salaryDatesProvider).value ?? const [],
+      ),
     ),
   );
 });

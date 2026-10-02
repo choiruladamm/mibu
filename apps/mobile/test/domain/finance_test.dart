@@ -31,7 +31,11 @@ void main() {
     });
 
     test('payday with no salary yet → today; logged → lasts to the next', () {
-      expect(at(DateTime(2026, 11, 25)).status, PaydayStatus.today);
+      final hariH = at(DateTime(2026, 11, 25));
+      expect(
+        (hariH.status, hariH.daysLeft, hariH.daysToNext),
+        (PaydayStatus.today, 0, 30),
+      );
       final p = at(
         DateTime(2026, 11, 25, 20),
         paid: [DateTime(2026, 11, 25, 9)],

@@ -178,11 +178,14 @@ const paydayLateMaxDays = 7;
 enum PaydayStatus { upcoming, today, late }
 
 /// Where [now] stands against payday. [next] = the payday the money has to
-/// last until (exclusive); [daysLeft] = days from today to it, today
-/// included; [lateDays] > 0 only when [status] is late.
+/// last until (exclusive); [daysToNext] = days from today to it, today
+/// included (always ≥ 1); [daysLeft] = the same while [status] is upcoming,
+/// 0 on payday / telat (no "gajian lagi n hari" then); [lateDays] > 0 only
+/// when late.
 typedef PaydayInfo = ({
   PaydayStatus status,
   DateTime next,
+  int daysToNext,
   int daysLeft,
   int lateDays,
 });
@@ -217,32 +220,48 @@ PaydayInfo paydayInfo({
   // Next payday's salary already in (cair duluan): last until the one after.
   if (!today.isBefore(early(next)) && paidSince(early(next))) {
     final after = r.next(cycle).end;
+    final n = days(today, after);
     return (
       status: PaydayStatus.upcoming,
       next: after,
-      daysLeft: days(today, after),
+      daysToNext: n,
+      daysLeft: n,
       lateDays: 0,
     );
   }
+  final toNext = days(today, next);
   final upcoming = (
     status: PaydayStatus.upcoming,
     next: next,
-    daysLeft: days(today, next),
+    daysToNext: toNext,
+    daysLeft: toNext,
     lateDays: 0,
   );
   if (paidSince(early(last))) return upcoming;
   final late = days(last, today);
   if (late == 0) {
-    return (status: PaydayStatus.today, next: next, daysLeft: 0, lateDays: 0);
+    return (
+      status: PaydayStatus.today,
+      next: next,
+      daysToNext: toNext,
+      daysLeft: 0,
+      lateDays: 0,
+    );
   }
   if (paid.isNotEmpty && late <= paydayLateMaxDays) {
-    return (status: PaydayStatus.late, next: next, daysLeft: 0, lateDays: late);
+    return (
+      status: PaydayStatus.late,
+      next: next,
+      daysToNext: toNext,
+      daysLeft: 0,
+      lateDays: late,
+    );
   }
   return upcoming;
 }
 
-/// "aman jajan hari ini": today's share of the balance over [days] (from
-/// [paydayInfo]), minus what's already spent today. Negative = overspent
+/// "aman jajan hari ini": today's share of the balance over [days] (usually
+/// [PaydayInfo.daysToNext]), minus what's already spent today. Negative = overspent
 /// today. See MVP_PLAN.md.
 int safeToSpendToday({
   required int balance,
