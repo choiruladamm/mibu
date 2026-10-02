@@ -56,7 +56,7 @@ class TransactionDetailView extends ConsumerWidget {
           children: [
             NavHeader(
               title: l.receiptTitle,
-              sub: _headerDay.format(t.at).toLowerCase(),
+              sub: [_headerDay.format(t.at).toLowerCase()],
               backLabel: l.txTitle,
               actionIcon: HugeIcons.strokeRoundedPencilEdit02,
               actionLabel: l.receiptEdit,
@@ -170,7 +170,7 @@ class TransactionDetailView extends ConsumerWidget {
         rupiahSigned(t.amount),
         if (t.place.isNotEmpty) t.place,
         dayLabel(t.at),
-      ].join(' · '),
+      ],
       today: dateOnly(ref.read(clockProvider)()),
     );
     if (note == null) return;

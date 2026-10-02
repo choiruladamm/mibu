@@ -3,6 +3,7 @@ import 'package:hugeicons/hugeicons.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../tokens.dart';
+import 'meta_line.dart';
 import 'sheet.dart';
 
 /// 00.5 NavHeader — ink back disc, title + sub, optional action disc.
@@ -18,7 +19,8 @@ class NavHeader extends StatelessWidget {
     this.onMist = false,
   });
 
-  final String title, sub;
+  final String title;
+  final List<String> sub; // MetaLine parts
   final String backLabel; // "beranda" → "balik ke beranda"
   final List<List<dynamic>>? actionIcon; // null = no action
   final String? actionLabel;
@@ -73,10 +75,8 @@ class NavHeader extends StatelessWidget {
                       height: 1.1,
                     ),
                   ),
-                  Text(
+                  MetaLine(
                     sub,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                     style: AppText.caption.copyWith(color: AppColors.muted),
                   ),
                 ],

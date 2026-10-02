@@ -13,6 +13,8 @@ import 'package:mibu/ui/core/finance_providers.dart';
 import 'package:mibu/ui/features/home/view_models/home_view_model.dart';
 import 'package:mibu/ui/features/home/views/home_view.dart';
 
+import '../../../meta.dart';
+
 void main() {
   final now = DateTime(2026, 10, 14, 14, 50);
 
@@ -85,8 +87,8 @@ void main() {
     expect(find.text('kemarin · sel 13 okt'), findsOneWidget);
     expect(find.text('sen 12 okt'), findsOneWidget);
     expect(find.text('-Rp1,02jt'), findsOneWidget); // kemarin: 3 entries
-    expect(find.text('gojek · 11.05'), findsOneWidget);
-    expect(find.text('dokter hewan · 17.00'), findsOneWidget);
+    expect(findMeta(['gojek', '11.05']), findsOneWidget);
+    expect(findMeta(['dokter hewan', '17.00']), findsOneWidget);
     // 7 this month, 5 shown: the 11th stays behind the button.
     expect(find.text('liat semua transaksi (7)'), findsOneWidget);
     expect(find.textContaining('tokopedia'), findsNothing);

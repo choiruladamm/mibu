@@ -269,9 +269,16 @@
       }
     }
   },
-  "noteFor": "buat",
-  "notePlaceholder": "buat apa, sama siapa, kenapa…",
-  "noteQuickTags": "tag cepet · maks 3",
+  "notePlaceholder": "sama siapa, kenapa, detailnya…",
+  "noteQuickTags": "tag cepet",
+  "noteTagsMax": "maks {n}",
+  "@noteTagsMax": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "noteWroteBefore": "pernah kamu tulis",
   "noteSave": "simpan catatan",
   "noteLeaveEmpty": "nggak jadi, kosongin",

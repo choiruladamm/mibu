@@ -60,7 +60,7 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
               children: [
                 NavHeader(
                   title: l.txTitle,
-                  sub: s == null ? '' : l.txCount(s.count),
+                  sub: [if (s != null) l.txCount(s.count)],
                   backLabel: l.home,
                   actionIcon: HugeIcons.strokeRoundedSearch01,
                   actionLabel: l.search,

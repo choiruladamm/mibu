@@ -163,7 +163,7 @@ class _EditFormState extends ConsumerState<_EditForm> {
               sub: [
                 _o.place.isNotEmpty ? _o.place : _o.category ?? l.uncategorized,
                 _headerDay.format(_o.at).toLowerCase(),
-              ].join(' · '),
+              ],
               backLabel: l.receiptTitle,
             ),
             Expanded(

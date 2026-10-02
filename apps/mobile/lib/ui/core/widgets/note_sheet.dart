@@ -6,6 +6,7 @@ import '../../../data/repositories/finance_repository.dart';
 import '../../../l10n/app_localizations.dart';
 import '../dates.dart';
 import '../tokens.dart';
+import 'meta_line.dart';
 import 'sheet.dart';
 
 typedef Note = ({String text, List<String> tags});
@@ -13,7 +14,7 @@ typedef Note = ({String text, List<String> tags});
 const noteMaxLength = 80;
 const noteMaxTags = 3;
 const noteTags = [
-  '#patungan',
+  '#splitbill',
   '#kantor',
   '#nongkrong',
   '#darurat',
@@ -21,12 +22,13 @@ const noteTags = [
   '#langganan',
 ];
 
-/// 00.13 NoteSheet. [context] is the entry it's for: "-Rp50.000 · 🍜 warteg ·
-/// sel 13 okt". Resolves to the note (empty = cleared), or null if dismissed.
+/// 00.13 NoteSheet. [entryContext] is the entry it's for, as MetaLine parts:
+/// -Rp50.000 • 🍜 warteg • sel 13 okt. Resolves to the note (empty =
+/// cleared), or null if dismissed.
 Future<Note?> showNoteSheet(
   BuildContext context, {
   required Note initial,
-  required String entryContext,
+  required List<String> entryContext,
   required DateTime today,
 }) => showAppSheet(
   context,
@@ -41,7 +43,7 @@ class _NoteSheet extends ConsumerStatefulWidget {
   });
 
   final Note initial;
-  final String entryContext;
+  final List<String> entryContext;
   final DateTime today;
 
   @override
@@ -94,23 +96,7 @@ class _NoteSheetState extends ConsumerState<_NoteSheet> {
               // widthFactor 1: hug the text (alignment would stretch it).
               child: Center(
                 widthFactor: 1,
-                child: Text.rich(
-                  TextSpan(
-                    text: '${l.noteFor} ',
-                    children: [
-                      TextSpan(
-                        text: widget.entryContext,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.ink,
-                        ),
-                      ),
-                    ],
-                  ),
-                  style: AppText.caption.copyWith(color: AppColors.muted),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                child: MetaLine(widget.entryContext, style: AppText.caption),
               ),
             ),
           ),
@@ -171,9 +157,24 @@ class _NoteSheetState extends ConsumerState<_NoteSheet> {
             ),
           ),
           const SizedBox(height: 16),
-          Text(
-            l.noteQuickTags,
-            style: AppText.caption.copyWith(color: AppColors.muted),
+          // Section title: title left, info right, no dot.
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                l.noteQuickTags,
+                style: AppText.caption.copyWith(fontWeight: FontWeight.w600),
+              ),
+              Text(
+                l.noteTagsMax(noteMaxTags),
+                style: AppText.caption.copyWith(
+                  fontSize: 12,
+                  color: AppColors.muted,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 8),
           Wrap(

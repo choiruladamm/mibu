@@ -167,7 +167,8 @@ void main() {
     await tester.pump();
     await tester.tap(find.text('catatan'));
     await settle();
-    expect(find.text('tag cepet · maks 3'), findsOneWidget);
+    expect(find.text('tag cepet'), findsOneWidget);
+    expect(find.text('maks 3'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     await tester.pumpWidget(const SizedBox());

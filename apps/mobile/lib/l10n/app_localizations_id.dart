@@ -338,13 +338,15 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
-  String get noteFor => 'buat';
+  String get notePlaceholder => 'sama siapa, kenapa, detailnya…';
 
   @override
-  String get notePlaceholder => 'buat apa, sama siapa, kenapa…';
+  String get noteQuickTags => 'tag cepet';
 
   @override
-  String get noteQuickTags => 'tag cepet · maks 3';
+  String noteTagsMax(int n) {
+    return 'maks $n';
+  }
 
   @override
   String get noteWroteBefore => 'pernah kamu tulis';

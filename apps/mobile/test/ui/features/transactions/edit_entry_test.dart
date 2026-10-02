@@ -9,6 +9,8 @@ import 'package:mibu/ui/core/clock.dart';
 import 'package:mibu/ui/core/theme.dart';
 import 'package:mibu/ui/features/transactions/views/edit_entry_view.dart';
 
+import '../../../meta.dart';
+
 void main() {
   testWidgets('04.4: diubah badges, batalin, simpan, hapus', (tester) async {
     tester.view.physicalSize = const Size(390, 844);
@@ -64,7 +66,7 @@ void main() {
 
     await tester.tap(find.text('open'));
     await settle();
-    expect(find.text('petshop · sel 13 okt'), findsOneWidget);
+    expect(findMeta(['petshop', 'sel 13 okt']), findsOneWidget);
     expect(find.text('450.000'), findsOneWidget);
     expect(find.text('belum ada perubahan'), findsOneWidget);
     expect(find.text('diubah'), findsNothing);

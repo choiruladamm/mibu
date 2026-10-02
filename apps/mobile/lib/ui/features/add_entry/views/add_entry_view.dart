@@ -75,7 +75,7 @@ class _AddEntryViewState extends ConsumerState<AddEntryView> {
         if (s.category case final c?)
           '${c.emoji} ${s.place.isEmpty ? c.name : s.place}',
         dayLabel(s.day),
-      ].join(' · '),
+      ],
       today: _today,
     );
     if (note != null) _vm.setNote(note);

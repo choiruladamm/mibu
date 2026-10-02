@@ -6,6 +6,7 @@ import '../../../domain/models/finance.dart';
 import '../../../l10n/app_localizations.dart';
 import '../money.dart';
 import '../tokens.dart';
+import 'meta_line.dart';
 
 /// 00.4 TxRow — 64 tall; tap opens 04.3 detail.
 class TxRow extends StatelessWidget {
@@ -60,16 +61,11 @@ class TxRow extends StatelessWidget {
                           color: AppColors.ink,
                         ),
                       Expanded(
-                        child: Text(
-                          [
-                            if (tx.place.isNotEmpty) tx.place,
-                            _time.format(tx.at),
-                          ].join(' · '),
+                        child: MetaLine(
+                          [tx.place, _time.format(tx.at)],
                           style: AppText.caption.copyWith(
                             color: AppColors.muted,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],

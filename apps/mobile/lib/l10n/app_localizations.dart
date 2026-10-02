@@ -652,23 +652,23 @@ abstract class AppLocalizations {
   /// **'pakai {date}'**
   String useDate(String date);
 
-  /// No description provided for @noteFor.
-  ///
-  /// In id, this message translates to:
-  /// **'buat'**
-  String get noteFor;
-
   /// No description provided for @notePlaceholder.
   ///
   /// In id, this message translates to:
-  /// **'buat apa, sama siapa, kenapa…'**
+  /// **'sama siapa, kenapa, detailnya…'**
   String get notePlaceholder;
 
   /// No description provided for @noteQuickTags.
   ///
   /// In id, this message translates to:
-  /// **'tag cepet · maks 3'**
+  /// **'tag cepet'**
   String get noteQuickTags;
+
+  /// No description provided for @noteTagsMax.
+  ///
+  /// In id, this message translates to:
+  /// **'maks {n}'**
+  String noteTagsMax(int n);
 
   /// No description provided for @noteWroteBefore.
   ///
