@@ -92,9 +92,11 @@ void main() {
     expect(find.text('coba cari'), findsNothing);
     expect(find.text('pemasukan'), findsOneWidget);
     // pills sit in one row, each as wide as its label
-    final pills = ['semua', 'pengeluaran', 'pemasukan']
-        .map((t) => tester.getRect(find.text(t)))
-        .toList();
+    final pills = [
+      'semua',
+      'pengeluaran',
+      'pemasukan',
+    ].map((t) => tester.getRect(find.text(t))).toList();
     expect(pills.map((r) => r.top).toSet(), hasLength(1));
     expect(pills[0].right, lessThan(pills[1].left));
     expect(findMeta(['1 hasil']), findsOneWidget);
@@ -196,15 +198,20 @@ void main() {
     );
   });
 
-  testWidgets('04.2: × in the header clears the query (keyboard open)', (
+  testWidgets('04.2: × in the field clears the query and the filter', (
     tester,
   ) async {
     await pump(tester);
     await tester.tap(find.byType(TextField));
     await type(tester, 'gojek');
     expect(findMeta(['2 hasil', '2 hari']), findsOneWidget);
-    await tap(tester, find.byType(CircleButton));
+    await tap(tester, find.text('pemasukan'));
+    await tap(tester, find.byType(CircleButton)); // × in the field
     expect(find.text('gojek'), findsOneWidget); // idea chip only
     expect(find.text('coba cari'), findsOneWidget);
+    expect(find.byType(CircleButton), findsNothing); // only while typing
+
+    await type(tester, 'gojek'); // filter went back to semua
+    expect(findMeta(['2 hasil', '2 hari']), findsOneWidget);
   });
 }

@@ -17,6 +17,7 @@ import '../../../core/money.dart';
 import '../../../core/tokens.dart';
 import '../../../core/widgets/meta_line.dart';
 import '../../../core/widgets/nav_header.dart';
+import '../../../core/widgets/sheet.dart';
 import '../../../core/widgets/tx_row.dart';
 import '../../transactions/view_models/transactions_view_model.dart';
 
@@ -263,25 +264,10 @@ class _SearchViewState extends ConsumerState<SearchView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Part of the field: tapping × mustn't unfocus it first
-            // (TapOutsideUnfocus) — closing the keyboard hands the old text
-            // back and undoes the clear.
-            TextFieldTapRegion(
-              child: NavHeader(
-                title: l.search,
-                sub: [_allMonths ? l.searchAllMonths : l.searchSub(monthName)],
-                backLabel: l.home,
-                actionIcon: HugeIcons.strokeRoundedCancel01,
-                actionLabel: l.searchClear,
-                onAction: () {
-                  setState(() {
-                    _controller.clear();
-                    _allMonths = false;
-                    _reset();
-                  });
-                  _focus.requestFocus();
-                },
-              ),
+            NavHeader(
+              title: l.search,
+              sub: [_allMonths ? l.searchAllMonths : l.searchSub(monthName)],
+              backLabel: l.home,
             ),
             Expanded(
               child: ListView(
@@ -300,6 +286,15 @@ class _SearchViewState extends ConsumerState<SearchView> {
                     hint: l.searchHint,
                     onChanged: (_) => setState(_reset),
                     onSubmitted: _remember,
+                    onClear: () {
+                      setState(() {
+                        _controller.clear();
+                        _kind = null;
+                        _allMonths = false;
+                        _reset();
+                      });
+                      _focus.requestFocus();
+                    },
                   ),
                   if (q.isEmpty)
                     ...idle()
@@ -337,12 +332,14 @@ class _Field extends StatelessWidget {
     required this.hint,
     required this.onChanged,
     required this.onSubmitted,
+    required this.onClear,
   });
 
   final TextEditingController controller;
   final FocusNode focus;
   final String hint;
   final ValueChanged<String> onChanged, onSubmitted;
+  final VoidCallback onClear; // × while typing
 
   @override
   Widget build(BuildContext context) {
@@ -380,6 +377,19 @@ class _Field extends StatelessWidget {
               ),
             ),
           ),
+          if (controller.text.isNotEmpty)
+            // Part of the field: tapping × mustn't unfocus it first
+            // (TapOutsideUnfocus) — closing the keyboard hands the old text
+            // back and undoes the clear.
+            TextFieldTapRegion(
+              child: CircleButton(
+                icon: HugeIcons.strokeRoundedCancel01,
+                label: AppLocalizations.of(context)!.searchClear,
+                size: 32,
+                iconSize: 16,
+                onTap: onClear,
+              ),
+            ),
         ],
       ),
     );
