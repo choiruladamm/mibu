@@ -1342,17 +1342,29 @@ abstract class AppLocalizations {
   /// **'beres'**
   String get manageDone;
 
-  /// No description provided for @manageHint.
+  /// No description provided for @manageHintIcon.
   ///
   /// In id, this message translates to:
-  /// **'tap = edit'**
-  String get manageHint;
+  /// **'tap ikon = ganti ikon'**
+  String get manageHintIcon;
 
-  /// No description provided for @manageHintDelete.
+  /// No description provided for @manageHintIconBold.
   ///
   /// In id, this message translates to:
-  /// **'− = hapus'**
-  String get manageHintDelete;
+  /// **'tap ikon'**
+  String get manageHintIconBold;
+
+  /// No description provided for @manageHintName.
+  ///
+  /// In id, this message translates to:
+  /// **'tap nama = edit'**
+  String get manageHintName;
+
+  /// No description provided for @manageHintNameBold.
+  ///
+  /// In id, this message translates to:
+  /// **'tap nama'**
+  String get manageHintNameBold;
 
   /// No description provided for @manageHintMove.
   ///
@@ -1372,11 +1384,23 @@ abstract class AppLocalizations {
   /// **'edit {name}'**
   String manageEdit(String name);
 
-  /// No description provided for @manageDelete.
+  /// No description provided for @manageIcon.
   ///
   /// In id, this message translates to:
-  /// **'hapus {name}'**
-  String manageDelete(String name);
+  /// **'ganti ikon {name}'**
+  String manageIcon(String name);
+
+  /// No description provided for @manageIconSwapped.
+  ///
+  /// In id, this message translates to:
+  /// **'ikon {name} diganti'**
+  String manageIconSwapped(String name);
+
+  /// No description provided for @manageIconSwappedSub.
+  ///
+  /// In id, this message translates to:
+  /// **'toples, catatan & statistik ikut berubah'**
+  String get manageIconSwappedSub;
 
   /// No description provided for @manageIncomeNote.
   ///

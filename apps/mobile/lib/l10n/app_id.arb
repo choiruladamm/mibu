@@ -655,8 +655,10 @@
   "limitSetBudget": "＋ pasang budget bulanan",
   "manageTitle": "buat apa aja",
   "manageDone": "beres",
-  "manageHint": "tap = edit",
-  "manageHintDelete": "− = hapus",
+  "manageHintIcon": "tap ikon = ganti ikon",
+  "manageHintIconBold": "tap ikon",
+  "manageHintName": "tap nama = edit",
+  "manageHintNameBold": "tap nama",
   "manageHintMove": "tahan = geser",
   "manageUses": "{count} catatan",
   "@manageUses": {
@@ -674,14 +676,23 @@
       }
     }
   },
-  "manageDelete": "hapus {name}",
-  "@manageDelete": {
+  "manageIcon": "ganti ikon {name}",
+  "@manageIcon": {
     "placeholders": {
       "name": {
         "type": "String"
       }
     }
   },
+  "manageIconSwapped": "ikon {name} diganti",
+  "@manageIconSwapped": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "manageIconSwappedSub": "toples, catatan & statistik ikut berubah",
   "manageIncomeNote": "{name} itu pemasukan, nggak pernah dikasih limit.",
   "@manageIncomeNote": {
     "placeholders": {

@@ -774,10 +774,16 @@ class AppLocalizationsId extends AppLocalizations {
   String get manageDone => 'beres';
 
   @override
-  String get manageHint => 'tap = edit';
+  String get manageHintIcon => 'tap ikon = ganti ikon';
 
   @override
-  String get manageHintDelete => '− = hapus';
+  String get manageHintIconBold => 'tap ikon';
+
+  @override
+  String get manageHintName => 'tap nama = edit';
+
+  @override
+  String get manageHintNameBold => 'tap nama';
 
   @override
   String get manageHintMove => 'tahan = geser';
@@ -793,9 +799,17 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
-  String manageDelete(String name) {
-    return 'hapus $name';
+  String manageIcon(String name) {
+    return 'ganti ikon $name';
   }
+
+  @override
+  String manageIconSwapped(String name) {
+    return 'ikon $name diganti';
+  }
+
+  @override
+  String get manageIconSwappedSub => 'toples, catatan & statistik ikut berubah';
 
   @override
   String manageIncomeNote(String name) {

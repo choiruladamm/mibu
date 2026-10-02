@@ -9,6 +9,8 @@ import 'package:mibu/ui/core/clock.dart';
 import 'package:mibu/ui/core/theme.dart';
 import 'package:mibu/ui/features/add_entry/views/add_entry_view.dart';
 
+import '../../../meta.dart';
+
 void main() {
   testWidgets('03.3 from the picker: usage and the income note', (
     tester,
@@ -39,7 +41,6 @@ void main() {
         ),
       ),
     );
-    // Tiles wiggle forever, so no pumpAndSettle.
     Future<void> settle() async {
       await tester.runAsync(
         () => Future<void>.delayed(const Duration(milliseconds: 50)),
@@ -66,6 +67,28 @@ void main() {
       ),
       findsOneWidget,
     );
+
+    expect(
+      findMeta(['tap ikon = ganti ikon', 'tap nama = edit', 'tahan = geser']),
+      findsOneWidget,
+    );
+
+    // Tap ikon → IconSheet → saved right away, toast batalin puts it back.
+    Future<String> ngopi() async => (await (db.select(
+      db.categories,
+    )..where((c) => c.name.equals('ngopi'))).getSingle()).emoji;
+    await tester.tap(find.bySemanticsLabel('ganti ikon ngopi'));
+    await settle();
+    await tester.tap(find.bySemanticsLabel('boba').first);
+    await settle();
+    await tester.tap(findEmojiText('pakai 🧋 boba'));
+    await settle();
+    expect(find.text('ikon ngopi diganti'), findsOneWidget);
+    expect(find.text('buat apa aja'), findsOneWidget); // 03.3 stays open
+    expect(await tester.runAsync(ngopi), '🧋');
+    await tester.tap(find.text('batalin'));
+    await settle();
+    expect(await tester.runAsync(ngopi), '☕');
 
     // ponytail: tahan & geser is checked by hand on device; after a
     // simulated drag the next frame never returns under flutter_test.
