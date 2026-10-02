@@ -186,51 +186,64 @@ class _EditFormState extends ConsumerState<_EditForm> {
                             ),
                           ),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.baseline,
-                          textBaseline: TextBaseline.alphabetic,
-                          spacing: 4,
-                          children: [
-                            Text(
-                              _o.amount < 0 ? '-Rp' : '+Rp',
-                              style: AppText.inputXl.copyWith(
-                                fontSize: 26,
-                                letterSpacing: -0.52,
-                                color: AppColors.muted,
-                              ),
-                            ),
-                            Flexible(
-                              child: SizedBox(
+                        child: LayoutBuilder(
+                          builder: (context, box) {
+                            final prefix = AppText.inputXl.copyWith(
+                              fontSize: 26,
+                              letterSpacing: -0.52,
+                              color: AppColors.muted,
+                            );
+                            final sign = _o.amount < 0 ? '-Rp' : '+Rp';
+                            // Shrink the digits (never clip) once they'd
+                            // outgrow the row; letterSpacing scales with size.
+                            final room =
+                                box.maxWidth - textWidth(sign, prefix) - 4 - 4;
+                            final full = textWidth(
+                              _amount.text,
+                              AppText.display,
+                            );
+                            final size = (56 * (room / full).clamp(0.0, 1.0))
+                                .clamp(28.0, 56.0);
+                            final style = AppText.display.copyWith(
+                              fontSize: size,
+                              letterSpacing: -0.04 * size,
+                            );
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.baseline,
+                              textBaseline: TextBaseline.alphabetic,
+                              spacing: 4,
+                              children: [
+                                Text(sign, style: prefix),
                                 // Hugs the digits so "-Rp" sits next to them.
-                                width:
-                                    (textWidth(_amount.text, AppText.display) +
-                                            4)
-                                        .clamp(40, 240),
-                                child: Semantics(
-                                  label: l.editAmount,
-                                  child: TextField(
-                                    controller: _amount,
-                                    onChanged: _typed,
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.allow(
-                                        RegExp('[0-9.]'),
-                                      ),
-                                    ],
-                                    textAlign: TextAlign.center,
-                                    style: AppText.display,
-                                    decoration: InputDecoration.collapsed(
-                                      hintText: '0',
-                                      hintStyle: AppText.display.copyWith(
-                                        color: AppColors.grey400,
+                                SizedBox(
+                                  width: (textWidth(_amount.text, style) + 4)
+                                      .clamp(size * 0.7, room),
+                                  child: Semantics(
+                                    label: l.editAmount,
+                                    child: TextField(
+                                      controller: _amount,
+                                      onChanged: _typed,
+                                      keyboardType: TextInputType.number,
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.allow(
+                                          RegExp('[0-9.]'),
+                                        ),
+                                      ],
+                                      textAlign: TextAlign.center,
+                                      style: style,
+                                      decoration: InputDecoration.collapsed(
+                                        hintText: '0',
+                                        hintStyle: style.copyWith(
+                                          color: AppColors.grey400,
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ),
-                          ],
+                              ],
+                            );
+                          },
                         ),
                       ),
                     ),
