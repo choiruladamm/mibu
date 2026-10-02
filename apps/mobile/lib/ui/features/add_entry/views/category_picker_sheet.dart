@@ -9,6 +9,7 @@ import '../../../core/tokens.dart';
 import '../../../core/widgets/new_tile.dart';
 import '../../../core/widgets/sheet.dart';
 import '../../categories/views/category_form_sheet.dart';
+import '../../categories/views/category_manage_sheet.dart';
 
 /// 03.2 pilih kategori — resolves to the category + place, or null.
 Future<RecentPick?> showCategoryPicker(
@@ -79,13 +80,40 @@ class _CategoryPickerState extends ConsumerState<_CategoryPicker> {
           in ref.watch(recentPicksProvider).value ?? const <RecentPick>[])
         if (r.category.kind == widget.kind) r,
     ].take(3);
-    final picked = _picked;
+    // Fresh copy, in case 03.3 renamed it.
+    final picked = [
+      ...?ref.watch(categoriesProvider).value,
+    ].where((c) => c.id == _picked?.id).firstOrNull;
 
     return SheetFrame(
       title: l.pickerTitle,
       titleSize: 26,
       height: 700,
       scrollable: false, // the grid scrolls
+      actions: [
+        Semantics(
+          button: true,
+          child: GestureDetector(
+            onTap: () => showCategoryManage(context),
+            child: Container(
+              height: AppSpace.minTouch,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(AppRadius.pill),
+                border: Border.all(
+                  color: AppColors.ink,
+                  width: AppStroke.outline,
+                ),
+              ),
+              child: Text(
+                l.pickerManage,
+                style: AppText.label.copyWith(fontSize: 15),
+              ),
+            ),
+          ),
+        ),
+      ],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

@@ -439,5 +439,40 @@
       }
     }
   },
-  "limitSetBudget": "＋ pasang budget bulanan"
+  "limitSetBudget": "＋ pasang budget bulanan",
+  "manageTitle": "kategori kamu",
+  "manageDone": "beres",
+  "manageHint": "tap buat edit · − buat hapus · tahan & geser buat urutin",
+  "manageUses": "{count} catatan",
+  "@manageUses": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "manageEdit": "edit {name}",
+  "@manageEdit": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "manageDelete": "hapus {name}",
+  "@manageDelete": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "manageIncomeNote": "{name} itu buat pemasukan, jadi cuma muncul pas kamu catat pemasukan.",
+  "@manageIncomeNote": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

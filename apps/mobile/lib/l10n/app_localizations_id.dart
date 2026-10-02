@@ -529,4 +529,34 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get limitSetBudget => '＋ pasang budget bulanan';
+
+  @override
+  String get manageTitle => 'kategori kamu';
+
+  @override
+  String get manageDone => 'beres';
+
+  @override
+  String get manageHint =>
+      'tap buat edit · − buat hapus · tahan & geser buat urutin';
+
+  @override
+  String manageUses(int count) {
+    return '$count catatan';
+  }
+
+  @override
+  String manageEdit(String name) {
+    return 'edit $name';
+  }
+
+  @override
+  String manageDelete(String name) {
+    return 'hapus $name';
+  }
+
+  @override
+  String manageIncomeNote(String name) {
+    return '$name itu buat pemasukan, jadi cuma muncul pas kamu catat pemasukan.';
+  }
 }

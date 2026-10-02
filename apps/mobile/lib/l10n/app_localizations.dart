@@ -975,6 +975,48 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'＋ pasang budget bulanan'**
   String get limitSetBudget;
+
+  /// No description provided for @manageTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'kategori kamu'**
+  String get manageTitle;
+
+  /// No description provided for @manageDone.
+  ///
+  /// In id, this message translates to:
+  /// **'beres'**
+  String get manageDone;
+
+  /// No description provided for @manageHint.
+  ///
+  /// In id, this message translates to:
+  /// **'tap buat edit · − buat hapus · tahan & geser buat urutin'**
+  String get manageHint;
+
+  /// No description provided for @manageUses.
+  ///
+  /// In id, this message translates to:
+  /// **'{count} catatan'**
+  String manageUses(int count);
+
+  /// No description provided for @manageEdit.
+  ///
+  /// In id, this message translates to:
+  /// **'edit {name}'**
+  String manageEdit(String name);
+
+  /// No description provided for @manageDelete.
+  ///
+  /// In id, this message translates to:
+  /// **'hapus {name}'**
+  String manageDelete(String name);
+
+  /// No description provided for @manageIncomeNote.
+  ///
+  /// In id, this message translates to:
+  /// **'{name} itu buat pemasukan, jadi cuma muncul pas kamu catat pemasukan.'**
+  String manageIncomeNote(String name);
 }
 
 class _AppLocalizationsDelegate

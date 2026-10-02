@@ -23,12 +23,16 @@ class SheetFrame extends StatelessWidget {
     this.actions = const [],
     this.titleSize = 22,
     this.scrollable = true,
+    this.close,
   });
 
   final String title;
   final double height, titleSize;
   final List<Widget> actions;
   final Widget child;
+
+  /// Replaces the close disc, e.g. 03.3's "beres".
+  final Widget? close;
 
   /// Scroll [child] when the screen is shorter than [height]. Turn off when
   /// [child] scrolls itself (e.g. holds a GridView).
@@ -72,12 +76,13 @@ class SheetFrame extends StatelessWidget {
                     ),
                   ),
                   ...actions,
-                  CircleButton(
-                    icon: HugeIcons.strokeRoundedCancel01,
-                    label: l.close,
-                    size: compact ? 40 : 44,
-                    onTap: () => Navigator.of(context).pop(),
-                  ),
+                  close ??
+                      CircleButton(
+                        icon: HugeIcons.strokeRoundedCancel01,
+                        label: l.close,
+                        size: compact ? 40 : 44,
+                        onTap: () => Navigator.of(context).pop(),
+                      ),
                 ],
               ),
               Expanded(
