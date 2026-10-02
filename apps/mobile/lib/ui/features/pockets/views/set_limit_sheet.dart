@@ -65,7 +65,7 @@ Future<bool> releaseLimit(
   double toastBottom = 28,
 }) async {
   final repo = ref.read(financeRepositoryProvider);
-  final month = await repo.monthUsage(id, ref.read(nowProvider));
+  final month = await repo.periodUsage(id, ref.read(currentPeriodProvider));
   if (!context.mounted) return false;
   final ok = await showLimitOff(
     context,
@@ -126,7 +126,11 @@ class _SetLimitSheetState extends ConsumerState<SetLimitSheet> {
   @override
   Widget build(BuildContext context) {
     final now = ref.watch(nowProvider);
-    final free = ref.watch(freeCategoriesProvider(now)).value ?? const [];
+    final free =
+        ref
+            .watch(freeCategoriesProvider(ref.watch(currentPeriodProvider)))
+            .value ??
+        const [];
     final pick = _pick;
     if (pick != null) return _limitStep(context, pick, now);
     return _ListStep(
@@ -237,7 +241,7 @@ class _SetLimitSheetState extends ConsumerState<SetLimitSheet> {
                       value: _limit,
                       budget: ref.watch(profileProvider).value?.monthlyBudget,
                       others: others,
-                      monthDays: DateTime(now.year, now.month + 1, 0).day,
+                      monthDays: ref.watch(currentPeriodProvider).length,
                       onChanged: (v) => setState(() => _limit = v),
                       onSetBudget: () => editBudget(context, ref),
                     ),

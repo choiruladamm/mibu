@@ -26,6 +26,16 @@ void main() {
       expect(p.id, periodId(2026, m));
     }
     expect(r.periodOf(DateTime(2026, 12, 31)).end, DateTime(2027));
+    // daysLeft counts today ("16 hari lagi" on 16 okt).
+    expect(
+      r.periodOf(DateTime(2026, 10, 16)).daysLeft(DateTime(2026, 10, 16)),
+      16,
+    );
+    expect(
+      r.periodOf(DateTime(2026, 10, 31)).daysLeft(DateTime(2026, 10, 31)),
+      1,
+    );
+    expect(r.periodOf(DateTime(2026, 2)).daysLeft(DateTime(2026, 2)), 28);
     tiles(r);
   });
 

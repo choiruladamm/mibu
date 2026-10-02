@@ -1,4 +1,5 @@
 import 'models/finance.dart';
+import 'period.dart';
 
 /// 02.3 statistik toggle.
 enum StatsPeriod { week, month, year }
@@ -6,29 +7,46 @@ enum StatsPeriod { week, month, year }
 /// Half-open window [start, end), local midnights.
 typedef Span = ({DateTime start, DateTime end});
 
-/// The [p] window holding [d]: Monday week, calendar month, calendar year.
-Span spanOf(StatsPeriod p, DateTime d) => switch (p) {
+/// The [p] window holding [d]: Monday week, budget period ([periods],
+/// calendar month in v1), calendar year.
+Span spanOf(
+  StatsPeriod p,
+  DateTime d, {
+  PeriodResolver periods = const CalendarMonthResolver(),
+}) => switch (p) {
   StatsPeriod.week => (
     start: DateTime(d.year, d.month, d.day - d.weekday + 1),
     end: DateTime(d.year, d.month, d.day - d.weekday + 8),
   ),
-  StatsPeriod.month => (
-    start: DateTime(d.year, d.month),
-    end: DateTime(d.year, d.month + 1),
-  ),
+  StatsPeriod.month => _span(periods.periodOf(d)),
   StatsPeriod.year => (start: DateTime(d.year), end: DateTime(d.year + 1)),
 };
 
+Span _span(Period p) => (start: p.start, end: p.end);
+
 /// The window [by] periods after [s] (negative = earlier).
-Span shiftSpan(StatsPeriod p, Span s, int by) => spanOf(p, switch (p) {
-  StatsPeriod.week => DateTime(
-    s.start.year,
-    s.start.month,
-    s.start.day + 7 * by,
-  ),
-  StatsPeriod.month => DateTime(s.start.year, s.start.month + by),
-  StatsPeriod.year => DateTime(s.start.year + by),
-});
+Span shiftSpan(
+  StatsPeriod p,
+  Span s,
+  int by, {
+  PeriodResolver periods = const CalendarMonthResolver(),
+}) {
+  if (p == StatsPeriod.month) {
+    var q = periods.periodOf(s.start);
+    for (var i = 0; i < by.abs(); i++) {
+      q = by > 0 ? periods.next(q) : periods.prev(q);
+    }
+    return _span(q);
+  }
+  return spanOf(p, switch (p) {
+    StatsPeriod.week => DateTime(
+      s.start.year,
+      s.start.month,
+      s.start.day + 7 * by,
+    ),
+    _ => DateTime(s.start.year + by),
+  });
+}
 
 /// One bar per day (week), per Monday week clipped to the month (month:
 /// 1–4, 5–11 …), per month (year).
@@ -77,6 +95,7 @@ class Stats {
     required this.span,
     required DateTime today,
     int? budget,
+    PeriodResolver periods = const CalendarMonthResolver(),
   }) : bars = barsOf(period, span) {
     final day = DateTime(today.year, today.month, today.day);
     _expenses = [
@@ -115,10 +134,9 @@ class Stats {
     limit = b == null || b <= 0
         ? null
         : switch (period) {
-            // Week crossing months: the month of its Monday.
+            // Week crossing periods: the period of its Monday.
             StatsPeriod.week =>
-              (b * 7 / DateTime(span.start.year, span.start.month + 1, 0).day)
-                  .round(),
+              (b * 7 / periods.periodOf(span.start).length).round(),
             StatsPeriod.month => b,
             StatsPeriod.year => b * 12,
           };

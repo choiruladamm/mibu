@@ -115,7 +115,9 @@ final homeProvider = Provider<AsyncValue<HomeState>>((ref) {
   final profile = ref.watch(profileProvider);
   final totals = ref.watch(totalsProvider);
   final chart = ref.watch(homeChartProvider);
-  final pockets = ref.watch(pocketsInMonthProvider(month));
+  final pockets = ref.watch(
+    pocketsInPeriodProvider(ref.watch(periodsProvider).periodOf(month)),
+  );
   final own = ref.watch(monthTransactionsProvider(month));
   // Early in the month "baru aja" reaches back into the last one.
   final spill =

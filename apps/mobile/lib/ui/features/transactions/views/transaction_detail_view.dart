@@ -21,6 +21,7 @@ import '../../../core/widgets/note_sheet.dart';
 import '../../../core/widgets/toast.dart';
 import '../../../core/widgets/meta_line.dart';
 import '../../../core/widgets/app_emoji.dart';
+import '../../../core/finance_providers.dart';
 
 final transactionProvider = StreamProvider.autoDispose
     .family<Transaction?, String>(
@@ -29,7 +30,7 @@ final transactionProvider = StreamProvider.autoDispose
 
 /// The pocket [t] counts toward (its category, in its month); null = none.
 Pocket? pocketOf(WidgetRef ref, Transaction t) => ref
-    .watch(pocketsInMonthProvider(DateTime(t.at.year, t.at.month)))
+    .watch(pocketsInPeriodProvider(ref.watch(periodsProvider).periodOf(t.at)))
     .value
     ?.where((p) => p.id == t.categoryId)
     .firstOrNull;

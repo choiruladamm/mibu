@@ -33,8 +33,9 @@ final totalsProvider = StreamProvider<Totals>((ref) {
       .watchTotals(profile, ref.watch(nowProvider));
 });
 final pocketsProvider = StreamProvider<List<Pocket>>(
-  (ref) =>
-      ref.watch(financeRepositoryProvider).watchPockets(ref.watch(nowProvider)),
+  (ref) => ref
+      .watch(financeRepositoryProvider)
+      .watchPockets(ref.watch(currentPeriodProvider)),
 );
 
 /// 02.4 sembunyiin nominal: tap a hero amount to peek; routing resets it.

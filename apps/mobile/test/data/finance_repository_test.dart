@@ -6,6 +6,8 @@ import 'package:mibu/data/repositories/finance_repository.dart';
 import 'package:mibu/domain/models/finance.dart';
 import 'package:mibu/domain/period.dart';
 
+Period cal(DateTime d) => const CalendarMonthResolver().periodOf(d);
+
 void main() {
   final now = DateTime(2026, 10, 14, 14, 50);
   late AppDatabase db;
@@ -59,7 +61,7 @@ void main() {
       expect(totals.spent[DateTime(2026, 10)], greaterThan(0));
       expect(totals.spentToday, 27000);
 
-      final pockets = await repo.watchPockets(now).first;
+      final pockets = await repo.watchPockets(cal(now)).first;
       expect(pockets.map((p) => '${p.emoji}${p.usedPct}'), [
         '🐶90',
         '☕60',
@@ -88,7 +90,7 @@ void main() {
     expect(totals.balance, 4530000 + 450000 - 10000);
     expect(totals.spentToday, 37000);
 
-    final pockets = await repo.watchPockets(now).first;
+    final pockets = await repo.watchPockets(cal(now)).first;
     expect(pockets.first.spent, 450000); // anabul back to one entry
 
     final recent = await repo.watchRecent().first;
@@ -146,7 +148,7 @@ void main() {
       expect(cats.last.id, id);
       expect(cats.last.name, 'gym');
       expect(
-        (await repo.watchPockets(now).first).map((p) => p.name),
+        (await repo.watchPockets(cal(now)).first).map((p) => p.name),
         contains('gym'),
       );
 
@@ -165,19 +167,19 @@ void main() {
 
   test('pasang limit: this month\'s entries count right away', () async {
     final belanja = await idOf('belanja');
-    final free = await repo.watchFreeCategories(now).first;
+    final free = await repo.watchFreeCategories(cal(now)).first;
     expect(free.map((f) => f.category.name), ['belanja']); // income left out
     final before = free.single;
 
     await repo.setLimit(belanja, 600000);
-    final pocket = (await repo.watchPockets(now).first).firstWhere(
+    final pocket = (await repo.watchPockets(cal(now)).first).firstWhere(
       (p) => p.id == belanja,
     );
     expect(pocket.spent, before.spent); // nothing moved, already counted
-    expect(await repo.watchFreeCategories(now).first, isEmpty);
+    expect(await repo.watchFreeCategories(cal(now)).first, isEmpty);
 
     // copot limit sheet: this month's count + spend match the jar.
-    expect(await repo.monthUsage(belanja, now), (
+    expect(await repo.periodUsage(belanja, cal(now)), (
       count: before.count,
       spent: before.spent,
     ));
@@ -185,14 +187,14 @@ void main() {
     // copot limit: category + entries stay, it just leaves the jars.
     await repo.setLimit(belanja, null);
     expect(
-      (await repo.watchPockets(now).first).map((p) => p.id),
+      (await repo.watchPockets(cal(now)).first).map((p) => p.id),
       isNot(contains(belanja)),
     );
     expect(
       (await repo.watchCategories().first).map((c) => c.id),
       contains(belanja),
     );
-    final back = (await repo.watchFreeCategories(now).first).single;
+    final back = (await repo.watchFreeCategories(cal(now)).first).single;
     expect(
       (back.category.id, back.spent, back.count),
       (belanja, before.spent, before.count),
@@ -232,7 +234,7 @@ void main() {
         at: now,
       );
     }
-    final free = await repo.watchFreeCategories(now).first;
+    final free = await repo.watchFreeCategories(cal(now)).first;
     final tail = free.where((f) => f.category.id == a || f.category.id == b);
     expect(tail.map((f) => '${f.category.name}${f.spent}/${f.count}'), [
       'buku5000/2', // same spending, more entries first
@@ -242,7 +244,7 @@ void main() {
 
   test('uncategorized: in totals, in no pocket, counts once edited', () async {
     final profile = await repo.watchProfile().first;
-    final pocketsBefore = await repo.watchPockets(now).first;
+    final pocketsBefore = await repo.watchPockets(cal(now)).first;
     final spentBefore =
         (await repo.watchTotals(profile, now).first).spent[DateTime(2026, 10)]!;
     await repo.addTransaction(
@@ -258,7 +260,7 @@ void main() {
       spentBefore + 20000,
     );
     expect(
-      (await repo.watchPockets(now).first).map((p) => p.spent),
+      (await repo.watchPockets(cal(now)).first).map((p) => p.spent),
       pocketsBefore.map((p) => p.spent),
     );
 
@@ -274,7 +276,7 @@ void main() {
     );
     int spentOf(List<Pocket> ps) => ps.firstWhere((p) => p.id == makan).spent;
     expect(
-      spentOf(await repo.watchPockets(now).first),
+      spentOf(await repo.watchPockets(cal(now)).first),
       spentOf(pocketsBefore) + 20000,
     );
   });
@@ -303,11 +305,11 @@ void main() {
       (await repo.watchCategories().first).map((c) => c.name),
       isNot(contains('anabul')),
     );
-    var pockets = await repo.watchPockets(now).first;
+    var pockets = await repo.watchPockets(cal(now)).first;
     expect(pockets.firstWhere((p) => p.name == 'makan').spent, 390000 + 900000);
 
     await repo.undoDeleteCategory(anabul, moved);
-    pockets = await repo.watchPockets(now).first;
+    pockets = await repo.watchPockets(cal(now)).first;
     expect(pockets.firstWhere((p) => p.name == 'anabul').spent, 900000);
     expect(pockets.firstWhere((p) => p.name == 'makan').spent, 390000);
   });
@@ -326,10 +328,13 @@ void main() {
 
   test('month list, first month, edit, delete + restore', () async {
     expect(await repo.watchFirstMonth().first, DateTime(2026, 7));
-    var oct = await repo.watchMonth(DateTime(2026, 10, 20)).first;
+    var oct = await repo.watchPeriod(cal(DateTime(2026, 10, 20))).first;
     expect(oct, hasLength(7));
     expect(oct.first.place, 'gojek'); // newest first
-    expect((await repo.watchMonth(DateTime(2026, 9)).first), hasLength(2));
+    expect(
+      (await repo.watchPeriod(cal(DateTime(2026, 9))).first),
+      hasLength(2),
+    );
 
     final warteg = oct.firstWhere((t) => t.place == 'warteg');
     expect(warteg.note, 'makan siang bareng tim');
@@ -354,12 +359,12 @@ void main() {
     await repo.deleteTransaction(warteg.id);
     t = (await repo.watchTransaction(warteg.id).first)!;
     expect(t.deleted, isTrue); // still readable for the 04.3c stamp
-    oct = await repo.watchMonth(DateTime(2026, 10)).first;
+    oct = await repo.watchPeriod(cal(DateTime(2026, 10))).first;
     expect(oct, hasLength(6));
 
     await repo.restoreTransaction(warteg.id);
     expect((await repo.watchTransaction(warteg.id).first)!.deleted, isFalse);
-    expect(await repo.watchMonth(DateTime(2026, 10)).first, hasLength(7));
+    expect(await repo.watchPeriod(cal(DateTime(2026, 10))).first, hasLength(7));
   });
 
   test(
@@ -395,7 +400,9 @@ void main() {
       ]);
       expect(cats.last.kind, CategoryKind.income);
       expect(
-        (await r.watchPockets(now).first).map((p) => '${p.name}${p.budget}'),
+        (await r.watchPockets(cal(now)).first).map(
+          (p) => '${p.name}${p.budget}',
+        ),
         ['makan1500000', 'ngopi300000'],
       );
 

@@ -116,10 +116,6 @@ int suggestedLimit(int spent) {
   return v < 300000 ? 300000 : v;
 }
 
-/// Days left in [now]'s month, today included (never 0).
-int daysLeftInMonth(DateTime now) =>
-    DateTime(now.year, now.month + 1, 0).day - now.day + 1;
-
 /// PocketLimit 00.15 slider scale. [budget] = monthly budget (null = not
 /// set), [others] = Σ limits of the other pockets. [free] = room left in the
 /// budget ("sisa budget"), null when there's no budget. See MVP_PLAN.md.

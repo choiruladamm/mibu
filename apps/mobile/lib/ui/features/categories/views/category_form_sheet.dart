@@ -6,7 +6,6 @@ import '../../../../data/repositories/finance_repository.dart';
 import '../../../../domain/emoji_search.dart';
 import '../../../../domain/models/finance.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../../core/clock.dart';
 import '../../../core/money.dart';
 import '../../../core/tokens.dart';
 import '../../../core/widgets/pocket_limit.dart';
@@ -131,7 +130,6 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
     final expense = _kind == CategoryKind.expense;
     final canSave =
         name.isNotEmpty && !(expense && _pocket && _limit == 0) && !_saving;
-    final now = ref.watch(nowProvider);
     final others = [
       for (final p in ref.watch(pocketsProvider).value ?? const <Pocket>[])
         if (p.id != _edit?.id) p.budget,
@@ -335,11 +333,9 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
                                     .value
                                     ?.monthlyBudget,
                                 others: others,
-                                monthDays: DateTime(
-                                  now.year,
-                                  now.month + 1,
-                                  0,
-                                ).day,
+                                monthDays: ref
+                                    .watch(currentPeriodProvider)
+                                    .length,
                                 onChanged: (v) => setState(() => _limit = v),
                                 onSetBudget: () => editBudget(context, ref),
                               ),

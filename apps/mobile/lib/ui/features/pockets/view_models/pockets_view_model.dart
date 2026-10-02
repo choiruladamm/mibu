@@ -44,8 +44,9 @@ class PocketsState {
 /// 02.2 kantong state.
 final pocketsScreenProvider = Provider<AsyncValue<PocketsState>>((ref) {
   final now = ref.watch(nowProvider);
+  final period = ref.watch(currentPeriodProvider);
   final budget = ref.watch(profileProvider).value?.monthlyBudget;
-  final free = ref.watch(freeCategoriesProvider(now));
+  final free = ref.watch(freeCategoriesProvider(period));
   if (free.hasError) debugPrint('kantong: ${free.error}');
   return switch (ref.watch(pocketsProvider)) {
     AsyncData(:final value) when free.hasValue => AsyncData(
@@ -57,7 +58,7 @@ final pocketsScreenProvider = Provider<AsyncValue<PocketsState>>((ref) {
                 .where((p) => p.id == ref.watch(selectedPocketProvider))
                 .firstOrNull ??
             value.firstOrNull,
-        daysLeft: daysLeftInMonth(now),
+        daysLeft: period.daysLeft(now),
         budget: budget,
         free: free.value!,
       ),

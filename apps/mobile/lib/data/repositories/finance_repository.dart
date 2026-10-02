@@ -55,25 +55,25 @@ class FinanceRepository {
   /// Budget periods in force: calendar months, then each saved rule from
   /// its date on (v1 saves none).
   Stream<PeriodResolver> watchPeriods() =>
-      (_db.select(_db.periodRules)..where((r) => r.deletedAt.isNull()))
-          .watch()
-          .map(
-            (rows) => SegmentedResolver([
-              (
-                effectiveFrom: DateTime(1970),
-                mode: PeriodMode.calendar,
-                paydayDay: 0,
-                shift: PaydayShift.none,
-              ),
-              for (final r in rows)
-                (
-                  effectiveFrom: r.effectiveFrom,
-                  mode: r.mode,
-                  paydayDay: r.paydayDay,
-                  shift: r.shift,
-                ),
-            ]),
-          );
+      (_db.select(
+        _db.periodRules,
+      )..where((r) => r.deletedAt.isNull())).watch().map(
+        (rows) => SegmentedResolver([
+          (
+            effectiveFrom: DateTime(1970),
+            mode: PeriodMode.calendar,
+            paydayDay: 0,
+            shift: PaydayShift.none,
+          ),
+          for (final r in rows)
+            (
+              effectiveFrom: r.effectiveFrom,
+              mode: r.mode,
+              paydayDay: r.paydayDay,
+              shift: r.shift,
+            ),
+        ]),
+      );
 
   /// 01.4 / 01.4b: writes the profile and the starter categories — every
   /// preset (picked ones become kantong with their limit) plus 💰 gajian.
@@ -157,8 +157,12 @@ class FinanceRepository {
     });
   }
 
-  /// Categories with a monthly limit, plus this month's spending.
-  Stream<List<Pocket>> watchPockets(DateTime now) {
+  /// Entries dated inside [p] (local dates, [start, end)).
+  Expression<bool> _inPeriod(Period p) =>
+      _tx.at.isBiggerOrEqualValue(p.start) & _tx.at.isSmallerThanValue(p.end);
+
+  /// Categories with a limit, plus what's spent in [period].
+  Stream<List<Pocket>> watchPockets(Period period) {
     final c = _db.categories;
     final spent = _tx.amount.sum();
     final q =
@@ -168,8 +172,7 @@ class FinanceRepository {
               _tx.categoryId.equalsExp(c.id) &
                   _tx.deletedAt.isNull() &
                   _tx.amount.isSmallerThanValue(0) &
-                  _tx.at.isBiggerOrEqualValue(DateTime(now.year, now.month)) &
-                  _tx.at.isSmallerThanValue(DateTime(now.year, now.month + 1)),
+                  _inPeriod(period),
             ),
           ])
           ..addColumns([spent])
@@ -191,10 +194,10 @@ class FinanceRepository {
     );
   }
 
-  /// "belum ada limit" (02.2): expense categories without a limit plus this
-  /// month's spending and entry count, most spent (then most used) first.
-  /// Income never shows up here.
-  Stream<List<FreeCategory>> watchFreeCategories(DateTime now) {
+  /// "belum ada limit" (02.2): expense categories without a limit plus their
+  /// spending and entry count in [period], most spent (then most used)
+  /// first. Income never shows up here.
+  Stream<List<FreeCategory>> watchFreeCategories(Period period) {
     final c = _db.categories;
     final spent = _tx.amount.sum();
     final count = _tx.id.count();
@@ -205,8 +208,7 @@ class FinanceRepository {
               _tx.categoryId.equalsExp(c.id) &
                   _tx.deletedAt.isNull() &
                   _tx.amount.isSmallerThanValue(0) &
-                  _tx.at.isBiggerOrEqualValue(DateTime(now.year, now.month)) &
-                  _tx.at.isSmallerThanValue(DateTime(now.year, now.month + 1)),
+                  _inPeriod(period),
             ),
           ])
           ..addColumns([spent, count])
@@ -265,12 +267,11 @@ class FinanceRepository {
     _tx.deletedAt.isNull(),
   )..limit(limit)).watch().map((rows) => rows.map(_transaction).toList());
 
-  /// 04.1: every entry in the month containing [month].
-  Stream<List<Transaction>> watchMonth(DateTime month) => _joined(
-    _tx.deletedAt.isNull() &
-        _tx.at.isBiggerOrEqualValue(DateTime(month.year, month.month)) &
-        _tx.at.isSmallerThanValue(DateTime(month.year, month.month + 1)),
-  ).watch().map((rows) => rows.map(_transaction).toList());
+  /// 04.1 / 04.2: every entry in [period].
+  Stream<List<Transaction>> watchPeriod(Period period) =>
+      _joined(_tx.deletedAt.isNull() & _inPeriod(period))
+          .watch()
+          .map((rows) => rows.map(_transaction).toList());
 
   /// 04.2 cari di semua bulan: every live entry, newest first.
   Stream<List<Transaction>> watchAll() =>
@@ -465,9 +466,9 @@ class FinanceRepository {
         ),
       );
 
-  /// This month's entries and expense (positive) of one category, for the
+  /// Entries and expense (positive) of one category in [period], for the
   /// copot limit sheet.
-  Future<({int count, int spent})> monthUsage(String id, DateTime now) async {
+  Future<({int count, int spent})> periodUsage(String id, Period period) async {
     final count = _tx.id.count();
     final spent = _tx.amount.sum(filter: _tx.amount.isSmallerThanValue(0));
     final r =
@@ -476,10 +477,7 @@ class FinanceRepository {
               ..where(
                 _tx.deletedAt.isNull() &
                     _tx.categoryId.equals(id) &
-                    _tx.at.isBiggerOrEqualValue(DateTime(now.year, now.month)) &
-                    _tx.at.isSmallerThanValue(
-                      DateTime(now.year, now.month + 1),
-                    ),
+                    _inPeriod(period),
               ))
             .getSingle();
     return (count: r.read(count) ?? 0, spent: -(r.read(spent) ?? 0));
@@ -645,14 +643,14 @@ final daysProvider =
           .watchDays(month, DateTime(month.year, month.month + 1)),
     );
 
-/// Expense categories without a limit, with spending in [month]'s month.
+/// Expense categories without a limit, with spending in [period].
 final freeCategoriesProvider =
-    StreamProvider.family<List<FreeCategory>, DateTime>(
-      (ref, month) =>
-          ref.watch(financeRepositoryProvider).watchFreeCategories(month),
+    StreamProvider.family<List<FreeCategory>, Period>(
+      (ref, period) =>
+          ref.watch(financeRepositoryProvider).watchFreeCategories(period),
     );
 
-/// Pockets with spending in the month containing [month].
-final pocketsInMonthProvider = StreamProvider.family<List<Pocket>, DateTime>(
-  (ref, month) => ref.watch(financeRepositoryProvider).watchPockets(month),
+/// Pockets with spending in [period].
+final pocketsInPeriodProvider = StreamProvider.family<List<Pocket>, Period>(
+  (ref, period) => ref.watch(financeRepositoryProvider).watchPockets(period),
 );

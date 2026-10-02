@@ -126,7 +126,7 @@ Testing matrix (unit test resolver, jalan di CI):
 - [x] anchor yang mundur ke bulan sebelumnya (gajian tgl 1 jatuh minggu)
 - [x] `next(prev(p)) == p` dan nggak ada tanggal yang masuk dua periode atau nggak masuk sama sekali, di range 3 tahun
 - [x] ganti paydayDay di tengah siklus: periode lama nggak berubah
-- [ ] `CalendarMonthResolver` dan query lama ngasih angka yang sama persis (regression waktu migrasi fase 0)
+- [x] `CalendarMonthResolver` dan query lama ngasih angka yang sama persis (regression waktu migrasi fase 0: semua test lama lolos tanpa diubah angkanya)
 
 ## Keputusan terbuka & risiko
 
@@ -176,7 +176,13 @@ Status fase 0:
 |---|---|---|
 | F0.1 | `Period` + resolver + unit test | ✅ |
 | F0.2 | tabel `periodRules` + `periodsProvider` / `currentPeriodProvider` | ✅ |
-| F0.3 | jendela "bulan ini" lewat resolver + test regression | dikerjain |
+| F0.3 | jendela "bulan ini" lewat resolver + test regression | ✅ |
 | F0.4 | tabel `budgets` + `limits` gantiin `profile.monthlyBudget` + `categories.monthlyLimit` | — |
 | F0.5 | helper copy periode + test literal "bulan ini" | — |
 | F0.6 | sisa hari dari `period.end`, `categories.isPayday` | — |
+
+Masih asumsi bulan kalender (aman di v1, dibenerin pas fase 2 bareng labelnya):
+
+- Navigasi bulan (MonthMenu beranda, carousel 04.1, cari 04.2) masih pakai awal bulan sebagai kunci, lalu diubah ke `Period` lewat `periodOf`. Datanya udah per periode; label & lompat antar periode belum.
+- Ringkasan cari 04.2 (tick per tanggal 1–31, "liat bulan lain").
+- `monthLeft` beranda bulan lalu (`Totals.spent` per bulan kalender). Diganti hero sisa budget 02.1p.

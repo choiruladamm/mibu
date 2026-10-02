@@ -5,6 +5,7 @@ import '../../../../domain/models/finance.dart';
 import '../../../../domain/search.dart';
 import '../../../core/clock.dart';
 import '../../../core/dates.dart';
+import '../../../core/finance_providers.dart';
 
 enum TxFilter { all, expenses, income }
 
@@ -60,7 +61,9 @@ final txSearchProvider = Provider.autoDispose<TxSearch?>(
 
 final monthTransactionsProvider =
     StreamProvider.family<List<Transaction>, DateTime>(
-      (ref, month) => ref.watch(financeRepositoryProvider).watchMonth(month),
+      (ref, month) => ref
+          .watch(financeRepositoryProvider)
+          .watchPeriod(ref.watch(periodsProvider).periodOf(month)),
     );
 
 final firstMonthProvider = StreamProvider<DateTime?>(

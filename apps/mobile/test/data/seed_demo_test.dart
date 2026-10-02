@@ -1,10 +1,13 @@
 import 'package:drift/drift.dart' hide isNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mibu/domain/period.dart';
 import 'package:mibu/data/database/app_database.dart';
 import 'package:mibu/data/database/seed.dart';
 import 'package:mibu/data/repositories/finance_repository.dart';
 import 'package:mibu/domain/models/finance.dart';
+
+Period cal(DateTime d) => const CalendarMonthResolver().periodOf(d);
 
 void main() {
   for (final now in [
@@ -38,7 +41,9 @@ void main() {
         expect(txs.where((t) => t.categoryId == null), isNotEmpty);
 
         final pockets = {
-          for (final p in await FinanceRepository(db).watchPockets(now).first)
+          for (final p in await FinanceRepository(
+            db,
+          ).watchPockets(cal(now)).first)
             p.name: p,
         };
         expect(pockets['ngopi']!.status, PocketStatus.almostOut);

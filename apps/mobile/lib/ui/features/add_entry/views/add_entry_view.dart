@@ -395,7 +395,11 @@ class _Impact extends ConsumerWidget {
     final v = s.amount;
     final pockets =
         ref
-            .watch(pocketsInMonthProvider(DateTime(s.day.year, s.day.month)))
+            .watch(
+              pocketsInPeriodProvider(
+                ref.watch(periodsProvider).periodOf(s.day),
+              ),
+            )
             .value ??
         const <Pocket>[];
     final balance = ref.watch(totalsProvider).value?.balance ?? 0;

@@ -101,12 +101,6 @@ void main() {
     expect(p(1200000).left, -200000);
   });
 
-  test('daysLeftInMonth counts today', () {
-    expect(daysLeftInMonth(DateTime(2026, 10, 16)), 16);
-    expect(daysLeftInMonth(DateTime(2026, 10, 31)), 1);
-    expect(daysLeftInMonth(DateTime(2026, 2, 1)), 28);
-  });
-
   test('pocketLimitScale follows the PocketLimit rules', () {
     // design example: 6,9jt − 5,6jt = 1,3jt free → end 3jt
     expect(pocketLimitScale(budget: 6900000, others: 5600000), (

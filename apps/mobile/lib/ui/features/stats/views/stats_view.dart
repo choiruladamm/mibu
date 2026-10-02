@@ -64,15 +64,17 @@ class _StatsViewState extends ConsumerState<StatsView> {
     final entries = ref.watch(allTransactionsProvider).value ?? const [];
     final budget = ref.watch(profileProvider).value?.monthlyBudget;
     final first = ref.watch(firstMonthProvider).value;
-    final span = _span ?? spanOf(_period, now);
+    final periods = ref.watch(periodsProvider);
+    final span = _span ?? spanOf(_period, now, periods: periods);
     final s = Stats(
       entries,
       period: _period,
       span: span,
       today: now,
       budget: budget,
+      periods: periods,
     );
-    final prev = shiftSpan(_period, span, -1);
+    final prev = shiftSpan(_period, span, -1, periods: periods);
     final hasPrev = first != null && first.isBefore(span.start);
     final isNow = s.current >= 0;
 
@@ -104,7 +106,10 @@ class _StatsViewState extends ConsumerState<StatsView> {
                 onPrev: hasPrev ? () => _go(_period, prev) : null,
                 onNext: isNow
                     ? null
-                    : () => _go(_period, shiftSpan(_period, span, 1)),
+                    : () => _go(
+                        _period,
+                        shiftSpan(_period, span, 1, periods: periods),
+                      ),
               ),
               const SizedBox(height: 26),
               _Chart(

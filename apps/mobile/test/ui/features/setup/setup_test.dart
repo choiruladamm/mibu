@@ -3,6 +3,7 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mibu/domain/period.dart';
 import 'package:mibu/data/database/app_database.dart';
 import 'package:mibu/data/repositories/finance_repository.dart';
 import 'package:mibu/l10n/app_localizations.dart';
@@ -11,6 +12,8 @@ import 'package:mibu/ui/core/theme.dart';
 import 'package:mibu/ui/features/setup/views/setup_view.dart';
 
 import '../../../meta.dart';
+
+Period cal(DateTime d) => const CalendarMonthResolver().periodOf(d);
 
 void main() {
   final now = DateTime(2026, 10, 14, 14, 50);
@@ -100,7 +103,7 @@ void main() {
     final p = (await tester.runAsync(() => repo.watchProfile().first))!;
     expect((p.onboarded, p.openingBalance, p.payday), (true, 3000000, 0));
     final pockets = (await tester.runAsync(
-      () => repo.watchPockets(now).first,
+      () => repo.watchPockets(cal(now)).first,
     ))!;
     expect(pockets.map((p) => p.name), [
       'makan',
@@ -122,7 +125,10 @@ void main() {
     expect(done, [1]);
     final p = (await tester.runAsync(() => repo.watchProfile().first))!;
     expect((p.onboarded, p.openingBalance, p.payday), (true, 0, 25));
-    expect(await tester.runAsync(() => repo.watchPockets(now).first), isEmpty);
+    expect(
+      await tester.runAsync(() => repo.watchPockets(cal(now)).first),
+      isEmpty,
+    );
     await tester.pumpWidget(const SizedBox());
     await db.close();
   });
