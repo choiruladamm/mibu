@@ -234,6 +234,10 @@ void main() {
   // Regression: a failing query (e.g. stale dev DB missing a table) used to
   // leave a blank screen with nothing in the console.
   test('stream errors surface instead of a blank beranda', () async {
+    // homeProvider logs the injected error + stack; keep test output clean.
+    final print = debugPrint;
+    debugPrint = (_, {wrapWidth}) {};
+    addTearDown(() => debugPrint = print);
     final db = AppDatabase(
       DatabaseConnection(
         NativeDatabase.memory(),
