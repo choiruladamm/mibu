@@ -59,7 +59,7 @@ void main() {
     expect(findMeta(['hari ini', 'rab 14 okt']), findsOneWidget);
     expect(findMeta(['kemarin', 'sel 13 okt']), findsOneWidget);
     expect(find.text('-Rp1,02jt'), findsOneWidget); // 13 okt total
-    expect(find.bySemanticsLabel('november belum kejadian'), findsOneWidget);
+    expect(find.bySemanticsLabel('bulan depan belum kejadian'), findsOneWidget);
 
     await tester.tap(find.text('pemasukan').last);
     await settle();
@@ -72,7 +72,7 @@ void main() {
     // filter stays on pemasukan: tile, day total, row
     expect(find.text('+Rp8,5jt'), findsNWidgets(3));
     await tester.scrollUntilVisible(find.text('liat agu'), 200);
-    expect(find.text('udah semua buat september'), findsOneWidget);
+    expect(find.text('udah semua di september'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox());
     await db.close();

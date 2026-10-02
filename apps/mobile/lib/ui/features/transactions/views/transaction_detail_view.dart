@@ -369,7 +369,7 @@ class _Receipt extends StatelessWidget {
                   row(
                     l.receiptKind,
                     Text(
-                      t.amount < 0 ? l.expense : l.income,
+                      t.amount < 0 ? l.kindOut : l.kindIn,
                       style: AppText.label,
                     ),
                   ),

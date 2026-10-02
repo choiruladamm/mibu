@@ -91,7 +91,7 @@ void main() {
     expect(findMeta(['gojek', '11.05']), findsOneWidget);
     expect(findMeta(['dokter hewan', '17.00']), findsOneWidget);
     // 7 this month, 5 shown: the 11th stays behind the button.
-    expect(find.text('liat semua transaksi (7)'), findsOneWidget);
+    expect(find.text('semua transaksi (7)'), findsOneWidget);
     expect(find.textContaining('tokopedia'), findsNothing);
   });
 

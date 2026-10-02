@@ -14,6 +14,7 @@ import '../../../core/widgets/sheet.dart';
 import '../view_models/categories_view_model.dart';
 import 'category_delete_sheet.dart';
 import 'category_form_sheet.dart';
+import '../../../core/widgets/meta_line.dart';
 
 /// 03.3 buat apa aja — from 03.2 "atur" and (M6) 02.4.
 Future<void> showCategoryManage(BuildContext context) =>
@@ -79,8 +80,9 @@ class _CategoryManageSheetState extends ConsumerState<CategoryManageSheet>
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const SizedBox(height: 12),
-          Text(
-            l.manageHint,
+          MetaLine(
+            [l.manageHint, l.manageHintDelete, l.manageHintMove],
+            tight: true,
             style: AppText.caption.copyWith(color: AppColors.muted),
           ),
           const SizedBox(height: 16),

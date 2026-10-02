@@ -8,8 +8,8 @@
   "balanceLabel": "saldo kamu",
   "safeToSpendToday": "aman jajan hari ini",
   "overspentToday": "kebablasan hari ini",
-  "uncategorized": "tanpa kategori",
-  "onboardingSkip": "lewati",
+  "uncategorized": "lain-lain",
+  "onboardingSkip": "skip",
   "onboardingNext": "lanjut",
   "onboardingStart": "mulai sekarang",
   "onboardingFooter": "masuk pakai google / apple",
@@ -54,7 +54,7 @@
     }
   },
   "homeMonthlyBalance": "saldo per bulan",
-  "homeTapMonthHint": "tap bulannya buat intip",
+  "homeTapMonthHint": "tap bulan buat intip",
   "homeRecent": "baru aja",
   "homePockets": "kantong",
   "homeTodayTotal": "{total} hari ini",
@@ -73,7 +73,7 @@
       }
     }
   },
-  "homeAllCount": "liat semua transaksi ({n})",
+  "homeAllCount": "semua transaksi ({n})",
   "@homeAllCount": {
     "placeholders": {
       "n": {
@@ -185,7 +185,7 @@
       }
     }
   },
-  "overAmount": "kelebihan {amount}",
+  "overAmount": "lewat {amount}",
   "@overAmount": {
     "placeholders": {
       "amount": {
@@ -197,7 +197,7 @@
   "keyBackspace": "hapus satu angka",
   "pickerTitle": "buat apa?",
   "pickerSearch": "cari atau bikin…",
-  "pickerRecent": "terakhir · sekali tap langsung keisi",
+  "pickerRecent": "terakhir dipakai",
   "pickerWhere": "di mana",
   "pickerUse": "pakai {emoji} {name}",
   "@pickerUse": {
@@ -249,7 +249,7 @@
       }
     }
   },
-  "dateSheetTitle": "kapan kejadiannya?",
+  "dateSheetTitle": "tanggal berapa?",
   "startOfMonth": "awal bulan",
   "prevMonth": "bulan sebelumnya",
   "nextMonth": "bulan berikutnya",
@@ -315,7 +315,7 @@
   "pocketsSwipe": "geser",
   "pocketsNewJar": "pasang limit ke yang lain",
   "pocketsFirstTitle": "pasang limit pertama",
-  "pocketsFirstBody": "pasang limit ke makan, ngopi, atau ojol. catatan bulan ini langsung keitung.",
+  "pocketsFirstBody": "misal makan, ngopi, ojol. mibu ngabarin pas mau abis.",
   "pocketsFirstButton": "pasang limit",
   "pocketsFreeTitle": "belum ada limit",
   "pocketsNoLimit": "belum ada limit",
@@ -356,18 +356,15 @@
       }
     }
   },
-  "pocketDaily": "kira-kira {amount} sehari buat {days} hari ke depan",
+  "pocketDaily": "≈ {amount}/hari sampai akhir bulan",
   "@pocketDaily": {
     "placeholders": {
       "amount": {
         "type": "String"
-      },
-      "days": {
-        "type": "int"
       }
     }
   },
-  "pocketOver": "kelebihan {amount} bulan ini",
+  "pocketOver": "lewat {amount}",
   "@pocketOver": {
     "placeholders": {
       "amount": {
@@ -388,7 +385,7 @@
       }
     }
   },
-  "limitSetSub": "{n, plural, =0{toplesnya udah nongol} other{{n} catatan bulan ini langsung keitung}}",
+  "limitSetSub": "{n, plural, =0{toplesnya udah nongol} other{{n} catatan langsung keitung}}",
   "@limitSetSub": {
     "placeholders": {
       "n": {
@@ -451,10 +448,10 @@
       }
     }
   },
-  "setLimitEmptyTitle": "semua buat apa udah pakai limit",
-  "setLimitEmptyBody": "mau ngatur yang lain? bikin baru aja.",
-  "setLimitNewCategory": "bikin kategori baru",
-  "setLimitIncomeNote": "pemasukan (gajian dkk) nggak bisa dikasih limit",
+  "setLimitEmptyTitle": "semua udah pakai limit",
+  "setLimitEmptyBody": "mau yang lain? bikin baru",
+  "setLimitNewCategory": "bikin baru",
+  "setLimitIncomeNote": "pemasukan nggak pakai limit",
   "setLimitBack": "ganti",
   "setLimitSave": "pasang limit {amount}",
   "@setLimitSave": {
@@ -529,9 +526,9 @@
       }
     }
   },
-  "budgetSavedSub": "ritme budget dihitung ulang",
+  "budgetSavedSub": "budget di-track ulang",
   "budgetDeletedTitle": "budget dihapus",
-  "budgetDeletedSub": "ritme budget libur dulu",
+  "budgetDeletedSub": "tracking budget off dulu",
   "pocketsBudget": "budget {amount}",
   "@pocketsBudget": {
     "placeholders": {
@@ -581,10 +578,12 @@
       }
     }
   },
-  "categoryKindLabel": "masuk ke",
+  "categoryKindLabel": "jenis",
+  "kindOut": "duit keluar",
+  "kindIn": "duit masuk",
   "categoryPocket": "limit bulanan",
-  "categoryPocketOn": "jadi toples · mibu ngingetin kalau mau abis",
-  "categoryPocketOff": "nggak wajib, bisa dipasang nanti",
+  "categoryPocketOn": "muncul di kantong + diingetin",
+  "categoryPocketOff": "opsional, bisa nanti",
   "categoryCreate": "bikin {emoji} {name}",
   "@categoryCreate": {
     "placeholders": {
@@ -627,12 +626,12 @@
       }
     }
   },
-  "categoryUnused": "belum dipakai",
+  "categoryUnused": "belum kepake",
   "limitPerMonth": "/ bulan",
   "limitFieldLabel": "limit per bulan",
   "limitSliderLabel": "geser limit",
   "limitMax": "maks Rp100jt per limit",
-  "limitPerDay": "≈ {amount} sehari",
+  "limitPerDay": "≈ {amount}/hari",
   "@limitPerDay": {
     "placeholders": {
       "amount": {
@@ -649,7 +648,7 @@
       }
     }
   },
-  "limitFree": "sisa budget {amount}",
+  "limitFree": "belum dijatah {amount}",
   "@limitFree": {
     "placeholders": {
       "amount": {
@@ -660,7 +659,9 @@
   "limitSetBudget": "＋ pasang budget bulanan",
   "manageTitle": "buat apa aja",
   "manageDone": "beres",
-  "manageHint": "tap buat edit · − buat hapus · tahan & geser buat urutin",
+  "manageHint": "tap = edit",
+  "manageHintDelete": "− = hapus",
+  "manageHintMove": "tahan = geser",
   "manageUses": "{count} catatan",
   "@manageUses": {
     "placeholders": {
@@ -729,8 +730,8 @@
       }
     }
   },
-  "deleteUnused": "belum ada catatan pakai kategori ini",
-  "deleteMoveTo": "pindahin {count} catatan itu ke",
+  "deleteUnused": "belum ada catatan",
+  "deleteMoveTo": "{count} catatan pindah ke",
   "@deleteMoveTo": {
     "placeholders": {
       "count": {
@@ -765,7 +766,7 @@
       }
     }
   },
-  "deleteDoneMoved": "{count} catatan sekarang pindah ke {emoji} {name}.",
+  "deleteDoneMoved": "{count} catatan udah pindah ke {emoji} {name}.",
   "@deleteDoneMoved": {
     "placeholders": {
       "count": {
@@ -780,7 +781,7 @@
     }
   },
   "deleteDoneEmpty": "nggak ada catatan yang ikut pindah.",
-  "deleteCategory": "hapus kategori",
+  "deleteCategory": "hapus",
   "limitLabel": "limit per bulan",
   "txTitle": "transaksi",
   "home": "beranda",
@@ -802,7 +803,7 @@
       }
     }
   },
-  "txAllShown": "udah semua buat {month}",
+  "txAllShown": "udah semua di {month}",
   "@txAllShown": {
     "placeholders": {
       "month": {
@@ -819,14 +820,7 @@
     }
   },
   "txNoPrev": "nggak ada bulan sebelumnya",
-  "txNotYet": "{month} belum kejadian",
-  "@txNotYet": {
-    "placeholders": {
-      "month": {
-        "type": "String"
-      }
-    }
-  },
+  "txNotYet": "bulan depan belum kejadian",
   "txBackToNow": "balik ke {month} {year}",
   "@txBackToNow": {
     "placeholders": {
@@ -852,7 +846,7 @@
   "receiptTitle": "struk",
   "receiptKind": "jenis",
   "receiptNote": "catatan",
-  "receiptAddNote": "tambahin catatan",
+  "receiptAddNote": "+ catatan",
   "receiptPocket": "{emoji} {name}",
   "@receiptPocket": {
     "placeholders": {
@@ -886,7 +880,7 @@
       }
     }
   },
-  "receiptShare": "transaksi ini aja udah makan {pct}% jatah {name}.",
+  "receiptShare": "ini aja makan {pct}% jatah {name}",
   "@receiptShare": {
     "placeholders": {
       "pct": {
@@ -903,7 +897,7 @@
   "receiptDeleted": "dihapus",
   "receiptBack": "balik ke transaksi",
   "confirmDeleteTitle": "hapus catatan ini?",
-  "confirmDeleteBody": "{amount} di {place}, {date}. tenang, abis ini masih bisa dibatalin.",
+  "confirmDeleteBody": "{amount} di {place}, {date}. tenang, masih bisa dibatalin.",
   "@confirmDeleteBody": {
     "placeholders": {
       "amount": {
@@ -944,7 +938,7 @@
       }
     }
   },
-  "confirmAfter": "abis ini {pct}%",
+  "confirmAfter": "abis dihapus {pct}%",
   "@confirmAfter": {
     "placeholders": {
       "pct": {
@@ -972,7 +966,7 @@
   "editDay": "kapan",
   "editChanged": "diubah",
   "editNoChanges": "belum ada perubahan",
-  "editChanges": "{count} perubahan · batalin",
+  "editChanges": "batalin {count} perubahan",
   "@editChanges": {
     "placeholders": {
       "count": {
@@ -982,7 +976,7 @@
   },
   "editSave": "simpan",
   "editDelete": "hapus catatan ini",
-  "setupCounter": "atur awal · {step} / 02",
+  "setupCounter": "setup {step}/2",
   "@setupCounter": {
     "placeholders": {
       "step": {
@@ -1010,7 +1004,7 @@
   "setupUntil": "sampai gajian",
   "setupNext": "lanjut",
   "setupPocketsTitle": "mau mulai pasang limit ke apa?",
-  "setupPocketsBody": "pilih aja dulu, nominalnya bisa diubah nanti.",
+  "setupPocketsBody": "pilih dulu, nominal bisa diubah nanti.",
   "setupPerMonth": "{amount}/bln",
   "@setupPerMonth": {
     "placeholders": {
@@ -1029,7 +1023,7 @@
   },
   "setupNoPockets": "belum ada limit",
   "setupSummary": "ringkasan limit",
-  "setupFree": "sisa bebas {free} dari saldo {balance}",
+  "setupFree": "belum dijatah {free} dari saldo {balance}",
   "@setupFree": {
     "placeholders": {
       "free": {
@@ -1040,7 +1034,7 @@
       }
     }
   },
-  "setupOver": "lebih {over} dari saldo — santai, nanti gajian nambah",
+  "setupOver": "lebih {over} dari saldo — santai, gajian nambah",
   "@setupOver": {
     "placeholders": {
       "over": {

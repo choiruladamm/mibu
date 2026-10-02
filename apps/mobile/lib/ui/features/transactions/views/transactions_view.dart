@@ -325,7 +325,7 @@ class _MonthCarousel extends StatelessWidget {
                 side(
                   label: _label(next, s.month),
                   semantics: s.nextIsFuture
-                      ? l.txNotYet(_name(next))
+                      ? l.txNotYet
                       : l.txSeeMonth(_name(next)),
                   onTap: s.nextIsFuture ? null : () => onPick(i + 1),
                   left: false,

@@ -131,7 +131,7 @@ class _SetupViewState extends ConsumerState<SetupView> {
                               fit: BoxFit.scaleDown,
                               alignment: Alignment.centerLeft,
                               child: Text(
-                                l.setupCounter('01'),
+                                l.setupCounter('1'),
                                 style: AppText.caption.copyWith(
                                   color: AppColors.muted,
                                 ),
@@ -160,7 +160,7 @@ class _SetupViewState extends ConsumerState<SetupView> {
                                     ),
                                     Flexible(
                                       child: Text(
-                                        l.setupCounter('02'),
+                                        l.setupCounter('2'),
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),

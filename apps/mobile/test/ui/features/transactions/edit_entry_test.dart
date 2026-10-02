@@ -76,7 +76,7 @@ void main() {
     await settle();
     expect(find.text('500.000'), findsOneWidget); // dots as you type
     expect(find.text('diubah'), findsNWidgets(2));
-    await tester.tap(find.text('2 perubahan · batalin'));
+    await tester.tap(find.text('batalin 2 perubahan'));
     await settle();
     expect(find.text('450.000'), findsOneWidget);
     expect(find.text('belum ada perubahan'), findsOneWidget);

@@ -157,7 +157,7 @@ void main() {
 
     await tester.tap(find.bySemanticsLabel('pilih tanggal lain'));
     await settle();
-    expect(find.text('kapan kejadiannya?'), findsOneWidget);
+    expect(find.text('tanggal berapa?'), findsOneWidget);
     expect(tester.takeException(), isNull);
     await tester.tap(find.bySemanticsLabel('tutup').last);
     await settle();

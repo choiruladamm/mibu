@@ -78,10 +78,7 @@ void main() {
     expect(find.text('hampir abis'), findsOneWidget);
     expect(find.text('Rp100K'), findsOneWidget);
     expect(find.text('jatah sisa dari limit Rp1jt'), findsOneWidget);
-    expect(
-      find.text('kira-kira Rp5,6K sehari buat 18 hari ke depan'),
-      findsOneWidget,
-    );
+    expect(find.text('≈ Rp5,6K/hari sampai akhir bulan'), findsOneWidget);
 
     await tester.tap(find.bySemanticsLabel('ngopi, 60% kepake'));
     await tester.pumpAndSettle();
@@ -323,7 +320,7 @@ void main() {
     expect(find.text('pasang limit ke…'), findsOneWidget);
     expect(find.text('1 catatan'), findsOne); // row; amount on the right
     expect(find.text('gajian'), findsNothing); // income never shows
-    expect(find.text('bikin kategori baru'), findsOneWidget);
+    expect(find.text('bikin baru'), findsOneWidget);
 
     await tester.tap(find.text('belanja').last); // the sheet row
     await tester.pumpAndSettle();
@@ -335,7 +332,7 @@ void main() {
     await settle(tester);
     expect(await limitOf(db, 'belanja'), 3400000);
     expect(find.text('limit belanja Rp3,4jt kepasang'), findsOneWidget);
-    expect(find.text('1 catatan bulan ini langsung keitung'), findsOneWidget);
+    expect(find.text('1 catatan langsung keitung'), findsOneWidget);
     expect(find.text('belanja'), findsOneWidget); // its jar got selected
     expect(find.textContaining('belum ada limit'), findsNothing);
 
@@ -379,7 +376,7 @@ void main() {
 
     await tester.tap(find.text('pasang limit'));
     await tester.pumpAndSettle();
-    expect(find.text('semua buat apa udah pakai limit'), findsOneWidget);
+    expect(find.text('semua udah pakai limit'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox());
     await db.close();

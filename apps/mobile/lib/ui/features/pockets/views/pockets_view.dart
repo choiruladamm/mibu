@@ -1060,7 +1060,7 @@ class _Detail extends StatelessWidget {
             Text(
               left < 0
                   ? l.pocketOver(rupiahCompact(-left))
-                  : l.pocketDaily(rupiahCompact(left ~/ daysLeft), daysLeft),
+                  : l.pocketDaily(rupiahCompact(left ~/ daysLeft)),
               style: muted,
             ),
             const SizedBox(height: 2),

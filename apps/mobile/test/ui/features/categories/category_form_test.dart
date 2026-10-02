@@ -56,13 +56,13 @@ void main() {
     final db = await pump(tester, const PocketsView());
     await tester.tap(find.text('pasang limit')); // header
     await settle(tester);
-    await tester.tap(find.text('bikin kategori baru')); // bottom of the sheet
+    await tester.tap(find.text('bikin baru')); // bottom of the sheet
     await settle(tester);
     await settle(tester);
     // 03.4b: always has a limit, no kind / switch rows.
     expect(find.text('bikin baru'), findsOneWidget);
     expect(find.text('dari: pasang limit ke…'), findsOneWidget);
-    expect(find.text('masuk ke'), findsNothing);
+    expect(find.text('jenis'), findsNothing);
     expect(find.text('limit bulanan'), findsNothing);
 
     await tester.enterText(nameField, 'Kopi Susu');
@@ -71,8 +71,8 @@ void main() {
     expect(find.text('bikin ☕ kopi susu'), findsOneWidget);
 
     // budget 8jt − other pockets 3,3jt = 4,7jt free; 300K ÷ 31 days.
-    expect(find.text('sisa budget Rp4,7jt'), findsOneWidget);
-    expect(find.text('≈ Rp9,7K sehari'), findsOneWidget);
+    expect(find.text('belum dijatah Rp4,7jt'), findsOneWidget);
+    expect(find.text('≈ Rp9,7K/hari'), findsOneWidget);
     await tester.ensureVisible(find.text('Rp1jt'));
     await tester.tap(find.text('Rp1jt'));
     await tester.pump();
@@ -122,7 +122,7 @@ void main() {
     expect(findMeta(['2 catatan', 'Rp900K tahun ini']), findsOneWidget);
     expect(find.text('1.000.000'), findsOneWidget); // anabul's limit
 
-    await tester.tap(find.text('pemasukan'));
+    await tester.tap(find.text('duit masuk'));
     await tester.pump();
     expect(find.text('limit bulanan'), findsNothing);
     await tester.tap(find.text('simpan 🐶 anabul'));
@@ -172,7 +172,7 @@ void main() {
     // From catat: no limit by default.
     expect(find.text('abis dibikin, langsung kepake di catatan ini'), findsOne);
     expect(find.text('limit bulanan'), findsOneWidget);
-    expect(find.text('nggak wajib, bisa dipasang nanti'), findsOneWidget);
+    expect(find.text('opsional, bisa nanti'), findsOneWidget);
     expect(find.text('maks Rp100jt per limit'), findsNothing);
     await tester.tap(find.text('bikin & pakai 🏋️ gym'));
     await settle(tester);

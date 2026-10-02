@@ -145,13 +145,13 @@ abstract class AppLocalizations {
   /// No description provided for @uncategorized.
   ///
   /// In id, this message translates to:
-  /// **'tanpa kategori'**
+  /// **'lain-lain'**
   String get uncategorized;
 
   /// No description provided for @onboardingSkip.
   ///
   /// In id, this message translates to:
-  /// **'lewati'**
+  /// **'skip'**
   String get onboardingSkip;
 
   /// No description provided for @onboardingNext.
@@ -295,7 +295,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeTapMonthHint.
   ///
   /// In id, this message translates to:
-  /// **'tap bulannya buat intip'**
+  /// **'tap bulan buat intip'**
   String get homeTapMonthHint;
 
   /// No description provided for @homeRecent.
@@ -325,7 +325,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeAllCount.
   ///
   /// In id, this message translates to:
-  /// **'liat semua transaksi ({n})'**
+  /// **'semua transaksi ({n})'**
   String homeAllCount(int n);
 
   /// No description provided for @homeAllIn.
@@ -505,7 +505,7 @@ abstract class AppLocalizations {
   /// No description provided for @overAmount.
   ///
   /// In id, this message translates to:
-  /// **'kelebihan {amount}'**
+  /// **'lewat {amount}'**
   String overAmount(String amount);
 
   /// No description provided for @keyThreeZeros.
@@ -535,7 +535,7 @@ abstract class AppLocalizations {
   /// No description provided for @pickerRecent.
   ///
   /// In id, this message translates to:
-  /// **'terakhir · sekali tap langsung keisi'**
+  /// **'terakhir dipakai'**
   String get pickerRecent;
 
   /// No description provided for @pickerWhere.
@@ -619,7 +619,7 @@ abstract class AppLocalizations {
   /// No description provided for @dateSheetTitle.
   ///
   /// In id, this message translates to:
-  /// **'kapan kejadiannya?'**
+  /// **'tanggal berapa?'**
   String get dateSheetTitle;
 
   /// No description provided for @startOfMonth.
@@ -745,7 +745,7 @@ abstract class AppLocalizations {
   /// No description provided for @pocketsFirstBody.
   ///
   /// In id, this message translates to:
-  /// **'pasang limit ke makan, ngopi, atau ojol. catatan bulan ini langsung keitung.'**
+  /// **'misal makan, ngopi, ojol. mibu ngabarin pas mau abis.'**
   String get pocketsFirstBody;
 
   /// No description provided for @pocketsFirstButton.
@@ -847,13 +847,13 @@ abstract class AppLocalizations {
   /// No description provided for @pocketDaily.
   ///
   /// In id, this message translates to:
-  /// **'kira-kira {amount} sehari buat {days} hari ke depan'**
-  String pocketDaily(String amount, int days);
+  /// **'≈ {amount}/hari sampai akhir bulan'**
+  String pocketDaily(String amount);
 
   /// No description provided for @pocketOver.
   ///
   /// In id, this message translates to:
-  /// **'kelebihan {amount} bulan ini'**
+  /// **'lewat {amount}'**
   String pocketOver(String amount);
 
   /// No description provided for @pocketManage.
@@ -877,7 +877,7 @@ abstract class AppLocalizations {
   /// No description provided for @limitSetSub.
   ///
   /// In id, this message translates to:
-  /// **'{n, plural, =0{toplesnya udah nongol} other{{n} catatan bulan ini langsung keitung}}'**
+  /// **'{n, plural, =0{toplesnya udah nongol} other{{n} catatan langsung keitung}}'**
   String limitSetSub(int n);
 
   /// No description provided for @limitReleasedTitle.
@@ -943,25 +943,25 @@ abstract class AppLocalizations {
   /// No description provided for @setLimitEmptyTitle.
   ///
   /// In id, this message translates to:
-  /// **'semua buat apa udah pakai limit'**
+  /// **'semua udah pakai limit'**
   String get setLimitEmptyTitle;
 
   /// No description provided for @setLimitEmptyBody.
   ///
   /// In id, this message translates to:
-  /// **'mau ngatur yang lain? bikin baru aja.'**
+  /// **'mau yang lain? bikin baru'**
   String get setLimitEmptyBody;
 
   /// No description provided for @setLimitNewCategory.
   ///
   /// In id, this message translates to:
-  /// **'bikin kategori baru'**
+  /// **'bikin baru'**
   String get setLimitNewCategory;
 
   /// No description provided for @setLimitIncomeNote.
   ///
   /// In id, this message translates to:
-  /// **'pemasukan (gajian dkk) nggak bisa dikasih limit'**
+  /// **'pemasukan nggak pakai limit'**
   String get setLimitIncomeNote;
 
   /// No description provided for @setLimitBack.
@@ -1099,7 +1099,7 @@ abstract class AppLocalizations {
   /// No description provided for @budgetSavedSub.
   ///
   /// In id, this message translates to:
-  /// **'ritme budget dihitung ulang'**
+  /// **'budget di-track ulang'**
   String get budgetSavedSub;
 
   /// No description provided for @budgetDeletedTitle.
@@ -1111,7 +1111,7 @@ abstract class AppLocalizations {
   /// No description provided for @budgetDeletedSub.
   ///
   /// In id, this message translates to:
-  /// **'ritme budget libur dulu'**
+  /// **'tracking budget off dulu'**
   String get budgetDeletedSub;
 
   /// No description provided for @pocketsBudget.
@@ -1201,8 +1201,20 @@ abstract class AppLocalizations {
   /// No description provided for @categoryKindLabel.
   ///
   /// In id, this message translates to:
-  /// **'masuk ke'**
+  /// **'jenis'**
   String get categoryKindLabel;
+
+  /// No description provided for @kindOut.
+  ///
+  /// In id, this message translates to:
+  /// **'duit keluar'**
+  String get kindOut;
+
+  /// No description provided for @kindIn.
+  ///
+  /// In id, this message translates to:
+  /// **'duit masuk'**
+  String get kindIn;
 
   /// No description provided for @categoryPocket.
   ///
@@ -1213,13 +1225,13 @@ abstract class AppLocalizations {
   /// No description provided for @categoryPocketOn.
   ///
   /// In id, this message translates to:
-  /// **'jadi toples · mibu ngingetin kalau mau abis'**
+  /// **'muncul di kantong + diingetin'**
   String get categoryPocketOn;
 
   /// No description provided for @categoryPocketOff.
   ///
   /// In id, this message translates to:
-  /// **'nggak wajib, bisa dipasang nanti'**
+  /// **'opsional, bisa nanti'**
   String get categoryPocketOff;
 
   /// No description provided for @categoryCreate.
@@ -1255,7 +1267,7 @@ abstract class AppLocalizations {
   /// No description provided for @categoryUnused.
   ///
   /// In id, this message translates to:
-  /// **'belum dipakai'**
+  /// **'belum kepake'**
   String get categoryUnused;
 
   /// No description provided for @limitPerMonth.
@@ -1285,7 +1297,7 @@ abstract class AppLocalizations {
   /// No description provided for @limitPerDay.
   ///
   /// In id, this message translates to:
-  /// **'≈ {amount} sehari'**
+  /// **'≈ {amount}/hari'**
   String limitPerDay(String amount);
 
   /// No description provided for @limitEmpty.
@@ -1303,7 +1315,7 @@ abstract class AppLocalizations {
   /// No description provided for @limitFree.
   ///
   /// In id, this message translates to:
-  /// **'sisa budget {amount}'**
+  /// **'belum dijatah {amount}'**
   String limitFree(String amount);
 
   /// No description provided for @limitSetBudget.
@@ -1327,8 +1339,20 @@ abstract class AppLocalizations {
   /// No description provided for @manageHint.
   ///
   /// In id, this message translates to:
-  /// **'tap buat edit · − buat hapus · tahan & geser buat urutin'**
+  /// **'tap = edit'**
   String get manageHint;
+
+  /// No description provided for @manageHintDelete.
+  ///
+  /// In id, this message translates to:
+  /// **'− = hapus'**
+  String get manageHintDelete;
+
+  /// No description provided for @manageHintMove.
+  ///
+  /// In id, this message translates to:
+  /// **'tahan = geser'**
+  String get manageHintMove;
 
   /// No description provided for @manageUses.
   ///
@@ -1387,13 +1411,13 @@ abstract class AppLocalizations {
   /// No description provided for @deleteUnused.
   ///
   /// In id, this message translates to:
-  /// **'belum ada catatan pakai kategori ini'**
+  /// **'belum ada catatan'**
   String get deleteUnused;
 
   /// No description provided for @deleteMoveTo.
   ///
   /// In id, this message translates to:
-  /// **'pindahin {count} catatan itu ke'**
+  /// **'{count} catatan pindah ke'**
   String deleteMoveTo(int count);
 
   /// No description provided for @deleteCount.
@@ -1435,7 +1459,7 @@ abstract class AppLocalizations {
   /// No description provided for @deleteDoneMoved.
   ///
   /// In id, this message translates to:
-  /// **'{count} catatan sekarang pindah ke {emoji} {name}.'**
+  /// **'{count} catatan udah pindah ke {emoji} {name}.'**
   String deleteDoneMoved(int count, String emoji, String name);
 
   /// No description provided for @deleteDoneEmpty.
@@ -1447,7 +1471,7 @@ abstract class AppLocalizations {
   /// No description provided for @deleteCategory.
   ///
   /// In id, this message translates to:
-  /// **'hapus kategori'**
+  /// **'hapus'**
   String get deleteCategory;
 
   /// No description provided for @limitLabel.
@@ -1495,7 +1519,7 @@ abstract class AppLocalizations {
   /// No description provided for @txAllShown.
   ///
   /// In id, this message translates to:
-  /// **'udah semua buat {month}'**
+  /// **'udah semua di {month}'**
   String txAllShown(String month);
 
   /// No description provided for @txSeeMonth.
@@ -1513,8 +1537,8 @@ abstract class AppLocalizations {
   /// No description provided for @txNotYet.
   ///
   /// In id, this message translates to:
-  /// **'{month} belum kejadian'**
-  String txNotYet(String month);
+  /// **'bulan depan belum kejadian'**
+  String get txNotYet;
 
   /// No description provided for @txBackToNow.
   ///
@@ -1549,7 +1573,7 @@ abstract class AppLocalizations {
   /// No description provided for @receiptAddNote.
   ///
   /// In id, this message translates to:
-  /// **'tambahin catatan'**
+  /// **'+ catatan'**
   String get receiptAddNote;
 
   /// No description provided for @receiptPocket.
@@ -1573,7 +1597,7 @@ abstract class AppLocalizations {
   /// No description provided for @receiptShare.
   ///
   /// In id, this message translates to:
-  /// **'transaksi ini aja udah makan {pct}% jatah {name}.'**
+  /// **'ini aja makan {pct}% jatah {name}'**
   String receiptShare(int pct, String name);
 
   /// No description provided for @receiptAgain.
@@ -1615,7 +1639,7 @@ abstract class AppLocalizations {
   /// No description provided for @confirmDeleteBody.
   ///
   /// In id, this message translates to:
-  /// **'{amount} di {place}, {date}. tenang, abis ini masih bisa dibatalin.'**
+  /// **'{amount} di {place}, {date}. tenang, masih bisa dibatalin.'**
   String confirmDeleteBody(String amount, String place, String date);
 
   /// No description provided for @confirmPocket.
@@ -1639,7 +1663,7 @@ abstract class AppLocalizations {
   /// No description provided for @confirmAfter.
   ///
   /// In id, this message translates to:
-  /// **'abis ini {pct}%'**
+  /// **'abis dihapus {pct}%'**
   String confirmAfter(int pct);
 
   /// No description provided for @confirmDelete.
@@ -1705,7 +1729,7 @@ abstract class AppLocalizations {
   /// No description provided for @editChanges.
   ///
   /// In id, this message translates to:
-  /// **'{count} perubahan · batalin'**
+  /// **'batalin {count} perubahan'**
   String editChanges(int count);
 
   /// No description provided for @editSave.
@@ -1723,7 +1747,7 @@ abstract class AppLocalizations {
   /// No description provided for @setupCounter.
   ///
   /// In id, this message translates to:
-  /// **'atur awal · {step} / 02'**
+  /// **'setup {step}/2'**
   String setupCounter(String step);
 
   /// No description provided for @setupBack.
@@ -1807,7 +1831,7 @@ abstract class AppLocalizations {
   /// No description provided for @setupPocketsBody.
   ///
   /// In id, this message translates to:
-  /// **'pilih aja dulu, nominalnya bisa diubah nanti.'**
+  /// **'pilih dulu, nominal bisa diubah nanti.'**
   String get setupPocketsBody;
 
   /// No description provided for @setupPerMonth.
@@ -1837,13 +1861,13 @@ abstract class AppLocalizations {
   /// No description provided for @setupFree.
   ///
   /// In id, this message translates to:
-  /// **'sisa bebas {free} dari saldo {balance}'**
+  /// **'belum dijatah {free} dari saldo {balance}'**
   String setupFree(String free, String balance);
 
   /// No description provided for @setupOver.
   ///
   /// In id, this message translates to:
-  /// **'lebih {over} dari saldo — santai, nanti gajian nambah'**
+  /// **'lebih {over} dari saldo — santai, gajian nambah'**
   String setupOver(String over);
 
   /// No description provided for @setupTapHint.

@@ -74,7 +74,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('atur limit')); // anabul is selected
     await settle();
-    await tester.tap(find.bySemanticsLabel('hapus kategori'));
+    await tester.tap(find.bySemanticsLabel('hapus'));
     await settle();
 
     expect(find.text('hapus anabul?'), findsOneWidget);
@@ -91,7 +91,7 @@ void main() {
     await holdFor(const Duration(milliseconds: 1100));
     await settle();
     expect(find.text('anabul udah dihapus'), findsOneWidget);
-    expect(find.text('2 catatan sekarang pindah ke 🍜 makan.'), findsOneWidget);
+    expect(find.text('2 catatan udah pindah ke 🍜 makan.'), findsOneWidget);
     expect((await tester.runAsync(anabul))!.deletedAt, isNotNull);
     expect(await tester.runAsync(makanEntries), 1 + 2);
 
@@ -103,7 +103,7 @@ void main() {
     expect(find.text('edit'), findsOneWidget);
 
     // Again, then beres closes the form too.
-    await tester.tap(find.bySemanticsLabel('hapus kategori'));
+    await tester.tap(find.bySemanticsLabel('hapus'));
     await settle();
     await holdFor(const Duration(milliseconds: 1100));
     await settle();

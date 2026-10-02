@@ -66,27 +66,23 @@ void main() {
     expect(find.text('petshop'), findsOneWidget);
     expect(find.text('sel 13 okt'), findsOneWidget);
     expect(findMeta(['sel 13 okt', '14.32']), findsOneWidget);
-    expect(find.text('tambahin catatan'), findsOneWidget);
+    expect(find.text('+ catatan'), findsOneWidget);
     expect(find.text('🐶 anabul'), findsOneWidget);
     expect(find.text('jatah sisa Rp100K dari limit Rp1jt'), findsOneWidget);
-    expect(
-      find.text('transaksi ini aja udah makan 45% jatah anabul.'),
-      findsOneWidget,
-    );
+    expect(find.text('ini aja makan 45% jatah anabul'), findsOneWidget);
 
     // Cancel keeps it.
     await tester.tap(find.bySemanticsLabel('hapus catatan'));
     await settle();
     expect(
       find.text(
-        '-Rp450.000 di petshop, sel 13 okt. tenang, abis ini masih bisa '
-        'dibatalin.',
+        '-Rp450.000 di petshop, sel 13 okt. tenang, masih bisa dibatalin.',
       ),
       findsOneWidget,
     );
     expect(find.text('balik jadi sisa Rp550K'), findsOneWidget);
     expect(find.text('sekarang 90% kepake'), findsOneWidget);
-    expect(find.text('abis ini 45%'), findsOneWidget);
+    expect(find.text('abis dihapus 45%'), findsOneWidget);
     await tester.tap(find.text('nggak jadi'));
     await settle();
     expect((await tester.runAsync(petshop))!.deletedAt, isNull);

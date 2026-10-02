@@ -318,7 +318,7 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
                                 alignment: Alignment.centerRight,
                                 child: _KindSegment(
                                   kind: _kind,
-                                  labels: (l.expense, l.income),
+                                  labels: (l.kindOut, l.kindIn),
                                   onPick: (k) => setState(() => _kind = k),
                                 ),
                               ),
