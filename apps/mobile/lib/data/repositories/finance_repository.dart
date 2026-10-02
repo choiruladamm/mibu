@@ -263,6 +263,7 @@ class FinanceRepository {
           name: 'gajian',
           kind: CategoryKind.income,
           sortOrder: Value(setupPockets.length),
+          isPayday: const Value(true),
         ),
       );
     });

@@ -74,6 +74,13 @@ void main() {
     },
   );
 
+  test('gajian is the payday category (seed + atur awal)', () async {
+    final payday = await (db.select(
+      db.categories,
+    )..where((c) => c.isPayday.equals(true))).get();
+    expect(payday.map((c) => c.name), ['gajian']);
+  });
+
   test('periods: calendar months until a rule says otherwise', () async {
     final none = await repo.watchPeriods().first;
     expect(none.periodOf(now).start, DateTime(2026, 10));
@@ -457,6 +464,12 @@ void main() {
         'gajian',
       ]);
       expect(cats.last.kind, CategoryKind.income);
+      expect(
+        (await fresh.select(fresh.categories).get())
+            .where((c) => c.isPayday)
+            .map((c) => c.name),
+        ['gajian'],
+      );
       expect(
         (await r.watchPockets(cal(now)).first).map(
           (p) => '${p.name}${p.budget}',

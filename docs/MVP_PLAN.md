@@ -102,6 +102,7 @@ categories
   name            text              -- huruf kecil
   kind            text              -- expense | income
   sortOrder       int
+  isPayday        bool              -- gajian (pemasukan gaji), buat siklus nanti
 
 transactions
   id              text  pk

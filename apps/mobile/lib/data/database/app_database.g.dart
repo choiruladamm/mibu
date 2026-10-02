@@ -714,6 +714,21 @@ class $CategoriesTable extends Categories
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _isPaydayMeta = const VerificationMeta(
+    'isPayday',
+  );
+  @override
+  late final GeneratedColumn<bool> isPayday = GeneratedColumn<bool>(
+    'is_payday',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_payday" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -724,6 +739,7 @@ class $CategoriesTable extends Categories
     name,
     kind,
     sortOrder,
+    isPayday,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -780,6 +796,12 @@ class $CategoriesTable extends Categories
         sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
       );
     }
+    if (data.containsKey('is_payday')) {
+      context.handle(
+        _isPaydayMeta,
+        isPayday.isAcceptableOrUnknown(data['is_payday']!, _isPaydayMeta),
+      );
+    }
     return context;
   }
 
@@ -823,6 +845,10 @@ class $CategoriesTable extends Categories
         DriftSqlType.int,
         data['${effectivePrefix}sort_order'],
       )!,
+      isPayday: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_payday'],
+      )!,
     );
   }
 
@@ -844,6 +870,7 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
   final String name;
   final CategoryKind kind;
   final int sortOrder;
+  final bool isPayday;
   const CategoryRow({
     required this.id,
     required this.createdAt,
@@ -853,6 +880,7 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
     required this.name,
     required this.kind,
     required this.sortOrder,
+    required this.isPayday,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -871,6 +899,7 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
       );
     }
     map['sort_order'] = Variable<int>(sortOrder);
+    map['is_payday'] = Variable<bool>(isPayday);
     return map;
   }
 
@@ -886,6 +915,7 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
       name: Value(name),
       kind: Value(kind),
       sortOrder: Value(sortOrder),
+      isPayday: Value(isPayday),
     );
   }
 
@@ -905,6 +935,7 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
         serializer.fromJson<String>(json['kind']),
       ),
       sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      isPayday: serializer.fromJson<bool>(json['isPayday']),
     );
   }
   @override
@@ -921,6 +952,7 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
         $CategoriesTable.$converterkind.toJson(kind),
       ),
       'sortOrder': serializer.toJson<int>(sortOrder),
+      'isPayday': serializer.toJson<bool>(isPayday),
     };
   }
 
@@ -933,6 +965,7 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
     String? name,
     CategoryKind? kind,
     int? sortOrder,
+    bool? isPayday,
   }) => CategoryRow(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
@@ -942,6 +975,7 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
     name: name ?? this.name,
     kind: kind ?? this.kind,
     sortOrder: sortOrder ?? this.sortOrder,
+    isPayday: isPayday ?? this.isPayday,
   );
   CategoryRow copyWithCompanion(CategoriesCompanion data) {
     return CategoryRow(
@@ -953,6 +987,7 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
       name: data.name.present ? data.name.value : this.name,
       kind: data.kind.present ? data.kind.value : this.kind,
       sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      isPayday: data.isPayday.present ? data.isPayday.value : this.isPayday,
     );
   }
 
@@ -966,7 +1001,8 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
           ..write('emoji: $emoji, ')
           ..write('name: $name, ')
           ..write('kind: $kind, ')
-          ..write('sortOrder: $sortOrder')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('isPayday: $isPayday')
           ..write(')'))
         .toString();
   }
@@ -981,6 +1017,7 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
     name,
     kind,
     sortOrder,
+    isPayday,
   );
   @override
   bool operator ==(Object other) =>
@@ -993,7 +1030,8 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
           other.emoji == this.emoji &&
           other.name == this.name &&
           other.kind == this.kind &&
-          other.sortOrder == this.sortOrder);
+          other.sortOrder == this.sortOrder &&
+          other.isPayday == this.isPayday);
 }
 
 class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
@@ -1005,6 +1043,7 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
   final Value<String> name;
   final Value<CategoryKind> kind;
   final Value<int> sortOrder;
+  final Value<bool> isPayday;
   final Value<int> rowid;
   const CategoriesCompanion({
     this.id = const Value.absent(),
@@ -1015,6 +1054,7 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     this.name = const Value.absent(),
     this.kind = const Value.absent(),
     this.sortOrder = const Value.absent(),
+    this.isPayday = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CategoriesCompanion.insert({
@@ -1026,6 +1066,7 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     required String name,
     required CategoryKind kind,
     this.sortOrder = const Value.absent(),
+    this.isPayday = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : emoji = Value(emoji),
        name = Value(name),
@@ -1039,6 +1080,7 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     Expression<String>? name,
     Expression<String>? kind,
     Expression<int>? sortOrder,
+    Expression<bool>? isPayday,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1050,6 +1092,7 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
       if (name != null) 'name': name,
       if (kind != null) 'kind': kind,
       if (sortOrder != null) 'sort_order': sortOrder,
+      if (isPayday != null) 'is_payday': isPayday,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1063,6 +1106,7 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     Value<String>? name,
     Value<CategoryKind>? kind,
     Value<int>? sortOrder,
+    Value<bool>? isPayday,
     Value<int>? rowid,
   }) {
     return CategoriesCompanion(
@@ -1074,6 +1118,7 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
       name: name ?? this.name,
       kind: kind ?? this.kind,
       sortOrder: sortOrder ?? this.sortOrder,
+      isPayday: isPayday ?? this.isPayday,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1107,6 +1152,9 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     if (sortOrder.present) {
       map['sort_order'] = Variable<int>(sortOrder.value);
     }
+    if (isPayday.present) {
+      map['is_payday'] = Variable<bool>(isPayday.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1124,6 +1172,7 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
           ..write('name: $name, ')
           ..write('kind: $kind, ')
           ..write('sortOrder: $sortOrder, ')
+          ..write('isPayday: $isPayday, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3573,6 +3622,7 @@ typedef $$CategoriesTableCreateCompanionBuilder = CategoriesCompanion Function({
   required String name,
   required CategoryKind kind,
   Value<int> sortOrder,
+  Value<bool> isPayday,
   Value<int> rowid,
 });
 typedef $$CategoriesTableUpdateCompanionBuilder = CategoriesCompanion Function({
@@ -3584,6 +3634,7 @@ typedef $$CategoriesTableUpdateCompanionBuilder = CategoriesCompanion Function({
   Value<String> name,
   Value<CategoryKind> kind,
   Value<int> sortOrder,
+  Value<bool> isPayday,
   Value<int> rowid,
 });
 
@@ -3676,6 +3727,11 @@ class $$CategoriesTableFilterComposer
 
   ColumnFilters<int> get sortOrder => $composableBuilder(
     column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isPayday => $composableBuilder(
+    column: $table.isPayday,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3778,6 +3834,11 @@ class $$CategoriesTableOrderingComposer
     column: $table.sortOrder,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get isPayday => $composableBuilder(
+    column: $table.isPayday,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CategoriesTableAnnotationComposer
@@ -3812,6 +3873,9 @@ class $$CategoriesTableAnnotationComposer
 
   GeneratedColumn<int> get sortOrder =>
       $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<bool> get isPayday =>
+      $composableBuilder(column: $table.isPayday, builder: (column) => column);
 
   Expression<T> transactionsRefs<T extends Object>(
     Expression<T> Function($$TransactionsTableAnnotationComposer a) f,
@@ -3900,6 +3964,7 @@ class $$CategoriesTableTableManager
                 Value<String> name = const Value.absent(),
                 Value<CategoryKind> kind = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
+                Value<bool> isPayday = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CategoriesCompanion(
                 id: id,
@@ -3910,6 +3975,7 @@ class $$CategoriesTableTableManager
                 name: name,
                 kind: kind,
                 sortOrder: sortOrder,
+                isPayday: isPayday,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -3922,6 +3988,7 @@ class $$CategoriesTableTableManager
                 required String name,
                 required CategoryKind kind,
                 Value<int> sortOrder = const Value.absent(),
+                Value<bool> isPayday = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CategoriesCompanion.insert(
                 id: id,
@@ -3932,6 +3999,7 @@ class $$CategoriesTableTableManager
                 name: name,
                 kind: kind,
                 sortOrder: sortOrder,
+                isPayday: isPayday,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

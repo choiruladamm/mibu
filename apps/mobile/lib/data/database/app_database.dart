@@ -41,6 +41,8 @@ class Categories extends Table with SyncColumns {
   TextColumn get name => text()();
   TextColumn get kind => textEnum<CategoryKind>()();
   IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+  // Salary income: will start payday cycles and auto-detect (fase 1+).
+  BoolColumn get isPayday => boolean().withDefault(const Constant(false))();
 }
 
 @DataClassName('TransactionRow')

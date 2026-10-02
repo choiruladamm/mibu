@@ -60,6 +60,7 @@ Future<void> seedFixture(AppDatabase db, DateTime now) async {
           name: name,
           kind: kind,
           sortOrder: Value(i),
+          isPayday: Value(name == 'gajian'),
         ),
       );
       if (limit != null) {
@@ -367,6 +368,7 @@ Future<void> seedDemo(AppDatabase db, DateTime now) async {
           name: name,
           kind: kind,
           sortOrder: Value(i),
+          isPayday: Value(name == 'gajian'),
         ),
       );
       if (limit != null) {
