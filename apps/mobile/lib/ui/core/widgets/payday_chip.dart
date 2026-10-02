@@ -47,7 +47,9 @@ class PaydayChip extends StatelessWidget {
               height: 48,
               constraints: const BoxConstraints(minWidth: 48),
               padding: const EdgeInsets.symmetric(horizontal: 12),
-              alignment: Alignment.center,
+              // No `alignment` on the container: it would stretch the chip to
+              // the full width in a Wrap and stack them one per row. Center
+              // with factors keeps it as wide as its text (min 48).
               decoration: BoxDecoration(
                 color: on ? AppColors.ink : AppColors.paper,
                 borderRadius: BorderRadius.circular(24),
@@ -57,14 +59,17 @@ class PaydayChip extends StatelessWidget {
                 ),
               ),
               // Shrinks instead of overflowing on narrow screens.
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  text,
-                  style: AppText.label.copyWith(
-                    fontWeight: FontWeight.w500,
-                    color: on ? AppColors.paper : AppColors.ink,
-                    fontFeatures: const [FontFeature.tabularFigures()],
+              child: Center(
+                widthFactor: 1,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    text,
+                    style: AppText.label.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: on ? AppColors.paper : AppColors.ink,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
                   ),
                 ),
               ),

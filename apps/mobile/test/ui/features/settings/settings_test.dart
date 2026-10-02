@@ -152,6 +152,11 @@ void main() {
     await settle();
     expect(find.text('gajian tiap tanggal berapa?'), findsOneWidget);
     expect(find.text('umum'), findsOneWidget); // tag on 25
+    // Chips flow in a row, not one per line.
+    final row1 = tester.getTopLeft(find.text('1')).dy;
+    for (final d in ['10', '15', '25', '28']) {
+      expect(tester.getTopLeft(find.text(d)).dy, row1, reason: 'chip $d');
+    }
     expect(find.text('oke'), findsOneWidget); // nothing changed yet
     expect(find.text('jum 23 okt'), findsOneWidget);
     expect(find.text('9 hari lagi'), findsOneWidget);
