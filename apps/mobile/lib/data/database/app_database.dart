@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../domain/models/finance.dart';
+import 'seed.dart';
 
 part 'app_database.g.dart';
 
@@ -57,10 +58,17 @@ class Transactions extends Table with SyncColumns {
 
 @DriftDatabase(tables: [Profiles, Categories, Transactions])
 class AppDatabase extends _$AppDatabase {
-  AppDatabase([QueryExecutor? executor, this._now = DateTime.now])
-    : super(executor ?? driftDatabase(name: 'mibu'));
+  AppDatabase([
+    QueryExecutor? executor,
+    this._now = DateTime.now,
+    this._seed = seedFixture,
+  ]) : super(executor ?? driftDatabase(name: 'mibu'));
 
   final DateTime Function() _now;
+
+  // ponytail: sample data (debug only) so screens aren't empty; drop once
+  // 01.4 atur awal writes real data.
+  final Seed _seed;
 
   // Pre-release: schema edited in place; wipe app data on dev devices.
   @override
@@ -70,115 +78,13 @@ class AppDatabase extends _$AppDatabase {
   MigrationStrategy get migration => MigrationStrategy(
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
-      if (details.wasCreated && kDebugMode) await _seed(_now());
+      if (details.wasCreated && kDebugMode) await _seed(this, _now());
     },
   );
-
-  // ponytail: design sample data (debug only) so screens aren't empty;
-  // drop once 01.4 atur awal writes real data. Dates are relative to [now]
-  // so nothing lands in the future: 3 past months + this month.
-  Future<void> _seed(DateTime now) async {
-    DateTime thisMonth(int day, int h, int m) {
-      final at = DateTime(now.year, now.month, day.clamp(1, now.day), h, m);
-      return at.isAfter(now) ? now : at;
-    }
-
-    final cats = <String, String>{}; // name → id
-    await batch((b) {
-      b.insert(
-        profiles,
-        ProfilesCompanion.insert(
-          openingBalance: 3000000,
-          openingAt: DateTime(now.year, now.month - 3),
-          payday: 25,
-          monthlyBudget: const Value(8000000),
-          onboardedAt: Value(now),
-        ),
-      );
-      for (final (i, (emoji, name, kind, limit)) in [
-        ('🐶', 'anabul', CategoryKind.expense, 1000000),
-        ('☕', 'ngopi', CategoryKind.expense, 300000),
-        ('🛵', 'ojol', CategoryKind.expense, 500000),
-        ('🍜', 'makan', CategoryKind.expense, 1500000),
-        ('🛍️', 'belanja', CategoryKind.expense, null),
-        ('💰', 'gajian', CategoryKind.income, null),
-      ].indexed) {
-        final id = _uuid.v4();
-        cats[name] = id;
-        b.insert(
-          categories,
-          CategoriesCompanion.insert(
-            id: Value(id),
-            emoji: emoji,
-            name: name,
-            kind: kind,
-            monthlyLimit: Value(limit),
-            sortOrder: Value(i),
-          ),
-        );
-      }
-
-      TransactionsCompanion tx(
-        String cat,
-        String place,
-        DateTime at,
-        int amount, {
-        String note = '',
-      }) => TransactionsCompanion.insert(
-        amount: amount,
-        categoryId: Value(cats[cat]),
-        place: Value(place),
-        note: Value(note),
-        at: at,
-      );
-
-      b.insertAll(transactions, [
-        // Past months: gajian in, belanja out → design's month balances.
-        for (final (offset, out) in [
-          (-3, 7954000),
-          (-2, 9344500),
-          (-1, 2612500),
-        ]) ...[
-          tx(
-            'gajian',
-            'kantor',
-            DateTime(now.year, now.month + offset, 25, 9),
-            8500000,
-          ),
-          tx(
-            'belanja',
-            'tokopedia',
-            DateTime(now.year, now.month + offset, 5, 20),
-            -out,
-          ),
-        ],
-        // This month: pockets at 90 / 60 / 38 / 26 %.
-        tx(
-          'belanja',
-          'tokopedia',
-          thisMonth(now.day - 3, 20, 0),
-          -2399000,
-          note: 'titip beliin ibu',
-        ),
-        tx(
-          'makan',
-          'warteg',
-          thisMonth(now.day - 1, 12, 30),
-          -390000,
-          note: 'makan siang bareng tim',
-        ),
-        tx('ojol', 'gojek', thisMonth(now.day - 3, 8, 15), -163000),
-        tx('anabul', 'dokter hewan', thisMonth(now.day - 2, 17, 0), -450000),
-        tx('ngopi', 'kopi kenangan', thisMonth(now.day - 1, 9, 0), -180000),
-        tx('anabul', 'petshop', thisMonth(now.day - 1, 14, 32), -450000),
-        tx('ojol', 'gojek', thisMonth(now.day, 11, 5), -27000),
-      ]);
-    });
-  }
 }
 
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
-  final db = AppDatabase();
+  final db = AppDatabase(null, DateTime.now, seedDemo);
   ref.onDispose(db.close);
   return db;
 });
