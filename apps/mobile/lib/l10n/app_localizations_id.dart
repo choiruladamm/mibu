@@ -34,7 +34,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get overspentToday => 'kebablasan hari ini';
 
   @override
-  String get uncategorized => 'apaan nih';
+  String get uncategorized => 'lain-lain';
 
   @override
   String get onboardingSkip => 'skip';
