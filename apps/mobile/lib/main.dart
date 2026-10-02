@@ -4,11 +4,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'l10n/app_localizations.dart';
 import 'routing/router.dart';
+import 'ui/features/home/view_models/home_view_model.dart';
 import 'ui/core/theme.dart';
 import 'ui/core/widgets/tap_outside_unfocus.dart';
 
 void main() {
-  runApp(const ProviderScope(child: MibuApp()));
+  WidgetsFlutterBinding.ensureInitialized();
+  final container = ProviderContainer();
+  // Open (and, in debug, seed) the database and load beranda while the user
+  // is still on onboarding, so "mulai" lands on a ready screen.
+  container.read(homeProvider);
+  runApp(
+    UncontrolledProviderScope(container: container, child: const MibuApp()),
+  );
 }
 
 class MibuApp extends ConsumerWidget {

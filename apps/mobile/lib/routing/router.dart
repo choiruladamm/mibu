@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../ui/core/tokens.dart';
 import '../ui/core/widgets/tab_bar.dart';
 import '../ui/features/add_entry/views/add_entry_view.dart';
 import '../ui/features/home/views/home_view.dart';
@@ -37,11 +38,8 @@ void goTab(BuildContext context, AppTab tab) {
   if (path != null) context.go(path);
 }
 
-/// Tabs swap in place, no slide.
-GoRoute _tab(String path, Widget child) => GoRoute(
-  path: path,
-  pageBuilder: (_, state) => NoTransitionPage(key: state.pageKey, child: child),
-);
+/// `extra` for [Routes.home] when arriving from onboarding: fade in.
+const _fadeIn = 'fade-in';
 
 DateTime? _monthParam(String? s) {
   final m = RegExp(r'^(\d{4})-(\d{2})$').firstMatch(s ?? '');
@@ -58,10 +56,23 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.onboarding,
         // TODO: onDone → 01.2 masuk once login is sliced.
-        builder: (context, _) =>
-            OnboardingView(onDone: () => context.go(Routes.home)),
+        builder: (context, _) => OnboardingView(
+          onDone: () => context.go(Routes.home, extra: _fadeIn),
+        ),
       ),
-      _tab(Routes.home, const HomeView()),
+      GoRoute(
+        path: Routes.home,
+        // Tabs swap in place, no slide; only the arrival from onboarding fades.
+        pageBuilder: (_, state) => state.extra == _fadeIn
+            ? CustomTransitionPage(
+                key: state.pageKey,
+                transitionDuration: AppMotion.sheet,
+                transitionsBuilder: (_, animation, _, child) =>
+                    FadeTransition(opacity: animation, child: child),
+                child: const HomeView(),
+              )
+            : NoTransitionPage(key: state.pageKey, child: const HomeView()),
+      ),
       GoRoute(
         path: Routes.pockets,
         pageBuilder: (_, state) => NoTransitionPage(
