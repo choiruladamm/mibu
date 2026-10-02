@@ -510,21 +510,29 @@ class _Bar extends StatelessWidget {
           spacing: 10,
           children: [
             if (selected)
-              Container(
+              // Wider than the bar's column (a year bar is ~26 wide): centred
+              // on the bar, spilling into the card padding.
+              SizedBox(
                 height: 26,
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: AppColors.paper,
-                  borderRadius: BorderRadius.circular(13),
-                ),
-                child: Text(
-                  future ? l.statsNotYet : context.rpCompact(value!),
-                  maxLines: 1,
-                  softWrap: false,
-                  style: AppText.caption.copyWith(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
+                child: OverflowBox(
+                  maxWidth: double.infinity,
+                  child: Container(
+                    height: 26,
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: AppColors.paper,
+                      borderRadius: BorderRadius.circular(13),
+                    ),
+                    child: Text(
+                      future ? l.statsNotYet : context.rpCompact(value!),
+                      maxLines: 1,
+                      softWrap: false,
+                      style: AppText.caption.copyWith(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ),
               ),

@@ -80,6 +80,23 @@ void main() {
     expect(find.text('lewat budget'), findsOneWidget); // > Rp1,81jt
   });
 
+  testWidgets('02.3c tahun: amount chip isn\'t squeezed to the bar column', (
+    tester,
+  ) async {
+    await pump(tester);
+    await tester.tap(find.text('tahun'));
+    await settle(tester);
+    await tester.tap(find.bySemanticsLabel(RegExp('^september, ')));
+    await settle(tester);
+    final chip = tester.getRect(find.text('Rp2,61jt').first);
+    final column = tester.getRect(
+      find.bySemanticsLabel(RegExp('^september, ')),
+    );
+    expect(chip.width, greaterThan(column.width)); // not clipped to 1/12
+    expect(chip.left, greaterThan(16)); // still inside the card
+    expect(chip.right, lessThan(900 - 16));
+  });
+
   testWidgets('02.3d no budget: pasang budget card', (tester) async {
     final db = await pump(tester);
     await tester.runAsync(
