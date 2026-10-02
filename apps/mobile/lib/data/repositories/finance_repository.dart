@@ -245,6 +245,10 @@ class FinanceRepository {
         _tx.at.isSmallerThanValue(DateTime(month.year, month.month + 1)),
   ).watch().map((rows) => rows.map(_transaction).toList());
 
+  /// Ekspor CSV: every live entry, newest first.
+  Future<List<Transaction>> allTransactions() async =>
+      (await _joined(_tx.deletedAt.isNull()).get()).map(_transaction).toList();
+
   /// 04.3: one entry, soft-deleted included (stamped "dihapus" + batalin).
   Stream<Transaction?> watchTransaction(String id) =>
       _joined(_tx.id.equals(id))
