@@ -48,6 +48,28 @@ final homeMonthProvider = NotifierProvider<HomeMonth, HomeMonthSelection>(
   HomeMonth.new,
 );
 
+typedef HomeChart = ({List<MonthBalance> months, DateTime selected, int now});
+
+/// Chart inputs only (totals + pick), so the chart reacts the moment a month
+/// is picked instead of waiting for that month's pockets and rows to load.
+final homeChartProvider = Provider<HomeChart?>((ref) {
+  final now = ref.watch(nowProvider);
+  final pick = ref.watch(homeMonthProvider);
+  final totals = ref.watch(totalsProvider).value;
+  if (totals == null) return null;
+  return (
+    months: balanceSeries(
+      now: now,
+      start: pick.start,
+      balance: totals.balance,
+      nets: totals.nets,
+    ),
+    selected: pick.selected,
+    now:
+        (now.year * 12 + now.month) - (pick.start.year * 12 + pick.start.month),
+  );
+});
+
 /// "baru aja" shows at most this many rows.
 const homeRecentLimit = 5;
 
@@ -106,6 +128,7 @@ final homeProvider = Provider<AsyncValue<HomeState>>((ref) {
 
   final profile = ref.watch(profileProvider);
   final totals = ref.watch(totalsProvider);
+  final chart = ref.watch(homeChartProvider);
   final pockets = ref.watch(pocketsInMonthProvider(month));
   final own = ref.watch(monthTransactionsProvider(month));
   // Early in the month "baru aja" reaches back into the last one.
@@ -121,11 +144,12 @@ final homeProvider = Provider<AsyncValue<HomeState>>((ref) {
       return AsyncError(error, stackTrace);
     }
   }
-  if ((profile.value, totals.value, pockets.value, own.value) case (
+  if ((profile.value, totals.value, pockets.value, own.value, chart) case (
     final profile?,
     final totals?,
     final pockets?,
     final own?,
+    final chart?,
   )) {
     if (spill != null && !spill.hasValue) return const AsyncLoading();
     if (!first.hasValue) return const AsyncLoading();
@@ -159,15 +183,8 @@ final homeProvider = Provider<AsyncValue<HomeState>>((ref) {
         selected: pick.selected,
         isCurrent: isCurrent,
         balance: balance,
-        months: balanceSeries(
-          now: now,
-          start: pick.start,
-          balance: totals.balance,
-          nets: totals.nets,
-        ),
-        nowIndex:
-            (cur.year * 12 + cur.month) -
-            (pick.start.year * 12 + pick.start.month),
+        months: chart.months,
+        nowIndex: chart.now,
         pockets: ([...pockets]..sort((a, b) => b.usedPct.compareTo(a.usedPct))),
         groups: groups,
         count: own.length,

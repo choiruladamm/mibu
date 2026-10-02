@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -42,6 +43,10 @@ class _HomeViewState extends ConsumerState<HomeView> {
   final _sticky = ValueNotifier(false);
   bool _menuOpen = false;
 
+  /// Last loaded state: shown while a newly picked month's rows load, so the
+  /// screen never blanks (and the scroll position survives) between months.
+  HomeState? _last;
+
   @override
   void initState() {
     super.initState();
@@ -62,7 +67,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
     final HomeState s;
     switch (ref.watch(homeProvider)) {
       case AsyncData(:final value):
-        s = value;
+        s = _last = value;
       case AsyncError(:final error):
         // ponytail: no error state in the design yet; plain text for now.
         return Scaffold(
@@ -74,7 +79,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
           ),
         );
       default:
-        return const Scaffold();
+        final last = _last;
+        if (last == null) return const Scaffold();
+        s = last;
     }
     final l = AppLocalizations.of(context)!;
     final now = ref.watch(nowProvider);
@@ -148,10 +155,13 @@ class _HomeViewState extends ConsumerState<HomeView> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  _BalanceChart(
-                    state: s,
-                    onSelect: ref.read(homeMonthProvider.notifier).select,
-                  ),
+                  if (ref.watch(homeChartProvider) case final chart?)
+                    _BalanceChart(
+                      chart: chart,
+                      onSelect: ref.read(homeMonthProvider.notifier).select,
+                    )
+                  else
+                    const SizedBox(height: _BalanceChart._height),
                   const SizedBox(height: 22),
                   _gutter(
                     Row(
@@ -838,58 +848,136 @@ class _DashedCard extends CustomPainter {
   bool shouldRepaint(_DashedCard old) => false;
 }
 
-/// "saldo per bulan" — curve through month balances, tap a month to peek.
-class _BalanceChart extends StatelessWidget {
-  const _BalanceChart({required this.state, required this.onSelect});
+/// One animated state of the chart: curve heights, the marker's (fractional)
+/// month index and height, and where the pill sits.
+typedef _Frame = ({List<double> ys, double sel, double y, double pillTop});
 
-  final HomeState state;
+/// "saldo per bulan" — curve through month balances, tap a month to peek.
+/// Curve, marker and pill share one controller so they always move together,
+/// also when the 6-month window slides.
+class _BalanceChart extends StatefulWidget {
+  const _BalanceChart({required this.chart, required this.onSelect});
+
+  final HomeChart chart;
   final ValueChanged<DateTime> onSelect;
 
   static const _height = 186.0;
   static const _base = 150.0; // stems end here
   static const _top = 22.0, _bottom = 120.0; // y of max / min balance
+
+  @override
+  State<_BalanceChart> createState() => _BalanceChartState();
+}
+
+class _BalanceChartState extends State<_BalanceChart>
+    with SingleTickerProviderStateMixin {
   static final _monthShort = DateFormat.MMM('id');
+
+  late final _c = AnimationController(
+    vsync: this,
+    duration: AppMotion.select,
+    value: 1,
+  );
+  late _Frame _from = _frameOf(widget.chart), _to = _from;
+
+  static int _selIndex(HomeChart c) =>
+      c.months.indexWhere((m) => m.month == c.selected);
+
+  static _Frame _frameOf(HomeChart c) {
+    final amounts = c.months.map((m) => m.amount);
+    final lo = amounts.reduce(math.min), hi = amounts.reduce(math.max);
+    final ys = [
+      for (final m in c.months)
+        hi == lo
+            ? (_BalanceChart._top + _BalanceChart._bottom) / 2
+            : _BalanceChart._bottom -
+                  (m.amount - lo) /
+                      (hi - lo) *
+                      (_BalanceChart._bottom - _BalanceChart._top),
+    ];
+    final sel = math.max(0, _selIndex(c));
+    return (
+      ys: ys,
+      sel: sel.toDouble(),
+      y: ys[sel],
+      pillTop: ys[sel] < 60 ? ys[sel] + 18 : ys[sel] - 58,
+    );
+  }
+
+  _Frame get _now {
+    final t = AppMotion.ease.transform(_c.value);
+    return (
+      ys: [
+        for (var i = 0; i < _to.ys.length; i++)
+          _lerp(_from.ys[i], _to.ys[i], t),
+      ],
+      sel: _lerp(_from.sel, _to.sel, t),
+      y: _lerp(_from.y, _to.y, t),
+      pillTop: _lerp(_from.pillTop, _to.pillTop, t),
+    );
+  }
+
+  static double _lerp(double a, double b, double t) => a + (b - a) * t;
+
+  @override
+  void didUpdateWidget(_BalanceChart old) {
+    super.didUpdateWidget(old);
+    final next = _frameOf(widget.chart);
+    if (next.sel == _to.sel && listEquals(next.ys, _to.ys)) return;
+    _from = _now;
+    _to = next;
+    _c.forward(from: 0);
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
-    final months = state.months;
-    final sel = state.selectedIndex;
-    final now = state.nowIndex;
-    if (months.length < 2) return const SizedBox(height: _height);
+    final months = widget.chart.months;
+    final now = widget.chart.now;
+    final sel = _selIndex(widget.chart);
+    if (months.length < 2 || sel < 0) {
+      return const SizedBox(height: _BalanceChart._height);
+    }
+    final pillTop = [
+      if (sel == now) l.today,
+      if (sel > now) l.prediction,
+      _monthShort.format(months[sel].month).toLowerCase(),
+    ].join(' · ');
+    final pillVal =
+        '${sel > now ? '± ' : ''}${rupiahCompact(months[sel].amount)}';
 
     return LayoutBuilder(
       builder: (context, c) {
         final w = c.maxWidth;
         // Design: points at x = 33 … 360 on a 390 frame.
-        final xs = [
-          for (var i = 0; i < months.length; i++)
-            w * (33 + i * 327 / (months.length - 1)) / 390,
-        ];
-        final amounts = months.map((m) => m.amount);
-        final lo = amounts.reduce(math.min), hi = amounts.reduce(math.max);
-        final ys = [
-          for (final m in months)
-            hi == lo
-                ? (_top + _bottom) / 2
-                : _bottom - (m.amount - lo) / (hi - lo) * (_bottom - _top),
-        ];
-        final pillTop = [
-          if (sel == now) l.today,
-          if (sel > now) l.prediction,
-          _monthShort.format(months[sel].month).toLowerCase(),
-        ].join(' · ');
-        final pillVal =
-            '${sel > now ? '± ' : ''}${rupiahCompact(months[sel].amount)}';
+        double xAt(double i) => w * (33 + i * 327 / (months.length - 1)) / 390;
+        final xs = [for (var i = 0; i < months.length; i++) xAt(i.toDouble())];
 
         return SizedBox(
-          height: _height,
+          height: _BalanceChart._height,
           child: Stack(
             clipBehavior: Clip.none,
             children: [
               Positioned.fill(
-                child: CustomPaint(
-                  painter: _ChartPainter(xs: xs, ys: ys, sel: sel, now: now),
+                child: AnimatedBuilder(
+                  animation: _c,
+                  builder: (context, _) {
+                    final f = _now;
+                    return CustomPaint(
+                      painter: _ChartPainter(
+                        xs: xs,
+                        ys: f.ys,
+                        marker: Offset(xAt(f.sel), f.y),
+                        now: now,
+                      ),
+                    );
+                  },
                 ),
               ),
               for (var i = 0; i < months.length; i++)
@@ -897,14 +985,14 @@ class _BalanceChart extends StatelessWidget {
                   left: xs[i] - 28,
                   top: 0,
                   width: 56,
-                  height: _height,
+                  height: _BalanceChart._height,
                   child: Semantics(
                     button: true,
                     selected: i == sel,
                     label: _monthShort.format(months[i].month).toLowerCase(),
                     child: GestureDetector(
                       behavior: HitTestBehavior.opaque,
-                      onTap: () => onSelect(months[i].month),
+                      onTap: () => widget.onSelect(months[i].month),
                       child: Align(
                         alignment: Alignment.bottomCenter,
                         child: Text(
@@ -921,11 +1009,16 @@ class _BalanceChart extends StatelessWidget {
                     ),
                   ),
                 ),
-              AnimatedPositioned(
-                duration: AppMotion.select,
-                curve: AppMotion.ease,
-                left: xs[sel].clamp(60, w - 60),
-                top: ys[sel] < 60 ? ys[sel] + 18 : ys[sel] - 58,
+              AnimatedBuilder(
+                animation: _c,
+                builder: (context, child) {
+                  final f = _now;
+                  return Positioned(
+                    left: xAt(f.sel).clamp(60, w - 60),
+                    top: f.pillTop,
+                    child: child!,
+                  );
+                },
                 child: IgnorePointer(
                   child: FractionalTranslation(
                     translation: const Offset(-0.5, 0),
@@ -977,12 +1070,13 @@ class _ChartPainter extends CustomPainter {
   _ChartPainter({
     required this.xs,
     required this.ys,
-    required this.sel,
+    required this.marker,
     required this.now,
   });
 
   final List<double> xs, ys;
-  final int sel, now;
+  final Offset marker; // the selected month; glides between points
+  final int now;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1012,45 +1106,52 @@ class _ChartPainter extends CustomPainter {
     final fill = Paint();
     for (var i = 0; i < xs.length; i++) {
       final p = Offset(xs[i], ys[i]);
-      final line = Path()
-        ..moveTo(p.dx, p.dy)
-        ..lineTo(p.dx, _BalanceChart._base);
-      if (i == sel) {
-        canvas.drawPath(
-          line,
+      canvas.drawPath(
+        dashPath(
+          Path()
+            ..moveTo(p.dx, p.dy)
+            ..lineTo(p.dx, _BalanceChart._base),
+          dash: 3,
+          gap: 3,
+        ),
+        stem
+          ..color = AppColors.line
+          ..strokeWidth = AppStroke.hairline,
+      );
+      canvas.drawCircle(
+        p,
+        4,
+        fill..color = i > now ? AppColors.paper : AppColors.ink,
+      );
+      if (i > now) {
+        // prediction: hollow dot
+        canvas.drawCircle(
+          p,
+          3.25,
           stem
             ..color = AppColors.ink
             ..strokeWidth = AppStroke.outline,
         );
-        canvas.drawCircle(p, 12, fill..color = AppColors.paper); // 3px ring
-        canvas.drawCircle(p, 9, fill..color = AppColors.ink);
-      } else {
-        canvas.drawPath(
-          dashPath(line, dash: 3, gap: 3),
-          stem
-            ..color = AppColors.line
-            ..strokeWidth = AppStroke.hairline,
-        );
-        canvas.drawCircle(
-          p,
-          4,
-          fill..color = i > now ? AppColors.paper : AppColors.ink,
-        );
-        if (i > now) {
-          // prediction: hollow dot
-          canvas.drawCircle(
-            p,
-            3.25,
-            stem
-              ..color = AppColors.ink
-              ..strokeWidth = AppStroke.outline,
-          );
-        }
       }
     }
+
+    // Selected month, drawn last so it covers the point it lands on.
+    canvas.drawPath(
+      Path()
+        ..moveTo(marker.dx, marker.dy)
+        ..lineTo(marker.dx, _BalanceChart._base),
+      stem
+        ..color = AppColors.ink
+        ..strokeWidth = AppStroke.outline,
+    );
+    canvas.drawCircle(marker, 12, fill..color = AppColors.paper); // 3px ring
+    canvas.drawCircle(marker, 9, fill..color = AppColors.ink);
   }
 
   @override
   bool shouldRepaint(_ChartPainter old) =>
-      old.sel != sel || old.now != now || old.xs != xs || old.ys != ys;
+      old.marker != marker ||
+      old.now != now ||
+      !listEquals(old.xs, xs) ||
+      !listEquals(old.ys, ys);
 }
