@@ -177,7 +177,7 @@ Di v1 (di luar fase 0) tanggal gajian udah dipakai buat aman jajan: weekend dige
 1. **Nama:** bulan yang paling banyak harinya (gajian ≥ 16 → bulan berakhir, ≤ 15 → bulan mulai). Aturan titik tengah dicoba dan dibuang: bisa ngelewatin bulan (februari pendek).
 2. **Gaji cair duluan:** batas periode ngikutin tanggal gaji yang dicatat (≤ 3 hari sebelum jadwal, yang paling awal). Telat nggak memperpanjang.
 3. **"Bulan" di seluruh UI = periode**, termasuk grafik saldo dan prediksi. Bulan depan tetap cuma intip.
-4. **Periode pertama** mulai dari tanggal install. **Ganti tanggal gajian:** mulai periode berikutnya (di periode pertama langsung).
+4. **Aturan berlaku dari awal waktu** (bukan dari tanggal install): periode sebelum install tetap siklus gajian, jadi entri yang di-back-fill ke hari sebelum install jatuh di periode yang sama, bukan potongan bulan kalender. **Ganti tanggal gajian:** mulai periode berikutnya (langsung kalau masih di periode tempat app di-setup). Label "siklus pertama" dibuang.
 
 Yang belum: label range tanggal ("25 sep – 24 okt") di menu bulan / 04.1 / statistik, dan label "siklus pertama". Selama gajian diganti di tengah jalan, nama periode bisa dobel sekali di titik pergantian (jarang, dibiarin dulu).
 

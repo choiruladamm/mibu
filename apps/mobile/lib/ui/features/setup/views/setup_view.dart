@@ -13,7 +13,6 @@ import '../../../core/money.dart';
 import '../../../core/tokens.dart';
 import '../../../core/widgets/meta_line.dart';
 import '../../../core/widgets/app_emoji.dart';
-import '../../../core/finance_providers.dart';
 import '../../../core/widgets/payday_chip.dart';
 
 final _dots = NumberFormat('#,##0', 'id_ID');
@@ -73,7 +72,6 @@ class _SetupViewState extends ConsumerState<SetupView> {
           payday: _payday,
           pockets: withPockets ? _pockets : const {},
           now: ref.read(clockProvider)(),
-          period: ref.read(currentPeriodProvider),
         );
     if (mounted) widget.onDone();
   }

@@ -214,9 +214,14 @@ class FinanceRepository {
     required int payday,
     required Set<String> pockets,
     required DateTime now,
-    required Period period,
   }) => _db.transaction(() async {
     final p = _db.profiles;
+    // The period gajian puts [now] in: where the starter limits are stamped,
+    // so they're in force right away (not under a calendar month).
+    final period = PaydayCycleResolver(
+      payday,
+      shift: PaydayShift.previousWorkday,
+    ).periodOf(now);
     final row = ProfilesCompanion(
       openingBalance: Value(openingBalance),
       openingAt: Value(now),
@@ -229,8 +234,8 @@ class FinanceRepository {
     )..where((r) => r.deletedAt.isNull())).write(row);
     if (updated == 0) await _db.into(p).insert(row);
 
-    // Periods follow gajian from today on; the first one is "siklus pertama"
-    // (clipped to today). Re-running setup keeps the rule it already has.
+    // Periods follow gajian from the start of time, so a back-filled entry
+    // lands in the right period. Re-running setup keeps the rule it has.
     final rules = _db.periodRules;
     if (await (_db.selectOnly(rules)..addColumns([rules.id.count()]))
             .map((r) => r.read(rules.id.count()))
@@ -240,7 +245,7 @@ class FinanceRepository {
           .into(rules)
           .insert(
             PeriodRulesCompanion.insert(
-              effectiveFrom: DateTime(now.year, now.month, now.day),
+              effectiveFrom: periodsFromStart,
               mode: PeriodMode.payday,
               paydayDay: payday,
               shift: const Value(PaydayShift.previousWorkday),
@@ -714,6 +719,9 @@ class FinanceRepository {
       ProfilesCompanion(payday: Value(day), updatedAt: Value(DateTime.now())),
     );
     final today = DateTime(now.year, now.month, now.day);
+    final opening = await (_db.select(
+      _db.profiles,
+    )..limit(1)).getSingleOrNull();
     final rules = _db.periodRules;
     final rows =
         await (_db.select(rules)
@@ -741,9 +749,15 @@ class FinanceRepository {
                 ),
               );
 
-    // No payday rule yet, or still inside the first period: now.
-    if (payday.isEmpty ||
-        (payday.length == 1 && current.start == payday.first.effectiveFrom)) {
+    // No payday rule yet, or still in the period the app was set up in: now.
+    final setUpOn = opening == null
+        ? today
+        : DateTime(
+            opening.openingAt.year,
+            opening.openingAt.month,
+            opening.openingAt.day,
+          );
+    if (payday.isEmpty || (payday.length == 1 && current.contains(setUpOn))) {
       await Future.sync(() => write(payday.firstOrNull, today));
       return null;
     }

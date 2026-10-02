@@ -100,19 +100,20 @@ void main() {
         payday: 25,
         pockets: {'makan'},
         now: now,
-        period: cal(now),
       );
       final rules = await r.watchPeriodRules().first;
       expect(rules, hasLength(1));
       expect(
         (rules.single.mode, rules.single.paydayDay, rules.single.effectiveFrom),
-        (PeriodMode.payday, 25, DateTime(2026, 10, 14)),
+        (PeriodMode.payday, 25, periodsFromStart),
       );
 
-      // Still in the first period ("siklus pertama", 14 okt – 22 okt): the
-      // correction applies at once, in the same row.
+      // Still in the period the app was set up in (25 sep – 22 okt): the
+      // correction applies at once, in the same row. Days before the install
+      // are in the same period, not a calendar-month sliver.
       final periods = (await r.watchPeriods().first);
-      expect(periods.periodOf(now).start, DateTime(2026, 10, 14));
+      expect(periods.periodOf(now).start, DateTime(2026, 9, 25));
+      expect(periods.periodOf(DateTime(2026, 10, 2)), periods.periodOf(now));
       final startsOn = await r.setPayday(10, periods: periods, now: now);
       expect(startsOn, isNull);
       final after = await r.watchPeriodRules().first;
@@ -148,6 +149,60 @@ void main() {
           .first;
       expect(totals.spent[DateTime(2026, 10)], 200000); // both in "oktober"
       expect(totals.spent[DateTime(2026, 9)], isNull);
+    },
+  );
+
+  test(
+    'back-filled "kemarin" after a fresh install lands in this period',
+    () async {
+      // Installed 3 okt, gajian 25; yesterday's lunch is logged afterwards.
+      final today = DateTime(2026, 10, 3, 10);
+      final fresh = AppDatabase(
+        DatabaseConnection(
+          NativeDatabase.memory(),
+          closeStreamsSynchronously: true,
+        ),
+        () => today,
+        (_, _) async {},
+      );
+      addTearDown(fresh.close);
+      final r = FinanceRepository(fresh);
+      await r.completeSetup(
+        openingBalance: 1000000,
+        payday: 25,
+        pockets: {'makan'},
+        now: today,
+      );
+      final periods = await r.watchPeriods().first;
+      final makan = (await r.watchCategories(periods.periodOf(today)).first)
+          .firstWhere((c) => c.name == 'makan')
+          .id;
+      for (final at in [DateTime(2026, 10, 2, 12), DateTime(2026, 10, 3, 11)]) {
+        await r.addTransaction(
+          amount: -25000,
+          categoryId: makan,
+          place: 'warteg',
+          note: '',
+          tags: const [],
+          at: at,
+        );
+      }
+      // One period, named for the month it's shown under.
+      final oct = periods.periodForMonth(DateTime(2026, 10));
+      expect(periods.periodOf(DateTime(2026, 10, 2)), oct);
+      expect(periods.periodOf(today), oct);
+      final rows = await r.watchPeriod(oct).first;
+      expect(rows.map((t) => t.at.day), containsAll([2, 3]));
+      // Both count against the kantong and the budget...
+      final pocket = (await r.watchPockets(oct).first).single;
+      expect(pocket.spent, 50000);
+      // ...while saldo only counts what's logged from the install on: the
+      // opening balance already had yesterday's spending in it.
+      final profile = await r.watchProfile(oct).first;
+      final totals = await r
+          .watchTotals(profile, today, periods: periods)
+          .first;
+      expect(totals.spent[DateTime(2026, 10)], 25000);
     },
   );
 
@@ -521,7 +576,6 @@ void main() {
         payday: 0,
         pockets: {'makan', 'ngopi'},
         now: now,
-        period: cal(now),
       );
       final p = await r.watchProfile(cal(now)).first;
       expect(
@@ -553,7 +607,6 @@ void main() {
         payday: 10,
         pockets: {'makan'},
         now: now,
-        period: cal(now),
       );
       expect((await repo.watchProfile(cal(now)).first).openingBalance, 1);
       expect(await repo.watchCategories(cal(now)).first, hasLength(6));

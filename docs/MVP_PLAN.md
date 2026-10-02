@@ -198,7 +198,7 @@ Satu konsep aja: **buat apa** (= baris `categories`). Kantong bukan benda sendir
 >
 > - **Nama periode** = bulan yang paling banyak harinya: gajian tgl ≥ 16 → bulan tempat periode berakhir ("oktober" = 25 sep – 24 okt), gajian ≤ 15 → bulan mulai. Selalu satu nama per bulan, berurutan. UI tetap milih "bulan"; label itu dipetakan ke periodenya (`periodForMonth`).
 > - **Gaji cair duluan:** pemasukan gajian yang dicatat ≤ 3 hari sebelum jadwal memulai periode baru di tanggal itu. Gaji telat nggak memperpanjang periode.
-> - **Periode pertama** user baru mulai dari tanggal 01.4 ("siklus pertama"). Aturan nggak pernah ngubah periode yang udah lewat: ganti tanggal gajian berlaku mulai periode berikutnya (di periode pertama langsung, buat benerin salah pilih).
+> - Aturan periode berlaku **dari awal waktu**, jadi entri yang di-back-fill ke hari sebelum install tetap jatuh di periodenya (budget, kantong, daftar). Saldo tetap cuma ngitung catatan sejak saldo awal diisi. Ganti tanggal gajian berlaku mulai periode berikutnya, nggak pernah ngubah periode yang udah lewat (langsung kalau masih di periode tempat app di-setup, buat benerin salah pilih).
 > - Sebelum ada aturan periode (data contoh `seedFixture`) periode = bulan kalender.
 
 - Budget bulanan = baris `budgets` yang berlaku (di kode: `Profile.monthlyBudget`), diisi user, bukan turunan. Boleh beda dari Σ `monthlyLimit`. **[diupdate]**

@@ -350,8 +350,10 @@ Future<void> seedDemo(AppDatabase db, DateTime now) async {
         onboardedAt: Value(start),
       ),
     );
-    final from = DateTime(start.year, start.month);
-    final until = DateTime(from.year, from.month + 1);
+    // Stamped from the start of time like the payday rule, so the first
+    // (partial) period has them too.
+    final from = periodsFromStart;
+    final until = DateTime(start.year, start.month + 1);
     b.insert(
       db.budgets,
       BudgetsCompanion.insert(
@@ -364,7 +366,7 @@ Future<void> seedDemo(AppDatabase db, DateTime now) async {
     b.insert(
       db.periodRules,
       PeriodRulesCompanion.insert(
-        effectiveFrom: DateTime(start.year, start.month, start.day),
+        effectiveFrom: periodsFromStart,
         mode: PeriodMode.payday,
         paydayDay: 25,
         shift: const Value(PaydayShift.previousWorkday),

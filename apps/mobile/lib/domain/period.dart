@@ -166,6 +166,12 @@ typedef PeriodRule = ({
   PaydayShift shift,
 });
 
+/// A rule that covers all history: setup writes its payday rule from here,
+/// so entries back-filled before the install day fall in the same periods
+/// (a rule starting on install day left a calendar-month sliver before it,
+/// with the same name as the period after it).
+final DateTime periodsFromStart = DateTime(1971);
+
 /// Before any saved rule: calendar months.
 final PeriodRule calendarBase = (
   effectiveFrom: DateTime(1970),
