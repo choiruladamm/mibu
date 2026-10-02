@@ -161,15 +161,77 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
-  String homeBalanceEnd(String month) {
-    return 'saldo akhir $month';
+  String get heroBudgetLeft => 'sisa budget';
+
+  @override
+  String get heroBudgetOver => 'kelewat budget';
+
+  @override
+  String heroBudgetLeftEnd(String month) {
+    return 'sisa budget akhir $month';
   }
 
   @override
-  String get homeLeftEnd => 'sisa akhir bulan';
+  String heroBudgetOverEnd(String month) {
+    return 'kelewat budget akhir $month';
+  }
 
   @override
-  String get homeOverEnd => 'lewat budget';
+  String heroFromBudget(String amount) {
+    return 'dari budget $amount';
+  }
+
+  @override
+  String heroPer(int day, String month) {
+    return 'per $day $month';
+  }
+
+  @override
+  String heroBudgetOverSub(String amount) {
+    return 'budget bulan ini kelewat $amount';
+  }
+
+  @override
+  String get heroSetBudget => 'pasang budget';
+
+  @override
+  String get heroCatatGajian => 'udah gajian? catat';
+
+  @override
+  String get heroCatatGajianLate => 'gajian belum masuk? catat';
+
+  @override
+  String get heroRemDulu => 'rem dulu ya';
+
+  @override
+  String heroDaysLeft(int n) {
+    return '$n hari lagi';
+  }
+
+  @override
+  String get heroAvgDay => 'rata²/hari';
+
+  @override
+  String get heroHint => 'tap buat liat sisa budget';
+
+  @override
+  String get heroHintOk => 'oke';
+
+  @override
+  String heroFlipAria(String label, String other) {
+    return '$label, ketuk buat ganti ke $other';
+  }
+
+  @override
+  String get heroModeSaldo => 'saldo';
+
+  @override
+  String get heroModeBudget => 'sisa budget';
+
+  @override
+  String homeBalanceEnd(String month) {
+    return 'saldo akhir $month';
+  }
 
   @override
   String homePocketPill(String name, int pct) {

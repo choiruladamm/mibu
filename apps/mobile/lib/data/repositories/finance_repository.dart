@@ -55,6 +55,8 @@ class FinanceRepository {
               recentSearches: r.recentSearches.isEmpty
                   ? const []
                   : r.recentSearches.split('\n'),
+              heroMode: r.heroMode,
+              heroHintSeen: r.heroHintSeen,
             );
     });
   }
@@ -613,6 +615,42 @@ class FinanceRepository {
   /// Budget bulanan (00.16) from [period] on; null = hapus budget.
   Future<void> setMonthlyBudget(int? budget, Period period) =>
       _setBudgetRow(period, budget);
+
+  /// The budget in force for [period] (null = none), for any month.
+  Stream<int?> watchBudget(Period period) {
+    final b = _db.budgets;
+    return (_db.select(b)
+          ..where(
+            (r) =>
+                r.deletedAt.isNull() &
+                r.periodStart.isSmallerOrEqualValue(period.start),
+          )
+          ..orderBy([
+            (r) => OrderingTerm.desc(r.periodStart),
+            (r) => OrderingTerm.desc(r.updatedAt),
+          ])
+          ..limit(1))
+        .watchSingleOrNull()
+        .map((r) => r?.amount);
+  }
+
+  /// 02.1 hero: saldo kamu ⇄ sisa budget.
+  Future<void> setBalanceMode(BalanceMode mode) =>
+      (_db.update(_db.profiles)..where((p) => p.deletedAt.isNull())).write(
+        ProfilesCompanion(
+          heroMode: Value(mode),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+
+  /// The "tap buat liat sisa budget" hint was shown (or used).
+  Future<void> markHeroHintSeen() =>
+      (_db.update(_db.profiles)..where((p) => p.deletedAt.isNull())).write(
+        ProfilesCompanion(
+          heroHintSeen: const Value(true),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
 
   /// 02.4 tanggal gajian (00.24): 1–31, 31 = akhir.
   Future<void> setPayday(int day) =>

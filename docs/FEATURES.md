@@ -31,7 +31,10 @@ Tanda: **[diupdate]** = aturan/perilaku berubah dari design, **[perlu design]** 
 
 - [ ] **02.1 beranda**
   - Header: logo, MonthPicker, tombol cari → 04.2.
-  - Hero `saldo kamu` + chip `aman jajan hari ini · Rp580K`.
+  - Hero (HeroSaldo 00.23b): pill `saldo kamu ⇄` di-tap → `sisa budget` (budget − kepake bulan itu). Default saldo (kumulatif, sisa bulan lalu kebawa), pilihan terakhir diinget buat semua bulan. Tanpa budget cuma saldo, pill jadi label biasa + "• pasang budget". Hint "tap buat liat sisa budget · oke" sekali. Tap → angka count-up + haptic ringan.
+  - Ikut mode: angka + label hero, baris kecil di bawahnya ("gajian lagi 9 hari" / "dari budget Rp8jt" / "per 30 sep"), header sticky (tap juga ganti).
+  - Nggak ikut mode: grafik saldo per bulan + prediksi, chip, kantong, statistik.
+  - Chip: `aman jajan hari ini · Rp…` (versi ketat, lihat MVP_PLAN › Aman jajan); budget kelewat → `rem dulu ya · N hari lagi` (+ baris kecil "! budget bulan ini kelewat Rp…"); hari gajian belum dicatat → "gajian hari ini" + `udah gajian? catat`; lewat gajian → "! gajian telat n hari" + `gajian belum masuk? catat`; bulan lalu → `rata²/hari · Rp…`. Bulan depan di grafik cuma intip (pill "± Rp…"), hero nggak pindah.
   - Grafik `saldo per bulan` 6 bulan, tap bulan buat intip; bulan depan = prediksi (±). Sinkron dua arah sama MonthMenu.
   - 4 kantong teratas (% kepake), `lihat semua` → 02.2.
   - `baru aja`: 2 transaksi terakhir → 04.3, `lihat semua` → 04.1.

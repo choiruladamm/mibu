@@ -35,6 +35,10 @@ class MonthBalance {
   final int amount; // balance at month end (or now, for the current month)
 }
 
+/// What the beranda hero shows: saldo kamu (cumulative) or sisa budget.
+/// (Not `HeroMode`: Flutter has a widget by that name.)
+enum BalanceMode { saldo, budget }
+
 class Profile {
   const Profile({
     required this.openingBalance,
@@ -44,6 +48,8 @@ class Profile {
     this.hideAmounts = false,
     this.onboarded = false,
     this.recentSearches = const [],
+    this.heroMode = BalanceMode.saldo,
+    this.heroHintSeen = false,
   });
 
   /// Before 01.4 atur awal has run.
@@ -55,11 +61,13 @@ class Profile {
 
   final int openingBalance;
   final DateTime openingAt; // transactions before this aren't in the balance
-  final int payday; // 1–28, 0 = last day of month
+  final int payday; // 1–31, 31 = akhir (legacy 0 too)
   final int? monthlyBudget; // budget bulanan, set by the user; null = not set
   final bool hideAmounts;
   final bool onboarded; // 01.4 atur awal done (or skipped with "nanti aja")
   final List<String> recentSearches; // 04.2b terakhir dicari, newest first
+  final BalanceMode heroMode; // last pick, kept for every month
+  final bool heroHintSeen; // "tap buat liat sisa budget" shown once
 }
 
 /// 01.4b kantong pertama: presets with the board's monthly limits.
@@ -263,15 +271,25 @@ PaydayInfo paydayInfo({
 }
 
 /// "aman jajan hari ini": today's share of the balance over [days] (usually
-/// [PaydayInfo.daysToNext]), minus what's already spent today. Negative = overspent
-/// today. See MVP_PLAN.md.
+/// [PaydayInfo.daysToNext]), minus what's already spent today. With a budget
+/// ([budgetLeft] = budget − spent this period, [budgetDays] = days left in
+/// the period) it's the smaller of that and the budget's own share, so the
+/// chip never invites going past the budget the user set. Negative =
+/// overspent today. See MVP_PLAN.md.
 int safeToSpendToday({
   required int balance,
   required int spentToday,
   required int days,
+  int? budgetLeft,
+  int budgetDays = 1,
 }) {
   if (balance <= 0 || days <= 0) return 0;
-  return (balance + spentToday) ~/ days - spentToday;
+  final bySaldo = (balance + spentToday) ~/ days - spentToday;
+  if (budgetLeft == null) return bySaldo;
+  final byBudget =
+      (budgetLeft + spentToday) ~/ (budgetDays < 1 ? 1 : budgetDays) -
+      spentToday;
+  return bySaldo < byBudget ? bySaldo : byBudget;
 }
 
 int _monthIndex(DateTime m) => m.year * 12 + m.month;

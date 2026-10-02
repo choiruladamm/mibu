@@ -168,6 +168,8 @@ hariSisa = hari dari hari ini sampai gajian (nggak termasuk gajian), hari ini ik
 aman = floor((saldo + pengeluaranHariIni) / hariSisa) − pengeluaranHariIni
 ```
 
+- **Versi ketat (ada budget):** `aman = min(rumus saldo di atas, rumus budget)`, rumus budget = `floor((sisaBudget + pengeluaranHariIni) / hariSisaPeriode) − pengeluaranHariIni` dengan `sisaBudget = budget − kepake periode ini` (`hariSisaPeriode` = hari sampai akhir periode, hari ini ikut). Jadi chip nggak ngajak lewat budget yang user pasang sendiri. Tanpa budget: rumus saldo aja. Contoh fixture 14 okt: saldo ÷ 9 = Rp479K, budget (Rp8jt − Rp4,059jt) ÷ 18 = Rp193K → chip Rp193K.
+- Budget kelewat (`sisaBudget < 0`) → chip jadi "rem dulu ya · N hari lagi" (outline), bukan aman jajan.
 - Gaji (kategori `gajian`) yang dicatat ≤ 3 hari sebelum gajian dianggap gajian itu udah masuk: hariSisa dihitung sampai gajian berikutnya lagi (`paydayInfo`, `paydayEarlyDays`).
 - Hari gajian, gaji belum dicatat → status "hari ini"; lewat gajian dan pernah nyatet gaji → "telat N hari" (maks 7). Di dua state ini hariSisa = 0, jadi beranda ganti chip aman jajan dengan ajakan catat gajian (02.1p o–q), nggak ada pembagian nol.
 - Pengeluaran hari ini langsung mengurangi jatah hari ini.

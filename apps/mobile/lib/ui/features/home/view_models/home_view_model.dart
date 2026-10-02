@@ -73,7 +73,12 @@ class HomeState {
     required this.today,
     required this.payday,
     required this.safeToSpendToday,
-    required this.monthLeft,
+    required this.budget,
+    required this.monthSpent,
+    required this.periodDays,
+    required this.budgetDaysLeft,
+    required this.heroMode,
+    required this.heroHintSeen,
     required this.noEntries,
   });
 
@@ -92,8 +97,23 @@ class HomeState {
   final DateTime today;
   final PaydayInfo payday; // today, telat, or how long until gajian
   final int safeToSpendToday; // negative = overspent today
-  final int? monthLeft; // past months: budget − spent; null = no budget
+  final int? budget; // in force for [month]; null = none
+  final int monthSpent; // expenses in [month], positive
+  final int periodDays; // length of [month]'s period (rata²/hari)
+  final int budgetDaysLeft; // days left in the current period, today included
+  final BalanceMode heroMode; // last pick; folded to saldo without a budget
+  final bool heroHintSeen;
   final bool noEntries; // nothing ever logged
+
+  /// The pill only exists with a budget; without one it's saldo only.
+  bool get canFlip => budget != null;
+  bool get isBudget => canFlip && heroMode == BalanceMode.budget;
+
+  /// budget − spent in [month]; negative = kelewat. Null without a budget.
+  int? get budgetLeft => budget == null ? null : budget! - monthSpent;
+
+  /// Budget gone this month (current month only).
+  bool get overBudget => isCurrent && (budgetLeft ?? 0) < 0;
 
   int get selectedIndex => months.indexWhere((m) => m.month == selected);
   bool get selectedIsPrediction => selected.isAfter(month);
@@ -115,6 +135,9 @@ final homeProvider = Provider<AsyncValue<HomeState>>((ref) {
   final prev = DateTime(cur.year, cur.month - 1);
 
   final profile = ref.watch(profileProvider);
+  final periods = ref.watch(periodsProvider);
+  final period = periods.periodOf(month);
+  final budgetIn = ref.watch(budgetInPeriodProvider(period));
   final totals = ref.watch(totalsProvider);
   final chart = ref.watch(homeChartProvider);
   final pockets = ref.watch(
@@ -128,19 +151,28 @@ final homeProvider = Provider<AsyncValue<HomeState>>((ref) {
       : null;
   final first = ref.watch(firstMonthProvider);
 
-  for (final s in [profile, totals, pockets, own, ?spill, first]) {
+  for (final s in [profile, budgetIn, totals, pockets, own, ?spill, first]) {
     if (s case AsyncError(:final error, :final stackTrace)) {
       debugPrint('beranda: $error\n$stackTrace');
       return AsyncError(error, stackTrace);
     }
   }
-  if ((profile.value, totals.value, pockets.value, own.value, chart) case (
-    final profile?,
-    final totals?,
-    final pockets?,
-    final own?,
-    final chart?,
-  )) {
+  if ((
+        profile.value,
+        totals.value,
+        pockets.value,
+        own.value,
+        chart,
+        budgetIn.hasValue,
+      )
+      case (
+        final profile?,
+        final totals?,
+        final pockets?,
+        final own?,
+        final chart?,
+        true,
+      )) {
     if (spill != null && !spill.hasValue) return const AsyncLoading();
     if (!first.hasValue) return const AsyncLoading();
     final rows = [...own, ...?spill?.value];
@@ -151,6 +183,10 @@ final homeProvider = Provider<AsyncValue<HomeState>>((ref) {
       salaries: ref.watch(salaryDatesProvider).value ?? const [],
     );
     final noEntries = first.value == null;
+    final budget = budgetIn.value;
+    final monthSpent = totals.spent[month] ?? 0;
+    final curPeriod = ref.watch(currentPeriodProvider);
+    final budgetDaysLeft = curPeriod.daysLeft(today);
 
     var left = homeRecentLimit;
     final groups = <DayGroup>[];
@@ -191,10 +227,15 @@ final homeProvider = Provider<AsyncValue<HomeState>>((ref) {
           // On payday / telat the hero swaps the chip for "catat gajian"
           // (02.1p o–q); the figure still counts to the next payday.
           days: payday.daysToNext,
+          budgetLeft: isCurrent && budget != null ? budget - monthSpent : null,
+          budgetDays: budgetDaysLeft,
         ),
-        monthLeft: profile.monthlyBudget == null
-            ? null
-            : profile.monthlyBudget! - (totals.spent[month] ?? 0),
+        budget: budget,
+        monthSpent: monthSpent,
+        periodDays: period.length,
+        budgetDaysLeft: budgetDaysLeft,
+        heroMode: profile.heroMode,
+        heroHintSeen: profile.heroHintSeen,
         noEntries: noEntries,
       ),
     );

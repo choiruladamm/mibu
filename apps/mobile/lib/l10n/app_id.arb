@@ -103,6 +103,31 @@
       }
     }
   },
+  "heroBudgetLeft": "sisa budget",
+  "heroBudgetOver": "kelewat budget",
+  "heroBudgetLeftEnd": "sisa budget akhir {month}",
+  "@heroBudgetLeftEnd": {"placeholders": {"month": {"type": "String"}}},
+  "heroBudgetOverEnd": "kelewat budget akhir {month}",
+  "@heroBudgetOverEnd": {"placeholders": {"month": {"type": "String"}}},
+  "heroFromBudget": "dari budget {amount}",
+  "@heroFromBudget": {"placeholders": {"amount": {"type": "String"}}},
+  "heroPer": "per {day} {month}",
+  "@heroPer": {"placeholders": {"day": {"type": "int"}, "month": {"type": "String"}}},
+  "heroBudgetOverSub": "budget bulan ini kelewat {amount}",
+  "@heroBudgetOverSub": {"placeholders": {"amount": {"type": "String"}}},
+  "heroSetBudget": "pasang budget",
+  "heroCatatGajian": "udah gajian? catat",
+  "heroCatatGajianLate": "gajian belum masuk? catat",
+  "heroRemDulu": "rem dulu ya",
+  "heroDaysLeft": "{n} hari lagi",
+  "@heroDaysLeft": {"placeholders": {"n": {"type": "int"}}},
+  "heroAvgDay": "rata²/hari",
+  "heroHint": "tap buat liat sisa budget",
+  "heroHintOk": "oke",
+  "heroFlipAria": "{label}, ketuk buat ganti ke {other}",
+  "@heroFlipAria": {"placeholders": {"label": {"type": "String"}, "other": {"type": "String"}}},
+  "heroModeSaldo": "saldo",
+  "heroModeBudget": "sisa budget",
   "homeBalanceEnd": "saldo akhir {month}",
   "@homeBalanceEnd": {
     "placeholders": {
@@ -111,8 +136,6 @@
       }
     }
   },
-  "homeLeftEnd": "sisa akhir bulan",
-  "homeOverEnd": "lewat budget",
   "homePocketPill": "buka kantong {name}, {pct}% kepake",
   "@homePocketPill": {
     "placeholders": {

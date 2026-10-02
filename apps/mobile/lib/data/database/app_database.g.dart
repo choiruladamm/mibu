@@ -124,6 +124,31 @@ class $ProfilesTable extends Profiles
     defaultValue: const Constant(''),
   );
   @override
+  late final GeneratedColumnWithTypeConverter<BalanceMode, String> heroMode =
+      GeneratedColumn<String>(
+        'hero_mode',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: Constant(BalanceMode.saldo.name),
+      ).withConverter<BalanceMode>($ProfilesTable.$converterheroMode);
+  static const VerificationMeta _heroHintSeenMeta = const VerificationMeta(
+    'heroHintSeen',
+  );
+  @override
+  late final GeneratedColumn<bool> heroHintSeen = GeneratedColumn<bool>(
+    'hero_hint_seen',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("hero_hint_seen" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
   List<GeneratedColumn> get $columns => [
     id,
     createdAt,
@@ -135,6 +160,8 @@ class $ProfilesTable extends Profiles
     hideAmounts,
     onboardedAt,
     recentSearches,
+    heroMode,
+    heroHintSeen,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -223,6 +250,15 @@ class $ProfilesTable extends Profiles
         ),
       );
     }
+    if (data.containsKey('hero_hint_seen')) {
+      context.handle(
+        _heroHintSeenMeta,
+        heroHintSeen.isAcceptableOrUnknown(
+          data['hero_hint_seen']!,
+          _heroHintSeenMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -272,6 +308,16 @@ class $ProfilesTable extends Profiles
         DriftSqlType.string,
         data['${effectivePrefix}recent_searches'],
       )!,
+      heroMode: $ProfilesTable.$converterheroMode.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}hero_mode'],
+        )!,
+      ),
+      heroHintSeen: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}hero_hint_seen'],
+      )!,
     );
   }
 
@@ -279,6 +325,9 @@ class $ProfilesTable extends Profiles
   $ProfilesTable createAlias(String alias) {
     return $ProfilesTable(attachedDatabase, alias);
   }
+
+  static JsonTypeConverter2<BalanceMode, String, String> $converterheroMode =
+      const EnumNameConverter<BalanceMode>(BalanceMode.values);
 }
 
 class ProfileRow extends DataClass implements Insertable<ProfileRow> {
@@ -292,6 +341,8 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
   final bool hideAmounts;
   final DateTime? onboardedAt;
   final String recentSearches;
+  final BalanceMode heroMode;
+  final bool heroHintSeen;
   const ProfileRow({
     required this.id,
     required this.createdAt,
@@ -303,6 +354,8 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
     required this.hideAmounts,
     this.onboardedAt,
     required this.recentSearches,
+    required this.heroMode,
+    required this.heroHintSeen,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -321,6 +374,12 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
       map['onboarded_at'] = Variable<DateTime>(onboardedAt);
     }
     map['recent_searches'] = Variable<String>(recentSearches);
+    {
+      map['hero_mode'] = Variable<String>(
+        $ProfilesTable.$converterheroMode.toSql(heroMode),
+      );
+    }
+    map['hero_hint_seen'] = Variable<bool>(heroHintSeen);
     return map;
   }
 
@@ -340,6 +399,8 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
           ? const Value.absent()
           : Value(onboardedAt),
       recentSearches: Value(recentSearches),
+      heroMode: Value(heroMode),
+      heroHintSeen: Value(heroHintSeen),
     );
   }
 
@@ -359,6 +420,10 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
       hideAmounts: serializer.fromJson<bool>(json['hideAmounts']),
       onboardedAt: serializer.fromJson<DateTime?>(json['onboardedAt']),
       recentSearches: serializer.fromJson<String>(json['recentSearches']),
+      heroMode: $ProfilesTable.$converterheroMode.fromJson(
+        serializer.fromJson<String>(json['heroMode']),
+      ),
+      heroHintSeen: serializer.fromJson<bool>(json['heroHintSeen']),
     );
   }
   @override
@@ -375,6 +440,10 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
       'hideAmounts': serializer.toJson<bool>(hideAmounts),
       'onboardedAt': serializer.toJson<DateTime?>(onboardedAt),
       'recentSearches': serializer.toJson<String>(recentSearches),
+      'heroMode': serializer.toJson<String>(
+        $ProfilesTable.$converterheroMode.toJson(heroMode),
+      ),
+      'heroHintSeen': serializer.toJson<bool>(heroHintSeen),
     };
   }
 
@@ -389,6 +458,8 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
     bool? hideAmounts,
     Value<DateTime?> onboardedAt = const Value.absent(),
     String? recentSearches,
+    BalanceMode? heroMode,
+    bool? heroHintSeen,
   }) => ProfileRow(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
@@ -400,6 +471,8 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
     hideAmounts: hideAmounts ?? this.hideAmounts,
     onboardedAt: onboardedAt.present ? onboardedAt.value : this.onboardedAt,
     recentSearches: recentSearches ?? this.recentSearches,
+    heroMode: heroMode ?? this.heroMode,
+    heroHintSeen: heroHintSeen ?? this.heroHintSeen,
   );
   ProfileRow copyWithCompanion(ProfilesCompanion data) {
     return ProfileRow(
@@ -421,6 +494,10 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
       recentSearches: data.recentSearches.present
           ? data.recentSearches.value
           : this.recentSearches,
+      heroMode: data.heroMode.present ? data.heroMode.value : this.heroMode,
+      heroHintSeen: data.heroHintSeen.present
+          ? data.heroHintSeen.value
+          : this.heroHintSeen,
     );
   }
 
@@ -436,7 +513,9 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
           ..write('payday: $payday, ')
           ..write('hideAmounts: $hideAmounts, ')
           ..write('onboardedAt: $onboardedAt, ')
-          ..write('recentSearches: $recentSearches')
+          ..write('recentSearches: $recentSearches, ')
+          ..write('heroMode: $heroMode, ')
+          ..write('heroHintSeen: $heroHintSeen')
           ..write(')'))
         .toString();
   }
@@ -453,6 +532,8 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
     hideAmounts,
     onboardedAt,
     recentSearches,
+    heroMode,
+    heroHintSeen,
   );
   @override
   bool operator ==(Object other) =>
@@ -467,7 +548,9 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
           other.payday == this.payday &&
           other.hideAmounts == this.hideAmounts &&
           other.onboardedAt == this.onboardedAt &&
-          other.recentSearches == this.recentSearches);
+          other.recentSearches == this.recentSearches &&
+          other.heroMode == this.heroMode &&
+          other.heroHintSeen == this.heroHintSeen);
 }
 
 class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
@@ -481,6 +564,8 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
   final Value<bool> hideAmounts;
   final Value<DateTime?> onboardedAt;
   final Value<String> recentSearches;
+  final Value<BalanceMode> heroMode;
+  final Value<bool> heroHintSeen;
   final Value<int> rowid;
   const ProfilesCompanion({
     this.id = const Value.absent(),
@@ -493,6 +578,8 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
     this.hideAmounts = const Value.absent(),
     this.onboardedAt = const Value.absent(),
     this.recentSearches = const Value.absent(),
+    this.heroMode = const Value.absent(),
+    this.heroHintSeen = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ProfilesCompanion.insert({
@@ -506,6 +593,8 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
     this.hideAmounts = const Value.absent(),
     this.onboardedAt = const Value.absent(),
     this.recentSearches = const Value.absent(),
+    this.heroMode = const Value.absent(),
+    this.heroHintSeen = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : openingBalance = Value(openingBalance),
        openingAt = Value(openingAt),
@@ -521,6 +610,8 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
     Expression<bool>? hideAmounts,
     Expression<DateTime>? onboardedAt,
     Expression<String>? recentSearches,
+    Expression<String>? heroMode,
+    Expression<bool>? heroHintSeen,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -534,6 +625,8 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
       if (hideAmounts != null) 'hide_amounts': hideAmounts,
       if (onboardedAt != null) 'onboarded_at': onboardedAt,
       if (recentSearches != null) 'recent_searches': recentSearches,
+      if (heroMode != null) 'hero_mode': heroMode,
+      if (heroHintSeen != null) 'hero_hint_seen': heroHintSeen,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -549,6 +642,8 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
     Value<bool>? hideAmounts,
     Value<DateTime?>? onboardedAt,
     Value<String>? recentSearches,
+    Value<BalanceMode>? heroMode,
+    Value<bool>? heroHintSeen,
     Value<int>? rowid,
   }) {
     return ProfilesCompanion(
@@ -562,6 +657,8 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
       hideAmounts: hideAmounts ?? this.hideAmounts,
       onboardedAt: onboardedAt ?? this.onboardedAt,
       recentSearches: recentSearches ?? this.recentSearches,
+      heroMode: heroMode ?? this.heroMode,
+      heroHintSeen: heroHintSeen ?? this.heroHintSeen,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -599,6 +696,14 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
     if (recentSearches.present) {
       map['recent_searches'] = Variable<String>(recentSearches.value);
     }
+    if (heroMode.present) {
+      map['hero_mode'] = Variable<String>(
+        $ProfilesTable.$converterheroMode.toSql(heroMode.value),
+      );
+    }
+    if (heroHintSeen.present) {
+      map['hero_hint_seen'] = Variable<bool>(heroHintSeen.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -618,6 +723,8 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
           ..write('hideAmounts: $hideAmounts, ')
           ..write('onboardedAt: $onboardedAt, ')
           ..write('recentSearches: $recentSearches, ')
+          ..write('heroMode: $heroMode, ')
+          ..write('heroHintSeen: $heroHintSeen, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3317,6 +3424,8 @@ typedef $$ProfilesTableCreateCompanionBuilder = ProfilesCompanion Function({
   Value<bool> hideAmounts,
   Value<DateTime?> onboardedAt,
   Value<String> recentSearches,
+  Value<BalanceMode> heroMode,
+  Value<bool> heroHintSeen,
   Value<int> rowid,
 });
 typedef $$ProfilesTableUpdateCompanionBuilder = ProfilesCompanion Function({
@@ -3330,6 +3439,8 @@ typedef $$ProfilesTableUpdateCompanionBuilder = ProfilesCompanion Function({
   Value<bool> hideAmounts,
   Value<DateTime?> onboardedAt,
   Value<String> recentSearches,
+  Value<BalanceMode> heroMode,
+  Value<bool> heroHintSeen,
   Value<int> rowid,
 });
 
@@ -3389,6 +3500,17 @@ class $$ProfilesTableFilterComposer
 
   ColumnFilters<String> get recentSearches => $composableBuilder(
     column: $table.recentSearches,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<BalanceMode, BalanceMode, String>
+  get heroMode => $composableBuilder(
+    column: $table.heroMode,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<bool> get heroHintSeen => $composableBuilder(
+    column: $table.heroHintSeen,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -3451,6 +3573,16 @@ class $$ProfilesTableOrderingComposer
     column: $table.recentSearches,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get heroMode => $composableBuilder(
+    column: $table.heroMode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get heroHintSeen => $composableBuilder(
+    column: $table.heroHintSeen,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ProfilesTableAnnotationComposer
@@ -3499,6 +3631,14 @@ class $$ProfilesTableAnnotationComposer
     column: $table.recentSearches,
     builder: (column) => column,
   );
+
+  GeneratedColumnWithTypeConverter<BalanceMode, String> get heroMode =>
+      $composableBuilder(column: $table.heroMode, builder: (column) => column);
+
+  GeneratedColumn<bool> get heroHintSeen => $composableBuilder(
+    column: $table.heroHintSeen,
+    builder: (column) => column,
+  );
 }
 
 class $$ProfilesTableTableManager
@@ -3542,6 +3682,8 @@ class $$ProfilesTableTableManager
                 Value<bool> hideAmounts = const Value.absent(),
                 Value<DateTime?> onboardedAt = const Value.absent(),
                 Value<String> recentSearches = const Value.absent(),
+                Value<BalanceMode> heroMode = const Value.absent(),
+                Value<bool> heroHintSeen = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ProfilesCompanion(
                 id: id,
@@ -3554,6 +3696,8 @@ class $$ProfilesTableTableManager
                 hideAmounts: hideAmounts,
                 onboardedAt: onboardedAt,
                 recentSearches: recentSearches,
+                heroMode: heroMode,
+                heroHintSeen: heroHintSeen,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -3568,6 +3712,8 @@ class $$ProfilesTableTableManager
                 Value<bool> hideAmounts = const Value.absent(),
                 Value<DateTime?> onboardedAt = const Value.absent(),
                 Value<String> recentSearches = const Value.absent(),
+                Value<BalanceMode> heroMode = const Value.absent(),
+                Value<bool> heroHintSeen = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ProfilesCompanion.insert(
                 id: id,
@@ -3580,6 +3726,8 @@ class $$ProfilesTableTableManager
                 hideAmounts: hideAmounts,
                 onboardedAt: onboardedAt,
                 recentSearches: recentSearches,
+                heroMode: heroMode,
+                heroHintSeen: heroHintSeen,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

@@ -358,23 +358,119 @@ abstract class AppLocalizations {
   /// **'belum ada catatan di {month}'**
   String homeMonthEmpty(String month);
 
+  /// No description provided for @heroBudgetLeft.
+  ///
+  /// In id, this message translates to:
+  /// **'sisa budget'**
+  String get heroBudgetLeft;
+
+  /// No description provided for @heroBudgetOver.
+  ///
+  /// In id, this message translates to:
+  /// **'kelewat budget'**
+  String get heroBudgetOver;
+
+  /// No description provided for @heroBudgetLeftEnd.
+  ///
+  /// In id, this message translates to:
+  /// **'sisa budget akhir {month}'**
+  String heroBudgetLeftEnd(String month);
+
+  /// No description provided for @heroBudgetOverEnd.
+  ///
+  /// In id, this message translates to:
+  /// **'kelewat budget akhir {month}'**
+  String heroBudgetOverEnd(String month);
+
+  /// No description provided for @heroFromBudget.
+  ///
+  /// In id, this message translates to:
+  /// **'dari budget {amount}'**
+  String heroFromBudget(String amount);
+
+  /// No description provided for @heroPer.
+  ///
+  /// In id, this message translates to:
+  /// **'per {day} {month}'**
+  String heroPer(int day, String month);
+
+  /// No description provided for @heroBudgetOverSub.
+  ///
+  /// In id, this message translates to:
+  /// **'budget bulan ini kelewat {amount}'**
+  String heroBudgetOverSub(String amount);
+
+  /// No description provided for @heroSetBudget.
+  ///
+  /// In id, this message translates to:
+  /// **'pasang budget'**
+  String get heroSetBudget;
+
+  /// No description provided for @heroCatatGajian.
+  ///
+  /// In id, this message translates to:
+  /// **'udah gajian? catat'**
+  String get heroCatatGajian;
+
+  /// No description provided for @heroCatatGajianLate.
+  ///
+  /// In id, this message translates to:
+  /// **'gajian belum masuk? catat'**
+  String get heroCatatGajianLate;
+
+  /// No description provided for @heroRemDulu.
+  ///
+  /// In id, this message translates to:
+  /// **'rem dulu ya'**
+  String get heroRemDulu;
+
+  /// No description provided for @heroDaysLeft.
+  ///
+  /// In id, this message translates to:
+  /// **'{n} hari lagi'**
+  String heroDaysLeft(int n);
+
+  /// No description provided for @heroAvgDay.
+  ///
+  /// In id, this message translates to:
+  /// **'rata²/hari'**
+  String get heroAvgDay;
+
+  /// No description provided for @heroHint.
+  ///
+  /// In id, this message translates to:
+  /// **'tap buat liat sisa budget'**
+  String get heroHint;
+
+  /// No description provided for @heroHintOk.
+  ///
+  /// In id, this message translates to:
+  /// **'oke'**
+  String get heroHintOk;
+
+  /// No description provided for @heroFlipAria.
+  ///
+  /// In id, this message translates to:
+  /// **'{label}, ketuk buat ganti ke {other}'**
+  String heroFlipAria(String label, String other);
+
+  /// No description provided for @heroModeSaldo.
+  ///
+  /// In id, this message translates to:
+  /// **'saldo'**
+  String get heroModeSaldo;
+
+  /// No description provided for @heroModeBudget.
+  ///
+  /// In id, this message translates to:
+  /// **'sisa budget'**
+  String get heroModeBudget;
+
   /// No description provided for @homeBalanceEnd.
   ///
   /// In id, this message translates to:
   /// **'saldo akhir {month}'**
   String homeBalanceEnd(String month);
-
-  /// No description provided for @homeLeftEnd.
-  ///
-  /// In id, this message translates to:
-  /// **'sisa akhir bulan'**
-  String get homeLeftEnd;
-
-  /// No description provided for @homeOverEnd.
-  ///
-  /// In id, this message translates to:
-  /// **'lewat budget'**
-  String get homeOverEnd;
 
   /// No description provided for @homePocketPill.
   ///

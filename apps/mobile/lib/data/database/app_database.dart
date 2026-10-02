@@ -34,6 +34,10 @@ class Profiles extends Table with SyncColumns {
   DateTimeColumn get onboardedAt => dateTime().nullable()();
   TextColumn get recentSearches =>
       text().withDefault(const Constant(''))(); // newline-separated, ≤ 5
+  // Beranda hero: last pick (saldo / sisa budget) and the 1× hint.
+  TextColumn get heroMode =>
+      textEnum<BalanceMode>().withDefault(Constant(BalanceMode.saldo.name))();
+  BoolColumn get heroHintSeen => boolean().withDefault(const Constant(false))();
 }
 
 @DataClassName('CategoryRow')

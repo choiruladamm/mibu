@@ -2,11 +2,13 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../data/repositories/finance_repository.dart';
 import '../../../../domain/models/finance.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../routing/router.dart';
@@ -23,6 +25,7 @@ import '../../../core/widgets/tab_bar.dart';
 import '../../../core/widgets/tx_row.dart';
 import '../../transactions/view_models/transactions_view_model.dart';
 import '../view_models/home_view_model.dart';
+import '../../budget/views/budget_sheet.dart';
 import '../../../core/widgets/meta_line.dart';
 import '../../../core/widgets/app_emoji.dart';
 
@@ -96,9 +99,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
     final label =
         _name(s.selected) +
         (s.selected.year != now.year ? ' ${s.selected.year}' : '');
-    final heroLabel = s.isCurrent
-        ? l.balanceLabel
-        : l.homeBalanceEnd(_name(s.month));
+    final hero = _hero(s, l);
     void toggleMenu() => setState(() => _menuOpen = !_menuOpen);
     Widget picker() =>
         MonthPicker(label: label, open: _menuOpen, onTap: toggleMenu);
@@ -133,9 +134,14 @@ class _HomeViewState extends ConsumerState<HomeView> {
                   ),
                   const SizedBox(height: 18),
                   _Hero(
-                    label: heroLabel,
-                    balance: s.balance,
-                    chip: _chip(context, l, s),
+                    data: hero,
+                    canFlip: s.canFlip,
+                    flipAria: _flipAria(s, l, hero.label),
+                    showHint: s.canFlip && !s.heroHintSeen && s.isCurrent,
+                    onFlip: () => _flip(s),
+                    onHintOk: () =>
+                        ref.read(financeRepositoryProvider).markHeroHintSeen(),
+                    onSetBudget: () => editBudget(context, ref),
                   ),
                   const SizedBox(height: 18),
                   _gutter(
@@ -253,28 +259,59 @@ class _HomeViewState extends ConsumerState<HomeView> {
                         child: Row(
                           children: [
                             Expanded(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    heroLabel,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: AppText.micro.copyWith(
-                                      color: AppColors.muted,
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: Semantics(
+                                  button: s.canFlip,
+                                  toggled: s.canFlip ? s.isBudget : null,
+                                  label: _flipAria(s, l, hero.label),
+                                  excludeSemantics: s.canFlip,
+                                  child: GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: s.canFlip ? () => _flip(s) : null,
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          spacing: 4,
+                                          children: [
+                                            Flexible(
+                                              child: Text(
+                                                hero.label,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: AppText.micro.copyWith(
+                                                  color: AppColors.muted,
+                                                ),
+                                              ),
+                                            ),
+                                            if (s.canFlip)
+                                              const HugeIcon(
+                                                icon: HugeIcons
+                                                    .strokeRoundedArrowDataTransferHorizontal,
+                                                size: 12,
+                                                strokeWidth: 2,
+                                                color: AppColors.muted,
+                                              ),
+                                          ],
+                                        ),
+                                        Text(
+                                          context.rpCompact(hero.amount),
+                                          maxLines: 1,
+                                          style: AppText.label.copyWith(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w600,
+                                            letterSpacing: -0.4,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  Text(
-                                    context.rpCompact(s.balance),
-                                    maxLines: 1,
-                                    style: AppText.label.copyWith(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w600,
-                                      letterSpacing: -0.4,
-                                    ),
-                                  ),
-                                ],
+                                ),
                               ),
                             ),
                             picker(),
@@ -323,27 +360,115 @@ class _HomeViewState extends ConsumerState<HomeView> {
     );
   }
 
-  /// "aman jajan hari ini · Rp580K" now; "sisa akhir bulan · Rp…" for past
-  /// months (hidden without a budget); null = no chip.
-  static _ChipData? _chip(
-    BuildContext context,
-    AppLocalizations l,
-    HomeState s,
-  ) {
-    if (s.isCurrent) {
+  /// Hero pill: saldo ⇄ sisa budget. Remembered, haptic, and using it once
+  /// retires the hint.
+  void _flip(HomeState s) {
+    if (!s.canFlip) return;
+    final repo = ref.read(financeRepositoryProvider);
+    HapticFeedback.lightImpact();
+    repo.setBalanceMode(s.isBudget ? BalanceMode.saldo : BalanceMode.budget);
+    if (!s.heroHintSeen) repo.markHeroHintSeen();
+  }
+
+  static String _flipAria(HomeState s, AppLocalizations l, String label) =>
+      l.heroFlipAria(label, s.isBudget ? l.heroModeSaldo : l.heroModeBudget);
+
+  /// What the hero shows for [s]: label, amount, the small line under it and
+  /// the chip (02.1p, 00.23b). The chip never follows the mode.
+  _HeroData _hero(HomeState s, AppLocalizations l) {
+    final month = _name(s.month);
+    final left = s.budgetLeft;
+    final negative = (left ?? 0) < 0;
+
+    // label + amount
+    final String label;
+    final int amount;
+    if (s.isBudget) {
+      label = s.isCurrent
+          ? (negative ? l.heroBudgetOver : l.heroBudgetLeft)
+          : (negative
+                ? l.heroBudgetOverEnd(month)
+                : l.heroBudgetLeftEnd(month));
+      amount = (left ?? 0).abs();
+    } else {
+      label = s.isCurrent ? l.balanceLabel : l.homeBalanceEnd(month);
+      amount = s.balance;
+    }
+
+    // small line
+    String sub;
+    var warn = false;
+    if (s.isBudget) {
+      sub = l.heroFromBudget(context.rpCompact(s.budget ?? 0));
+    } else if (!s.isCurrent) {
+      sub = l.heroPer(
+        DateTime(s.month.year, s.month.month + 1, 0).day,
+        _monthShort.format(s.month).toLowerCase(),
+      );
+    } else if (s.overBudget) {
+      sub = l.heroBudgetOverSub(context.rpCompact(-(left ?? 0)));
+      warn = true;
+    } else {
+      switch (s.payday.status) {
+        case PaydayStatus.today:
+          sub = l.paydayToday;
+        case PaydayStatus.late:
+          sub = l.paydayLate(s.payday.lateDays);
+          warn = true;
+        case PaydayStatus.upcoming:
+          sub = l.paydayIn(s.payday.daysLeft);
+      }
+    }
+
+    // chip: aman jajan, or what to do instead
+    _ChipData? chip;
+    if (!s.isCurrent) {
+      final avg = (s.monthSpent / s.periodDays / 1000).round() * 1000;
+      chip = (
+        text: l.heroAvgDay,
+        value: context.rpCompact(avg),
+        icon: _ChipIcon.tick,
+        outline: false,
+        onTap: () => goTab(context, AppTab.stats),
+      );
+    } else if (s.payday.status == PaydayStatus.today ||
+        s.payday.status == PaydayStatus.late) {
+      // Days left is 0 here: no division, ask for the salary instead.
+      chip = (
+        text: s.payday.status == PaydayStatus.today
+            ? l.heroCatatGajian
+            : l.heroCatatGajianLate,
+        value: null,
+        icon: _ChipIcon.plus,
+        outline: true,
+        onTap: () => context.push(Routes.addEntry),
+      );
+    } else if (s.overBudget) {
+      chip = (
+        text: l.heroRemDulu,
+        value: l.heroDaysLeft(s.budgetDaysLeft),
+        icon: _ChipIcon.alert,
+        outline: true,
+        onTap: () => goTab(context, AppTab.pockets),
+      );
+    } else {
       final over = s.safeToSpendToday < 0;
-      return (
+      chip = (
         text: over ? l.overspentToday : l.safeToSpendToday,
         value: context.rpCompact(s.safeToSpendToday.abs()),
-        alert: over,
+        icon: over ? _ChipIcon.alert : _ChipIcon.tick,
+        outline: false,
+        onTap: () => goTab(context, AppTab.pockets),
       );
     }
-    final left = s.monthLeft;
-    if (left == null) return null;
+
     return (
-      text: left < 0 ? l.homeOverEnd : l.homeLeftEnd,
-      value: context.rpCompact(left.abs()),
-      alert: left < 0,
+      label: label,
+      amount: amount,
+      sub: sub,
+      subWarn: warn,
+      setBudget: !s.canFlip && s.isCurrent,
+      chip: chip,
     );
   }
 
@@ -386,27 +511,117 @@ class _SearchButton extends StatelessWidget {
   }
 }
 
-typedef _ChipData = ({String text, String value, bool alert});
+enum _ChipIcon { tick, alert, plus }
 
+typedef _ChipData = ({
+  String text,
+  String? value,
+  _ChipIcon icon,
+  bool outline, // ring instead of filled ink
+  VoidCallback onTap,
+});
+
+typedef _HeroData = ({
+  String label,
+  int amount,
+  String sub,
+  bool subWarn, // "!" in front, ink
+  bool setBudget, // "• pasang budget" link after the sub
+  _ChipData? chip,
+});
+
+final _monthShort = DateFormat.MMM('id');
+
+/// 02.1 hero (HeroSaldo 00.23b): label pill (saldo ⇄ sisa budget), amount,
+/// one small line, and the chip.
 class _Hero extends StatelessWidget {
-  const _Hero({required this.label, required this.balance, required this.chip});
+  const _Hero({
+    required this.data,
+    required this.canFlip,
+    required this.flipAria,
+    required this.showHint,
+    required this.onFlip,
+    required this.onHintOk,
+    required this.onSetBudget,
+  });
 
-  final String label;
-  final int balance;
-  final _ChipData? chip;
+  final _HeroData data;
+  final bool canFlip, showHint;
+  final String flipAria;
+  final VoidCallback onFlip, onHintOk, onSetBudget;
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    final label = _Swap(
+      id: data.label,
+      child: Text(
+        data.label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: AppText.label.copyWith(
+          fontSize: 14,
+          fontWeight: canFlip ? FontWeight.w500 : FontWeight.w400,
+          color: canFlip ? AppColors.ink : AppColors.muted,
+        ),
+      ),
+    );
     return Column(
       children: [
-        _Swap(
-          id: label,
-          child: Text(
-            label,
-            style: AppText.label.copyWith(fontSize: 14, color: AppColors.muted),
-          ),
+        // First time only: sits above the pill and pushes the hero down a bit
+        // (a floating bubble outside the hero's box can't be tapped).
+        AnimatedSize(
+          duration: AppMotion.select,
+          curve: AppMotion.ease,
+          alignment: Alignment.topCenter,
+          child: showHint
+              ? Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: _HeroHint(
+                    text: l.heroHint,
+                    ok: l.heroHintOk,
+                    onOk: onHintOk,
+                  ),
+                )
+              : const SizedBox(width: double.infinity),
         ),
-        const SizedBox(height: 6),
+        if (canFlip)
+          Semantics(
+            button: true,
+            label: flipAria,
+            excludeSemantics: true,
+            child: GestureDetector(
+              onTap: onFlip,
+              child: Container(
+                height: 32,
+                constraints: BoxConstraints(
+                  maxWidth:
+                      MediaQuery.sizeOf(context).width - 2 * AppSpace.gutter,
+                ),
+                padding: const EdgeInsets.only(left: 14, right: 10),
+                decoration: BoxDecoration(
+                  color: AppColors.mist,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 6,
+                  children: [
+                    Flexible(child: label),
+                    const HugeIcon(
+                      icon: HugeIcons.strokeRoundedArrowDataTransferHorizontal,
+                      size: 16,
+                      strokeWidth: 1.8,
+                      color: AppColors.muted,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          )
+        else
+          SizedBox(height: 32, child: Center(child: label)),
+        const SizedBox(height: 8),
         // Long balances shrink instead of overflowing.
         _gutterFit(
           PeekTap(
@@ -426,9 +641,10 @@ class _Hero extends StatelessWidget {
                     ),
                   ),
                 ),
-                // Counts from the old balance to the new one.
+                // Counts from the old figure to the new one: after a swipe
+                // between months and after the pill flips.
                 TweenAnimationBuilder(
-                  tween: IntTween(end: balance),
+                  tween: IntTween(end: data.amount),
                   duration: AppMotion.fill,
                   curve: AppMotion.ease,
                   builder: (context, v, _) => Text(
@@ -440,9 +656,73 @@ class _Hero extends StatelessWidget {
             ),
           ),
         ),
+        const SizedBox(height: 8),
         _Swap(
-          id: chip?.text,
-          child: switch (chip) {
+          id: (data.sub, data.setBudget),
+          child: SizedBox(
+            height: 20,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: 6,
+              children: [
+                if (data.subWarn)
+                  Container(
+                    width: 16,
+                    height: 16,
+                    alignment: Alignment.center,
+                    decoration: const BoxDecoration(
+                      color: AppColors.ink,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const HugeIcon(
+                      icon: HugeIcons.strokeRoundedAlert02,
+                      size: 10,
+                      strokeWidth: 2.4,
+                      color: AppColors.paper,
+                    ),
+                  ),
+                Flexible(
+                  child: Text(
+                    data.sub,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppText.caption.copyWith(
+                      color: data.subWarn ? AppColors.ink : AppColors.muted,
+                    ),
+                  ),
+                ),
+                if (data.setBudget)
+                  GestureDetector(
+                    onTap: onSetBudget,
+                    child: Row(
+                      spacing: 6,
+                      children: [
+                        Container(
+                          width: 3,
+                          height: 3,
+                          decoration: const BoxDecoration(
+                            color: AppColors.onInkMuted,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        Text(
+                          l.heroSetBudget,
+                          style: AppText.caption.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.ink,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+        _Swap(
+          id: data.chip?.text,
+          child: switch (data.chip) {
             final c? => _chipPill(c),
             null => const SizedBox.shrink(),
           },
@@ -451,56 +731,148 @@ class _Hero extends StatelessWidget {
     );
   }
 
-  static Widget _chipPill(_ChipData chip) => Padding(
-    padding: const EdgeInsets.only(top: 14),
-    child: Container(
-      height: 34,
-      padding: const EdgeInsets.only(left: 6, right: 14),
-      decoration: BoxDecoration(
-        color: AppColors.ink,
-        borderRadius: BorderRadius.circular(AppRadius.pill),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        spacing: 8,
-        children: [
-          Container(
-            alignment: Alignment.center,
-            width: 24,
-            height: 24,
-            decoration: const BoxDecoration(
-              color: AppColors.paper,
-              shape: BoxShape.circle,
+  /// Aman jajan, rata²/hari: filled ink + ✓. Rem dulu / catat gajian: ring +
+  /// disc glyph. Tap goes where the number comes from.
+  static Widget _chipPill(_ChipData chip) {
+    final ink = chip.outline ? AppColors.paper : AppColors.ink;
+    final fg = chip.outline ? AppColors.ink : AppColors.paper;
+    return Padding(
+      padding: const EdgeInsets.only(top: 14),
+      child: Semantics(
+        button: true,
+        child: GestureDetector(
+          onTap: chip.onTap,
+          child: Container(
+            height: 34,
+            padding: const EdgeInsets.only(left: 6, right: 14),
+            decoration: BoxDecoration(
+              color: ink == AppColors.paper ? AppColors.paper : AppColors.ink,
+              borderRadius: BorderRadius.circular(AppRadius.pill),
+              border: chip.outline
+                  ? Border.all(color: AppColors.ink, width: AppStroke.outline)
+                  : null,
             ),
-            child: HugeIcon(
-              icon: chip.alert
-                  ? HugeIcons.strokeRoundedAlert02
-                  : HugeIcons.strokeRoundedTick02,
-              size: 14,
-              strokeWidth: AppStroke.iconOnInkSmall,
-              color: AppColors.ink,
-            ),
-          ),
-          Flexible(
-            child: MetaLine.rich(
-              [
-                TextSpan(text: chip.text),
-                TextSpan(
-                  text: chip.value,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 8,
+              children: [
+                Container(
+                  alignment: Alignment.center,
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: chip.outline ? AppColors.ink : AppColors.paper,
+                    shape: BoxShape.circle,
+                  ),
+                  child: HugeIcon(
+                    icon: switch (chip.icon) {
+                      _ChipIcon.tick => HugeIcons.strokeRoundedTick02,
+                      _ChipIcon.alert => HugeIcons.strokeRoundedAlert02,
+                      _ChipIcon.plus => HugeIcons.strokeRoundedAdd01,
+                    },
+                    size: 14,
+                    strokeWidth: AppStroke.iconOnInkSmall,
+                    color: chip.outline ? AppColors.paper : AppColors.ink,
+                  ),
+                ),
+                Flexible(
+                  child: MetaLine.rich(
+                    [
+                      TextSpan(text: chip.text),
+                      if (chip.value case final v?)
+                        TextSpan(
+                          text: v,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                    ],
+                    onInk: !chip.outline,
+                    style: AppText.label.copyWith(fontSize: 14, color: fg),
+                  ),
                 ),
               ],
-              onInk: true,
-              style: AppText.label.copyWith(
-                fontSize: 14,
-                color: AppColors.paper,
-              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// "tap buat liat sisa budget" + oke, once, pointing at the pill.
+class _HeroHint extends StatelessWidget {
+  const _HeroHint({required this.text, required this.ok, required this.onOk});
+
+  final String text, ok;
+  final VoidCallback onOk;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      liveRegion: true,
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.bottomCenter,
+        children: [
+          Container(
+            padding: const EdgeInsets.fromLTRB(14, 8, 8, 8),
+            decoration: BoxDecoration(
+              color: AppColors.ink,
+              borderRadius: BorderRadius.circular(14),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x2E111111),
+                  blurRadius: 20,
+                  offset: Offset(0, 8),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 10,
+              children: [
+                Flexible(
+                  child: Text(
+                    text,
+                    style: AppText.caption.copyWith(
+                      fontSize: 13,
+                      color: AppColors.paper,
+                    ),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: onOk,
+                  child: Container(
+                    height: 26,
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: AppColors.paper,
+                      borderRadius: BorderRadius.circular(13),
+                    ),
+                    child: Text(
+                      ok,
+                      style: AppText.micro.copyWith(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.ink,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Positioned(
+            bottom: -5,
+            child: Transform.rotate(
+              angle: math.pi / 4,
+              child: Container(width: 10, height: 10, color: AppColors.ink),
             ),
           ),
         ],
       ),
-    ),
-  );
+    );
+  }
 }
 
 /// Content that fades to its replacement when [id] changes while the height

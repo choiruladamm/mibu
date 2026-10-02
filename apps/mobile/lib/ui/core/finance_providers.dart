@@ -41,6 +41,11 @@ final currentPeriodProvider = Provider<Period>(
   (ref) => ref.watch(periodsProvider).periodOf(ref.watch(nowProvider)),
 );
 
+/// The budget in force for [period] (any month; null = none).
+final budgetInPeriodProvider = StreamProvider.family<int?, Period>(
+  (ref, period) => ref.watch(financeRepositoryProvider).watchBudget(period),
+);
+
 /// Dates of logged gajian, for [paydayInfo] (cair duluan, telat).
 final salaryDatesProvider = StreamProvider<List<DateTime>>(
   (ref) => ref.watch(financeRepositoryProvider).watchSalaryDates(),
