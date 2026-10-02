@@ -18,6 +18,7 @@ import '../../../core/widgets/sheet.dart';
 import '../../../core/finance_providers.dart';
 import '../view_models/add_entry_view_model.dart';
 import 'category_picker_sheet.dart';
+import '../../../core/widgets/app_emoji.dart';
 
 /// 03.1 catat — opened from + on every tab; pops on close / save.
 class AddEntryView extends ConsumerStatefulWidget {
@@ -462,9 +463,10 @@ class _Impact extends ConsumerWidget {
           Row(
             children: [
               Expanded(
-                child: Text(
+                child: EmojiText(
                   label,
                   style: AppText.caption.copyWith(color: AppColors.muted),
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -520,7 +522,7 @@ class _CategoryChip extends StatelessWidget {
                         strokeWidth: AppStroke.icon,
                         color: AppColors.ink,
                       )
-                    : Text(c.emoji, style: const TextStyle(fontSize: 19)),
+                    : AppEmoji(c.emoji, size: 22),
               ),
               Text(
                 c == null

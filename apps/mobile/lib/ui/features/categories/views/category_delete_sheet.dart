@@ -10,6 +10,7 @@ import '../../../core/tokens.dart';
 import '../../../core/widgets/sheet.dart';
 import '../view_models/categories_view_model.dart';
 import '../../../core/widgets/meta_line.dart';
+import '../../../core/widgets/app_emoji.dart';
 
 /// 03.6 hapus kategori. True when it ended deleted (beres or dismissed
 /// after the delete); false when cancelled or undone.
@@ -241,7 +242,7 @@ class _Header extends StatelessWidget {
                   color: AppColors.mist,
                   shape: BoxShape.circle,
                 ),
-                child: Text(emoji, style: const TextStyle(fontSize: 32)),
+                child: AppEmoji(emoji, size: 37),
               ),
               Positioned(
                 right: -4,
@@ -330,7 +331,7 @@ class _TargetChip extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             spacing: 8,
             children: [
-              Text(emoji, style: const TextStyle(fontSize: 18)),
+              AppEmoji(emoji, size: 21),
               Text(
                 label,
                 style: AppText.label.copyWith(
@@ -368,7 +369,7 @@ class _MoveSummary extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Text(from, style: style),
+          EmojiText(from, style: style, emojiSize: 22),
           Text(count, style: style.copyWith(color: AppColors.muted)),
           const Spacer(),
           const HugeIcon(
@@ -380,8 +381,9 @@ class _MoveSummary extends StatelessWidget {
           const Spacer(),
           Flexible(
             flex: 4,
-            child: Text(
+            child: EmojiText(
               '${to.$1} ${to.$2}',
+              emojiSize: 22,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: style.copyWith(fontWeight: FontWeight.w600),
@@ -525,8 +527,9 @@ class _Done extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        Text(
+        EmojiText(
           body,
+          emojiSize: 20,
           textAlign: TextAlign.center,
           style: AppText.label.copyWith(fontSize: 15, color: AppColors.muted),
         ),

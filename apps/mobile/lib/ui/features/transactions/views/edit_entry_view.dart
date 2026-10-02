@@ -16,6 +16,7 @@ import '../../../core/widgets/nav_header.dart';
 import '../../../core/widgets/note_sheet.dart';
 import '../../../core/widgets/sheet.dart';
 import 'transaction_detail_view.dart';
+import '../../../core/widgets/app_emoji.dart';
 
 final _dots = NumberFormat('#,##0', 'id_ID');
 final _headerDay = DateFormat('EEE d MMM', 'id');
@@ -522,7 +523,7 @@ class _CategoryChip extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             spacing: 6,
             children: [
-              Text(category.emoji, style: const TextStyle(fontSize: 17)),
+              AppEmoji(category.emoji, size: 20),
               Text(
                 category.name,
                 style: AppText.label.copyWith(

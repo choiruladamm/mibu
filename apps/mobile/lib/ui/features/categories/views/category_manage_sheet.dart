@@ -15,6 +15,7 @@ import '../view_models/categories_view_model.dart';
 import 'category_delete_sheet.dart';
 import 'category_form_sheet.dart';
 import '../../../core/widgets/meta_line.dart';
+import '../../../core/widgets/app_emoji.dart';
 
 /// 03.3 buat apa aja — from 03.2 "atur" and (M6) 02.4.
 Future<void> showCategoryManage(BuildContext context) =>
@@ -301,7 +302,7 @@ class _Tile extends StatelessWidget {
             color: AppColors.mist,
             shape: BoxShape.circle,
           ),
-          child: Text(category.emoji, style: const TextStyle(fontSize: 28)),
+          child: AppEmoji(category.emoji, size: 32),
         ),
         Text(
           category.name,
@@ -360,7 +361,7 @@ class _JarNote extends StatelessWidget {
       child: Row(
         spacing: 12,
         children: [
-          const Text('🫙', style: TextStyle(fontSize: 22)),
+          const AppEmoji('🫙', size: 25),
           Expanded(
             child: Text.rich(
               TextSpan(

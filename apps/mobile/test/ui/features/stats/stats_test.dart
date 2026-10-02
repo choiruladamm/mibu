@@ -8,6 +8,7 @@ import 'package:mibu/data/database/seed.dart';
 import 'package:mibu/l10n/app_localizations.dart';
 import 'package:mibu/ui/core/clock.dart';
 import 'package:mibu/ui/core/theme.dart';
+import 'package:mibu/ui/core/widgets/app_emoji.dart';
 import 'package:mibu/ui/features/stats/views/stats_view.dart';
 
 import '../../../meta.dart';
@@ -131,7 +132,7 @@ void main() {
     );
     // the decorative circle's emoji (the bar badge is a different widget)
     final emoji = tester.getCenter(
-      find.byWidgetPredicate((w) => w is Text && w.style?.fontSize == 30),
+      find.byWidgetPredicate((w) => w is AppEmoji && w.size == 34),
     );
     expect(card.right - emoji.dx, closeTo(27, 0.5));
     expect(emoji.dy - card.top, closeTo(27, 0.5));

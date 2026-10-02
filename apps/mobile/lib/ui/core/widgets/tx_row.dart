@@ -7,6 +7,7 @@ import '../../../l10n/app_localizations.dart';
 import '../money.dart';
 import '../tokens.dart';
 import 'meta_line.dart';
+import 'app_emoji.dart';
 
 /// 00.4 TxRow — 64 tall; tap opens 04.3 detail.
 class TxRow extends StatelessWidget {
@@ -33,12 +34,7 @@ class TxRow extends StatelessWidget {
             SizedBox(
               width: 40,
               height: 40,
-              child: Center(
-                child: Text(
-                  tx.emoji,
-                  style: const TextStyle(fontSize: 30, height: 1),
-                ),
-              ),
+              child: Center(child: AppEmoji(tx.emoji, size: 34)),
             ),
             Expanded(
               child: Column(

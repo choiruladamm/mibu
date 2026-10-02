@@ -12,6 +12,7 @@ import '../../../core/widgets/new_tile.dart';
 import '../../../core/widgets/sheet.dart';
 import '../../categories/views/category_form_sheet.dart';
 import '../../categories/views/category_manage_sheet.dart';
+import '../../../core/widgets/app_emoji.dart';
 
 /// 03.2 buat apa? — resolves to the category + place, or null.
 Future<RecentPick?> showCategoryPicker(
@@ -275,10 +276,7 @@ class _RecentChip extends StatelessWidget {
               color: AppColors.paper,
               shape: BoxShape.circle,
             ),
-            child: Text(
-              pick.category.emoji,
-              style: const TextStyle(fontSize: 15),
-            ),
+            child: AppEmoji(pick.category.emoji, size: 17),
           ),
           Text(pick.place, style: AppText.label.copyWith(fontSize: 15)),
         ],
@@ -324,10 +322,7 @@ class _CategoryTile extends StatelessWidget {
                     color: on ? AppColors.ink : AppColors.mist,
                     shape: BoxShape.circle,
                   ),
-                  child: Text(
-                    category.emoji,
-                    style: const TextStyle(fontSize: 28),
-                  ),
+                  child: AppEmoji(category.emoji, size: 32),
                 ),
                 if (on)
                   Positioned(

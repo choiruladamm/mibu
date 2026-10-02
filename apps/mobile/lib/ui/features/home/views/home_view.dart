@@ -24,6 +24,7 @@ import '../../../core/widgets/tx_row.dart';
 import '../../transactions/view_models/transactions_view_model.dart';
 import '../view_models/home_view_model.dart';
 import '../../../core/widgets/meta_line.dart';
+import '../../../core/widgets/app_emoji.dart';
 
 final _monthFull = DateFormat.MMMM('id');
 final _dayTitle = DateFormat('EEE d MMM', 'id');
@@ -573,8 +574,9 @@ class _PocketPills extends StatelessWidget {
                       color: ink ? AppColors.ink : AppColors.mist,
                       borderRadius: BorderRadius.circular(24),
                     ),
-                    child: Text(
+                    child: EmojiText(
                       '${p.emoji} ${p.usedPct}%',
+                      emojiSize: 22,
                       style: AppText.label.copyWith(
                         fontSize: 14,
                         fontWeight: ink ? FontWeight.w600 : FontWeight.w400,

@@ -91,7 +91,7 @@ void main() {
     await holdFor(const Duration(milliseconds: 1100));
     await settle();
     expect(find.text('anabul udah dihapus'), findsOneWidget);
-    expect(find.text('2 catatan udah pindah ke 🍜 makan.'), findsOneWidget);
+    expect(findEmojiText('2 catatan udah pindah ke 🍜 makan.'), findsOneWidget);
     expect((await tester.runAsync(anabul))!.deletedAt, isNotNull);
     expect(await tester.runAsync(makanEntries), 1 + 2);
 

@@ -17,6 +17,7 @@ import '../view_models/categories_view_model.dart';
 import '../../pockets/views/set_limit_sheet.dart';
 import 'category_delete_sheet.dart';
 import '../../../core/widgets/meta_line.dart';
+import '../../../core/widgets/app_emoji.dart';
 
 /// Where a new category is made from (03.4 / 03.4b / 03.4c / 03.4d).
 enum CategoryOrigin { catat, kantong, atur }
@@ -470,7 +471,7 @@ class _EmojiDisc extends StatelessWidget {
               color: AppColors.mist,
               shape: BoxShape.circle,
             ),
-            child: Text(emoji, style: const TextStyle(fontSize: 64)),
+            child: AppEmoji(emoji, size: 74),
           ),
           Positioned(
             right: 0,
@@ -603,7 +604,7 @@ class _EmojiButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(size / 2),
             border: ring ? Border.all(color: AppColors.ink, width: 2) : null,
           ),
-          child: Text(emoji, style: TextStyle(fontSize: fontSize)),
+          child: AppEmoji(emoji, size: (fontSize * 1.15).roundToDouble()),
         ),
       ),
     );

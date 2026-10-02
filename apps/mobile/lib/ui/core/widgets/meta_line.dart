@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../tokens.dart';
+import 'app_emoji.dart';
 
 /// 00.19 MetaLine — a 1-line metadata row ("petshop • 14:32") whose parts
 /// are split by 3px round dots, never the "·" character. Screen readers
@@ -67,9 +68,25 @@ class MetaLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = inlineEmojiSize(
+      (style?.fontSize ?? DefaultTextStyle.of(context).style.fontSize) ?? 14,
+    );
     return Text.rich(
       TextSpan(
-        children: join(spans, onInk: onInk, tight: tight),
+        children: join(
+          [
+            // Plain parts can carry a category emoji ("🍜 warteg").
+            for (final s in spans)
+              s is TextSpan && s.children == null && s.text != null
+                  ? TextSpan(
+                      style: s.style,
+                      children: emojiSpans(s.text!, size: size),
+                    )
+                  : s,
+          ],
+          onInk: onInk,
+          tight: tight,
+        ),
       ),
       style: style,
       textAlign: textAlign,

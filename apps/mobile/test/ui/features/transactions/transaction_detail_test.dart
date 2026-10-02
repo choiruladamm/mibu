@@ -67,7 +67,7 @@ void main() {
     expect(find.text('sel 13 okt'), findsOneWidget);
     expect(findMeta(['sel 13 okt', '14.32']), findsOneWidget);
     expect(find.text('+ catatan'), findsOneWidget);
-    expect(find.text('🐶 anabul'), findsOneWidget);
+    expect(findEmojiText('🐶 anabul'), findsOneWidget);
     expect(find.text('jatah sisa Rp100K dari limit Rp1jt'), findsOneWidget);
     expect(find.text('ini aja makan 45% jatah anabul'), findsOneWidget);
 

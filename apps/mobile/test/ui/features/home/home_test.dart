@@ -79,8 +79,8 @@ void main() {
 
     expect(find.text('kantong'), findsOneWidget);
     expect(find.text('liat semua'), findsOneWidget);
-    expect(find.text('🐶 90%'), findsOneWidget);
-    expect(find.text('☕ 60%'), findsOneWidget);
+    expect(findEmojiText('🐶 90%'), findsOneWidget);
+    expect(findEmojiText('☕ 60%'), findsOneWidget);
 
     expect(find.text('baru aja'), findsOneWidget);
     expect(find.text('-Rp27K hari ini'), findsOneWidget);
@@ -124,7 +124,7 @@ void main() {
     expect(findMeta(['sisa akhir bulan', 'Rp5,39jt']), findsOneWidget);
     expect(find.text('terakhir di september'), findsOneWidget);
     expect(find.text('liat semua di september (2)'), findsOneWidget);
-    expect(find.text('🐶 0%'), findsOneWidget); // no anabul that month
+    expect(findEmojiText('🐶 0%'), findsOneWidget); // no anabul that month
     expect(find.text('hari ini'), findsNothing);
     expect(findMeta(['hari ini', 'okt']), findsNothing);
   });

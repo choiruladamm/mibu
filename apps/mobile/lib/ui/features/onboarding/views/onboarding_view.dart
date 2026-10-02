@@ -8,6 +8,7 @@ import '../../../core/dashed.dart';
 import '../../../core/money.dart';
 import '../../../core/tokens.dart';
 import '../../../core/widgets/meta_line.dart';
+import '../../../core/widgets/app_emoji.dart';
 
 /// 01.1 onboarding — one widget, step 1 | 2 | 3.
 class OnboardingView extends StatefulWidget {
@@ -283,7 +284,12 @@ class _PocketsIllustration extends StatelessWidget {
               alignment: Alignment.center,
               child: MetaLine.rich(
                 [
-                  TextSpan(text: '💼 ${l.onboardingSalaryIn}'),
+                  TextSpan(
+                    children: emojiSpans(
+                      '💼 ${l.onboardingSalaryIn}',
+                      size: 20,
+                    ),
+                  ),
                   TextSpan(
                     text: rupiahCompact(8500000),
                     style: const TextStyle(fontWeight: FontWeight.w600),
@@ -455,7 +461,7 @@ class _Jar extends StatelessWidget {
                   shape: BoxShape.circle,
                   border: outline,
                 ),
-                child: Text(emoji, style: const TextStyle(fontSize: 22)),
+                child: AppEmoji(emoji, size: 25),
               ),
             ],
           ),

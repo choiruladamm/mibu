@@ -17,6 +17,7 @@ import '../../budget/views/budget_sheet.dart';
 import '../../categories/views/category_form_sheet.dart';
 import '../view_models/pockets_view_model.dart';
 import '../../../core/widgets/meta_line.dart';
+import '../../../core/widgets/app_emoji.dart';
 
 /// 02.2 "pasang limit ke…". With [pick] it opens straight on its limit step
 /// (the "belum ada limit" chips). Saves, selects the jar and shows the toast
@@ -191,10 +192,7 @@ class _SetLimitSheetState extends ConsumerState<SetLimitSheet> {
                           color: AppColors.mist,
                           shape: BoxShape.circle,
                         ),
-                        child: Text(
-                          f.category.emoji,
-                          style: const TextStyle(fontSize: 46),
-                        ),
+                        child: AppEmoji(f.category.emoji, size: 53),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -294,11 +292,7 @@ class _ListStep extends StatelessWidget {
         children: [
           if (free.isEmpty) ...[
             const SizedBox(height: 28),
-            const Text(
-              '🫙',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 40),
-            ),
+            const AppEmoji('🫙', size: 46),
             const SizedBox(height: 10),
             Text(
               l.setLimitEmptyTitle,
@@ -374,10 +368,7 @@ class _Row extends StatelessWidget {
                   color: AppColors.mist,
                   shape: BoxShape.circle,
                 ),
-                child: Text(
-                  f.category.emoji,
-                  style: const TextStyle(fontSize: 22),
-                ),
+                child: AppEmoji(f.category.emoji, size: 25),
               ),
               Expanded(
                 child: Column(

@@ -5,6 +5,7 @@ import '../../../l10n/app_localizations.dart';
 import '../dashed.dart';
 import '../tokens.dart';
 import 'sheet.dart';
+import 'app_emoji.dart';
 
 /// Pocket before → after, shown in the modal's mist box.
 typedef ConfirmImpact = ({String label, String value, int fromPct, int toPct});
@@ -130,8 +131,9 @@ class _ConfirmModal extends StatelessWidget {
                         spacing: 8,
                         children: [
                           Expanded(
-                            child: Text(
+                            child: EmojiText(
                               i.label,
+                              maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: muted,
                             ),
@@ -227,7 +229,7 @@ class _Badge extends StatelessWidget {
               color: AppColors.mist,
               shape: BoxShape.circle,
             ),
-            child: Text(emoji, style: const TextStyle(fontSize: 32)),
+            child: AppEmoji(emoji, size: 38),
           ),
           Positioned(
             right: -4,

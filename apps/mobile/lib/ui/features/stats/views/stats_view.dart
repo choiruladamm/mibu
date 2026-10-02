@@ -18,6 +18,7 @@ import '../../../core/widgets/sheet.dart';
 import '../../../core/widgets/tab_bar.dart';
 import '../../budget/views/budget_sheet.dart';
 import '../../transactions/view_models/transactions_view_model.dart';
+import '../../../core/widgets/app_emoji.dart';
 
 final _day = DateFormat('d', 'id');
 final _dayMonth = DateFormat('d MMM', 'id');
@@ -580,10 +581,7 @@ class _Bar extends StatelessWidget {
                           shape: BoxShape.circle,
                           border: Border.all(color: AppColors.ink, width: 2),
                         ),
-                        child: Text(
-                          emoji!,
-                          style: const TextStyle(fontSize: 16, height: 1),
-                        ),
+                        child: AppEmoji(emoji!, size: 18),
                       ),
                     ),
                 ],
@@ -773,10 +771,7 @@ class _PeakCard extends StatelessWidget {
                     color: AppColors.onInk12,
                     shape: BoxShape.circle,
                   ),
-                  child: Text(
-                    emoji!,
-                    style: const TextStyle(fontSize: 30, height: 1),
-                  ),
+                  child: AppEmoji(emoji!, size: 34),
                 ),
               ),
             Column(
@@ -1249,10 +1244,7 @@ class _Where extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Text(
-                    c.emoji,
-                    style: const TextStyle(fontSize: 20, height: 1),
-                  ),
+                  AppEmoji(c.emoji, size: 23),
                   Expanded(
                     child: Text(
                       c.category ?? l.uncategorized,

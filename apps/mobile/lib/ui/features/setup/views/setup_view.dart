@@ -12,6 +12,7 @@ import '../../../core/measure.dart';
 import '../../../core/money.dart';
 import '../../../core/tokens.dart';
 import '../../../core/widgets/meta_line.dart';
+import '../../../core/widgets/app_emoji.dart';
 
 final _dots = NumberFormat('#,##0', 'id_ID');
 
@@ -624,7 +625,7 @@ class _PocketTile extends StatelessWidget {
                       shape: BoxShape.circle,
                       color: on ? AppColors.paper : AppColors.mist,
                     ),
-                    child: Text(emoji, style: const TextStyle(fontSize: 20)),
+                    child: AppEmoji(emoji, size: 23),
                   ),
                   Expanded(
                     child: Column(

@@ -12,6 +12,8 @@ import 'package:mibu/ui/core/clock.dart';
 import 'package:mibu/ui/core/theme.dart';
 import 'package:mibu/ui/features/add_entry/views/add_entry_view.dart';
 
+import '../../../meta.dart';
+
 void main() {
   testWidgets('catat: type amount, pick a category, save → db', (tester) async {
     tester.view.physicalSize = const Size(390, 844);
@@ -87,18 +89,18 @@ void main() {
     await settle();
     await tester.tap(find.bySemanticsLabel('makan'));
     await tester.pump();
-    expect(find.text('pakai 🍜 makan'), findsOneWidget);
+    expect(findEmojiText('pakai 🍜 makan'), findsOneWidget);
     // Tapping it again unpicks.
     await tester.tap(find.bySemanticsLabel('makan'));
     await tester.pump();
-    expect(find.text('pakai 🍜 makan'), findsNothing);
+    expect(findEmojiText('pakai 🍜 makan'), findsNothing);
     await tester.tap(find.bySemanticsLabel('makan'));
     await tester.pump();
-    await tester.tap(find.text('pakai 🍜 makan'));
+    await tester.tap(findEmojiText('pakai 🍜 makan'));
     await settle();
 
     // makan pocket: 1,5jt − 390K − 52K left.
-    expect(find.text('🍜 jatah makan abis ini'), findsOneWidget);
+    expect(findEmojiText('🍜 jatah makan abis ini'), findsOneWidget);
     expect(find.text('sisa Rp1,06jt'), findsOneWidget);
 
     expect(tester.getSemantics(save), isSemantics(isEnabled: true));

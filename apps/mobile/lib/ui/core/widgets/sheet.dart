@@ -3,6 +3,7 @@ import 'package:hugeicons/hugeicons.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../tokens.dart';
+import 'app_emoji.dart';
 
 /// Opens [child] as a mibu bottom sheet (radius 32, scrim 45% from theme).
 /// [enableDrag] false: only [SheetFrame.handleDrag] closes it by swiping —
@@ -201,7 +202,15 @@ class PrimaryButton extends StatelessWidget {
               strokeWidth: AppStroke.iconOnInkSmall,
               color: fg,
             ),
-          Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
+          // "pakai 🍜 makan": the emoji is drawn, button size (00.20: 24).
+          Flexible(
+            child: EmojiText(
+              label,
+              emojiSize: 24,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
         ],
       ),
     );

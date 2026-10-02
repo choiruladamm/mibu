@@ -19,6 +19,7 @@ import '../../categories/views/category_manage_sheet.dart';
 import '../view_models/pockets_view_model.dart';
 import 'set_limit_sheet.dart';
 import '../../../core/widgets/meta_line.dart';
+import '../../../core/widgets/app_emoji.dart';
 
 /// 02.2 kantong. Isi ulang and impian are post-MVP.
 class PocketsView extends ConsumerStatefulWidget {
@@ -657,10 +658,7 @@ class _FirstPocket extends StatelessWidget {
                             color: AppColors.paper,
                             shape: BoxShape.circle,
                           ),
-                          child: const Text(
-                            '🫙',
-                            style: TextStyle(fontSize: 18),
-                          ),
+                          child: const AppEmoji('🫙', size: 21),
                         ),
                       ),
                     ],
@@ -832,10 +830,7 @@ class _FreeSection extends StatelessWidget {
                               color: AppColors.mist,
                               shape: BoxShape.circle,
                             ),
-                            child: Text(
-                              f.category.emoji,
-                              style: const TextStyle(fontSize: 15),
-                            ),
+                            child: AppEmoji(f.category.emoji, size: 17),
                           ),
                           Text(
                             f.category.name,
@@ -941,10 +936,7 @@ class _Jar extends StatelessWidget {
                         color: AppColors.paper,
                         shape: BoxShape.circle,
                       ),
-                      child: Text(
-                        pocket.emoji,
-                        style: const TextStyle(fontSize: 19),
-                      ),
+                      child: AppEmoji(pocket.emoji, size: 22),
                     ),
                   ),
                 ],
@@ -1002,7 +994,7 @@ class _Detail extends StatelessWidget {
             Row(
               spacing: 8,
               children: [
-                Text(pocket.emoji, style: const TextStyle(fontSize: 20)),
+                AppEmoji(pocket.emoji, size: 23),
                 Expanded(
                   child: Text(
                     pocket.name,

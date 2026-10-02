@@ -48,6 +48,23 @@ void main() {
     expect(stray, isEmpty, reason: 'add them to emoji_catalog.dart');
   });
 
+  test('lib/ui never draws an emoji with plain Text', () {
+    // Emoji go through AppEmoji / EmojiText / MetaLine, never the phone font.
+    final plain = RegExp(
+      r"(?:Text|TextSpan)\(\s*(?:text:\s*)?(?:[\w.]*emoji!?\b|'[^']*[\u{1F000}-\u{1FAFF}])",
+      unicode: true,
+    );
+    final hits = [
+      for (final f in Directory('lib/ui').listSync(recursive: true))
+        if (f is File &&
+            f.path.endsWith('.dart') &&
+            !f.path.endsWith('app_emoji.dart'))
+          for (final m in plain.allMatches(f.readAsStringSync()))
+            '${f.path}: ${m[0]}',
+    ];
+    expect(hits, isEmpty);
+  });
+
   test('asset key drops the FE0F variation selector', () {
     expect(AppEmoji.asset('✈️'), 'assets/emoji/2708.webp');
     expect(catalogEmoji('✈️'), '✈️');

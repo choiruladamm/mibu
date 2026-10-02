@@ -20,6 +20,7 @@ import '../../../core/widgets/nav_header.dart';
 import '../../../core/widgets/sheet.dart';
 import '../../../core/widgets/tx_row.dart';
 import '../../transactions/view_models/transactions_view_model.dart';
+import '../../../core/widgets/app_emoji.dart';
 
 final _monthName = DateFormat('MMMM', 'id');
 
@@ -1153,10 +1154,7 @@ class _Ideas extends StatelessWidget {
                             color: AppColors.mist,
                             shape: BoxShape.circle,
                           ),
-                          child: Text(
-                            idea.emoji,
-                            style: const TextStyle(fontSize: 15, height: 1),
-                          ),
+                          child: AppEmoji(idea.emoji, size: 17),
                         ),
                         Text(idea.label, style: AppText.label),
                       ],

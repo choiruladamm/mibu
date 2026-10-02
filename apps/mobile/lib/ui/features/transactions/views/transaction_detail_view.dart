@@ -20,6 +20,7 @@ import '../../../core/widgets/nav_header.dart';
 import '../../../core/widgets/note_sheet.dart';
 import '../../../core/widgets/toast.dart';
 import '../../../core/widgets/meta_line.dart';
+import '../../../core/widgets/app_emoji.dart';
 
 final transactionProvider = StreamProvider.autoDispose
     .family<Transaction?, String>(
@@ -299,7 +300,7 @@ class _Receipt extends StatelessWidget {
                     color: AppColors.mist,
                     shape: BoxShape.circle,
                   ),
-                  child: Text(t.emoji, style: const TextStyle(fontSize: 34)),
+                  child: AppEmoji(t.emoji, size: 39),
                 ),
               ),
               const SizedBox(height: 14),
@@ -405,8 +406,9 @@ class _Receipt extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       spacing: 12,
                       children: [
-                        Text(
+                        EmojiText(
                           l.receiptPocket(p.emoji, p.name),
+                          emojiSize: 22,
                           style: AppText.label.copyWith(
                             fontWeight: FontWeight.w600,
                           ),

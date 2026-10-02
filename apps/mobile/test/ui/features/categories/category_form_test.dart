@@ -67,7 +67,7 @@ void main() {
     await tester.enterText(nameField, 'Kopi Susu');
     await tester.pump();
     expect(find.text('buat “kopi susu”'), findsOneWidget);
-    expect(find.text('bikin ☕ kopi susu'), findsOneWidget);
+    expect(findEmojiText('bikin ☕ kopi susu'), findsOneWidget);
 
     // budget 8jt − other pockets 3,3jt = 4,7jt free; 300K ÷ 31 days.
     expect(find.text('belum dijatah Rp4,7jt'), findsOneWidget);
@@ -96,9 +96,9 @@ void main() {
     await tester.tap(find.bySemanticsLabel('pakai 🎧'));
     await tester.enterText(nameField, 'kopi');
     await tester.pump();
-    expect(find.text('bikin 🎧 kopi'), findsOneWidget);
+    expect(findEmojiText('bikin 🎧 kopi'), findsOneWidget);
 
-    await tester.tap(find.text('bikin 🎧 kopi'));
+    await tester.tap(findEmojiText('bikin 🎧 kopi'));
     await settle(tester);
     final c = await row(db, 'kopi');
     expect((c.emoji, c.monthlyLimit), ('🎧', 1000000));
@@ -123,7 +123,7 @@ void main() {
     await tester.tap(find.text('duit masuk'));
     await tester.pump();
     expect(find.text('limit bulanan'), findsNothing);
-    await tester.tap(find.text('simpan 🐶 anabul'));
+    await tester.tap(findEmojiText('simpan 🐶 anabul'));
     await settle(tester);
 
     final c = await row(db, 'anabul');
@@ -171,9 +171,9 @@ void main() {
     expect(find.text('limit bulanan'), findsOneWidget);
     expect(find.text('opsional, bisa nanti'), findsOneWidget);
     expect(find.text('maks Rp100jt per limit'), findsNothing);
-    await tester.tap(find.text('bikin & pakai 🏋️ gym'));
+    await tester.tap(findEmojiText('bikin & pakai 🏋️ gym'));
     await settle(tester);
-    expect(find.text('pakai 🏋️ gym'), findsOneWidget);
+    expect(findEmojiText('pakai 🏋️ gym'), findsOneWidget);
     expect((await row(db, 'gym')).monthlyLimit, isNull);
 
     await tester.pumpWidget(const SizedBox());
