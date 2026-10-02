@@ -413,7 +413,7 @@
   "limitPerMonth": "/ bulan",
   "limitFieldLabel": "batas kantong per bulan",
   "limitSliderLabel": "geser batas kantong",
-  "limitMax": "maks Rp100jt",
+  "limitMax": "maks Rp100jt per kantong",
   "limitPerDay": "≈ {amount} sehari",
   "@limitPerDay": {
     "placeholders": {
@@ -545,5 +545,6 @@
     }
   },
   "deleteDoneEmpty": "nggak ada catatan yang ikut pindah.",
-  "deleteCategory": "hapus kategori"
+  "deleteCategory": "hapus kategori",
+  "limitLabel": "batas per bulan"
 }

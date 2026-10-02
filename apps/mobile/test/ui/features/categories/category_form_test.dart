@@ -69,6 +69,21 @@ void main() {
     await tester.pump();
     expect(find.text('1.000.000'), findsOneWidget);
 
+    // Typed past Rp100jt: capped, said so; emptied then left: restored.
+    final limitField = find.byType(TextField).last;
+    await tester.enterText(limitField, '250000000');
+    await tester.pump();
+    expect(find.text('maks Rp100jt per kantong'), findsOneWidget);
+    expect(find.text('100.000.000'), findsOneWidget);
+    await tester.enterText(limitField, '');
+    await tester.pump();
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pump();
+    expect(find.text('1.000.000'), findsOneWidget); // value when focused
+    await tester.ensureVisible(find.text('Rp1jt'));
+    await tester.tap(find.text('Rp1jt'));
+    await tester.pump();
+
     // A picked emoji sticks when the name changes.
     await tester.tap(find.bySemanticsLabel('pakai 🎧'));
     await tester.enterText(nameField, 'kopi');

@@ -943,7 +943,7 @@ abstract class AppLocalizations {
   /// No description provided for @limitMax.
   ///
   /// In id, this message translates to:
-  /// **'maks Rp100jt'**
+  /// **'maks Rp100jt per kantong'**
   String get limitMax;
 
   /// No description provided for @limitPerDay.
@@ -1095,6 +1095,12 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'hapus kategori'**
   String get deleteCategory;
+
+  /// No description provided for @limitLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'batas per bulan'**
+  String get limitLabel;
 }
 
 class _AppLocalizationsDelegate

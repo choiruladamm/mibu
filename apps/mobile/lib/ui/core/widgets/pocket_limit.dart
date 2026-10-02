@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hugeicons/hugeicons.dart';
 
 import '../../../domain/models/finance.dart';
 import '../../../l10n/app_localizations.dart';
@@ -36,9 +37,25 @@ class PocketLimit extends StatefulWidget {
 
 class _PocketLimitState extends State<PocketLimit> {
   late final _text = TextEditingController(text: _dots(widget.value));
+  final _focus = FocusNode();
   bool _capped = false;
+  int _prev = 0; // restored when they empty the field and leave it
 
   static String _dots(int v) => v == 0 ? '' : rupiah(v).replaceFirst('Rp', '');
+
+  @override
+  void initState() {
+    super.initState();
+    _focus.addListener(() {
+      if (_focus.hasFocus) {
+        _prev = widget.value;
+      } else {
+        if (widget.value == 0 && _prev > 0) widget.onChanged(_prev);
+        _capped = false;
+      }
+      setState(() {});
+    });
+  }
 
   @override
   void didUpdateWidget(PocketLimit old) {
@@ -50,7 +67,20 @@ class _PocketLimitState extends State<PocketLimit> {
   @override
   void dispose() {
     _text.dispose();
+    _focus.dispose();
     super.dispose();
+  }
+
+  /// Field width = the typed digits, so "/ bulan" sits right after them.
+  static double _measure(String text, TextStyle style) {
+    final tp = TextPainter(
+      text: TextSpan(text: text.isEmpty ? '0' : text, style: style),
+      textDirection: TextDirection.ltr,
+      maxLines: 1,
+    )..layout();
+    final w = tp.width;
+    tp.dispose();
+    return w;
   }
 
   void _set(int v, {bool capped = false}) {
@@ -59,12 +89,16 @@ class _PocketLimitState extends State<PocketLimit> {
   }
 
   void _typed(String s) {
+    // Digits only (a pasted "Rp 250.000" works), max 10, capped at Rp100jt.
     final digits = s.replaceAll(RegExp('[^0-9]'), '');
-    final v = int.tryParse(digits.length > 9 ? digits.substring(0, 9) : digits);
-    final over = (v ?? 0) > PocketLimit.cap;
-    _set(over ? PocketLimit.cap : v ?? 0, capped: over);
+    final v =
+        int.tryParse(digits.length > 10 ? digits.substring(0, 10) : digits) ??
+        0;
+    final over = v > PocketLimit.cap;
+    final kept = over ? PocketLimit.cap : v;
+    _set(kept, capped: over);
     // Keep the dots as they type; caret stays at the end.
-    final shown = _dots(over ? PocketLimit.cap : v ?? 0);
+    final shown = _dots(kept);
     _text.value = TextEditingValue(
       text: shown,
       selection: TextSelection.collapsed(offset: shown.length),
@@ -89,76 +123,145 @@ class _PocketLimitState extends State<PocketLimit> {
         ? l.limitOver(rupiahCompact(v - free))
         : l.limitPerDay(rupiahCompact(v ~/ widget.monthDays));
     final loud = _capped || over;
+    final focused = _focus.hasFocus;
 
     final len = _dots(v).isEmpty ? 1 : _dots(v).length;
-    final size = len <= 9
-        ? 30.0
-        : len == 10
-        ? 26.0
-        : 22.0;
+    final size = len <= 10 ? 30.0 : 26.0;
+    final style = AppText.headline.copyWith(
+      fontSize: size,
+      fontWeight: FontWeight.w600,
+      letterSpacing: -0.02 * size,
+    );
+    final caption = AppText.caption.copyWith(fontSize: 12);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textBaseline: TextBaseline.alphabetic,
-          children: [
-            Text(
-              'Rp',
-              style: AppText.label.copyWith(
-                fontWeight: FontWeight.w500,
-                color: AppColors.muted,
+        SizedBox(
+          height: 18,
+          child: Row(
+            spacing: 8,
+            children: [
+              Text(
+                l.limitLabel,
+                style: caption.copyWith(color: AppColors.muted),
               ),
-            ),
-            const SizedBox(width: 4),
-            SizedBox(
-              width: (len * size * 0.58 + 6).clamp(24, 200),
-              child: Semantics(
-                label: l.limitFieldLabel,
-                child: TextField(
-                  controller: _text,
-                  onChanged: _typed,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp('[0-9.]')),
-                  ],
-                  style: AppText.headline.copyWith(
-                    fontSize: size,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: -0.03 * size,
-                  ),
-                  decoration: InputDecoration.collapsed(
-                    hintText: '0',
-                    hintStyle: AppText.headline.copyWith(
-                      fontSize: size,
-                      color: AppColors.grey400,
+              Expanded(
+                child: Semantics(
+                  liveRegion: true,
+                  child: Text(
+                    note,
+                    textAlign: TextAlign.end,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: caption.copyWith(
+                      fontWeight: loud ? FontWeight.w600 : FontWeight.w400,
+                      color: loud ? AppColors.ink : AppColors.muted,
                     ),
                   ),
                 ),
               ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 4),
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: _focus.requestFocus,
+          child: CustomPaint(
+            // idle: dashed hairline · typing: ink · capped: 2px ink.
+            painter: _Underline(
+              dashed: !focused && !_capped,
+              width: _capped
+                  ? 2
+                  : focused
+                  ? AppStroke.outline
+                  : AppStroke.hairline,
+              color: focused || _capped ? AppColors.ink : AppColors.line,
             ),
-            const SizedBox(width: 4),
-            Text(
-              l.limitPerMonth,
-              style: AppText.caption.copyWith(color: AppColors.muted),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                note,
-                textAlign: TextAlign.end,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppText.caption.copyWith(
-                  fontWeight: loud ? FontWeight.w600 : FontWeight.w400,
-                  color: loud ? AppColors.ink : AppColors.muted,
+            child: SizedBox(
+              height: 42,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
+                        children: [
+                          Text(
+                            'Rp',
+                            style: AppText.label.copyWith(
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.muted,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: SizedBox(
+                              width: (_measure(_text.text, style) + 4).clamp(
+                                18,
+                                240,
+                              ),
+                              child: Semantics(
+                                label: l.limitFieldLabel,
+                                child: TextField(
+                                  controller: _text,
+                                  focusNode: _focus,
+                                  onChanged: _typed,
+                                  keyboardType: TextInputType.number,
+                                  textInputAction: TextInputAction.done,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.allow(
+                                      RegExp('[0-9.]'),
+                                    ),
+                                  ],
+                                  style: style,
+                                  decoration: InputDecoration.collapsed(
+                                    hintText: '0',
+                                    hintStyle: AppText.headline.copyWith(
+                                      fontSize: size,
+                                      color: AppColors.grey400,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            l.limitPerMonth,
+                            style: AppText.caption.copyWith(
+                              color: AppColors.muted,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (!focused)
+                      Container(
+                        width: 28,
+                        height: 28,
+                        alignment: Alignment.center,
+                        decoration: const BoxDecoration(
+                          color: AppColors.mist,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const HugeIcon(
+                          icon: HugeIcons.strokeRoundedPencilEdit02,
+                          size: 14,
+                          strokeWidth: AppStroke.icon,
+                          color: AppColors.ink,
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ),
-          ],
+          ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
         _Track(
           value: v,
           max: scale.max,
@@ -328,6 +431,37 @@ class _Track extends StatelessWidget {
       },
     );
   }
+}
+
+class _Underline extends CustomPainter {
+  const _Underline({
+    required this.dashed,
+    required this.width,
+    required this.color,
+  });
+
+  final bool dashed;
+  final double width;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final y = size.height - width / 2;
+    final line = Path()
+      ..moveTo(0, y)
+      ..lineTo(size.width, y);
+    canvas.drawPath(
+      dashed ? dashPath(line) : line,
+      Paint()
+        ..color = color
+        ..strokeWidth = width
+        ..style = PaintingStyle.stroke,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_Underline old) =>
+      old.dashed != dashed || old.width != width || old.color != color;
 }
 
 class _DashedLine extends CustomPainter {

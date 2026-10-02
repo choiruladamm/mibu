@@ -6,10 +6,13 @@ import '../tokens.dart';
 
 const _undoWindow = Duration(seconds: 5);
 
-/// Ink toast floating at the bottom (02.4c/d, 04.3c). With [onUndo] it gets
-/// "batalin" and a 5s timer bar; without, a tick and it just informs.
+enum ToastIcon { trash, check }
+
+/// 00.18 UndoToast, floating at the bottom (02.2, 02.4c/d, 04.3c). With
+/// [onUndo] it gets "batalin" and a 5s timer bar. Gone after 5s either way.
 void showToast(
   BuildContext context, {
+  required ToastIcon icon,
   required String title,
   required String sub,
   VoidCallback? onUndo,
@@ -24,6 +27,7 @@ void showToast(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 28),
       duration: _undoWindow,
       content: _Toast(
+        icon: icon,
         title: title,
         sub: sub,
         onUndo: onUndo == null
@@ -38,8 +42,18 @@ void showToast(
 }
 
 class _Toast extends StatelessWidget {
-  const _Toast({required this.title, required this.sub, this.onUndo});
+  const _Toast({
+    required this.icon,
+    required this.title,
+    required this.sub,
+    this.onUndo,
+  });
 
+  // Rise 24 + scale 0.96 → 1 with a slight overshoot.
+  static const _enter = Duration(milliseconds: 260);
+  static const _curve = Cubic(0.2, 0.9, 0.3, 1.2);
+
+  final ToastIcon icon;
   final String title, sub;
   final VoidCallback? onUndo;
 
@@ -47,6 +61,23 @@ class _Toast extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
     final undo = onUndo != null;
+    final trash = icon == ToastIcon.trash;
+    return TweenAnimationBuilder(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: _enter,
+      curve: _curve,
+      builder: (_, t, child) => Opacity(
+        opacity: t.clamp(0.0, 1.0),
+        child: Transform.translate(
+          offset: Offset(0, 24 * (1 - t)),
+          child: Transform.scale(scale: 0.96 + 0.04 * t, child: child),
+        ),
+      ),
+      child: Semantics(liveRegion: true, child: _body(l, undo, trash)),
+    );
+  }
+
+  Widget _body(AppLocalizations l, bool undo, bool trash) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.ink,
@@ -70,11 +101,11 @@ class _Toast extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                   child: HugeIcon(
-                    icon: undo
+                    icon: trash
                         ? HugeIcons.strokeRoundedDelete02
                         : HugeIcons.strokeRoundedTick02,
                     size: 18,
-                    strokeWidth: undo
+                    strokeWidth: trash
                         ? AppStroke.icon
                         : AppStroke.iconOnInkSmall,
                     color: AppColors.ink,

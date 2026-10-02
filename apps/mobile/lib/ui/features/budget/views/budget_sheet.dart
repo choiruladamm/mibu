@@ -24,6 +24,7 @@ Future<void> editBudget(BuildContext context, WidgetRef ref) async {
   final v = await showAppSheet<int>(
     context,
     BudgetSheet(budget: prev, pocketsTotal: total),
+    enableDrag: false,
   );
   if (v == null || !context.mounted) return;
   if (v == 0) {
@@ -31,6 +32,7 @@ Future<void> editBudget(BuildContext context, WidgetRef ref) async {
     if (!context.mounted) return;
     showToast(
       context,
+      icon: ToastIcon.trash,
       title: l.budgetDeletedTitle,
       sub: l.budgetDeletedSub,
       onUndo: () => repo.setMonthlyBudget(prev),
@@ -40,6 +42,7 @@ Future<void> editBudget(BuildContext context, WidgetRef ref) async {
     if (!context.mounted) return;
     showToast(
       context,
+      icon: ToastIcon.check,
       title: l.budgetSavedTitle(rupiahCompact(v)),
       sub: l.budgetSavedSub,
     );
@@ -89,52 +92,71 @@ class _BudgetSheetState extends State<BudgetSheet> {
     return SheetFrame(
       title: l.budgetTitle,
       height: 640,
+      scrollable: false, // the keypad stays pinned; the top scrolls
+      handleDrag: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            l.budgetSub,
-            style: AppText.label.copyWith(fontSize: 14, color: AppColors.muted),
-          ),
-          const SizedBox(height: 18),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: _AmountField(
-              label: _edit ? l.budgetLabelNow : l.budgetLabelSuggest,
-              hint: !_edit && _fresh && v > 0 ? l.budgetAutoFilled : '',
-              value: v,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Container(
-            constraints: const BoxConstraints(minHeight: 36),
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: AppColors.mist,
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: Semantics(
-              liveRegion: true,
-              child: Text(
-                v == 0
-                    ? l.budgetInfoType(total)
-                    : short
-                    ? l.budgetInfoShort(rupiahCompact(widget.pocketsTotal - v))
-                    : l.budgetInfoFree(
-                        total,
-                        rupiahCompact(v - widget.pocketsTotal),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    l.budgetSub,
+                    style: AppText.label.copyWith(
+                      fontSize: 14,
+                      color: AppColors.muted,
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: _AmountField(
+                      label: _edit ? l.budgetLabelNow : l.budgetLabelSuggest,
+                      hint: !_edit && _fresh && v > 0 ? l.budgetAutoFilled : '',
+                      value: v,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    constraints: const BoxConstraints(minHeight: 36),
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: AppColors.mist,
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: Semantics(
+                      liveRegion: true,
+                      child: Text(
+                        v == 0
+                            ? l.budgetInfoType(total)
+                            : short
+                            ? l.budgetInfoShort(
+                                rupiahCompact(widget.pocketsTotal - v),
+                              )
+                            : l.budgetInfoFree(
+                                total,
+                                rupiahCompact(v - widget.pocketsTotal),
+                              ),
+                        textAlign: TextAlign.center,
+                        style: AppText.caption.copyWith(
+                          fontWeight: short ? FontWeight.w600 : FontWeight.w400,
+                          color: short ? AppColors.ink : AppColors.muted,
+                        ),
                       ),
-                textAlign: TextAlign.center,
-                style: AppText.caption.copyWith(
-                  fontWeight: short ? FontWeight.w600 : FontWeight.w400,
-                  color: short ? AppColors.ink : AppColors.muted,
-                ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-          const Spacer(),
+          const SizedBox(height: 16),
           AmountKeypad(
             variant: KeypadVariant.budget,
             onKey: (k) => _set(

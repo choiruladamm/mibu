@@ -507,7 +507,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get limitSliderLabel => 'geser batas kantong';
 
   @override
-  String get limitMax => 'maks Rp100jt';
+  String get limitMax => 'maks Rp100jt per kantong';
 
   @override
   String limitPerDay(String amount) {
@@ -612,4 +612,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get deleteCategory => 'hapus kategori';
+
+  @override
+  String get limitLabel => 'batas per bulan';
 }

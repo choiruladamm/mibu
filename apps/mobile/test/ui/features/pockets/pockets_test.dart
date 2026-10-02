@@ -163,6 +163,28 @@ void main() {
     await db.close();
   });
 
+  testWidgets('budget sheet: drags on the keypad stay, the handle closes', (
+    tester,
+  ) async {
+    final db = await pump(tester, const Size(390, 844));
+    await tester.tap(find.textContaining('kepake ·', findRichText: true));
+    await tester.pumpAndSettle();
+    expect(find.text('budget bulanan'), findsOneWidget);
+
+    await tester.drag(find.bySemanticsLabel('5'), const Offset(0, 400));
+    await tester.pumpAndSettle();
+    expect(find.text('budget bulanan'), findsOneWidget);
+
+    final handle =
+        tester.getTopLeft(find.text('budget bulanan')) + const Offset(150, -30);
+    await tester.dragFrom(handle, const Offset(0, 200));
+    await tester.pumpAndSettle();
+    expect(find.text('budget bulanan'), findsNothing);
+
+    await tester.pumpWidget(const SizedBox());
+    await db.close();
+  });
+
   testWidgets('kantong fits a short screen (375×667)', (tester) async {
     final db = await pump(tester, const Size(375, 667));
     expect(tester.takeException(), isNull);

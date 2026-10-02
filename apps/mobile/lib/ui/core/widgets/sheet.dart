@@ -5,13 +5,19 @@ import '../../../l10n/app_localizations.dart';
 import '../tokens.dart';
 
 /// Opens [child] as a mibu bottom sheet (radius 32, scrim 45% from theme).
-Future<T?> showAppSheet<T>(BuildContext context, Widget child) =>
-    showModalBottomSheet<T>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      builder: (_) => child,
-    );
+/// [enableDrag] false: only [SheetFrame.handleDrag] closes it by swiping —
+/// for sheets with a keypad, where a swipe is easy to start by accident.
+Future<T?> showAppSheet<T>(
+  BuildContext context,
+  Widget child, {
+  bool enableDrag = true,
+}) => showModalBottomSheet<T>(
+  context: context,
+  isScrollControlled: true,
+  useSafeArea: true,
+  enableDrag: enableDrag,
+  builder: (_) => child,
+);
 
 /// Handle + title + close disc; [height] is the design's sheet height.
 class SheetFrame extends StatelessWidget {
@@ -24,6 +30,7 @@ class SheetFrame extends StatelessWidget {
     this.titleSize = 22,
     this.scrollable = true,
     this.close,
+    this.handleDrag = false,
   });
 
   final String title;
@@ -33,6 +40,9 @@ class SheetFrame extends StatelessWidget {
 
   /// Replaces the close disc, e.g. 03.3's "beres".
   final Widget? close;
+
+  /// Swipe down on the handle closes; pair with `enableDrag: false`.
+  final bool handleDrag;
 
   /// Scroll [child] when the screen is shorter than [height]. Turn off when
   /// [child] scrolls itself (e.g. holds a GridView).
@@ -52,15 +62,9 @@ class SheetFrame extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Center(
-                child: Container(
-                  width: compact ? 36 : 40,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: AppColors.line,
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                ),
+              _Handle(
+                width: compact ? 36 : 40,
+                onClose: handleDrag ? () => Navigator.of(context).pop() : null,
               ),
               SizedBox(height: compact ? 14 : 12),
               Row(
@@ -199,6 +203,49 @@ class PrimaryButton extends StatelessWidget {
             ),
           Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
         ],
+      ),
+    );
+  }
+}
+
+class _Handle extends StatefulWidget {
+  const _Handle({required this.width, required this.onClose});
+
+  final double width;
+  final VoidCallback? onClose; // null = the sheet itself drags
+
+  @override
+  State<_Handle> createState() => _HandleState();
+}
+
+class _HandleState extends State<_Handle> {
+  double _dy = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    final bar = Center(
+      child: Container(
+        width: widget.width,
+        height: 5,
+        decoration: BoxDecoration(
+          color: AppColors.line,
+          borderRadius: BorderRadius.circular(3),
+        ),
+      ),
+    );
+    final close = widget.onClose;
+    if (close == null) return bar;
+    // Taller hit area than the 5px bar.
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onVerticalDragStart: (_) => _dy = 0,
+      onVerticalDragUpdate: (d) => _dy += d.delta.dy,
+      onVerticalDragEnd: (d) {
+        if (_dy > 48 || (d.primaryVelocity ?? 0) > 400) close();
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: bar,
       ),
     );
   }

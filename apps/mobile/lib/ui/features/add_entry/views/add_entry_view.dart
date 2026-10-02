@@ -29,6 +29,7 @@ class AddEntryView extends ConsumerStatefulWidget {
 
 class _AddEntryViewState extends ConsumerState<AddEntryView> {
   bool _calOpen = false;
+  bool _saving = false;
 
   AddEntry get _vm => ref.read(addEntryProvider.notifier);
 
@@ -69,6 +70,9 @@ class _AddEntryViewState extends ConsumerState<AddEntryView> {
   }
 
   Future<void> _save() async {
+    // A second tap before the pop would insert the entry twice.
+    if (_saving) return;
+    setState(() => _saving = true);
     await _vm.save();
     if (mounted) Navigator.of(context).pop();
   }
@@ -82,100 +86,109 @@ class _AddEntryViewState extends ConsumerState<AddEntryView> {
     return Scaffold(
       body: SafeArea(
         minimum: const EdgeInsets.only(top: 12, bottom: 28),
-        child: CustomScrollView(
-          slivers: [
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Row(
+        // Keypad pinned at the bottom; only what's above it scrolls.
+        child: Column(
+          children: [
+            Expanded(
+              child: CustomScrollView(
+                slivers: [
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Column(
                       children: [
-                        CircleButton(
-                          icon: HugeIcons.strokeRoundedCancel01,
-                          label: l.close,
-                          iconSize: 22,
-                          color: Colors.transparent,
-                          onTap: () => Navigator.of(context).pop(),
-                        ),
-                        Expanded(
-                          child: Center(
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: _KindToggle(
-                                kind: s.kind,
-                                onPick: _vm.setKind,
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Row(
+                            children: [
+                              CircleButton(
+                                icon: HugeIcons.strokeRoundedCancel01,
+                                label: l.close,
+                                iconSize: 22,
+                                color: Colors.transparent,
+                                onTap: () => Navigator.of(context).pop(),
                               ),
-                            ),
+                              Expanded(
+                                child: Center(
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: _KindToggle(
+                                      kind: s.kind,
+                                      onPick: _vm.setKind,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              CircleButton(
+                                icon: HugeIcons.strokeRoundedCalendar03,
+                                label: l.pickOtherDate,
+                                iconSize: 22,
+                                color: Colors.transparent,
+                                ink: _calOpen,
+                                onTap: () => _openCalendar(s.day),
+                              ),
+                            ],
                           ),
                         ),
-                        CircleButton(
-                          icon: HugeIcons.strokeRoundedCalendar03,
-                          label: l.pickOtherDate,
-                          iconSize: 22,
-                          color: Colors.transparent,
-                          ink: _calOpen,
-                          onTap: () => _openCalendar(s.day),
+                        const SizedBox(height: 14),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: DayStrip(
+                            selected: s.day,
+                            today: _today,
+                            onPick: _vm.pickDay,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        _AmountLine(_expression(s.draft)),
+                        const SizedBox(height: 2),
+                        _Amount(total: s.amount, sign: income ? '+' : '-'),
+                        const SizedBox(height: 6),
+                        _AmountLine(
+                          s.amount == 0
+                              ? l.amountTypeHint
+                              : l.amountInWords(terbilang(s.amount)),
+                          size: 13,
+                        ),
+                        const SizedBox(height: 12),
+                        _Impact(state: s),
+                        const SizedBox(height: 16),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Wrap(
+                            alignment: WrapAlignment.center,
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              _CategoryChip(
+                                state: s,
+                                onTap: () => _openPicker(s),
+                              ),
+                              _NoteChip(
+                                note: s.note,
+                                onTap: () => _openNote(s),
+                                onClear: () =>
+                                    _vm.setNote((text: '', tags: const [])),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: DayStrip(
-                      selected: s.day,
-                      today: _today,
-                      onPick: _vm.pickDay,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  _AmountLine(_expression(s.draft)),
-                  const SizedBox(height: 2),
-                  _Amount(total: s.amount, sign: income ? '+' : '-'),
-                  const SizedBox(height: 6),
-                  _AmountLine(
-                    s.amount == 0
-                        ? l.amountTypeHint
-                        : l.amountInWords(terbilang(s.amount)),
-                    size: 13,
-                  ),
-                  const SizedBox(height: 12),
-                  _Impact(state: s),
-                  const SizedBox(height: 16),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Wrap(
-                      alignment: WrapAlignment.center,
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        _CategoryChip(state: s, onTap: () => _openPicker(s)),
-                        _NoteChip(
-                          note: s.note,
-                          onTap: () => _openNote(s),
-                          onClear: () =>
-                              _vm.setNote((text: '', tags: const [])),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Spacer(),
-                  const SizedBox(height: 16),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: AmountKeypad(
-                      onKey: _vm.press,
-                      onBackspace: _vm.backspace,
-                      onClear: _vm.clear,
-                      onSave: _save,
-                      saveLabel: income ? l.income : l.expense,
-                      canClear: !draftIsEmpty(s.draft),
-                      canSave: s.canSave,
                     ),
                   ),
                 ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: AmountKeypad(
+                onKey: _vm.press,
+                onBackspace: _vm.backspace,
+                onClear: _vm.clear,
+                onSave: _save,
+                saveLabel: income ? l.income : l.expense,
+                canClear: !draftIsEmpty(s.draft),
+                canSave: s.canSave && !_saving,
               ),
             ),
           ],
@@ -407,20 +420,26 @@ class _Impact extends ConsumerWidget {
             child: SizedBox(
               height: 8,
               child: LayoutBuilder(
+                // Stack, not Row: mid-animation widths can't overflow.
                 builder: (context, c) => Container(
                   color: AppColors.track,
-                  child: Row(
+                  child: Stack(
                     children: [
-                      AnimatedContainer(
+                      AnimatedPositioned(
                         duration: AppMotion.select,
+                        left: 0,
+                        top: 0,
+                        bottom: 0,
                         width: c.maxWidth * prev,
-                        color: AppColors.grey400,
+                        child: const ColoredBox(color: AppColors.grey400),
                       ),
-                      if (add > 0) const SizedBox(width: 2),
-                      AnimatedContainer(
+                      AnimatedPositioned(
                         duration: AppMotion.select,
+                        left: c.maxWidth * prev + 2,
+                        top: 0,
+                        bottom: 0,
                         width: (c.maxWidth * add - 2).clamp(0, c.maxWidth),
-                        color: AppColors.ink,
+                        child: const ColoredBox(color: AppColors.ink),
                       ),
                     ],
                   ),

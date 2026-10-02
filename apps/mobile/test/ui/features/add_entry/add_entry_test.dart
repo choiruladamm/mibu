@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:drift/drift.dart' hide isNull;
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mibu/data/database/app_database.dart';
+import 'package:mibu/data/repositories/finance_repository.dart';
 import 'package:mibu/l10n/app_localizations.dart';
 import 'package:mibu/ui/core/clock.dart';
 import 'package:mibu/ui/core/theme.dart';
@@ -159,6 +162,9 @@ void main() {
     await tester.tap(find.bySemanticsLabel('tutup').last);
     await settle();
 
+    // Keypad is pinned; the chips scroll into view on a short screen.
+    await tester.ensureVisible(find.text('catatan'));
+    await tester.pump();
     await tester.tap(find.text('catatan'));
     await settle();
     expect(find.text('tag cepet · maks 3'), findsOneWidget);
@@ -234,4 +240,79 @@ void main() {
     await tester.pumpWidget(const SizedBox());
     await db.close();
   });
+
+  testWidgets('catat: a second tap while saving saves nothing', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final now = DateTime(2026, 10, 14, 14, 50);
+    final db = AppDatabase(
+      DatabaseConnection(
+        NativeDatabase.memory(),
+        closeStreamsSynchronously: true,
+      ),
+      () => now,
+    );
+    final repo = _HeldRepository(db);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          appDatabaseProvider.overrideWithValue(db),
+          clockProvider.overrideWithValue(() => now),
+          financeRepositoryProvider.overrideWithValue(repo),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.light,
+          locale: const Locale('id'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const AddEntryView(),
+        ),
+      ),
+    );
+    Future<void> settle() async {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 50)),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+    }
+
+    await settle();
+    await tester.tap(find.bySemanticsLabel('5'));
+    await tester.pump();
+
+    // Insert held open: the screen hasn't popped yet.
+    final save = find.bySemanticsLabel('simpan pengeluaran');
+    await tester.tap(save);
+    await tester.tap(save, warnIfMissed: false);
+    await tester.pump();
+    expect(repo.adds, 1);
+    expect(tester.getSemantics(save), isSemantics(isEnabled: false));
+
+    repo.hold.complete();
+    await settle();
+    await tester.pumpWidget(const SizedBox());
+    await db.close();
+  });
+}
+
+class _HeldRepository extends FinanceRepository {
+  _HeldRepository(super.db);
+
+  final hold = Completer<void>();
+  int adds = 0;
+
+  @override
+  Future<void> addTransaction({
+    required int amount,
+    required String? categoryId,
+    required String place,
+    required String note,
+    required List<String> tags,
+    required DateTime at,
+  }) {
+    adds++;
+    return hold.future;
+  }
 }
