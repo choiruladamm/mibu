@@ -1966,6 +1966,12 @@ abstract class AppLocalizations {
   /// **'semua catatan, satu file'**
   String get settingsExportHint;
 
+  /// No description provided for @settingsLicenses.
+  ///
+  /// In id, this message translates to:
+  /// **'lisensi'**
+  String get settingsLicenses;
+
   /// No description provided for @settingsVersion.
   ///
   /// In id, this message translates to:

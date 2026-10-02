@@ -1055,6 +1055,7 @@
   "settingsData": "data",
   "settingsExport": "ekspor ke csv",
   "settingsExportHint": "semua catatan, satu file",
+  "settingsLicenses": "lisensi",
   "settingsVersion": "versi {v}",
   "@settingsVersion": {
     "placeholders": {

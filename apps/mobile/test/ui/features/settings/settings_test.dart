@@ -12,6 +12,8 @@ import 'package:mibu/ui/core/theme.dart';
 import 'package:mibu/ui/features/settings/views/settings_view.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
+import '../../../meta.dart';
+
 void main() {
   Future<AppDatabase> pump(WidgetTester tester) async {
     // Tests render with Ahem (1em per glyph), so 390 wide overflows rows that
@@ -77,7 +79,15 @@ void main() {
     expect(find.text('limit bulanan'), findsOneWidget);
     expect(find.text('sembunyiin nominal'), findsOneWidget);
     expect(find.text('ekspor ke csv'), findsOneWidget);
-    expect(find.text('versi 0.2.0'), findsOneWidget);
+    expect(findMeta(['versi 0.2.0', 'lisensi']), findsOneWidget);
+    // Fluent Emoji (MIT) is credited on the licenses page behind it.
+    final footer = findMeta(['versi 0.2.0', 'lisensi']);
+    await tester.ensureVisible(footer);
+    await tester.tap(footer);
+    await tester.pumpAndSettle();
+    expect(find.byType(LicensePage), findsOneWidget);
+    Navigator.of(tester.element(find.byType(LicensePage))).pop();
+    await tester.pumpAndSettle();
 
     for (final deferred in [
       'reminder harian',

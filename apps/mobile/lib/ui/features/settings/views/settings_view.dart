@@ -143,11 +143,30 @@ class SettingsView extends ConsumerWidget {
                     spacing: 4,
                     children: [
                       Text(l.appTitle, style: AppText.wordmark(24)),
+                      // Licenses (Fluent Emoji is MIT: its notice lives here).
                       if (version != null)
-                        Text(
-                          l.settingsVersion(version),
-                          style: AppText.caption.copyWith(
-                            color: AppColors.muted,
+                        Semantics(
+                          button: true,
+                          label: l.settingsLicenses,
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () => showLicensePage(
+                              context: context,
+                              applicationName: l.appTitle,
+                              applicationVersion: version,
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              child: MetaLine(
+                                [
+                                  l.settingsVersion(version),
+                                  l.settingsLicenses,
+                                ],
+                                style: AppText.caption.copyWith(
+                                  color: AppColors.muted,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                     ],

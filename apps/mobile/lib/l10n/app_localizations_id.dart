@@ -1159,6 +1159,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get settingsExportHint => 'semua catatan, satu file';
 
   @override
+  String get settingsLicenses => 'lisensi';
+
+  @override
   String settingsVersion(String v) {
     return 'versi $v';
   }
