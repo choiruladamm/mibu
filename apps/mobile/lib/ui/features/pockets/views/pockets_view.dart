@@ -10,6 +10,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../routing/router.dart';
 import '../../../core/dashed.dart';
 import '../../../core/money.dart';
+import '../../../core/widgets/peek_tap.dart';
 import '../../../core/tokens.dart';
 import '../../../core/widgets/tab_bar.dart';
 import '../../budget/views/budget_sheet.dart';
@@ -114,7 +115,7 @@ class _PocketsViewState extends ConsumerState<PocketsView> {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  gutter(_Amount(s.left)),
+                  gutter(PeekTap(child: _Amount(s.left))),
                   const SizedBox(height: 4),
                   gutter(
                     Align(
@@ -252,14 +253,14 @@ class _BudgetLine extends StatelessWidget {
                           text: state.pockets.isEmpty
                               ? l.pocketsNoLimit
                               : l.pocketsSpentOf(
-                                  rupiahCompact(state.spent),
-                                  rupiahCompact(state.limit),
+                                  context.rpCompact(state.spent),
+                                  context.rpCompact(state.limit),
                                 ),
                         ),
                         TextSpan(
                           text: budget == null
                               ? l.pocketsSetBudget
-                              : l.pocketsBudget(rupiahCompact(budget)),
+                              : l.pocketsBudget(context.rpCompact(budget)),
                           style: TextStyle(
                             color: AppColors.ink,
                             fontWeight: budget == null
@@ -356,7 +357,7 @@ class _Amount extends StatelessWidget {
             child: Text(value < 0 ? '-Rp' : 'Rp', style: rp),
           ),
           Text(
-            rupiah(value.abs()).replaceFirst('Rp', ''),
+            context.rp(value.abs()).replaceFirst('Rp', ''),
             style: AppText.display.copyWith(height: 1),
           ),
         ],
@@ -774,7 +775,7 @@ class _FreeSection extends StatelessWidget {
                         TextSpan(
                           children: [
                             TextSpan(
-                              text: rupiahCompact(total),
+                              text: context.rpCompact(total),
                               style: const TextStyle(
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.ink,
@@ -840,7 +841,7 @@ class _FreeSection extends StatelessWidget {
                             f.category.name,
                             style: style.copyWith(color: AppColors.ink),
                           ),
-                          Text(rupiahCompact(f.spent), style: style),
+                          Text(context.rpCompact(f.spent), style: style),
                         ],
                       ),
                     ),
@@ -1042,7 +1043,7 @@ class _Detail extends StatelessWidget {
               spacing: 8,
               children: [
                 Text(
-                  rupiahCompact(left),
+                  context.rpCompact(left),
                   style: AppText.headline.copyWith(
                     fontSize: 36,
                     height: 1,
@@ -1051,7 +1052,7 @@ class _Detail extends StatelessWidget {
                 ),
                 Flexible(
                   child: Text(
-                    l.pocketLeftOf(rupiahCompact(pocket.budget)),
+                    l.pocketLeftOf(context.rpCompact(pocket.budget)),
                     style: muted,
                   ),
                 ),
@@ -1059,8 +1060,8 @@ class _Detail extends StatelessWidget {
             ),
             Text(
               left < 0
-                  ? l.pocketOver(rupiahCompact(-left))
-                  : l.pocketDaily(rupiahCompact(left ~/ daysLeft)),
+                  ? l.pocketOver(context.rpCompact(-left))
+                  : l.pocketDaily(context.rpCompact(left ~/ daysLeft)),
               style: muted,
             ),
             const SizedBox(height: 2),

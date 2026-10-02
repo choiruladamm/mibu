@@ -20,3 +20,14 @@ final pocketsProvider = StreamProvider<List<Pocket>>(
   (ref) =>
       ref.watch(financeRepositoryProvider).watchPockets(ref.watch(nowProvider)),
 );
+
+/// 02.4 sembunyiin nominal: tap a hero amount to peek; routing resets it.
+class Peek extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  void toggle() => state = !state;
+  void reset() => state = false;
+}
+
+final peekProvider = NotifierProvider<Peek, bool>(Peek.new);

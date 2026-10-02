@@ -174,11 +174,11 @@ class _Body extends ConsumerWidget {
           child: Row(
             spacing: 8,
             children: [
-              _Tile(label: l.income, value: rupiahSigned(s.income)),
-              _Tile(label: l.expense, value: rupiahSigned(s.expense)),
+              _Tile(label: l.income, value: context.rpSigned(s.income)),
+              _Tile(label: l.expense, value: context.rpSigned(s.expense)),
               _Tile(
                 label: l.txNet,
-                value: rupiahSigned(s.income + s.expense),
+                value: context.rpSigned(s.income + s.expense),
                 ink: true,
               ),
             ],
@@ -624,7 +624,7 @@ class _DayGroup extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  rupiahSigned(group.total),
+                  context.rpSigned(group.total),
                   style: AppText.caption.copyWith(color: AppColors.muted),
                 ),
               ],

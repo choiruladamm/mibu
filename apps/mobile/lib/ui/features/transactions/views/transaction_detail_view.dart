@@ -168,7 +168,7 @@ class TransactionDetailView extends ConsumerWidget {
       context,
       initial: (text: t.note, tags: t.tags),
       entryContext: [
-        rupiahSigned(t.amount),
+        context.rpSigned(t.amount),
         if (t.place.isNotEmpty) t.place,
         dayLabel(t.at),
       ],
@@ -204,7 +204,7 @@ Future<bool> confirmDeleteEntry(
     emoji: t.emoji,
     title: l.confirmDeleteTitle,
     body: l.confirmDeleteBody(
-      rupiah(t.amount),
+      context.rp(t.amount),
       t.place.isNotEmpty ? t.place : t.category ?? l.uncategorized,
       _headerDay.format(t.at).toLowerCase(),
     ),
@@ -212,7 +212,7 @@ Future<bool> confirmDeleteEntry(
         ? null
         : (
             label: l.confirmPocket(pocket.emoji, pocket.name),
-            value: l.confirmPocketAfter(rupiahCompact(pocket.left + cost)),
+            value: l.confirmPocketAfter(context.rpCompact(pocket.left + cost)),
             fromPct: pocket.usedPct,
             toPct: ((pocket.spent - cost) * 100 / pocket.budget).round(),
           ),
@@ -226,8 +226,11 @@ Future<bool> confirmDeleteEntry(
     icon: ToastIcon.trash,
     title: l.entryDeletedToast,
     sub: pocket == null
-        ? '${rupiah(t.amount)} · ${dayLabel(t.at)}'
-        : l.entryDeletedPocket(pocket.name, rupiahCompact(pocket.left + cost)),
+        ? '${context.rp(t.amount)} · ${dayLabel(t.at)}'
+        : l.entryDeletedPocket(
+            pocket.name,
+            context.rpCompact(pocket.left + cost),
+          ),
     onUndo: () => repo.restoreTransaction(t.id),
     bottom: toastBottom,
   );
@@ -346,7 +349,7 @@ class _Receipt extends StatelessWidget {
                       ),
                       const WidgetSpan(child: SizedBox(width: 4)),
                       TextSpan(
-                        text: rupiah(t.amount.abs()).substring(2),
+                        text: context.rp(t.amount.abs()).substring(2),
                         style: AppText.display.copyWith(
                           letterSpacing: -1.68,
                           height: 1,
@@ -412,12 +415,12 @@ class _Receipt extends StatelessWidget {
                           child: Text(
                             p.left < 0
                                 ? l.receiptOverOf(
-                                    rupiahCompact(-p.left),
-                                    rupiahCompact(p.budget),
+                                    context.rpCompact(-p.left),
+                                    context.rpCompact(p.budget),
                                   )
                                 : l.receiptLeftOf(
-                                    rupiahCompact(p.left),
-                                    rupiahCompact(p.budget),
+                                    context.rpCompact(p.left),
+                                    context.rpCompact(p.budget),
                                   ),
                             overflow: TextOverflow.ellipsis,
                             style: muted.copyWith(fontSize: 14),

@@ -6,6 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mibu/data/database/app_database.dart';
 import 'package:mibu/l10n/app_localizations.dart';
 import 'package:mibu/ui/core/clock.dart';
+import 'package:mibu/ui/core/finance_providers.dart';
+import 'package:mibu/ui/core/money.dart';
 import 'package:mibu/ui/core/theme.dart';
 import 'package:mibu/ui/features/settings/views/settings_view.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -44,6 +46,13 @@ void main() {
           locale: const Locale('id'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
+          // Same wiring as MibuApp.
+          builder: (_, child) => Consumer(
+            builder: (_, ref, _) => AmountMask(
+              hidden: ref.watch(profileProvider).value?.hideAmounts ?? false,
+              child: child!,
+            ),
+          ),
           home: const SettingsView(),
         ),
       ),

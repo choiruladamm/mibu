@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
 final _full = NumberFormat('#,##0', 'id_ID');
@@ -22,3 +23,31 @@ String rupiahCompact(int v) {
 
 /// +Rp8,5jt · -Rp450K · Rp0 — compact with the sign spelled out.
 String rupiahSigned(int v) => v > 0 ? '+${rupiahCompact(v)}' : rupiahCompact(v);
+
+/// 02.4 sembunyiin nominal: digits (and K / jt) become •••, sign and Rp stay.
+String maskAmount(String s) => s.replaceAll(RegExp(r'\d[\d.,]*(K|jt)?'), '•••');
+
+/// Above the Navigator (MibuApp). [hidden] = profile.hideAmounts and not
+/// peeking; the context formatters read it, so a screen only needs a context.
+class AmountMask extends InheritedWidget {
+  const AmountMask({super.key, required this.hidden, required super.child});
+
+  final bool hidden;
+
+  @override
+  bool updateShouldNotify(AmountMask old) => hidden != old.hidden;
+}
+
+/// `context.rp(v)` etc.: the formatters above, masked when 02.4 says so.
+/// Outside an [AmountMask] (tests) nothing is hidden.
+extension MoneyContext on BuildContext {
+  String _m(String s) =>
+      dependOnInheritedWidgetOfExactType<AmountMask>()?.hidden ?? false
+      ? maskAmount(s)
+      : s;
+
+  String rp(int v) => _m(rupiah(v));
+  String rpCompact(int v) => _m(rupiahCompact(v));
+  String rpSigned(int v) => _m(rupiahSigned(v));
+  String masked(String s) => _m(s);
+}

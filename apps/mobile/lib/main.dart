@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/misc.dart' show Override;
 import 'l10n/app_localizations.dart';
 import 'routing/router.dart';
 import 'ui/core/finance_providers.dart';
+import 'ui/core/money.dart';
 import 'ui/features/home/view_models/home_view_model.dart';
 import 'ui/core/theme.dart';
 import 'ui/core/widgets/tap_outside_unfocus.dart';
@@ -43,6 +44,12 @@ class MibuApp extends ConsumerWidget {
         onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
         theme: AppTheme.light,
         routerConfig: ref.watch(routerProvider),
+        builder: (_, child) => AmountMask(
+          hidden:
+              (ref.watch(profileProvider).value?.hideAmounts ?? false) &&
+              !ref.watch(peekProvider),
+          child: child!,
+        ),
         locale: const Locale('id', 'ID'),
         supportedLocales: AppLocalizations.supportedLocales,
         localizationsDelegates: const [

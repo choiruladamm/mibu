@@ -133,6 +133,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
     ],
   );
-  ref.onDispose(router.dispose);
+  // Peeking at hidden amounts ends on any navigation.
+  void endPeek() => ref.read(peekProvider.notifier).reset();
+  router.routerDelegate.addListener(endPeek);
+  ref.onDispose(() {
+    router.routerDelegate.removeListener(endPeek);
+    router.dispose();
+  });
   return router;
 });

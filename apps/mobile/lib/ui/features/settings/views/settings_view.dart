@@ -92,7 +92,6 @@ class SettingsView extends ConsumerWidget {
                   ),
                   _BudgetCard(
                     budget: s.budget,
-                    hidden: s.hideAmounts,
                     limits: s.limits,
                     onEdit: () => editBudget(context, ref),
                     onLimits: () => context.go(Routes.pockets),
@@ -112,7 +111,7 @@ class SettingsView extends ConsumerWidget {
                           children: MetaLine.join([
                             TextSpan(text: l.settingsLimits(s.limits)),
                             if (s.limits > 0)
-                              TextSpan(text: rupiahCompact(s.limitTotal)),
+                              TextSpan(text: context.rpCompact(s.limitTotal)),
                           ]),
                         ),
                       ),
@@ -175,14 +174,12 @@ class SettingsView extends ConsumerWidget {
 class _BudgetCard extends StatelessWidget {
   const _BudgetCard({
     required this.budget,
-    required this.hidden,
     required this.limits,
     required this.onEdit,
     required this.onLimits,
   });
 
   final int? budget;
-  final bool hidden;
   final int limits;
   final VoidCallback onEdit, onLimits;
 
@@ -228,9 +225,7 @@ class _BudgetCard extends StatelessWidget {
                           child: Text(
                             !set
                                 ? l.settingsBudgetEmpty
-                                : hidden
-                                ? 'Rp•••'
-                                : rupiahCompact(budget!),
+                                : context.rpCompact(budget!),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: (set ? AppText.displayS : AppText.title)

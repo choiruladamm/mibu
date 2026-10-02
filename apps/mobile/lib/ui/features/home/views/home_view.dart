@@ -15,6 +15,7 @@ import '../../../core/dashed.dart';
 import '../../../core/dates.dart';
 import '../../../core/finance_providers.dart';
 import '../../../core/money.dart';
+import '../../../core/widgets/peek_tap.dart';
 import '../../../core/tokens.dart';
 import '../../../core/widgets/month_menu.dart';
 import '../../../core/widgets/month_picker.dart';
@@ -133,7 +134,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                   _Hero(
                     label: heroLabel,
                     balance: s.balance,
-                    chip: _chip(l, s),
+                    chip: _chip(context, l, s),
                   ),
                   const SizedBox(height: 18),
                   _gutter(
@@ -264,7 +265,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                     ),
                                   ),
                                   Text(
-                                    rupiahCompact(s.balance),
+                                    context.rpCompact(s.balance),
                                     maxLines: 1,
                                     style: AppText.label.copyWith(
                                       fontSize: 20,
@@ -323,12 +324,16 @@ class _HomeViewState extends ConsumerState<HomeView> {
 
   /// "aman jajan hari ini · Rp580K" now; "sisa akhir bulan · Rp…" for past
   /// months (hidden without a budget); null = no chip.
-  static _ChipData? _chip(AppLocalizations l, HomeState s) {
+  static _ChipData? _chip(
+    BuildContext context,
+    AppLocalizations l,
+    HomeState s,
+  ) {
     if (s.isCurrent) {
       final over = s.safeToSpendToday < 0;
       return (
         text: over ? l.overspentToday : l.safeToSpendToday,
-        value: rupiahCompact(s.safeToSpendToday.abs()),
+        value: context.rpCompact(s.safeToSpendToday.abs()),
         alert: over,
       );
     }
@@ -336,7 +341,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
     if (left == null) return null;
     return (
       text: left < 0 ? l.homeOverEnd : l.homeLeftEnd,
-      value: rupiahCompact(left.abs()),
+      value: context.rpCompact(left.abs()),
       alert: left < 0,
     );
   }
@@ -403,33 +408,35 @@ class _Hero extends StatelessWidget {
         const SizedBox(height: 6),
         // Long balances shrink instead of overflowing.
         _gutterFit(
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 4,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 6),
-                child: Text(
-                  'Rp',
-                  style: AppText.sheetTitle.copyWith(
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: 0,
-                    color: AppColors.muted,
+          PeekTap(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 4,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(
+                    'Rp',
+                    style: AppText.sheetTitle.copyWith(
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0,
+                      color: AppColors.muted,
+                    ),
                   ),
                 ),
-              ),
-              // Counts from the old balance to the new one.
-              TweenAnimationBuilder(
-                tween: IntTween(end: balance),
-                duration: AppMotion.fill,
-                curve: AppMotion.ease,
-                builder: (context, v, _) => Text(
-                  rupiah(v).replaceFirst('Rp', ''),
-                  style: AppText.display.copyWith(height: 1),
+                // Counts from the old balance to the new one.
+                TweenAnimationBuilder(
+                  tween: IntTween(end: balance),
+                  duration: AppMotion.fill,
+                  curve: AppMotion.ease,
+                  builder: (context, v, _) => Text(
+                    context.rp(v).replaceFirst('Rp', ''),
+                    style: AppText.display.copyWith(height: 1),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         _Swap(
@@ -631,7 +638,10 @@ class _Recent extends ConsumerWidget {
                 style: AppText.caption.copyWith(fontWeight: FontWeight.w600),
               ),
               if (s.isCurrent)
-                Text(l.homeTodayTotal(rupiahSigned(s.todayNet)), style: muted),
+                Text(
+                  l.homeTodayTotal(context.rpSigned(s.todayNet)),
+                  style: muted,
+                ),
             ],
           ),
         ),
@@ -764,7 +774,7 @@ class _DayHeader extends StatelessWidget {
           children: [
             Flexible(child: MetaLine(title, style: style)),
             if (group.rows.isNotEmpty)
-              Text(rupiahSigned(group.total), style: style),
+              Text(context.rpSigned(group.total), style: style),
           ],
         ),
       ),
@@ -1016,7 +1026,7 @@ class _BalanceChartState extends State<_BalanceChart>
       _monthShort.format(months[sel].month).toLowerCase(),
     ];
     final pillVal =
-        '${sel > now ? '± ' : ''}${rupiahCompact(months[sel].amount)}';
+        '${sel > now ? '± ' : ''}${context.rpCompact(months[sel].amount)}';
 
     return LayoutBuilder(
       builder: (context, c) {
