@@ -8,6 +8,7 @@ import 'package:mibu/l10n/app_localizations.dart';
 import 'package:mibu/ui/core/clock.dart';
 import 'package:mibu/ui/core/theme.dart';
 import 'package:mibu/ui/features/add_entry/views/add_entry_view.dart';
+import 'package:mibu/ui/features/categories/views/category_form_sheet.dart';
 import 'package:mibu/ui/features/pockets/views/pockets_view.dart';
 
 import '../../../meta.dart';
@@ -66,7 +67,7 @@ void main() {
 
     await tester.enterText(nameField, 'Kopi Susu');
     await tester.pump();
-    expect(find.text('buat “kopi susu”'), findsOneWidget);
+    expect(find.text('saran buat “kopi susu”'), findsOneWidget);
     expect(findEmojiText('bikin ☕ kopi susu'), findsOneWidget);
 
     // budget 8jt − other pockets 3,3jt = 4,7jt free; 300K ÷ 31 days.
@@ -93,15 +94,15 @@ void main() {
     await tester.pump();
 
     // A picked emoji sticks when the name changes.
-    await tester.tap(find.bySemanticsLabel('pakai 🎧'));
+    await tester.tap(find.bySemanticsLabel('pakai 🧋'));
     await tester.enterText(nameField, 'kopi');
     await tester.pump();
-    expect(findEmojiText('bikin 🎧 kopi'), findsOneWidget);
+    expect(findEmojiText('bikin 🧋 kopi'), findsOneWidget);
 
-    await tester.tap(findEmojiText('bikin 🎧 kopi'));
+    await tester.tap(findEmojiText('bikin 🧋 kopi'));
     await settle(tester);
     final c = await row(db, 'kopi');
-    expect((c.emoji, c.monthlyLimit), ('🎧', 1000000));
+    expect((c.emoji, c.monthlyLimit), ('🧋', 1000000));
     // New pocket is the selected jar.
     expect(find.text('belum kepake'), findsOneWidget);
 
@@ -176,6 +177,47 @@ void main() {
     expect(findEmojiText('pakai 🏋️ gym'), findsOneWidget);
     expect((await row(db, 'gym')).monthlyLimit, isNull);
 
+    await tester.pumpWidget(const SizedBox());
+    await db.close();
+  });
+
+  testWidgets('03.4: tap the icon → 00.21 → picked icon comes back', (
+    tester,
+  ) async {
+    final db = await pump(
+      tester,
+      Builder(
+        builder: (context) => Scaffold(
+          body: TextButton(
+            onPressed: () => showCategoryForm(
+              context,
+              name: 'nongkrong',
+              origin: CategoryOrigin.atur,
+            ),
+            child: const Text('open'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await settle(tester);
+    expect(find.text('saran buat “nongkrong”'), findsOneWidget);
+    expect(find.text('dari nama'), findsOneWidget);
+    expect(findEmojiText('bikin 🫶 nongkrong'), findsOneWidget);
+
+    await tester.tap(find.bySemanticsLabel('ganti ikon'));
+    await settle(tester);
+    await tester.enterText(find.byType(TextField).last, 'boba');
+    await settle(tester);
+    await tester.tap(find.bySemanticsLabel('boba').last); // the grid cell
+    await settle(tester);
+    await tester.tap(findEmojiText('pakai 🧋 boba'));
+    await settle(tester);
+    expect(findEmojiText('bikin 🧋 nongkrong'), findsOneWidget);
+
+    await tester.tap(findEmojiText('bikin 🧋 nongkrong'));
+    await settle(tester);
+    expect((await row(db, 'nongkrong')).emoji, '🧋');
     await tester.pumpWidget(const SizedBox());
     await db.close();
   });

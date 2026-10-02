@@ -1159,13 +1159,13 @@ abstract class AppLocalizations {
   /// No description provided for @categorySuggest.
   ///
   /// In id, this message translates to:
-  /// **'saran'**
+  /// **'saran ikon'**
   String get categorySuggest;
 
   /// No description provided for @categorySuggestFor.
   ///
   /// In id, this message translates to:
-  /// **'buat “{name}”'**
+  /// **'saran buat “{name}”'**
   String categorySuggestFor(String name);
 
   /// No description provided for @categoryUseEmoji.
@@ -1173,6 +1173,24 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'pakai {emoji}'**
   String categoryUseEmoji(String emoji);
+
+  /// No description provided for @categorySuggestSource.
+  ///
+  /// In id, this message translates to:
+  /// **'dari nama'**
+  String get categorySuggestSource;
+
+  /// No description provided for @categoryAllIcons.
+  ///
+  /// In id, this message translates to:
+  /// **'semua ikon'**
+  String get categoryAllIcons;
+
+  /// No description provided for @categoryChangeIcon.
+  ///
+  /// In id, this message translates to:
+  /// **'ganti ikon'**
+  String get categoryChangeIcon;
 
   /// No description provided for @categoryKindLabel.
   ///

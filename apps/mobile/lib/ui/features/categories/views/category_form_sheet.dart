@@ -18,6 +18,7 @@ import '../../pockets/views/set_limit_sheet.dart';
 import 'category_delete_sheet.dart';
 import '../../../core/widgets/meta_line.dart';
 import '../../../core/widgets/app_emoji.dart';
+import '../../../core/widgets/icon_sheet.dart';
 
 /// Where a new category is made from (03.4 / 03.4b / 03.4c / 03.4d).
 enum CategoryOrigin { catat, kantong, atur }
@@ -56,10 +57,6 @@ class CategoryFormSheet extends ConsumerStatefulWidget {
 }
 
 class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
-  static const _palette = [
-    '🍜', '☕', '🐶', '🛵', '🛒', '💡', '🎉', '✈️', //
-    '🏠', '🎁', '📚', '🎮', '🎧', '📱', '🧾', '✨',
-  ];
   static const _defaultLimit = 300000;
 
   Category? get _edit => widget.category;
@@ -86,6 +83,12 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
     _emoji = e;
     _locked = true;
   });
+
+  /// 00.21 semua ikon.
+  Future<void> _openIcons() async {
+    final e = await showIconSheet(context, selected: _emoji);
+    if (e != null) _pickEmoji(e);
+  }
 
   Future<void> _save() async {
     setState(() => _saving = true);
@@ -196,7 +199,13 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       const SizedBox(height: 10),
-                      Center(child: _EmojiDisc(_emoji)),
+                      Center(
+                        child: _EmojiDisc(
+                          _emoji,
+                          label: l.categoryChangeIcon,
+                          onTap: _openIcons,
+                        ),
+                      ),
                       if (_edit != null) ...[
                         const SizedBox(height: 10),
                         Center(
@@ -223,6 +232,9 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
                       ),
                       const SizedBox(height: 16),
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
+                        spacing: 12,
                         children: [
                           Expanded(
                             child: Text(
@@ -231,64 +243,44 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
                                   : l.categorySuggestFor(name),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: AppText.caption.copyWith(
-                                color: AppColors.muted,
+                              style: AppText.label.copyWith(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
-                          for (final e in suggestEmoji(name))
-                            Padding(
-                              padding: const EdgeInsets.only(left: 8),
-                              child: _EmojiButton(
-                                emoji: e,
-                                label: l.categoryUseEmoji(e),
-                                size: 44,
-                                fontSize: 22,
-                                color: e == _emoji
-                                    ? AppColors.ink
-                                    : AppColors.mist,
-                                onTap: () => _pickEmoji(e),
-                              ),
+                          Text(
+                            l.categorySuggestSource,
+                            style: AppText.caption.copyWith(
+                              color: AppColors.muted,
                             ),
+                          ),
                         ],
                       ),
-                      const SizedBox(height: 12),
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: AppColors.mist,
-                          borderRadius: BorderRadius.circular(
-                            AppRadius.statTile,
-                          ),
-                        ),
-                        child: Column(
-                          spacing: 4,
-                          children: [
-                            for (final row in [
-                              _palette.sublist(0, 8),
-                              _palette.sublist(8),
-                            ])
-                              Row(
-                                spacing: 4,
-                                children: [
-                                  for (final e in row)
-                                    Expanded(
-                                      child: _EmojiButton(
-                                        emoji: e,
-                                        label: l.categoryUseEmoji(e),
-                                        size: 38,
-                                        fontSize: 19,
-                                        color: e == _emoji
-                                            ? AppColors.paper
-                                            : Colors.transparent,
-                                        ring: e == _emoji,
-                                        onTap: () => _pickEmoji(e),
-                                      ),
-                                    ),
-                                ],
+                      const SizedBox(height: 10),
+                      Row(
+                        spacing: 10,
+                        children: [
+                          for (final e in suggestEmoji(name))
+                            _EmojiButton(
+                              emoji: e,
+                              label: l.categoryUseEmoji(e),
+                              on: e == _emoji,
+                              onTap: () => _pickEmoji(e),
+                            ),
+                          Expanded(
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: _AllIcons(
+                                  label: l.categoryAllIcons,
+                                  onTap: _openIcons,
+                                ),
                               ),
-                          ],
-                        ),
+                            ),
+                          ),
+                        ],
                       ),
                       if (!_fromPocket) ...[
                         const SizedBox(height: 16),
@@ -453,47 +445,124 @@ class _TrashButton extends StatelessWidget {
   }
 }
 
+/// 03.4 hero: tap to open 00.21; pencil badge says so.
 class _EmojiDisc extends StatelessWidget {
-  const _EmojiDisc(this.emoji);
+  const _EmojiDisc(this.emoji, {required this.label, required this.onTap});
 
-  final String emoji;
+  final String emoji, label;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 120,
-      height: 120,
-      child: Stack(
-        children: [
-          Container(
-            alignment: Alignment.center,
-            decoration: const BoxDecoration(
-              color: AppColors.mist,
-              shape: BoxShape.circle,
-            ),
-            child: AppEmoji(emoji, size: 74),
-          ),
-          Positioned(
-            right: 0,
-            bottom: 4,
-            child: Container(
-              width: 36,
-              height: 36,
-              alignment: Alignment.center,
-              decoration: const BoxDecoration(
-                color: AppColors.ink,
-                shape: BoxShape.circle,
-                boxShadow: [BoxShadow(color: AppColors.paper, spreadRadius: 3)],
+    return Semantics(
+      button: true,
+      label: label,
+      excludeSemantics: true,
+      child: GestureDetector(
+        onTap: onTap,
+        child: SizedBox(
+          width: 120,
+          height: 120,
+          child: Stack(
+            children: [
+              Container(
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  gradient: const RadialGradient(
+                    center: Alignment(0, -0.24), // 50% 38%
+                    radius: 0.62,
+                    colors: [AppColors.paper, AppColors.mist],
+                  ),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: AppColors.divider,
+                    width: AppStroke.hairline,
+                  ),
+                ),
+                child: const DecoratedBox(
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color(0x2E111111), // ink 18%
+                        offset: Offset(0, 10),
+                        blurRadius: 12,
+                      ),
+                    ],
+                    shape: BoxShape.circle,
+                  ),
+                ),
               ),
-              child: const HugeIcon(
-                icon: HugeIcons.strokeRoundedPencilEdit02,
-                size: 16,
+              Center(child: AppEmoji(emoji, size: 80)),
+              Positioned(
+                right: 0,
+                bottom: 4,
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  alignment: Alignment.center,
+                  decoration: const BoxDecoration(
+                    color: AppColors.ink,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(color: AppColors.paper, spreadRadius: 3),
+                    ],
+                  ),
+                  child: const HugeIcon(
+                    icon: HugeIcons.strokeRoundedPencilEdit02,
+                    size: 16,
+                    strokeWidth: AppStroke.iconOnInkSmall,
+                    color: AppColors.onInk,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Outline pill "semua ikon ›" → 00.21.
+class _AllIcons extends StatelessWidget {
+  const _AllIcons({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          height: AppSpace.minTouch,
+          padding: const EdgeInsets.only(left: 16, right: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: AppColors.ink, width: AppStroke.outline),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 4,
+            children: [
+              Text(
+                label,
+                style: AppText.label.copyWith(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const HugeIcon(
+                icon: HugeIcons.strokeRoundedArrowRight01,
+                size: 14,
                 strokeWidth: AppStroke.iconOnInkSmall,
-                color: AppColors.onInk,
+                color: AppColors.ink,
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -570,41 +639,38 @@ class _NameField extends StatelessWidget {
   }
 }
 
+/// 52 suggestion disc; picked = paper + ink ring.
 class _EmojiButton extends StatelessWidget {
   const _EmojiButton({
     required this.emoji,
     required this.label,
-    required this.size,
-    required this.fontSize,
-    required this.color,
+    required this.on,
     required this.onTap,
-    this.ring = false,
   });
 
   final String emoji, label;
-  final double size, fontSize;
-  final Color color;
-  final bool ring;
+  final bool on;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
+      selected: on,
       label: label,
       excludeSemantics: true,
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          width: size,
-          height: size,
+          width: 52,
+          height: 52,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(size / 2),
-            border: ring ? Border.all(color: AppColors.ink, width: 2) : null,
+            color: on ? AppColors.paper : AppColors.mist,
+            shape: BoxShape.circle,
+            border: on ? Border.all(color: AppColors.ink, width: 2) : null,
           ),
-          child: AppEmoji(emoji, size: (fontSize * 1.15).roundToDouble()),
+          child: AppEmoji(emoji, size: 32),
         ),
       ),
     );

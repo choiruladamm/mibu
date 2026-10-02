@@ -661,17 +661,26 @@ class AppLocalizationsId extends AppLocalizations {
   String get categoryNameLabel => 'buat apa?';
 
   @override
-  String get categorySuggest => 'saran';
+  String get categorySuggest => 'saran ikon';
 
   @override
   String categorySuggestFor(String name) {
-    return 'buat “$name”';
+    return 'saran buat “$name”';
   }
 
   @override
   String categoryUseEmoji(String emoji) {
     return 'pakai $emoji';
   }
+
+  @override
+  String get categorySuggestSource => 'dari nama';
+
+  @override
+  String get categoryAllIcons => 'semua ikon';
+
+  @override
+  String get categoryChangeIcon => 'ganti ikon';
 
   @override
   String get categoryKindLabel => 'jenis';

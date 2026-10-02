@@ -547,8 +547,8 @@
   "cancel": "batal",
   "categoryNameHint": "kasih nama",
   "categoryNameLabel": "buat apa?",
-  "categorySuggest": "saran",
-  "categorySuggestFor": "buat “{name}”",
+  "categorySuggest": "saran ikon",
+  "categorySuggestFor": "saran buat “{name}”",
   "@categorySuggestFor": {
     "placeholders": {
       "name": {
@@ -557,6 +557,9 @@
     }
   },
   "categoryUseEmoji": "pakai {emoji}",
+  "categorySuggestSource": "dari nama",
+  "categoryAllIcons": "semua ikon",
+  "categoryChangeIcon": "ganti ikon",
   "@categoryUseEmoji": {
     "placeholders": {
       "emoji": {
