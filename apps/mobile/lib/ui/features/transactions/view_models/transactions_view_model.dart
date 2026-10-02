@@ -23,8 +23,12 @@ class TxMonth extends Notifier<DateTime> {
   void select(DateTime month) => state = month;
 }
 
+// `dependencies` scope the router's per-route override (a deep link's month)
+// to this screen. Without them [transactionsProvider] lives in the root scope
+// and keeps watching the un-overridden month, so the month can't be changed.
 final txMonthProvider = NotifierProvider.autoDispose<TxMonth, DateTime>(
   TxMonth.new,
+  dependencies: const [],
 );
 
 class TxFilterNotifier extends Notifier<TxFilter> {
@@ -101,39 +105,44 @@ List<DayGroup> groupByDay(List<Transaction> rows) {
 
 /// 04.1 semua transaksi.
 final transactionsProvider =
-    Provider.autoDispose<AsyncValue<TransactionsState>>((ref) {
-      final month = ref.watch(txMonthProvider);
-      final rows = ref.watch(monthTransactionsProvider(month));
-      final first = ref.watch(firstMonthProvider);
-      if (rows.error ?? first.error case final e?) {
-        return AsyncError(e, rows.stackTrace ?? first.stackTrace!);
-      }
-      if (!rows.hasValue || !first.hasValue) return const AsyncLoading();
+    Provider.autoDispose<AsyncValue<TransactionsState>>(
+      dependencies: [txMonthProvider],
+      (ref) {
+        final month = ref.watch(txMonthProvider);
+        final rows = ref.watch(monthTransactionsProvider(month));
+        final first = ref.watch(firstMonthProvider);
+        if (rows.error ?? first.error case final e?) {
+          return AsyncError(e, rows.stackTrace ?? first.stackTrace!);
+        }
+        if (!rows.hasValue || !first.hasValue) return const AsyncLoading();
 
-      final now = ref.watch(nowProvider);
-      var months = txMonths(first.value, now);
-      if (!months.contains(month)) months = [month, ...months]..sort();
-      final filter = ref.watch(txFilterProvider);
-      final shown = [
-        for (final t in rows.value!)
-          if (switch (filter) {
-            TxFilter.all => true,
-            TxFilter.expenses => t.amount < 0,
-            TxFilter.income => t.amount > 0,
-          })
-            t,
-      ];
-      int sum(bool Function(int) test) =>
-          rows.value!.map((t) => t.amount).where(test).fold(0, (a, b) => a + b);
-      return AsyncData(
-        TransactionsState(
-          months: months,
-          selected: months.indexOf(month),
-          today: dateOnly(now),
-          income: sum((v) => v > 0),
-          expense: sum((v) => v < 0),
-          groups: groupByDay(shown),
-          count: shown.length,
-        ),
-      );
-    });
+        final now = ref.watch(nowProvider);
+        var months = txMonths(first.value, now);
+        if (!months.contains(month)) months = [month, ...months]..sort();
+        final filter = ref.watch(txFilterProvider);
+        final shown = [
+          for (final t in rows.value!)
+            if (switch (filter) {
+              TxFilter.all => true,
+              TxFilter.expenses => t.amount < 0,
+              TxFilter.income => t.amount > 0,
+            })
+              t,
+        ];
+        int sum(bool Function(int) test) => rows.value!
+            .map((t) => t.amount)
+            .where(test)
+            .fold(0, (a, b) => a + b);
+        return AsyncData(
+          TransactionsState(
+            months: months,
+            selected: months.indexOf(month),
+            today: dateOnly(now),
+            income: sum((v) => v > 0),
+            expense: sum((v) => v < 0),
+            groups: groupByDay(shown),
+            count: shown.length,
+          ),
+        );
+      },
+    );
