@@ -20,16 +20,26 @@ String _name(DateTime m) => _monthName.format(m).toLowerCase();
 String _short(DateTime m) => _monthShort.format(m).toLowerCase();
 
 /// 04.1 semua transaksi.
-class TransactionsView extends ConsumerWidget {
+class TransactionsView extends ConsumerStatefulWidget {
   const TransactionsView({super.key, this.onOpen});
 
   /// Row tap → 04.3 struk.
   final ValueChanged<Transaction>? onOpen;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TransactionsView> createState() => _TransactionsViewState();
+}
+
+class _TransactionsViewState extends ConsumerState<TransactionsView> {
+  /// Last loaded state: shown while a newly picked month loads, so the list
+  /// doesn't blank (and lose its scroll position) between months.
+  TransactionsState? _last;
+
+  @override
+  Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
-    final s = ref.watch(transactionsProvider).value;
+    final s = _last = ref.watch(transactionsProvider).value ?? _last;
+    final onOpen = widget.onOpen;
 
     return Scaffold(
       body: SafeArea(
