@@ -1029,5 +1029,35 @@
     }
   },
   "setupTapHint": "tap di atas buat mulai",
-  "setupDone": "beres, ke beranda"
+  "setupDone": "beres, ke beranda",
+  "settingsBudget": "budget bulanan",
+  "settingsBudgetUnit": "/ bulan",
+  "settingsBudgetEmpty": "belum diisi",
+  "settingsBudgetEdit": "atur budget",
+  "settingsBudgetSet": "pasang budget bulanan",
+  "settingsLimits": "{n} limit",
+  "@settingsLimits": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsMoney": "duit",
+  "settingsCategories": "buat apa aja",
+  "settingsLimitMonthly": "limit bulanan",
+  "settingsPrivacy": "privasi",
+  "settingsHide": "sembunyiin nominal",
+  "settingsHideHint": "tampil ••• sampai kamu tap",
+  "settingsData": "data",
+  "settingsExport": "ekspor ke csv",
+  "settingsExportHint": "semua catatan, satu file",
+  "settingsVersion": "versi {v}",
+  "@settingsVersion": {
+    "placeholders": {
+      "v": {
+        "type": "String"
+      }
+    }
+  }
 }

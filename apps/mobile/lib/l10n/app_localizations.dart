@@ -1857,6 +1857,102 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'beres, ke beranda'**
   String get setupDone;
+
+  /// No description provided for @settingsBudget.
+  ///
+  /// In id, this message translates to:
+  /// **'budget bulanan'**
+  String get settingsBudget;
+
+  /// No description provided for @settingsBudgetUnit.
+  ///
+  /// In id, this message translates to:
+  /// **'/ bulan'**
+  String get settingsBudgetUnit;
+
+  /// No description provided for @settingsBudgetEmpty.
+  ///
+  /// In id, this message translates to:
+  /// **'belum diisi'**
+  String get settingsBudgetEmpty;
+
+  /// No description provided for @settingsBudgetEdit.
+  ///
+  /// In id, this message translates to:
+  /// **'atur budget'**
+  String get settingsBudgetEdit;
+
+  /// No description provided for @settingsBudgetSet.
+  ///
+  /// In id, this message translates to:
+  /// **'pasang budget bulanan'**
+  String get settingsBudgetSet;
+
+  /// No description provided for @settingsLimits.
+  ///
+  /// In id, this message translates to:
+  /// **'{n} limit'**
+  String settingsLimits(int n);
+
+  /// No description provided for @settingsMoney.
+  ///
+  /// In id, this message translates to:
+  /// **'duit'**
+  String get settingsMoney;
+
+  /// No description provided for @settingsCategories.
+  ///
+  /// In id, this message translates to:
+  /// **'buat apa aja'**
+  String get settingsCategories;
+
+  /// No description provided for @settingsLimitMonthly.
+  ///
+  /// In id, this message translates to:
+  /// **'limit bulanan'**
+  String get settingsLimitMonthly;
+
+  /// No description provided for @settingsPrivacy.
+  ///
+  /// In id, this message translates to:
+  /// **'privasi'**
+  String get settingsPrivacy;
+
+  /// No description provided for @settingsHide.
+  ///
+  /// In id, this message translates to:
+  /// **'sembunyiin nominal'**
+  String get settingsHide;
+
+  /// No description provided for @settingsHideHint.
+  ///
+  /// In id, this message translates to:
+  /// **'tampil ••• sampai kamu tap'**
+  String get settingsHideHint;
+
+  /// No description provided for @settingsData.
+  ///
+  /// In id, this message translates to:
+  /// **'data'**
+  String get settingsData;
+
+  /// No description provided for @settingsExport.
+  ///
+  /// In id, this message translates to:
+  /// **'ekspor ke csv'**
+  String get settingsExport;
+
+  /// No description provided for @settingsExportHint.
+  ///
+  /// In id, this message translates to:
+  /// **'semua catatan, satu file'**
+  String get settingsExportHint;
+
+  /// No description provided for @settingsVersion.
+  ///
+  /// In id, this message translates to:
+  /// **'versi {v}'**
+  String settingsVersion(String v);
 }
 
 class _AppLocalizationsDelegate

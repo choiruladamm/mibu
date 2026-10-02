@@ -414,6 +414,15 @@ class FinanceRepository {
         ),
       );
 
+  /// 02.4 sembunyiin nominal.
+  Future<void> setHideAmounts(bool hide) =>
+      (_db.update(_db.profiles)..where((p) => p.deletedAt.isNull())).write(
+        ProfilesCompanion(
+          hideAmounts: Value(hide),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+
   /// Per category: entries (all time) and expense this year, positive.
   /// "12 catatan · Rp840K tahun ini" in 03.3 / 03.5 / 03.6.
   Stream<Map<String, ({int count, int spentThisYear})>> watchCategoryUsage(

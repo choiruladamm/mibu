@@ -1101,4 +1101,56 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get setupDone => 'beres, ke beranda';
+
+  @override
+  String get settingsBudget => 'budget bulanan';
+
+  @override
+  String get settingsBudgetUnit => '/ bulan';
+
+  @override
+  String get settingsBudgetEmpty => 'belum diisi';
+
+  @override
+  String get settingsBudgetEdit => 'atur budget';
+
+  @override
+  String get settingsBudgetSet => 'pasang budget bulanan';
+
+  @override
+  String settingsLimits(int n) {
+    return '$n limit';
+  }
+
+  @override
+  String get settingsMoney => 'duit';
+
+  @override
+  String get settingsCategories => 'buat apa aja';
+
+  @override
+  String get settingsLimitMonthly => 'limit bulanan';
+
+  @override
+  String get settingsPrivacy => 'privasi';
+
+  @override
+  String get settingsHide => 'sembunyiin nominal';
+
+  @override
+  String get settingsHideHint => 'tampil ••• sampai kamu tap';
+
+  @override
+  String get settingsData => 'data';
+
+  @override
+  String get settingsExport => 'ekspor ke csv';
+
+  @override
+  String get settingsExportHint => 'semua catatan, satu file';
+
+  @override
+  String settingsVersion(String v) {
+    return 'versi $v';
+  }
 }
