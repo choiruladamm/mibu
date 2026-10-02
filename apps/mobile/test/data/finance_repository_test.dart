@@ -25,6 +25,55 @@ void main() {
   });
   tearDown(() => db.close());
 
+  test(
+    'limits & budget per period: carried forward, old periods untouched',
+    () async {
+      final oct = cal(now), nov = cal(DateTime(2026, 11, 3));
+      Future<Map<String, int?>> limits(Period p) async => {
+        for (final c in await repo.watchCategories(p).first)
+          c.name: c.monthlyLimit,
+      };
+      final anabul = (await repo.watchCategories(oct).first).firstWhere(
+        (c) => c.name == 'anabul',
+      );
+
+      // Nothing saved for nov: the seeded rows carry on.
+      expect((await limits(nov))['anabul'], 1000000);
+      expect((await repo.watchProfile(nov).first).monthlyBudget, 8000000);
+
+      // Changed in nov → nov's own row; okt keeps its number.
+      await repo.setLimit(anabul.id, 1200000, nov);
+      await repo.setMonthlyBudget(9000000, nov);
+      expect((await limits(nov))['anabul'], 1200000);
+      expect((await limits(oct))['anabul'], 1000000);
+      expect((await repo.watchProfile(oct).first).monthlyBudget, 8000000);
+      expect((await repo.watchProfile(nov).first).monthlyBudget, 9000000);
+
+      // Copot in nov: gone from nov's jars, still a jar in okt.
+      await repo.setLimit(anabul.id, null, nov);
+      expect(
+        (await repo.watchPockets(nov).first).map((p) => p.name),
+        isNot(contains('anabul')),
+      );
+      expect(
+        (await repo.watchPockets(oct).first).map((p) => p.name),
+        contains('anabul'),
+      );
+
+      // Saving the same limit again (an icon swap) writes no row.
+      final rows = (await db.select(db.limits).get()).length;
+      await repo.updateCategory(
+        anabul.id,
+        emoji: '🐕',
+        name: 'anabul',
+        kind: CategoryKind.expense,
+        monthlyLimit: 1000000,
+        period: oct,
+      );
+      expect((await db.select(db.limits).get()).length, rows);
+    },
+  );
+
   test('periods: calendar months until a rule says otherwise', () async {
     final none = await repo.watchPeriods().first;
     expect(none.periodOf(now).start, DateTime(2026, 10));
@@ -46,7 +95,7 @@ void main() {
   test(
     'seed: balance, nets and pockets are derived from transactions',
     () async {
-      final profile = await repo.watchProfile().first;
+      final profile = await repo.watchProfile(cal(now)).first;
       expect(profile.payday, 25);
       expect(profile.monthlyBudget, 8000000);
 
@@ -76,7 +125,7 @@ void main() {
   );
 
   test('soft-deleted and uncategorized transactions', () async {
-    final profile = await repo.watchProfile().first;
+    final profile = await repo.watchProfile(cal(now)).first;
     final petshop = await (db.select(
       db.transactions,
     )..where((t) => t.place.equals('petshop'))).getSingle();
@@ -111,7 +160,7 @@ void main() {
       at: now,
     );
 
-    final picks = await repo.watchRecentPicks().first;
+    final picks = await repo.watchRecentPicks(cal(now)).first;
     expect(picks.first.place, 'warteg'); // trimmed, newest first
     expect(picks.first.category.name, 'makan');
     expect(
@@ -143,8 +192,9 @@ void main() {
         name: ' Gym ',
         kind: CategoryKind.expense,
         monthlyLimit: 300000,
+        period: cal(now),
       );
-      var cats = await repo.watchCategories().first;
+      var cats = await repo.watchCategories(cal(now)).first;
       expect(cats.last.id, id);
       expect(cats.last.name, 'gym');
       expect(
@@ -158,8 +208,9 @@ void main() {
         name: 'yoga',
         kind: CategoryKind.income,
         monthlyLimit: 300000,
+        period: cal(now),
       );
-      cats = await repo.watchCategories().first;
+      cats = await repo.watchCategories(cal(now)).first;
       expect(cats.last.name, 'yoga');
       expect(cats.last.monthlyLimit, isNull);
     },
@@ -171,7 +222,7 @@ void main() {
     expect(free.map((f) => f.category.name), ['belanja']); // income left out
     final before = free.single;
 
-    await repo.setLimit(belanja, 600000);
+    await repo.setLimit(belanja, 600000, cal(now));
     final pocket = (await repo.watchPockets(cal(now)).first).firstWhere(
       (p) => p.id == belanja,
     );
@@ -185,13 +236,13 @@ void main() {
     ));
 
     // copot limit: category + entries stay, it just leaves the jars.
-    await repo.setLimit(belanja, null);
+    await repo.setLimit(belanja, null, cal(now));
     expect(
       (await repo.watchPockets(cal(now)).first).map((p) => p.id),
       isNot(contains(belanja)),
     );
     expect(
-      (await repo.watchCategories().first).map((c) => c.id),
+      (await repo.watchCategories(cal(now)).first).map((c) => c.id),
       contains(belanja),
     );
     final back = (await repo.watchFreeCategories(cal(now)).first).single;
@@ -202,9 +253,9 @@ void main() {
 
     // Income never gets a limit.
     final gajian = await idOf('gajian');
-    await repo.setLimit(gajian, 500000);
+    await repo.setLimit(gajian, 500000, cal(now));
     expect(
-      (await repo.watchCategories().first)
+      (await repo.watchCategories(cal(now)).first)
           .firstWhere((c) => c.id == gajian)
           .monthlyLimit,
       isNull,
@@ -217,12 +268,14 @@ void main() {
       name: 'game',
       kind: CategoryKind.expense,
       monthlyLimit: null,
+      period: cal(now),
     );
     final b = await repo.addCategory(
       emoji: '📚',
       name: 'buku',
       kind: CategoryKind.expense,
       monthlyLimit: null,
+      period: cal(now),
     );
     for (final (id, amount) in [(a, -5000), (b, -2500), (b, -2500)]) {
       await repo.addTransaction(
@@ -243,7 +296,7 @@ void main() {
   });
 
   test('uncategorized: in totals, in no pocket, counts once edited', () async {
-    final profile = await repo.watchProfile().first;
+    final profile = await repo.watchProfile(cal(now)).first;
     final pocketsBefore = await repo.watchPockets(cal(now)).first;
     final spentBefore =
         (await repo.watchTotals(profile, now).first).spent[DateTime(2026, 10)]!;
@@ -282,9 +335,13 @@ void main() {
   });
 
   test('reorder categories', () async {
-    final ids = [for (final c in await repo.watchCategories().first) c.id];
+    final ids = [
+      for (final c in await repo.watchCategories(cal(now)).first) c.id,
+    ];
     await repo.reorderCategories(ids.reversed.toList());
-    final after = [for (final c in await repo.watchCategories().first) c.id];
+    final after = [
+      for (final c in await repo.watchCategories(cal(now)).first) c.id,
+    ];
     expect(after, ids.reversed);
   });
 
@@ -302,7 +359,7 @@ void main() {
     expect(moved, hasLength(2));
 
     expect(
-      (await repo.watchCategories().first).map((c) => c.name),
+      (await repo.watchCategories(cal(now)).first).map((c) => c.name),
       isNot(contains('anabul')),
     );
     var pockets = await repo.watchPockets(cal(now)).first;
@@ -380,20 +437,21 @@ void main() {
       );
       addTearDown(fresh.close);
       final r = FinanceRepository(fresh);
-      expect((await r.watchProfile().first).onboarded, isFalse);
+      expect((await r.watchProfile(cal(now)).first).onboarded, isFalse);
 
       await r.completeSetup(
         openingBalance: 2500000,
         payday: 0,
         pockets: {'makan', 'ngopi'},
         now: now,
+        period: cal(now),
       );
-      final p = await r.watchProfile().first;
+      final p = await r.watchProfile(cal(now)).first;
       expect(
         (p.onboarded, p.openingBalance, p.payday, p.monthlyBudget),
         (true, 2500000, 0, null),
       );
-      final cats = await r.watchCategories().first;
+      final cats = await r.watchCategories(cal(now)).first;
       expect(cats.map((c) => c.name), [
         ...setupPockets.map((p) => p.$2),
         'gajian',
@@ -412,9 +470,10 @@ void main() {
         payday: 10,
         pockets: {'makan'},
         now: now,
+        period: cal(now),
       );
-      expect((await repo.watchProfile().first).openingBalance, 1);
-      expect(await repo.watchCategories().first, hasLength(6));
+      expect((await repo.watchProfile(cal(now)).first).openingBalance, 1);
+      expect(await repo.watchCategories(cal(now)).first, hasLength(6));
     },
   );
 }

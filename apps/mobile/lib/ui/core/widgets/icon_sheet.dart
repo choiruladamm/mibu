@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 
-import '../../../data/repositories/finance_repository.dart';
 import '../../../domain/emoji_catalog.dart';
 import '../../../domain/emoji_search.dart';
 import '../../../l10n/app_localizations.dart';
 import '../tokens.dart';
 import 'app_emoji.dart';
 import 'sheet.dart';
+import '../finance_providers.dart';
 
 /// 00.21 IconSheet: pick one of the catalog icons. Resolves to the picked
 /// emoji, or null when closed.

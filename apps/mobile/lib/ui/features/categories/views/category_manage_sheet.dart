@@ -15,6 +15,7 @@ import '../../../core/widgets/meta_line.dart';
 import '../../../core/widgets/app_emoji.dart';
 import '../../../core/widgets/icon_sheet.dart';
 import '../../../core/widgets/toast.dart';
+import '../../../core/finance_providers.dart';
 
 /// 03.3 buat apa aja — from 03.2 "atur" and 02.4. Its own messenger, so
 /// "ikon diganti" floats over the sheet instead of behind it.
@@ -70,6 +71,7 @@ class _CategoryManageSheetState extends ConsumerState<CategoryManageSheet> {
       name: c.name,
       kind: c.kind,
       monthlyLimit: c.monthlyLimit,
+      period: ref.read(currentPeriodProvider),
     );
     await save(emoji);
     if (!mounted) return;

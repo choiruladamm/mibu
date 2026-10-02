@@ -12,6 +12,7 @@ import 'package:mibu/ui/features/categories/views/category_form_sheet.dart';
 import 'package:mibu/ui/features/pockets/views/pockets_view.dart';
 
 import '../../../meta.dart';
+import '../../../db.dart';
 
 void main() {
   final now = DateTime(2026, 10, 14, 14, 50);
@@ -102,7 +103,7 @@ void main() {
     await tester.tap(findEmojiText('bikin 🧋 kopi'));
     await settle(tester);
     final c = await row(db, 'kopi');
-    expect((c.emoji, c.monthlyLimit), ('🧋', 1000000));
+    expect((c.emoji, await limitOf(db, 'kopi')), ('🧋', 1000000));
     // New pocket is the selected jar.
     expect(find.text('belum kepake'), findsOneWidget);
 
@@ -128,7 +129,7 @@ void main() {
     await settle(tester);
 
     final c = await row(db, 'anabul');
-    expect((c.kind.name, c.monthlyLimit), ('income', null));
+    expect((c.kind.name, await limitOf(db, 'anabul')), ('income', null));
 
     await tester.pumpWidget(const SizedBox());
     await db.close();
@@ -150,12 +151,12 @@ void main() {
     await settle(tester);
 
     expect(find.text('edit'), findsOneWidget); // 03.5 stays open
-    expect((await row(db, 'anabul')).monthlyLimit, isNull);
+    expect(await limitOf(db, 'anabul'), isNull);
     expect(find.text('limit anabul dicopot'), findsOneWidget);
     expect(find.text('opsional, bisa nanti'), findsOneWidget); // switch off
     await tester.tap(find.text('batalin'));
     await settle(tester);
-    expect((await row(db, 'anabul')).monthlyLimit, 1000000);
+    expect(await limitOf(db, 'anabul'), 1000000);
     expect(find.text('opsional, bisa nanti'), findsNothing); // back on
 
     await tester.pumpWidget(const SizedBox());
@@ -169,11 +170,7 @@ void main() {
     // Limits show as "sisa Rp…" under the name; anabul is ≥ 85%.
     expect(find.text('sisa Rp100K'), findsOneWidget);
     // Past the limit it reads "lewat Rp…" instead.
-    await tester.runAsync(
-      () async =>
-          (db.update(db.categories)..where((c) => c.name.equals('anabul')))
-              .write(const CategoriesCompanion(monthlyLimit: Value(800000))),
-    );
+    await tester.runAsync(() => setLimitOf(db, 'anabul', 800000));
     await settle(tester);
     expect(find.text('lewat Rp100K'), findsOneWidget);
     expect(find.text('sisa Rp100K'), findsNothing);
@@ -189,7 +186,7 @@ void main() {
     await tester.tap(findEmojiText('bikin & pakai 🏋️ gym'));
     await settle(tester);
     expect(findEmojiText('pakai 🏋️ gym'), findsOneWidget);
-    expect((await row(db, 'gym')).monthlyLimit, isNull);
+    expect(await limitOf(db, 'gym'), isNull);
 
     await tester.pumpWidget(const SizedBox());
     await db.close();

@@ -85,17 +85,6 @@ class $ProfilesTable extends Profiles
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _monthlyBudgetMeta = const VerificationMeta(
-    'monthlyBudget',
-  );
-  @override
-  late final GeneratedColumn<int> monthlyBudget = GeneratedColumn<int>(
-    'monthly_budget',
-    aliasedName,
-    true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-  );
   static const VerificationMeta _hideAmountsMeta = const VerificationMeta(
     'hideAmounts',
   );
@@ -143,7 +132,6 @@ class $ProfilesTable extends Profiles
     openingBalance,
     openingAt,
     payday,
-    monthlyBudget,
     hideAmounts,
     onboardedAt,
     recentSearches,
@@ -207,15 +195,6 @@ class $ProfilesTable extends Profiles
       );
     } else if (isInserting) {
       context.missing(_paydayMeta);
-    }
-    if (data.containsKey('monthly_budget')) {
-      context.handle(
-        _monthlyBudgetMeta,
-        monthlyBudget.isAcceptableOrUnknown(
-          data['monthly_budget']!,
-          _monthlyBudgetMeta,
-        ),
-      );
     }
     if (data.containsKey('hide_amounts')) {
       context.handle(
@@ -281,10 +260,6 @@ class $ProfilesTable extends Profiles
         DriftSqlType.int,
         data['${effectivePrefix}payday'],
       )!,
-      monthlyBudget: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}monthly_budget'],
-      ),
       hideAmounts: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}hide_amounts'],
@@ -314,7 +289,6 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
   final int openingBalance;
   final DateTime openingAt;
   final int payday;
-  final int? monthlyBudget;
   final bool hideAmounts;
   final DateTime? onboardedAt;
   final String recentSearches;
@@ -326,7 +300,6 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
     required this.openingBalance,
     required this.openingAt,
     required this.payday,
-    this.monthlyBudget,
     required this.hideAmounts,
     this.onboardedAt,
     required this.recentSearches,
@@ -343,9 +316,6 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
     map['opening_balance'] = Variable<int>(openingBalance);
     map['opening_at'] = Variable<DateTime>(openingAt);
     map['payday'] = Variable<int>(payday);
-    if (!nullToAbsent || monthlyBudget != null) {
-      map['monthly_budget'] = Variable<int>(monthlyBudget);
-    }
     map['hide_amounts'] = Variable<bool>(hideAmounts);
     if (!nullToAbsent || onboardedAt != null) {
       map['onboarded_at'] = Variable<DateTime>(onboardedAt);
@@ -365,9 +335,6 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
       openingBalance: Value(openingBalance),
       openingAt: Value(openingAt),
       payday: Value(payday),
-      monthlyBudget: monthlyBudget == null && nullToAbsent
-          ? const Value.absent()
-          : Value(monthlyBudget),
       hideAmounts: Value(hideAmounts),
       onboardedAt: onboardedAt == null && nullToAbsent
           ? const Value.absent()
@@ -389,7 +356,6 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
       openingBalance: serializer.fromJson<int>(json['openingBalance']),
       openingAt: serializer.fromJson<DateTime>(json['openingAt']),
       payday: serializer.fromJson<int>(json['payday']),
-      monthlyBudget: serializer.fromJson<int?>(json['monthlyBudget']),
       hideAmounts: serializer.fromJson<bool>(json['hideAmounts']),
       onboardedAt: serializer.fromJson<DateTime?>(json['onboardedAt']),
       recentSearches: serializer.fromJson<String>(json['recentSearches']),
@@ -406,7 +372,6 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
       'openingBalance': serializer.toJson<int>(openingBalance),
       'openingAt': serializer.toJson<DateTime>(openingAt),
       'payday': serializer.toJson<int>(payday),
-      'monthlyBudget': serializer.toJson<int?>(monthlyBudget),
       'hideAmounts': serializer.toJson<bool>(hideAmounts),
       'onboardedAt': serializer.toJson<DateTime?>(onboardedAt),
       'recentSearches': serializer.toJson<String>(recentSearches),
@@ -421,7 +386,6 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
     int? openingBalance,
     DateTime? openingAt,
     int? payday,
-    Value<int?> monthlyBudget = const Value.absent(),
     bool? hideAmounts,
     Value<DateTime?> onboardedAt = const Value.absent(),
     String? recentSearches,
@@ -433,9 +397,6 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
     openingBalance: openingBalance ?? this.openingBalance,
     openingAt: openingAt ?? this.openingAt,
     payday: payday ?? this.payday,
-    monthlyBudget: monthlyBudget.present
-        ? monthlyBudget.value
-        : this.monthlyBudget,
     hideAmounts: hideAmounts ?? this.hideAmounts,
     onboardedAt: onboardedAt.present ? onboardedAt.value : this.onboardedAt,
     recentSearches: recentSearches ?? this.recentSearches,
@@ -451,9 +412,6 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
           : this.openingBalance,
       openingAt: data.openingAt.present ? data.openingAt.value : this.openingAt,
       payday: data.payday.present ? data.payday.value : this.payday,
-      monthlyBudget: data.monthlyBudget.present
-          ? data.monthlyBudget.value
-          : this.monthlyBudget,
       hideAmounts: data.hideAmounts.present
           ? data.hideAmounts.value
           : this.hideAmounts,
@@ -476,7 +434,6 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
           ..write('openingBalance: $openingBalance, ')
           ..write('openingAt: $openingAt, ')
           ..write('payday: $payday, ')
-          ..write('monthlyBudget: $monthlyBudget, ')
           ..write('hideAmounts: $hideAmounts, ')
           ..write('onboardedAt: $onboardedAt, ')
           ..write('recentSearches: $recentSearches')
@@ -493,7 +450,6 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
     openingBalance,
     openingAt,
     payday,
-    monthlyBudget,
     hideAmounts,
     onboardedAt,
     recentSearches,
@@ -509,7 +465,6 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
           other.openingBalance == this.openingBalance &&
           other.openingAt == this.openingAt &&
           other.payday == this.payday &&
-          other.monthlyBudget == this.monthlyBudget &&
           other.hideAmounts == this.hideAmounts &&
           other.onboardedAt == this.onboardedAt &&
           other.recentSearches == this.recentSearches);
@@ -523,7 +478,6 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
   final Value<int> openingBalance;
   final Value<DateTime> openingAt;
   final Value<int> payday;
-  final Value<int?> monthlyBudget;
   final Value<bool> hideAmounts;
   final Value<DateTime?> onboardedAt;
   final Value<String> recentSearches;
@@ -536,7 +490,6 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
     this.openingBalance = const Value.absent(),
     this.openingAt = const Value.absent(),
     this.payday = const Value.absent(),
-    this.monthlyBudget = const Value.absent(),
     this.hideAmounts = const Value.absent(),
     this.onboardedAt = const Value.absent(),
     this.recentSearches = const Value.absent(),
@@ -550,7 +503,6 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
     required int openingBalance,
     required DateTime openingAt,
     required int payday,
-    this.monthlyBudget = const Value.absent(),
     this.hideAmounts = const Value.absent(),
     this.onboardedAt = const Value.absent(),
     this.recentSearches = const Value.absent(),
@@ -566,7 +518,6 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
     Expression<int>? openingBalance,
     Expression<DateTime>? openingAt,
     Expression<int>? payday,
-    Expression<int>? monthlyBudget,
     Expression<bool>? hideAmounts,
     Expression<DateTime>? onboardedAt,
     Expression<String>? recentSearches,
@@ -580,7 +531,6 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
       if (openingBalance != null) 'opening_balance': openingBalance,
       if (openingAt != null) 'opening_at': openingAt,
       if (payday != null) 'payday': payday,
-      if (monthlyBudget != null) 'monthly_budget': monthlyBudget,
       if (hideAmounts != null) 'hide_amounts': hideAmounts,
       if (onboardedAt != null) 'onboarded_at': onboardedAt,
       if (recentSearches != null) 'recent_searches': recentSearches,
@@ -596,7 +546,6 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
     Value<int>? openingBalance,
     Value<DateTime>? openingAt,
     Value<int>? payday,
-    Value<int?>? monthlyBudget,
     Value<bool>? hideAmounts,
     Value<DateTime?>? onboardedAt,
     Value<String>? recentSearches,
@@ -610,7 +559,6 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
       openingBalance: openingBalance ?? this.openingBalance,
       openingAt: openingAt ?? this.openingAt,
       payday: payday ?? this.payday,
-      monthlyBudget: monthlyBudget ?? this.monthlyBudget,
       hideAmounts: hideAmounts ?? this.hideAmounts,
       onboardedAt: onboardedAt ?? this.onboardedAt,
       recentSearches: recentSearches ?? this.recentSearches,
@@ -642,9 +590,6 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
     if (payday.present) {
       map['payday'] = Variable<int>(payday.value);
     }
-    if (monthlyBudget.present) {
-      map['monthly_budget'] = Variable<int>(monthlyBudget.value);
-    }
     if (hideAmounts.present) {
       map['hide_amounts'] = Variable<bool>(hideAmounts.value);
     }
@@ -670,7 +615,6 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
           ..write('openingBalance: $openingBalance, ')
           ..write('openingAt: $openingAt, ')
           ..write('payday: $payday, ')
-          ..write('monthlyBudget: $monthlyBudget, ')
           ..write('hideAmounts: $hideAmounts, ')
           ..write('onboardedAt: $onboardedAt, ')
           ..write('recentSearches: $recentSearches, ')
@@ -758,17 +702,6 @@ class $CategoriesTable extends Categories
         type: DriftSqlType.string,
         requiredDuringInsert: true,
       ).withConverter<CategoryKind>($CategoriesTable.$converterkind);
-  static const VerificationMeta _monthlyLimitMeta = const VerificationMeta(
-    'monthlyLimit',
-  );
-  @override
-  late final GeneratedColumn<int> monthlyLimit = GeneratedColumn<int>(
-    'monthly_limit',
-    aliasedName,
-    true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-  );
   static const VerificationMeta _sortOrderMeta = const VerificationMeta(
     'sortOrder',
   );
@@ -790,7 +723,6 @@ class $CategoriesTable extends Categories
     emoji,
     name,
     kind,
-    monthlyLimit,
     sortOrder,
   ];
   @override
@@ -842,15 +774,6 @@ class $CategoriesTable extends Categories
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
-    if (data.containsKey('monthly_limit')) {
-      context.handle(
-        _monthlyLimitMeta,
-        monthlyLimit.isAcceptableOrUnknown(
-          data['monthly_limit']!,
-          _monthlyLimitMeta,
-        ),
-      );
-    }
     if (data.containsKey('sort_order')) {
       context.handle(
         _sortOrderMeta,
@@ -896,10 +819,6 @@ class $CategoriesTable extends Categories
           data['${effectivePrefix}kind'],
         )!,
       ),
-      monthlyLimit: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}monthly_limit'],
-      ),
       sortOrder: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}sort_order'],
@@ -924,7 +843,6 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
   final String emoji;
   final String name;
   final CategoryKind kind;
-  final int? monthlyLimit;
   final int sortOrder;
   const CategoryRow({
     required this.id,
@@ -934,7 +852,6 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
     required this.emoji,
     required this.name,
     required this.kind,
-    this.monthlyLimit,
     required this.sortOrder,
   });
   @override
@@ -953,9 +870,6 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
         $CategoriesTable.$converterkind.toSql(kind),
       );
     }
-    if (!nullToAbsent || monthlyLimit != null) {
-      map['monthly_limit'] = Variable<int>(monthlyLimit);
-    }
     map['sort_order'] = Variable<int>(sortOrder);
     return map;
   }
@@ -971,9 +885,6 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
       emoji: Value(emoji),
       name: Value(name),
       kind: Value(kind),
-      monthlyLimit: monthlyLimit == null && nullToAbsent
-          ? const Value.absent()
-          : Value(monthlyLimit),
       sortOrder: Value(sortOrder),
     );
   }
@@ -993,7 +904,6 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
       kind: $CategoriesTable.$converterkind.fromJson(
         serializer.fromJson<String>(json['kind']),
       ),
-      monthlyLimit: serializer.fromJson<int?>(json['monthlyLimit']),
       sortOrder: serializer.fromJson<int>(json['sortOrder']),
     );
   }
@@ -1010,7 +920,6 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
       'kind': serializer.toJson<String>(
         $CategoriesTable.$converterkind.toJson(kind),
       ),
-      'monthlyLimit': serializer.toJson<int?>(monthlyLimit),
       'sortOrder': serializer.toJson<int>(sortOrder),
     };
   }
@@ -1023,7 +932,6 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
     String? emoji,
     String? name,
     CategoryKind? kind,
-    Value<int?> monthlyLimit = const Value.absent(),
     int? sortOrder,
   }) => CategoryRow(
     id: id ?? this.id,
@@ -1033,7 +941,6 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
     emoji: emoji ?? this.emoji,
     name: name ?? this.name,
     kind: kind ?? this.kind,
-    monthlyLimit: monthlyLimit.present ? monthlyLimit.value : this.monthlyLimit,
     sortOrder: sortOrder ?? this.sortOrder,
   );
   CategoryRow copyWithCompanion(CategoriesCompanion data) {
@@ -1045,9 +952,6 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
       emoji: data.emoji.present ? data.emoji.value : this.emoji,
       name: data.name.present ? data.name.value : this.name,
       kind: data.kind.present ? data.kind.value : this.kind,
-      monthlyLimit: data.monthlyLimit.present
-          ? data.monthlyLimit.value
-          : this.monthlyLimit,
       sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
     );
   }
@@ -1062,7 +966,6 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
           ..write('emoji: $emoji, ')
           ..write('name: $name, ')
           ..write('kind: $kind, ')
-          ..write('monthlyLimit: $monthlyLimit, ')
           ..write('sortOrder: $sortOrder')
           ..write(')'))
         .toString();
@@ -1077,7 +980,6 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
     emoji,
     name,
     kind,
-    monthlyLimit,
     sortOrder,
   );
   @override
@@ -1091,7 +993,6 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
           other.emoji == this.emoji &&
           other.name == this.name &&
           other.kind == this.kind &&
-          other.monthlyLimit == this.monthlyLimit &&
           other.sortOrder == this.sortOrder);
 }
 
@@ -1103,7 +1004,6 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
   final Value<String> emoji;
   final Value<String> name;
   final Value<CategoryKind> kind;
-  final Value<int?> monthlyLimit;
   final Value<int> sortOrder;
   final Value<int> rowid;
   const CategoriesCompanion({
@@ -1114,7 +1014,6 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     this.emoji = const Value.absent(),
     this.name = const Value.absent(),
     this.kind = const Value.absent(),
-    this.monthlyLimit = const Value.absent(),
     this.sortOrder = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -1126,7 +1025,6 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     required String emoji,
     required String name,
     required CategoryKind kind,
-    this.monthlyLimit = const Value.absent(),
     this.sortOrder = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : emoji = Value(emoji),
@@ -1140,7 +1038,6 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     Expression<String>? emoji,
     Expression<String>? name,
     Expression<String>? kind,
-    Expression<int>? monthlyLimit,
     Expression<int>? sortOrder,
     Expression<int>? rowid,
   }) {
@@ -1152,7 +1049,6 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
       if (emoji != null) 'emoji': emoji,
       if (name != null) 'name': name,
       if (kind != null) 'kind': kind,
-      if (monthlyLimit != null) 'monthly_limit': monthlyLimit,
       if (sortOrder != null) 'sort_order': sortOrder,
       if (rowid != null) 'rowid': rowid,
     });
@@ -1166,7 +1062,6 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     Value<String>? emoji,
     Value<String>? name,
     Value<CategoryKind>? kind,
-    Value<int?>? monthlyLimit,
     Value<int>? sortOrder,
     Value<int>? rowid,
   }) {
@@ -1178,7 +1073,6 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
       emoji: emoji ?? this.emoji,
       name: name ?? this.name,
       kind: kind ?? this.kind,
-      monthlyLimit: monthlyLimit ?? this.monthlyLimit,
       sortOrder: sortOrder ?? this.sortOrder,
       rowid: rowid ?? this.rowid,
     );
@@ -1210,9 +1104,6 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
         $CategoriesTable.$converterkind.toSql(kind.value),
       );
     }
-    if (monthlyLimit.present) {
-      map['monthly_limit'] = Variable<int>(monthlyLimit.value);
-    }
     if (sortOrder.present) {
       map['sort_order'] = Variable<int>(sortOrder.value);
     }
@@ -1232,7 +1123,6 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
           ..write('emoji: $emoji, ')
           ..write('name: $name, ')
           ..write('kind: $kind, ')
-          ..write('monthlyLimit: $monthlyLimit, ')
           ..write('sortOrder: $sortOrder, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -2352,6 +2242,983 @@ class PeriodRulesCompanion extends UpdateCompanion<PeriodRuleRow> {
   }
 }
 
+class $BudgetsTable extends Budgets with TableInfo<$BudgetsTable, BudgetRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $BudgetsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    clientDefault: _uuid.v4,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: DateTime.now,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: DateTime.now,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _periodStartMeta = const VerificationMeta(
+    'periodStart',
+  );
+  @override
+  late final GeneratedColumn<DateTime> periodStart = GeneratedColumn<DateTime>(
+    'period_start',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _periodEndMeta = const VerificationMeta(
+    'periodEnd',
+  );
+  @override
+  late final GeneratedColumn<DateTime> periodEnd = GeneratedColumn<DateTime>(
+    'period_end',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<int> amount = GeneratedColumn<int>(
+    'amount',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    periodStart,
+    periodEnd,
+    amount,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'budgets';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<BudgetRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('period_start')) {
+      context.handle(
+        _periodStartMeta,
+        periodStart.isAcceptableOrUnknown(
+          data['period_start']!,
+          _periodStartMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_periodStartMeta);
+    }
+    if (data.containsKey('period_end')) {
+      context.handle(
+        _periodEndMeta,
+        periodEnd.isAcceptableOrUnknown(data['period_end']!, _periodEndMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_periodEndMeta);
+    }
+    if (data.containsKey('amount')) {
+      context.handle(
+        _amountMeta,
+        amount.isAcceptableOrUnknown(data['amount']!, _amountMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  BudgetRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return BudgetRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      periodStart: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}period_start'],
+      )!,
+      periodEnd: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}period_end'],
+      )!,
+      amount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}amount'],
+      ),
+    );
+  }
+
+  @override
+  $BudgetsTable createAlias(String alias) {
+    return $BudgetsTable(attachedDatabase, alias);
+  }
+}
+
+class BudgetRow extends DataClass implements Insertable<BudgetRow> {
+  final String id;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final DateTime periodStart;
+  final DateTime periodEnd;
+  final int? amount;
+  const BudgetRow({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.periodStart,
+    required this.periodEnd,
+    this.amount,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['period_start'] = Variable<DateTime>(periodStart);
+    map['period_end'] = Variable<DateTime>(periodEnd);
+    if (!nullToAbsent || amount != null) {
+      map['amount'] = Variable<int>(amount);
+    }
+    return map;
+  }
+
+  BudgetsCompanion toCompanion(bool nullToAbsent) {
+    return BudgetsCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      periodStart: Value(periodStart),
+      periodEnd: Value(periodEnd),
+      amount: amount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(amount),
+    );
+  }
+
+  factory BudgetRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return BudgetRow(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      periodStart: serializer.fromJson<DateTime>(json['periodStart']),
+      periodEnd: serializer.fromJson<DateTime>(json['periodEnd']),
+      amount: serializer.fromJson<int?>(json['amount']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'periodStart': serializer.toJson<DateTime>(periodStart),
+      'periodEnd': serializer.toJson<DateTime>(periodEnd),
+      'amount': serializer.toJson<int?>(amount),
+    };
+  }
+
+  BudgetRow copyWith({
+    String? id,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    DateTime? periodStart,
+    DateTime? periodEnd,
+    Value<int?> amount = const Value.absent(),
+  }) => BudgetRow(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    periodStart: periodStart ?? this.periodStart,
+    periodEnd: periodEnd ?? this.periodEnd,
+    amount: amount.present ? amount.value : this.amount,
+  );
+  BudgetRow copyWithCompanion(BudgetsCompanion data) {
+    return BudgetRow(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      periodStart: data.periodStart.present
+          ? data.periodStart.value
+          : this.periodStart,
+      periodEnd: data.periodEnd.present ? data.periodEnd.value : this.periodEnd,
+      amount: data.amount.present ? data.amount.value : this.amount,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BudgetRow(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('periodStart: $periodStart, ')
+          ..write('periodEnd: $periodEnd, ')
+          ..write('amount: $amount')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    periodStart,
+    periodEnd,
+    amount,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is BudgetRow &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.periodStart == this.periodStart &&
+          other.periodEnd == this.periodEnd &&
+          other.amount == this.amount);
+}
+
+class BudgetsCompanion extends UpdateCompanion<BudgetRow> {
+  final Value<String> id;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<DateTime> periodStart;
+  final Value<DateTime> periodEnd;
+  final Value<int?> amount;
+  final Value<int> rowid;
+  const BudgetsCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.periodStart = const Value.absent(),
+    this.periodEnd = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  BudgetsCompanion.insert({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    required DateTime periodStart,
+    required DateTime periodEnd,
+    this.amount = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : periodStart = Value(periodStart),
+       periodEnd = Value(periodEnd);
+  static Insertable<BudgetRow> custom({
+    Expression<String>? id,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<DateTime>? periodStart,
+    Expression<DateTime>? periodEnd,
+    Expression<int>? amount,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (periodStart != null) 'period_start': periodStart,
+      if (periodEnd != null) 'period_end': periodEnd,
+      if (amount != null) 'amount': amount,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  BudgetsCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<DateTime>? periodStart,
+    Value<DateTime>? periodEnd,
+    Value<int?>? amount,
+    Value<int>? rowid,
+  }) {
+    return BudgetsCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      periodStart: periodStart ?? this.periodStart,
+      periodEnd: periodEnd ?? this.periodEnd,
+      amount: amount ?? this.amount,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (periodStart.present) {
+      map['period_start'] = Variable<DateTime>(periodStart.value);
+    }
+    if (periodEnd.present) {
+      map['period_end'] = Variable<DateTime>(periodEnd.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<int>(amount.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BudgetsCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('periodStart: $periodStart, ')
+          ..write('periodEnd: $periodEnd, ')
+          ..write('amount: $amount, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $LimitsTable extends Limits with TableInfo<$LimitsTable, LimitRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LimitsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    clientDefault: _uuid.v4,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: DateTime.now,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: DateTime.now,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _categoryIdMeta = const VerificationMeta(
+    'categoryId',
+  );
+  @override
+  late final GeneratedColumn<String> categoryId = GeneratedColumn<String>(
+    'category_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES categories (id)',
+    ),
+  );
+  static const VerificationMeta _periodStartMeta = const VerificationMeta(
+    'periodStart',
+  );
+  @override
+  late final GeneratedColumn<DateTime> periodStart = GeneratedColumn<DateTime>(
+    'period_start',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _periodEndMeta = const VerificationMeta(
+    'periodEnd',
+  );
+  @override
+  late final GeneratedColumn<DateTime> periodEnd = GeneratedColumn<DateTime>(
+    'period_end',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<int> amount = GeneratedColumn<int>(
+    'amount',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    categoryId,
+    periodStart,
+    periodEnd,
+    amount,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'limits';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LimitRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('category_id')) {
+      context.handle(
+        _categoryIdMeta,
+        categoryId.isAcceptableOrUnknown(data['category_id']!, _categoryIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_categoryIdMeta);
+    }
+    if (data.containsKey('period_start')) {
+      context.handle(
+        _periodStartMeta,
+        periodStart.isAcceptableOrUnknown(
+          data['period_start']!,
+          _periodStartMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_periodStartMeta);
+    }
+    if (data.containsKey('period_end')) {
+      context.handle(
+        _periodEndMeta,
+        periodEnd.isAcceptableOrUnknown(data['period_end']!, _periodEndMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_periodEndMeta);
+    }
+    if (data.containsKey('amount')) {
+      context.handle(
+        _amountMeta,
+        amount.isAcceptableOrUnknown(data['amount']!, _amountMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LimitRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LimitRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      categoryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category_id'],
+      )!,
+      periodStart: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}period_start'],
+      )!,
+      periodEnd: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}period_end'],
+      )!,
+      amount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}amount'],
+      ),
+    );
+  }
+
+  @override
+  $LimitsTable createAlias(String alias) {
+    return $LimitsTable(attachedDatabase, alias);
+  }
+}
+
+class LimitRow extends DataClass implements Insertable<LimitRow> {
+  final String id;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final String categoryId;
+  final DateTime periodStart;
+  final DateTime periodEnd;
+  final int? amount;
+  const LimitRow({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.categoryId,
+    required this.periodStart,
+    required this.periodEnd,
+    this.amount,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['category_id'] = Variable<String>(categoryId);
+    map['period_start'] = Variable<DateTime>(periodStart);
+    map['period_end'] = Variable<DateTime>(periodEnd);
+    if (!nullToAbsent || amount != null) {
+      map['amount'] = Variable<int>(amount);
+    }
+    return map;
+  }
+
+  LimitsCompanion toCompanion(bool nullToAbsent) {
+    return LimitsCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      categoryId: Value(categoryId),
+      periodStart: Value(periodStart),
+      periodEnd: Value(periodEnd),
+      amount: amount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(amount),
+    );
+  }
+
+  factory LimitRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LimitRow(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      categoryId: serializer.fromJson<String>(json['categoryId']),
+      periodStart: serializer.fromJson<DateTime>(json['periodStart']),
+      periodEnd: serializer.fromJson<DateTime>(json['periodEnd']),
+      amount: serializer.fromJson<int?>(json['amount']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'categoryId': serializer.toJson<String>(categoryId),
+      'periodStart': serializer.toJson<DateTime>(periodStart),
+      'periodEnd': serializer.toJson<DateTime>(periodEnd),
+      'amount': serializer.toJson<int?>(amount),
+    };
+  }
+
+  LimitRow copyWith({
+    String? id,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    String? categoryId,
+    DateTime? periodStart,
+    DateTime? periodEnd,
+    Value<int?> amount = const Value.absent(),
+  }) => LimitRow(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    categoryId: categoryId ?? this.categoryId,
+    periodStart: periodStart ?? this.periodStart,
+    periodEnd: periodEnd ?? this.periodEnd,
+    amount: amount.present ? amount.value : this.amount,
+  );
+  LimitRow copyWithCompanion(LimitsCompanion data) {
+    return LimitRow(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      categoryId: data.categoryId.present
+          ? data.categoryId.value
+          : this.categoryId,
+      periodStart: data.periodStart.present
+          ? data.periodStart.value
+          : this.periodStart,
+      periodEnd: data.periodEnd.present ? data.periodEnd.value : this.periodEnd,
+      amount: data.amount.present ? data.amount.value : this.amount,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LimitRow(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('periodStart: $periodStart, ')
+          ..write('periodEnd: $periodEnd, ')
+          ..write('amount: $amount')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    categoryId,
+    periodStart,
+    periodEnd,
+    amount,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LimitRow &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.categoryId == this.categoryId &&
+          other.periodStart == this.periodStart &&
+          other.periodEnd == this.periodEnd &&
+          other.amount == this.amount);
+}
+
+class LimitsCompanion extends UpdateCompanion<LimitRow> {
+  final Value<String> id;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<String> categoryId;
+  final Value<DateTime> periodStart;
+  final Value<DateTime> periodEnd;
+  final Value<int?> amount;
+  final Value<int> rowid;
+  const LimitsCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.categoryId = const Value.absent(),
+    this.periodStart = const Value.absent(),
+    this.periodEnd = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LimitsCompanion.insert({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    required String categoryId,
+    required DateTime periodStart,
+    required DateTime periodEnd,
+    this.amount = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : categoryId = Value(categoryId),
+       periodStart = Value(periodStart),
+       periodEnd = Value(periodEnd);
+  static Insertable<LimitRow> custom({
+    Expression<String>? id,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? categoryId,
+    Expression<DateTime>? periodStart,
+    Expression<DateTime>? periodEnd,
+    Expression<int>? amount,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (categoryId != null) 'category_id': categoryId,
+      if (periodStart != null) 'period_start': periodStart,
+      if (periodEnd != null) 'period_end': periodEnd,
+      if (amount != null) 'amount': amount,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LimitsCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<String>? categoryId,
+    Value<DateTime>? periodStart,
+    Value<DateTime>? periodEnd,
+    Value<int?>? amount,
+    Value<int>? rowid,
+  }) {
+    return LimitsCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      categoryId: categoryId ?? this.categoryId,
+      periodStart: periodStart ?? this.periodStart,
+      periodEnd: periodEnd ?? this.periodEnd,
+      amount: amount ?? this.amount,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (categoryId.present) {
+      map['category_id'] = Variable<String>(categoryId.value);
+    }
+    if (periodStart.present) {
+      map['period_start'] = Variable<DateTime>(periodStart.value);
+    }
+    if (periodEnd.present) {
+      map['period_end'] = Variable<DateTime>(periodEnd.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<int>(amount.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LimitsCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('periodStart: $periodStart, ')
+          ..write('periodEnd: $periodEnd, ')
+          ..write('amount: $amount, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2359,6 +3226,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $CategoriesTable categories = $CategoriesTable(this);
   late final $TransactionsTable transactions = $TransactionsTable(this);
   late final $PeriodRulesTable periodRules = $PeriodRulesTable(this);
+  late final $BudgetsTable budgets = $BudgetsTable(this);
+  late final $LimitsTable limits = $LimitsTable(this);
   late final Index transactionsAt = Index(
     'transactions_at',
     'CREATE INDEX transactions_at ON transactions (at)',
@@ -2366,6 +3235,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final Index transactionsCategory = Index(
     'transactions_category',
     'CREATE INDEX transactions_category ON transactions (category_id)',
+  );
+  late final Index limitsCategory = Index(
+    'limits_category',
+    'CREATE INDEX limits_category ON limits (category_id)',
   );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -2376,8 +3249,11 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     categories,
     transactions,
     periodRules,
+    budgets,
+    limits,
     transactionsAt,
     transactionsCategory,
+    limitsCategory,
   ];
 }
 
@@ -2389,7 +3265,6 @@ typedef $$ProfilesTableCreateCompanionBuilder = ProfilesCompanion Function({
   required int openingBalance,
   required DateTime openingAt,
   required int payday,
-  Value<int?> monthlyBudget,
   Value<bool> hideAmounts,
   Value<DateTime?> onboardedAt,
   Value<String> recentSearches,
@@ -2403,7 +3278,6 @@ typedef $$ProfilesTableUpdateCompanionBuilder = ProfilesCompanion Function({
   Value<int> openingBalance,
   Value<DateTime> openingAt,
   Value<int> payday,
-  Value<int?> monthlyBudget,
   Value<bool> hideAmounts,
   Value<DateTime?> onboardedAt,
   Value<String> recentSearches,
@@ -2451,11 +3325,6 @@ class $$ProfilesTableFilterComposer
 
   ColumnFilters<int> get payday => $composableBuilder(
     column: $table.payday,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get monthlyBudget => $composableBuilder(
-    column: $table.monthlyBudget,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2519,11 +3388,6 @@ class $$ProfilesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get monthlyBudget => $composableBuilder(
-    column: $table.monthlyBudget,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<bool> get hideAmounts => $composableBuilder(
     column: $table.hideAmounts,
     builder: (column) => ColumnOrderings(column),
@@ -2571,11 +3435,6 @@ class $$ProfilesTableAnnotationComposer
 
   GeneratedColumn<int> get payday =>
       $composableBuilder(column: $table.payday, builder: (column) => column);
-
-  GeneratedColumn<int> get monthlyBudget => $composableBuilder(
-    column: $table.monthlyBudget,
-    builder: (column) => column,
-  );
 
   GeneratedColumn<bool> get hideAmounts => $composableBuilder(
     column: $table.hideAmounts,
@@ -2631,7 +3490,6 @@ class $$ProfilesTableTableManager
                 Value<int> openingBalance = const Value.absent(),
                 Value<DateTime> openingAt = const Value.absent(),
                 Value<int> payday = const Value.absent(),
-                Value<int?> monthlyBudget = const Value.absent(),
                 Value<bool> hideAmounts = const Value.absent(),
                 Value<DateTime?> onboardedAt = const Value.absent(),
                 Value<String> recentSearches = const Value.absent(),
@@ -2644,7 +3502,6 @@ class $$ProfilesTableTableManager
                 openingBalance: openingBalance,
                 openingAt: openingAt,
                 payday: payday,
-                monthlyBudget: monthlyBudget,
                 hideAmounts: hideAmounts,
                 onboardedAt: onboardedAt,
                 recentSearches: recentSearches,
@@ -2659,7 +3516,6 @@ class $$ProfilesTableTableManager
                 required int openingBalance,
                 required DateTime openingAt,
                 required int payday,
-                Value<int?> monthlyBudget = const Value.absent(),
                 Value<bool> hideAmounts = const Value.absent(),
                 Value<DateTime?> onboardedAt = const Value.absent(),
                 Value<String> recentSearches = const Value.absent(),
@@ -2672,7 +3528,6 @@ class $$ProfilesTableTableManager
                 openingBalance: openingBalance,
                 openingAt: openingAt,
                 payday: payday,
-                monthlyBudget: monthlyBudget,
                 hideAmounts: hideAmounts,
                 onboardedAt: onboardedAt,
                 recentSearches: recentSearches,
@@ -2717,7 +3572,6 @@ typedef $$CategoriesTableCreateCompanionBuilder = CategoriesCompanion Function({
   required String emoji,
   required String name,
   required CategoryKind kind,
-  Value<int?> monthlyLimit,
   Value<int> sortOrder,
   Value<int> rowid,
 });
@@ -2729,7 +3583,6 @@ typedef $$CategoriesTableUpdateCompanionBuilder = CategoriesCompanion Function({
   Value<String> emoji,
   Value<String> name,
   Value<CategoryKind> kind,
-  Value<int?> monthlyLimit,
   Value<int> sortOrder,
   Value<int> rowid,
 });
@@ -2751,6 +3604,25 @@ final class $$CategoriesTableReferences
     ).filter((f) => f.categoryId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_transactionsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$LimitsTable, List<LimitRow>> _limitsRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.limits,
+    aliasName: 'categories__id__limits__category_id',
+  );
+
+  $$LimitsTableProcessedTableManager get limitsRefs {
+    final manager = $$LimitsTableTableManager(
+      $_db,
+      $_db.limits,
+    ).filter((f) => f.categoryId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_limitsRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -2802,11 +3674,6 @@ class $$CategoriesTableFilterComposer
         builder: (column) => ColumnWithTypeConverterFilters(column),
       );
 
-  ColumnFilters<int> get monthlyLimit => $composableBuilder(
-    column: $table.monthlyLimit,
-    builder: (column) => ColumnFilters(column),
-  );
-
   ColumnFilters<int> get sortOrder => $composableBuilder(
     column: $table.sortOrder,
     builder: (column) => ColumnFilters(column),
@@ -2828,6 +3695,31 @@ class $$CategoriesTableFilterComposer
           }) => $$TransactionsTableFilterComposer(
             $db: $db,
             $table: $db.transactions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> limitsRefs(
+    Expression<bool> Function($$LimitsTableFilterComposer f) f,
+  ) {
+    final $$LimitsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.limits,
+      getReferencedColumn: (t) => t.categoryId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LimitsTableFilterComposer(
+            $db: $db,
+            $table: $db.limits,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -2882,11 +3774,6 @@ class $$CategoriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get monthlyLimit => $composableBuilder(
-    column: $table.monthlyLimit,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<int> get sortOrder => $composableBuilder(
     column: $table.sortOrder,
     builder: (column) => ColumnOrderings(column),
@@ -2923,11 +3810,6 @@ class $$CategoriesTableAnnotationComposer
   GeneratedColumnWithTypeConverter<CategoryKind, String> get kind =>
       $composableBuilder(column: $table.kind, builder: (column) => column);
 
-  GeneratedColumn<int> get monthlyLimit => $composableBuilder(
-    column: $table.monthlyLimit,
-    builder: (column) => column,
-  );
-
   GeneratedColumn<int> get sortOrder =>
       $composableBuilder(column: $table.sortOrder, builder: (column) => column);
 
@@ -2955,6 +3837,31 @@ class $$CategoriesTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> limitsRefs<T extends Object>(
+    Expression<T> Function($$LimitsTableAnnotationComposer a) f,
+  ) {
+    final $$LimitsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.limits,
+      getReferencedColumn: (t) => t.categoryId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LimitsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.limits,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$CategoriesTableTableManager
@@ -2970,7 +3877,7 @@ class $$CategoriesTableTableManager
           $$CategoriesTableUpdateCompanionBuilder,
           (CategoryRow, $$CategoriesTableReferences),
           CategoryRow,
-          PrefetchHooks Function({bool transactionsRefs})
+          PrefetchHooks Function({bool transactionsRefs, bool limitsRefs})
         > {
   $$CategoriesTableTableManager(_$AppDatabase db, $CategoriesTable table)
     : super(
@@ -2992,7 +3899,6 @@ class $$CategoriesTableTableManager
                 Value<String> emoji = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<CategoryKind> kind = const Value.absent(),
-                Value<int?> monthlyLimit = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CategoriesCompanion(
@@ -3003,7 +3909,6 @@ class $$CategoriesTableTableManager
                 emoji: emoji,
                 name: name,
                 kind: kind,
-                monthlyLimit: monthlyLimit,
                 sortOrder: sortOrder,
                 rowid: rowid,
               ),
@@ -3016,7 +3921,6 @@ class $$CategoriesTableTableManager
                 required String emoji,
                 required String name,
                 required CategoryKind kind,
-                Value<int?> monthlyLimit = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CategoriesCompanion.insert(
@@ -3027,7 +3931,6 @@ class $$CategoriesTableTableManager
                 emoji: emoji,
                 name: name,
                 kind: kind,
-                monthlyLimit: monthlyLimit,
                 sortOrder: sortOrder,
                 rowid: rowid,
               ),
@@ -3039,36 +3942,63 @@ class $$CategoriesTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({transactionsRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [if (transactionsRefs) db.transactions],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (transactionsRefs)
-                    await $_getPrefetchedData<
-                      CategoryRow,
-                      $CategoriesTable,
-                      TransactionRow
-                    >(
-                      currentTable: table,
-                      referencedTable: $$CategoriesTableReferences
-                          ._transactionsRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$CategoriesTableReferences(
-                            db,
-                            table,
-                            p0,
-                          ).transactionsRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.categoryId == item.id),
-                      typedResults: items,
-                    ),
-                ];
+          prefetchHooksCallback:
+              ({transactionsRefs = false, limitsRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (transactionsRefs) db.transactions,
+                    if (limitsRefs) db.limits,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (transactionsRefs)
+                        await $_getPrefetchedData<
+                          CategoryRow,
+                          $CategoriesTable,
+                          TransactionRow
+                        >(
+                          currentTable: table,
+                          referencedTable: $$CategoriesTableReferences
+                              ._transactionsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$CategoriesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).transactionsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.categoryId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (limitsRefs)
+                        await $_getPrefetchedData<
+                          CategoryRow,
+                          $CategoriesTable,
+                          LimitRow
+                        >(
+                          currentTable: table,
+                          referencedTable: $$CategoriesTableReferences
+                              ._limitsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$CategoriesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).limitsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.categoryId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -3085,7 +4015,7 @@ typedef $$CategoriesTableProcessedTableManager =
       $$CategoriesTableUpdateCompanionBuilder,
       (CategoryRow, $$CategoriesTableReferences),
       CategoryRow,
-      PrefetchHooks Function({bool transactionsRefs})
+      PrefetchHooks Function({bool transactionsRefs, bool limitsRefs})
     >;
 typedef $$TransactionsTableCreateCompanionBuilder =
     TransactionsCompanion Function({
@@ -3767,6 +4697,619 @@ typedef $$PeriodRulesTableProcessedTableManager =
       PeriodRuleRow,
       PrefetchHooks Function()
     >;
+typedef $$BudgetsTableCreateCompanionBuilder = BudgetsCompanion Function({
+  Value<String> id,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  required DateTime periodStart,
+  required DateTime periodEnd,
+  Value<int?> amount,
+  Value<int> rowid,
+});
+typedef $$BudgetsTableUpdateCompanionBuilder = BudgetsCompanion Function({
+  Value<String> id,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<DateTime> periodStart,
+  Value<DateTime> periodEnd,
+  Value<int?> amount,
+  Value<int> rowid,
+});
+
+class $$BudgetsTableFilterComposer
+    extends Composer<_$AppDatabase, $BudgetsTable> {
+  $$BudgetsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get periodStart => $composableBuilder(
+    column: $table.periodStart,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get periodEnd => $composableBuilder(
+    column: $table.periodEnd,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$BudgetsTableOrderingComposer
+    extends Composer<_$AppDatabase, $BudgetsTable> {
+  $$BudgetsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get periodStart => $composableBuilder(
+    column: $table.periodStart,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get periodEnd => $composableBuilder(
+    column: $table.periodEnd,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$BudgetsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $BudgetsTable> {
+  $$BudgetsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get periodStart => $composableBuilder(
+    column: $table.periodStart,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get periodEnd =>
+      $composableBuilder(column: $table.periodEnd, builder: (column) => column);
+
+  GeneratedColumn<int> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+}
+
+class $$BudgetsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $BudgetsTable,
+          BudgetRow,
+          $$BudgetsTableFilterComposer,
+          $$BudgetsTableOrderingComposer,
+          $$BudgetsTableAnnotationComposer,
+          $$BudgetsTableCreateCompanionBuilder,
+          $$BudgetsTableUpdateCompanionBuilder,
+          (BudgetRow, BaseReferences<_$AppDatabase, $BudgetsTable, BudgetRow>),
+          BudgetRow,
+          PrefetchHooks Function()
+        > {
+  $$BudgetsTableTableManager(_$AppDatabase db, $BudgetsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$BudgetsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$BudgetsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$BudgetsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<DateTime> periodStart = const Value.absent(),
+                Value<DateTime> periodEnd = const Value.absent(),
+                Value<int?> amount = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BudgetsCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                periodStart: periodStart,
+                periodEnd: periodEnd,
+                amount: amount,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                required DateTime periodStart,
+                required DateTime periodEnd,
+                Value<int?> amount = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BudgetsCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                periodStart: periodStart,
+                periodEnd: periodEnd,
+                amount: amount,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$BudgetsTable, BudgetRow>(table),
+                  BaseReferences<_$AppDatabase, $BudgetsTable, BudgetRow>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$BudgetsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $BudgetsTable,
+      BudgetRow,
+      $$BudgetsTableFilterComposer,
+      $$BudgetsTableOrderingComposer,
+      $$BudgetsTableAnnotationComposer,
+      $$BudgetsTableCreateCompanionBuilder,
+      $$BudgetsTableUpdateCompanionBuilder,
+      (BudgetRow, BaseReferences<_$AppDatabase, $BudgetsTable, BudgetRow>),
+      BudgetRow,
+      PrefetchHooks Function()
+    >;
+typedef $$LimitsTableCreateCompanionBuilder = LimitsCompanion Function({
+  Value<String> id,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  required String categoryId,
+  required DateTime periodStart,
+  required DateTime periodEnd,
+  Value<int?> amount,
+  Value<int> rowid,
+});
+typedef $$LimitsTableUpdateCompanionBuilder = LimitsCompanion Function({
+  Value<String> id,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<String> categoryId,
+  Value<DateTime> periodStart,
+  Value<DateTime> periodEnd,
+  Value<int?> amount,
+  Value<int> rowid,
+});
+
+final class $$LimitsTableReferences
+    extends BaseReferences<_$AppDatabase, $LimitsTable, LimitRow> {
+  $$LimitsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $CategoriesTable _categoryIdTable(_$AppDatabase db) =>
+      db.categories.createAlias('limits__category_id__categories__id');
+
+  $$CategoriesTableProcessedTableManager get categoryId {
+    final $_column = $_itemColumn<String>('category_id')!;
+
+    final manager = $$CategoriesTableTableManager(
+      $_db,
+      $_db.categories,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_categoryIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$LimitsTableFilterComposer
+    extends Composer<_$AppDatabase, $LimitsTable> {
+  $$LimitsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get periodStart => $composableBuilder(
+    column: $table.periodStart,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get periodEnd => $composableBuilder(
+    column: $table.periodEnd,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$CategoriesTableFilterComposer get categoryId {
+    final $$CategoriesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.categoryId,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableFilterComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$LimitsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LimitsTable> {
+  $$LimitsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get periodStart => $composableBuilder(
+    column: $table.periodStart,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get periodEnd => $composableBuilder(
+    column: $table.periodEnd,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$CategoriesTableOrderingComposer get categoryId {
+    final $$CategoriesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.categoryId,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableOrderingComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$LimitsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LimitsTable> {
+  $$LimitsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get periodStart => $composableBuilder(
+    column: $table.periodStart,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get periodEnd =>
+      $composableBuilder(column: $table.periodEnd, builder: (column) => column);
+
+  GeneratedColumn<int> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  $$CategoriesTableAnnotationComposer get categoryId {
+    final $$CategoriesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.categoryId,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$LimitsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LimitsTable,
+          LimitRow,
+          $$LimitsTableFilterComposer,
+          $$LimitsTableOrderingComposer,
+          $$LimitsTableAnnotationComposer,
+          $$LimitsTableCreateCompanionBuilder,
+          $$LimitsTableUpdateCompanionBuilder,
+          (LimitRow, $$LimitsTableReferences),
+          LimitRow,
+          PrefetchHooks Function({bool categoryId})
+        > {
+  $$LimitsTableTableManager(_$AppDatabase db, $LimitsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LimitsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LimitsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LimitsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String> categoryId = const Value.absent(),
+                Value<DateTime> periodStart = const Value.absent(),
+                Value<DateTime> periodEnd = const Value.absent(),
+                Value<int?> amount = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LimitsCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                categoryId: categoryId,
+                periodStart: periodStart,
+                periodEnd: periodEnd,
+                amount: amount,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                required String categoryId,
+                required DateTime periodStart,
+                required DateTime periodEnd,
+                Value<int?> amount = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LimitsCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                categoryId: categoryId,
+                periodStart: periodStart,
+                periodEnd: periodEnd,
+                amount: amount,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$LimitsTable, LimitRow>(table),
+                  $$LimitsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({categoryId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (categoryId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.categoryId,
+                        referencedTable: $$LimitsTableReferences
+                            ._categoryIdTable(db),
+                        referencedColumn: $$LimitsTableReferences
+                            ._categoryIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$LimitsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LimitsTable,
+      LimitRow,
+      $$LimitsTableFilterComposer,
+      $$LimitsTableOrderingComposer,
+      $$LimitsTableAnnotationComposer,
+      $$LimitsTableCreateCompanionBuilder,
+      $$LimitsTableUpdateCompanionBuilder,
+      (LimitRow, $$LimitsTableReferences),
+      LimitRow,
+      PrefetchHooks Function({bool categoryId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -3779,4 +5322,8 @@ class $AppDatabaseManager {
       $$TransactionsTableTableManager(_db, _db.transactions);
   $$PeriodRulesTableTableManager get periodRules =>
       $$PeriodRulesTableTableManager(_db, _db.periodRules);
+  $$BudgetsTableTableManager get budgets =>
+      $$BudgetsTableTableManager(_db, _db.budgets);
+  $$LimitsTableTableManager get limits =>
+      $$LimitsTableTableManager(_db, _db.limits);
 }

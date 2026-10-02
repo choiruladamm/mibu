@@ -17,6 +17,7 @@ import '../../../core/finance_providers.dart';
 Future<void> editBudget(BuildContext context, WidgetRef ref) async {
   final l = AppLocalizations.of(context)!;
   final repo = ref.read(financeRepositoryProvider);
+  final period = ref.read(currentPeriodProvider);
   final prev = ref.read(profileProvider).value?.monthlyBudget;
   final total = [...?ref.read(pocketsProvider).value]
       .fold(0, (sum, p) => sum + p.budget);
@@ -28,17 +29,17 @@ Future<void> editBudget(BuildContext context, WidgetRef ref) async {
   );
   if (v == null || !context.mounted) return;
   if (v == 0) {
-    await repo.setMonthlyBudget(null);
+    await repo.setMonthlyBudget(null, period);
     if (!context.mounted) return;
     showToast(
       context,
       icon: ToastIcon.trash,
       title: l.budgetDeletedTitle,
       sub: l.budgetDeletedSub,
-      onUndo: () => repo.setMonthlyBudget(prev),
+      onUndo: () => repo.setMonthlyBudget(prev, period),
     );
   } else {
-    await repo.setMonthlyBudget(v);
+    await repo.setMonthlyBudget(v, period);
     if (!context.mounted) return;
     showToast(
       context,

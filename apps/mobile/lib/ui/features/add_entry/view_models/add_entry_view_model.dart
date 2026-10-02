@@ -6,6 +6,7 @@ import '../../../../domain/models/finance.dart';
 import '../../../core/clock.dart';
 import '../../../core/dates.dart';
 import '../../../core/widgets/note_sheet.dart';
+import '../../../core/finance_providers.dart';
 
 class AddEntryState {
   const AddEntryState({
@@ -76,7 +77,7 @@ class AddEntry extends Notifier<AddEntryState> {
   Future<void> again(Transaction t) async {
     final cats = await ref
         .read(financeRepositoryProvider)
-        .watchCategories()
+        .watchCategories(ref.read(currentPeriodProvider))
         .first;
     state = state.copyWith(
       kind: t.kind,

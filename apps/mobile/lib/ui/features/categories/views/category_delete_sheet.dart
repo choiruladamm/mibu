@@ -11,6 +11,7 @@ import '../../../core/widgets/sheet.dart';
 import '../view_models/categories_view_model.dart';
 import '../../../core/widgets/meta_line.dart';
 import '../../../core/widgets/app_emoji.dart';
+import '../../../core/finance_providers.dart';
 
 /// 03.6 hapus kategori. True when it ended deleted (beres or dismissed
 /// after the delete); false when cancelled or undone.

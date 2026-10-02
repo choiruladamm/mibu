@@ -12,6 +12,7 @@ import 'package:mibu/ui/core/theme.dart';
 import 'package:mibu/ui/features/pockets/views/pockets_view.dart';
 
 import '../../../meta.dart';
+import '../../../db.dart';
 
 void main() {
   Future<AppDatabase> pump(
@@ -100,11 +101,10 @@ void main() {
       tester,
       const Size(390, 844),
       initial: (db) async {
-        final anabul = await (db.select(
+        await setLimitOf(db, 'anabul', 800000);
+        return (await (db.select(
           db.categories,
-        )..where((c) => c.name.equals('anabul'))).getSingle();
-        await FinanceRepository(db).setLimit(anabul.id, 800000);
-        return anabul.id;
+        )..where((c) => c.name.equals('anabul'))).getSingle()).id;
       },
     );
 
@@ -126,8 +126,7 @@ void main() {
     tester,
   ) async {
     final db = await pump(tester, const Size(390, 844));
-    Future<int?> budget() async =>
-        (await db.select(db.profiles).getSingle()).monthlyBudget;
+    Future<int?> budget() => budgetOf(db);
     Future<void> settle() async {
       await tester.runAsync(
         () => Future<void>.delayed(const Duration(milliseconds: 50)),
@@ -174,7 +173,7 @@ void main() {
     expect(await budget(), 5000000);
 
     // Empty: prefill Σ limits 3,3jt → 3,5jt; short of the pockets is bold.
-    await tester.runAsync(() => FinanceRepository(db).setMonthlyBudget(null));
+    await tester.runAsync(() => setBudgetOf(db, null));
     await settle();
     await openSheet();
     expect(find.text('saran dari total limit'), findsOneWidget);
@@ -280,10 +279,10 @@ void main() {
               emoji: '🏠',
               name: name,
               kind: CategoryKind.expense,
-              monthlyLimit: Value(500000 + i),
               sortOrder: Value(10 + i),
             ),
           );
+      await setLimitOf(db, name, 500000 + i);
     }
     await tester.runAsync(
       () => Future<void>.delayed(const Duration(milliseconds: 50)),
@@ -306,8 +305,9 @@ void main() {
     tester,
   ) async {
     final db = await pump(tester, const Size(390, 844));
-    await (db.update(db.categories))
-        .write(const CategoriesCompanion(monthlyLimit: Value(null)));
+    for (final c in await db.select(db.categories).get()) {
+      await setLimitOf(db, c.name, null);
+    }
     await tester.runAsync(
       () => Future<void>.delayed(const Duration(milliseconds: 50)),
     );
@@ -332,10 +332,6 @@ void main() {
     );
     await tester.pumpAndSettle();
   }
-
-  Future<int?> limitOf(AppDatabase db, String name) async => (await (db.select(
-    db.categories,
-  )..where((c) => c.name.equals(name))).getSingle()).monthlyLimit;
 
   testWidgets('pasang limit: list → limit step → jar + toast, batalin', (
     tester,
@@ -397,7 +393,7 @@ void main() {
       final id = (await (db.select(
         db.categories,
       )..where((c) => c.name.equals('belanja'))).getSingle()).id;
-      await FinanceRepository(db).setLimit(id, 500000);
+      await FinanceRepository(db).setLimit(id, 500000, cal(fixtureNow));
     });
     await settle(tester);
 

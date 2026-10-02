@@ -100,7 +100,7 @@ void main() {
     await tester.tap(find.text('beres, ke beranda'));
     await settle(tester);
     expect(done, [1]);
-    final p = (await tester.runAsync(() => repo.watchProfile().first))!;
+    final p = (await tester.runAsync(() => repo.watchProfile(cal(now)).first))!;
     expect((p.onboarded, p.openingBalance, p.payday), (true, 3000000, 0));
     final pockets = (await tester.runAsync(
       () => repo.watchPockets(cal(now)).first,
@@ -123,7 +123,7 @@ void main() {
     await tester.tap(find.text('nanti aja'));
     await settle(tester);
     expect(done, [1]);
-    final p = (await tester.runAsync(() => repo.watchProfile().first))!;
+    final p = (await tester.runAsync(() => repo.watchProfile(cal(now)).first))!;
     expect((p.onboarded, p.openingBalance, p.payday), (true, 0, 25));
     expect(
       await tester.runAsync(() => repo.watchPockets(cal(now)).first),

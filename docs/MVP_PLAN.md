@@ -40,7 +40,6 @@ erDiagram
         int openingBalance
         datetime openingAt
         int payday "1-28, 0 = akhir"
-        int monthlyBudget "nullable"
         bool hideAmounts
         datetime onboardedAt "nullable"
     }
@@ -49,7 +48,6 @@ erDiagram
         text emoji
         text name
         text kind "expense | income"
-        int monthlyLimit "nullable, ada = kantong"
         int sortOrder
     }
     transactions {
@@ -61,10 +59,33 @@ erDiagram
         text tags
         datetime at
     }
+    budgets {
+        text id PK
+        datetime periodStart
+        datetime periodEnd
+        int amount "nullable = hapus budget"
+    }
+    limits {
+        text id PK
+        text categoryId FK
+        datetime periodStart
+        datetime periodEnd
+        int amount "nullable = copot limit"
+    }
+    periodRules {
+        text id PK
+        datetime effectiveFrom
+        text mode "calendar | payday"
+        int paydayDay
+        text shift
+    }
     categories |o--o{ transactions : "dicatat ke"
+    categories ||--o{ limits : "limit per periode"
 ```
 
 `profile` berdiri sendiri, cuma satu baris. Satu kategori bisa punya banyak transaksi. Transaksi boleh tanpa kategori.
+
+Budget dan limit disimpan **per periode** (fase 0 siklus gajian, [PAYDAY_CYCLE_PLAN.md](PAYDAY_CYCLE_PLAN.md)): yang berlaku buat sebuah periode = baris dengan `periodStart` paling akhir ≤ awal periode itu. Periode tanpa baris sendiri ngelanjutin baris terakhir; ngubah nilai nulis baris periode yang lagi jalan, jadi periode lama nggak pernah berubah. Baca nggak pernah nulis. `periodRules` kosong = bulan kalender (v1).
 
 ```
 profile
@@ -72,7 +93,6 @@ profile
   openingBalance  int               -- saldo saat atur awal (rupiah)
   openingAt       datetime          -- sejak kapan transaksi dihitung ke saldo
   payday          int               -- 1–28, 0 = akhir bulan
-  monthlyBudget   int?              -- budget bulanan (02.4); null = belum diisi
   hideAmounts     bool
   onboardedAt     datetime?
 
@@ -81,7 +101,6 @@ categories
   emoji           text
   name            text              -- huruf kecil
   kind            text              -- expense | income
-  monthlyLimit    int?              -- null = cuma dicatat; ada nilai = kantong
   sortOrder       int
 
 transactions
@@ -93,6 +112,24 @@ transactions
   tags            text              -- maks 3, dipisah koma
   at              datetime          -- waktu lokal
   index (at), index (categoryId)
+
+budgets                             -- budget bulanan (00.16)
+  periodStart     datetime          -- awal periode tempat nilai diset (date-only)
+  periodEnd       datetime          -- eksklusif
+  amount          int?              -- null = hapus budget mulai periode itu
+
+limits                              -- limit kantong (00.15)
+  categoryId      text fk
+  periodStart     datetime
+  periodEnd       datetime
+  amount          int?              -- null = copot limit; ada nilai = kantong
+  index (categoryId)
+
+periodRules                         -- append-only, v1 kosong (kalender)
+  effectiveFrom   datetime
+  mode            text              -- calendar | payday
+  paydayDay       int               -- 1–28, 0 = akhir bulan
+  shift           text              -- none | previousWorkday
 ```
 
 ### Turunan (query `watch()`, bukan kolom)
@@ -145,7 +182,7 @@ Satu konsep aja: **buat apa** (= baris `categories`). Kantong bukan benda sendir
 - "kantong" cuma nama tab + visual toples. Copy pakai "limit": `pasang limit` · `atur limit` · `copot limit`. Sisa per buat apa = "jatah X".
 - `+ pasang limit` (02.2) nggak bikin kategori baru: pilih buat apa yang belum pakai limit, urut paling kepake bulan ini → PocketLimit → simpan. Catatan bulan ini langsung keitung karena kepake dihitung dari transaksi. `bikin kategori baru` ada di bawah sheet.
 - Default limit di sheet = maks(Rp300K, ceil(kepake bulan ini × 1,4 ÷ 100K) × 100K).
-- `copot limit` = sheet konfirmasi (LimitOffSheet) dulu, lalu `monthlyLimit` null, langsung kesimpan + toast `batalin`. Buat apa + catatannya utuh. Beda dari hapus (03.6).
+- `copot limit` = sheet konfirmasi (LimitOffSheet) dulu, lalu baris `limits` periode ini `amount` null, langsung kesimpan + toast `batalin`. Buat apa + catatannya utuh. Beda dari hapus (03.6).
 - Gabungin duplikat = 03.6 hapus + pindahin catatan. Nggak ada fitur gabung terpisah.
 - Buat apa baru dari 03.2 / 03.3 default tanpa limit; dari 02.2 selalu pakai limit.
 
@@ -154,7 +191,7 @@ Satu konsep aja: **buat apa** (= baris `categories`). Kantong bukan benda sendir
 > Periode budget lewat `Period` + resolver (fase 0 siklus gajian), lihat [PAYDAY_CYCLE_PLAN.md](PAYDAY_CYCLE_PLAN.md). v1 tetap bulan kalender.
 
 - Periode budget = bulan kalender, mulai tanggal 1. Tanggal gajian cuma dipakai buat aman jajan.
-- Budget bulanan = `profile.monthlyBudget`, diisi user, bukan turunan. Boleh beda dari Σ `monthlyLimit`. **[diupdate]**
+- Budget bulanan = baris `budgets` yang berlaku (di kode: `Profile.monthlyBudget`), diisi user, bukan turunan. Boleh beda dari Σ `monthlyLimit`. **[diupdate]**
   - Diisi lewat BudgetSheet 00.16 **[perlu design]**, dibuka dari PocketLimit 00.15 + hero 02.2 (M3), kartu 02.4 + ritme budget 02.3 (M6).
   - Kosong → prefill Σ limit kantong dibulatin ke atas per Rp500K. `hapus budget` = balik ke null. Maks 12 digit.
   - Atur awal 01.4 nggak nanya budget; default null.
@@ -199,7 +236,7 @@ tahun:           kepake > limit → lewat budget
                  selain itu → aman
 ```
 
-- Periode lalu pakai B yang sekarang (riwayat budget nggak disimpan; tambah tabel riwayat kalau perlu).
+- Periode lalu pakai B yang berlaku di periode itu (baris `budgets`, lihat Skema).
 - B null → section ritme budget diganti kartu "pasang budget bulanan" **[perlu design]**. Section lain tetap jalan.
 
 ### Input

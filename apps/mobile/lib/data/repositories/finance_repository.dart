@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../domain/models/finance.dart';
 import '../../domain/period.dart';
@@ -24,6 +25,8 @@ class Totals {
 /// entry count ("belum ada limit" + "pasang limit ke…" in 02.2).
 typedef FreeCategory = ({Category category, int spent, int count});
 
+const _uuid = Uuid();
+
 class FinanceRepository {
   FinanceRepository(this._db);
 
@@ -31,26 +34,149 @@ class FinanceRepository {
 
   $TransactionsTable get _tx => _db.transactions;
 
-  Stream<Profile> watchProfile() =>
-      (_db.select(_db.profiles)
-            ..where((p) => p.deletedAt.isNull())
-            ..limit(1))
-          .watchSingleOrNull()
-          .map(
-            (r) => r == null
-                ? Profile.empty
-                : Profile(
-                    openingBalance: r.openingBalance,
-                    openingAt: r.openingAt,
-                    payday: r.payday,
-                    monthlyBudget: r.monthlyBudget,
-                    hideAmounts: r.hideAmounts,
-                    onboarded: r.onboardedAt != null,
-                    recentSearches: r.recentSearches.isEmpty
-                        ? const []
-                        : r.recentSearches.split('\n'),
-                  ),
+  /// The profile, with the budget in force for [period].
+  Stream<Profile> watchProfile(Period period) {
+    final budget = _budgetIn(period);
+    final q = _db.select(_db.profiles).join([])
+      ..addColumns([budget])
+      ..where(_db.profiles.deletedAt.isNull())
+      ..limit(1);
+    return q.watchSingleOrNull().map((row) {
+      final r = row?.readTable(_db.profiles);
+      return r == null
+          ? Profile.empty
+          : Profile(
+              openingBalance: r.openingBalance,
+              openingAt: r.openingAt,
+              payday: r.payday,
+              monthlyBudget: row!.read(budget),
+              hideAmounts: r.hideAmounts,
+              onboarded: r.onboardedAt != null,
+              recentSearches: r.recentSearches.isEmpty
+                  ? const []
+                  : r.recentSearches.split('\n'),
+            );
+    });
+  }
+
+  /// The row in force for [p]: latest start ≤ the period's (its own row, or
+  /// the last one before it). Reads never write a row.
+  Expression<int> _budgetIn(Period p) {
+    final b = _db.budgets;
+    return subqueryExpression<int>(
+      _db.selectOnly(b)
+        ..addColumns([b.amount])
+        ..where(
+          b.deletedAt.isNull() & b.periodStart.isSmallerOrEqualValue(p.start),
+        )
+        ..orderBy([
+          OrderingTerm.desc(b.periodStart),
+          OrderingTerm.desc(b.updatedAt),
+        ])
+        ..limit(1),
+    );
+  }
+
+  /// A category's limit in force for [p], same lookup as [_budgetIn].
+  Expression<int> _limitIn(Expression<String> categoryId, Period p) {
+    final l = _db.limits;
+    return subqueryExpression<int>(
+      _db.selectOnly(l)
+        ..addColumns([l.amount])
+        ..where(
+          l.deletedAt.isNull() &
+              l.categoryId.equalsExp(categoryId) &
+              l.periodStart.isSmallerOrEqualValue(p.start),
+        )
+        ..orderBy([
+          OrderingTerm.desc(l.periodStart),
+          OrderingTerm.desc(l.updatedAt),
+        ])
+        ..limit(1),
+    );
+  }
+
+  /// Writes [period]'s own row: updates it, or adds it the first time.
+  Future<void> _setBudgetRow(Period period, int? amount) async {
+    final b = _db.budgets;
+    final n =
+        await (_db.update(b)..where(
+              (r) =>
+                  r.deletedAt.isNull() &
+                  r.periodStart.equals(period.start) &
+                  r.periodEnd.equals(period.end),
+            ))
+            .write(
+              BudgetsCompanion(
+                amount: Value(amount),
+                updatedAt: Value(DateTime.now()),
+              ),
+            );
+    if (n == 0) {
+      await _db
+          .into(b)
+          .insert(
+            BudgetsCompanion.insert(
+              periodStart: period.start,
+              periodEnd: period.end,
+              amount: Value(amount),
+            ),
           );
+    }
+  }
+
+  Future<void> _setLimitRow(
+    String categoryId,
+    Period period,
+    int? amount,
+  ) async {
+    final l = _db.limits;
+    final n =
+        await (_db.update(l)..where(
+              (r) =>
+                  r.deletedAt.isNull() &
+                  r.categoryId.equals(categoryId) &
+                  r.periodStart.equals(period.start) &
+                  r.periodEnd.equals(period.end),
+            ))
+            .write(
+              LimitsCompanion(
+                amount: Value(amount),
+                updatedAt: Value(DateTime.now()),
+              ),
+            );
+    if (n == 0) {
+      await _db
+          .into(l)
+          .insert(
+            LimitsCompanion.insert(
+              categoryId: categoryId,
+              periodStart: period.start,
+              periodEnd: period.end,
+              amount: Value(amount),
+            ),
+          );
+    }
+  }
+
+  /// The limit in force for [period] (null = none).
+  Future<int?> _limitNow(String categoryId, Period period) async {
+    final row =
+        await (_db.select(_db.limits)
+              ..where(
+                (r) =>
+                    r.deletedAt.isNull() &
+                    r.categoryId.equals(categoryId) &
+                    r.periodStart.isSmallerOrEqualValue(period.start),
+              )
+              ..orderBy([
+                (r) => OrderingTerm.desc(r.periodStart),
+                (r) => OrderingTerm.desc(r.updatedAt),
+              ])
+              ..limit(1))
+            .getSingleOrNull();
+    return row?.amount;
+  }
 
   /// Budget periods in force: calendar months, then each saved rule from
   /// its date on (v1 saves none).
@@ -83,6 +209,7 @@ class FinanceRepository {
     required int payday,
     required Set<String> pockets,
     required DateTime now,
+    required Period period,
   }) => _db.transaction(() async {
     final p = _db.profiles;
     final row = ProfilesCompanion(
@@ -104,24 +231,41 @@ class FinanceRepository {
         0) {
       return;
     }
-    await _db.batch(
-      (b) => b.insertAll(c, [
-        for (final (i, (emoji, name, limit)) in setupPockets.indexed)
+    await _db.batch((b) {
+      for (final (i, (emoji, name, limit)) in setupPockets.indexed) {
+        final id = _uuid.v4();
+        b.insert(
+          c,
           CategoriesCompanion.insert(
+            id: Value(id),
             emoji: emoji,
             name: name,
             kind: CategoryKind.expense,
-            monthlyLimit: Value(pockets.contains(name) ? limit : null),
             sortOrder: Value(i),
           ),
+        );
+        if (pockets.contains(name)) {
+          b.insert(
+            _db.limits,
+            LimitsCompanion.insert(
+              categoryId: id,
+              periodStart: period.start,
+              periodEnd: period.end,
+              amount: Value(limit),
+            ),
+          );
+        }
+      }
+      b.insert(
+        c,
         CategoriesCompanion.insert(
           emoji: '💰',
           name: 'gajian',
           kind: CategoryKind.income,
           sortOrder: Value(setupPockets.length),
         ),
-      ]),
-    );
+      );
+    });
   });
 
   /// Balance, per-month nets / spending and today's spending.
@@ -165,6 +309,7 @@ class FinanceRepository {
   Stream<List<Pocket>> watchPockets(Period period) {
     final c = _db.categories;
     final spent = _tx.amount.sum();
+    final limit = _limitIn(c.id, period);
     final q =
         _db.select(c).join([
             leftOuterJoin(
@@ -175,8 +320,8 @@ class FinanceRepository {
                   _inPeriod(period),
             ),
           ])
-          ..addColumns([spent])
-          ..where(c.deletedAt.isNull() & c.monthlyLimit.isNotNull())
+          ..addColumns([spent, limit])
+          ..where(c.deletedAt.isNull() & limit.isNotNull())
           ..groupBy([c.id])
           ..orderBy([OrderingTerm.asc(c.sortOrder)]);
     return q.watch().map(
@@ -187,7 +332,7 @@ class FinanceRepository {
               id: cat.id,
               emoji: cat.emoji,
               name: cat.name,
-              budget: cat.monthlyLimit!,
+              budget: r.read(limit)!,
               spent: -(r.read(spent) ?? 0),
             ),
       ],
@@ -199,6 +344,7 @@ class FinanceRepository {
   /// first. Income never shows up here.
   Stream<List<FreeCategory>> watchFreeCategories(Period period) {
     final c = _db.categories;
+    final limit = _limitIn(c.id, period);
     final spent = _tx.amount.sum();
     final count = _tx.id.count();
     final q =
@@ -214,7 +360,7 @@ class FinanceRepository {
           ..addColumns([spent, count])
           ..where(
             c.deletedAt.isNull() &
-                c.monthlyLimit.isNull() &
+                limit.isNull() &
                 c.kind.equalsValue(CategoryKind.expense),
           )
           ..groupBy([c.id])
@@ -224,7 +370,7 @@ class FinanceRepository {
           [
             for (final r in rows)
               (
-                category: _category(r.readTable(c)),
+                category: _category(r.readTable(c), null),
                 spent: -(r.read(spent) ?? 0),
                 count: r.read(count) ?? 0,
               ),
@@ -303,28 +449,37 @@ class FinanceRepository {
     );
   }
 
-  static Category _category(CategoryRow r) => Category(
+  static Category _category(CategoryRow r, int? limit) => Category(
     id: r.id,
     emoji: r.emoji,
     name: r.name,
     kind: r.kind,
-    monthlyLimit: r.monthlyLimit,
+    monthlyLimit: limit,
   );
 
-  Stream<List<Category>> watchCategories() =>
-      (_db.select(_db.categories)
-            ..where((c) => c.deletedAt.isNull())
-            ..orderBy([(c) => OrderingTerm.asc(c.sortOrder)]))
-          .watch()
-          .map((rows) => rows.map(_category).toList());
+  /// Categories, each with its limit in force for [period].
+  Stream<List<Category>> watchCategories(Period period) {
+    final c = _db.categories;
+    final limit = _limitIn(c.id, period);
+    final q = _db.select(c).join([])
+      ..addColumns([limit])
+      ..where(c.deletedAt.isNull())
+      ..orderBy([OrderingTerm.asc(c.sortOrder)]);
+    return q.watch().map(
+      (rows) => [
+        for (final r in rows) _category(r.readTable(c), r.read(limit)),
+      ],
+    );
+  }
 
   /// Latest distinct category + place combos ("terakhir" in 03.2).
-  Stream<List<RecentPick>> watchRecentPicks({int limit = 6}) {
+  Stream<List<RecentPick>> watchRecentPicks(Period period, {int limit = 6}) {
     final c = _db.categories;
     final last = _tx.at.max();
+    final cap = _limitIn(c.id, period);
     final q =
         _db.select(_tx).join([innerJoin(c, c.id.equalsExp(_tx.categoryId))])
-          ..addColumns([last])
+          ..addColumns([last, cap])
           ..where(
             _tx.deletedAt.isNull() &
                 c.deletedAt.isNull() &
@@ -337,7 +492,7 @@ class FinanceRepository {
       (rows) => [
         for (final r in rows)
           RecentPick(
-            category: _category(r.readTable(c)),
+            category: _category(r.readTable(c), r.read(cap)),
             place: r.readTable(_tx).place,
           ),
       ],
@@ -438,15 +593,9 @@ class FinanceRepository {
         ),
       );
 
-  /// Budget bulanan (00.16); null = hapus budget.
-  // ponytail: no-op before 01.4 atur awal creates the profile row (M5).
-  Future<void> setMonthlyBudget(int? budget) =>
-      (_db.update(_db.profiles)..where((p) => p.deletedAt.isNull())).write(
-        ProfilesCompanion(
-          monthlyBudget: Value(budget),
-          updatedAt: Value(DateTime.now()),
-        ),
-      );
+  /// Budget bulanan (00.16) from [period] on; null = hapus budget.
+  Future<void> setMonthlyBudget(int? budget, Period period) =>
+      _setBudgetRow(period, budget);
 
   /// 02.4 sembunyiin nominal.
   Future<void> setHideAmounts(bool hide) =>
@@ -516,7 +665,8 @@ class FinanceRepository {
     required String name,
     required CategoryKind kind,
     required int? monthlyLimit,
-  }) async {
+    required Period period,
+  }) => _db.transaction(() async {
     final c = _db.categories;
     final last = c.sortOrder.max();
     final row = await (_db.selectOnly(c)..addColumns([last])).getSingle();
@@ -527,12 +677,14 @@ class FinanceRepository {
             emoji: emoji,
             name: name.trim().toLowerCase(),
             kind: kind,
-            monthlyLimit: Value(_limitFor(kind, monthlyLimit)),
             sortOrder: Value((row.read(last) ?? -1) + 1),
           ),
         );
+    if (_limitFor(kind, monthlyLimit) case final limit?) {
+      await _setLimitRow(inserted.id, period, limit);
+    }
     return inserted.id;
-  }
+  });
 
   Future<void> updateCategory(
     String id, {
@@ -540,28 +692,32 @@ class FinanceRepository {
     required String name,
     required CategoryKind kind,
     required int? monthlyLimit,
-  }) => (_db.update(_db.categories)..where((c) => c.id.equals(id))).write(
-    CategoriesCompanion(
-      emoji: Value(emoji),
-      name: Value(name.trim().toLowerCase()),
-      kind: Value(kind),
-      monthlyLimit: Value(_limitFor(kind, monthlyLimit)),
-      updatedAt: Value(DateTime.now()),
-    ),
-  );
+    required Period period,
+  }) => _db.transaction(() async {
+    await (_db.update(_db.categories)..where((c) => c.id.equals(id))).write(
+      CategoriesCompanion(
+        emoji: Value(emoji),
+        name: Value(name.trim().toLowerCase()),
+        kind: Value(kind),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+    // Only a changed limit gets a row (an icon swap writes none).
+    final limit = _limitFor(kind, monthlyLimit);
+    if (await _limitNow(id, period) != limit) {
+      await _setLimitRow(id, period, limit);
+    }
+  });
 
-  /// Pasang / atur / lepas limit (02.2, 03.5); null = lepas. Income
-  /// categories are left alone.
-  Future<void> setLimit(String id, int? limit) =>
-      (_db.update(_db.categories)..where(
-            (c) => c.id.equals(id) & c.kind.equalsValue(CategoryKind.expense),
-          ))
-          .write(
-            CategoriesCompanion(
-              monthlyLimit: Value(limit),
-              updatedAt: Value(DateTime.now()),
-            ),
-          );
+  /// Pasang / atur / copot limit (02.2, 03.5) from [period] on; null =
+  /// copot. Income categories are left alone.
+  Future<void> setLimit(String id, int? limit, Period period) async {
+    final c = await (_db.select(
+      _db.categories,
+    )..where((r) => r.id.equals(id))).getSingleOrNull();
+    if (c == null || c.kind != CategoryKind.expense) return;
+    await _setLimitRow(id, period, limit);
+  }
 
   /// Pockets track spending only, so income categories never keep a limit.
   static int? _limitFor(CategoryKind kind, int? limit) =>
@@ -623,14 +779,6 @@ final allTransactionsProvider = StreamProvider<List<Transaction>>(
   (ref) => ref.watch(financeRepositoryProvider).watchAll(),
 );
 
-final categoriesProvider = StreamProvider<List<Category>>(
-  (ref) => ref.watch(financeRepositoryProvider).watchCategories(),
-);
-final recentPicksProvider = StreamProvider<List<RecentPick>>(
-  // ponytail: last 30 combos also feed the per-category "di mana" hint; a
-  // per-category query if heavy users miss their places.
-  (ref) => ref.watch(financeRepositoryProvider).watchRecentPicks(limit: 30),
-);
 final recentNotesProvider = StreamProvider<List<({String text, DateTime at})>>(
   (ref) => ref.watch(financeRepositoryProvider).watchRecentNotes(),
 );

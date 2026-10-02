@@ -18,6 +18,7 @@ import '../../../core/widgets/note_sheet.dart';
 import '../../../core/widgets/sheet.dart';
 import 'transaction_detail_view.dart';
 import '../../../core/widgets/app_emoji.dart';
+import '../../../core/finance_providers.dart';
 
 final _dots = NumberFormat('#,##0', 'id_ID');
 final _headerDay = DateFormat('EEE d MMM', 'id');

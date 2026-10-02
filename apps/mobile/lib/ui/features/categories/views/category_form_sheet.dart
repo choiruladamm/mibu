@@ -101,6 +101,7 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
           name: name,
           kind: _kind,
           monthlyLimit: limit,
+          period: ref.read(currentPeriodProvider),
         );
     if (_edit != null) {
       await repo.updateCategory(
@@ -109,6 +110,7 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
         name: name,
         kind: _kind,
         monthlyLimit: limit,
+        period: ref.read(currentPeriodProvider),
       );
     }
     if (!mounted) return;

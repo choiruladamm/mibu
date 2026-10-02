@@ -1,4 +1,4 @@
-import 'package:drift/drift.dart' show DatabaseConnection, Value;
+import 'package:drift/drift.dart' show DatabaseConnection;
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,6 +12,7 @@ import 'package:mibu/ui/core/widgets/app_emoji.dart';
 import 'package:mibu/ui/features/stats/views/stats_view.dart';
 
 import '../../../meta.dart';
+import '../../../db.dart';
 
 void main() {
   // Fixture, rab 14 okt 2026, budget Rp8jt: okt Rp4,06jt (tokopedia 2,4jt +
@@ -140,11 +141,7 @@ void main() {
 
   testWidgets('02.3d no budget: pasang budget card', (tester) async {
     final db = await pump(tester);
-    await tester.runAsync(
-      () => db
-          .update(db.profiles)
-          .write(const ProfilesCompanion(monthlyBudget: Value(null))),
-    );
+    await tester.runAsync(() => setBudgetOf(db, null));
     await settle(tester);
     expect(find.text('pasang budget'), findsOneWidget);
     expect(find.text('aman'), findsNothing);

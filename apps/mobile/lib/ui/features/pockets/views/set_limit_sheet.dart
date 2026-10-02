@@ -39,7 +39,8 @@ Future<void> showSetLimit(
   final l = AppLocalizations.of(context)!;
   final repo = ref.read(financeRepositoryProvider);
   final c = r.free.category;
-  await repo.setLimit(c.id, r.limit);
+  final period = ref.read(currentPeriodProvider);
+  await repo.setLimit(c.id, r.limit, period);
   select(c.id);
   if (!context.mounted) return;
   showToast(
@@ -47,7 +48,7 @@ Future<void> showSetLimit(
     icon: ToastIcon.check,
     title: l.limitSetTitle(c.name, rupiahCompact(r.limit)),
     sub: l.limitSetSub(r.free.count),
-    onUndo: () => repo.setLimit(c.id, null),
+    onUndo: () => repo.setLimit(c.id, null, period),
   );
 }
 
@@ -76,7 +77,8 @@ Future<bool> releaseLimit(
     count: month.count,
   );
   if (!ok) return false;
-  await repo.setLimit(id, null);
+  final period = ref.read(currentPeriodProvider);
+  await repo.setLimit(id, null, period);
   final usage = await repo.watchCategoryUsage(ref.read(nowProvider)).first;
   if (!context.mounted) return true;
   final l = AppLocalizations.of(context)!;
@@ -87,7 +89,7 @@ Future<bool> releaseLimit(
     sub: l.limitReleasedSub(usage[id]?.count ?? 0, name),
     bottom: toastBottom,
     onUndo: () async {
-      await repo.setLimit(id, limit);
+      await repo.setLimit(id, limit, period);
       onUndo?.call();
     },
   );

@@ -8,7 +8,23 @@ import 'clock.dart';
 /// Finance data several features read (beranda, kantong, catat, budget, …);
 /// lives here so features don't import each other's view models.
 final profileProvider = StreamProvider<Profile>(
-  (ref) => ref.watch(financeRepositoryProvider).watchProfile(),
+  (ref) => ref
+      .watch(financeRepositoryProvider)
+      .watchProfile(ref.watch(currentPeriodProvider)),
+);
+
+/// Categories with this period's limits ([Category.monthlyLimit]).
+final categoriesProvider = StreamProvider<List<Category>>(
+  (ref) => ref
+      .watch(financeRepositoryProvider)
+      .watchCategories(ref.watch(currentPeriodProvider)),
+);
+final recentPicksProvider = StreamProvider<List<RecentPick>>(
+  // ponytail: last 30 combos also feed the per-category "di mana" hint; a
+  // per-category query if heavy users miss their places.
+  (ref) => ref
+      .watch(financeRepositoryProvider)
+      .watchRecentPicks(ref.watch(currentPeriodProvider), limit: 30),
 );
 
 /// Budget periods (fase 0). Calendar months until the rules load, so screens

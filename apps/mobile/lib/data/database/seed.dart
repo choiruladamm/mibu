@@ -28,8 +28,18 @@ Future<void> seedFixture(AppDatabase db, DateTime now) async {
         openingBalance: 3000000,
         openingAt: DateTime(now.year, now.month - 3),
         payday: 25,
-        monthlyBudget: const Value(8000000),
         onboardedAt: Value(now),
+      ),
+    );
+    // Budget + limits from the first seeded month, so past months have them.
+    final from = DateTime(now.year, now.month - 3);
+    final until = DateTime(from.year, from.month + 1);
+    b.insert(
+      db.budgets,
+      BudgetsCompanion.insert(
+        periodStart: from,
+        periodEnd: until,
+        amount: const Value(8000000),
       ),
     );
     for (final (i, (emoji, name, kind, limit)) in [
@@ -49,10 +59,20 @@ Future<void> seedFixture(AppDatabase db, DateTime now) async {
           emoji: emoji,
           name: name,
           kind: kind,
-          monthlyLimit: Value(limit),
           sortOrder: Value(i),
         ),
       );
+      if (limit != null) {
+        b.insert(
+          db.limits,
+          LimitsCompanion.insert(
+            categoryId: id,
+            periodStart: from,
+            periodEnd: until,
+            amount: Value(limit),
+          ),
+        );
+      }
     }
 
     TransactionsCompanion tx(
@@ -325,8 +345,17 @@ Future<void> seedDemo(AppDatabase db, DateTime now) async {
         openingBalance: 3000000,
         openingAt: start,
         payday: 25,
-        monthlyBudget: const Value(6500000),
         onboardedAt: Value(start),
+      ),
+    );
+    final from = DateTime(start.year, start.month);
+    final until = DateTime(from.year, from.month + 1);
+    b.insert(
+      db.budgets,
+      BudgetsCompanion.insert(
+        periodStart: from,
+        periodEnd: until,
+        amount: const Value(6500000),
       ),
     );
     for (final (i, (emoji, name, kind, limit)) in categoryList.indexed) {
@@ -337,10 +366,20 @@ Future<void> seedDemo(AppDatabase db, DateTime now) async {
           emoji: emoji,
           name: name,
           kind: kind,
-          monthlyLimit: Value(limit),
           sortOrder: Value(i),
         ),
       );
+      if (limit != null) {
+        b.insert(
+          db.limits,
+          LimitsCompanion.insert(
+            categoryId: cats[name]!,
+            periodStart: from,
+            periodEnd: until,
+            amount: Value(limit),
+          ),
+        );
+      }
     }
     b.insertAll(db.transactions, rows);
   });

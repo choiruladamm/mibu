@@ -29,7 +29,6 @@ class Profiles extends Table with SyncColumns {
   IntColumn get openingBalance => integer()();
   DateTimeColumn get openingAt => dateTime()();
   IntColumn get payday => integer()(); // 1–28, 0 = last day of month
-  IntColumn get monthlyBudget => integer().nullable()(); // null = not set
   BoolColumn get hideAmounts => boolean().withDefault(const Constant(false))();
   DateTimeColumn get onboardedAt => dateTime().nullable()();
   TextColumn get recentSearches =>
@@ -41,7 +40,6 @@ class Categories extends Table with SyncColumns {
   TextColumn get emoji => text()();
   TextColumn get name => text()();
   TextColumn get kind => textEnum<CategoryKind>()();
-  IntColumn get monthlyLimit => integer().nullable()(); // set = kantong
   IntColumn get sortOrder => integer().withDefault(const Constant(0))();
 }
 
@@ -59,6 +57,28 @@ class Transactions extends Table with SyncColumns {
   DateTimeColumn get at => dateTime()();
 }
 
+/// Budget bulanan per period (00.16). The one in force for a period is the
+/// row with the latest [periodStart] ≤ the period's start, so a period
+/// without its own row keeps the last one; old rows are never touched.
+/// [amount] null = hapus budget from that period on.
+@DataClassName('BudgetRow')
+class Budgets extends Table with SyncColumns {
+  DateTimeColumn get periodStart => dateTime()(); // date-only
+  DateTimeColumn get periodEnd => dateTime()(); // exclusive
+  IntColumn get amount => integer().nullable()();
+}
+
+/// A category's monthly limit per period, same lookup as [Budgets]. A
+/// category with a limit in force = kantong; [amount] null = copot limit.
+@DataClassName('LimitRow')
+@TableIndex(name: 'limits_category', columns: {#categoryId})
+class Limits extends Table with SyncColumns {
+  TextColumn get categoryId => text().references(Categories, #id)();
+  DateTimeColumn get periodStart => dateTime()();
+  DateTimeColumn get periodEnd => dateTime()();
+  IntColumn get amount => integer().nullable()();
+}
+
 /// Budget period settings, append-only: a change is a new row from the end
 /// of the running period, so past periods keep their rules. Empty = calendar
 /// months (v1). See [SegmentedResolver].
@@ -71,7 +91,9 @@ class PeriodRules extends Table with SyncColumns {
       textEnum<PaydayShift>().withDefault(Constant(PaydayShift.none.name))();
 }
 
-@DriftDatabase(tables: [Profiles, Categories, Transactions, PeriodRules])
+@DriftDatabase(
+  tables: [Profiles, Categories, Transactions, PeriodRules, Budgets, Limits],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase([
     QueryExecutor? executor,
@@ -103,6 +125,13 @@ class AppDatabase extends _$AppDatabase {
     final used = selectOnly(transactions)
       ..addColumns([transactions.categoryId])
       ..where(transactions.categoryId.isNotNull());
+    final gone = selectOnly(categories)
+      ..addColumns([categories.id])
+      ..where(
+        categories.deletedAt.isSmallerThanValue(cutoff) &
+            categories.id.isNotInQuery(used),
+      );
+    await (delete(limits)..where((l) => l.categoryId.isInQuery(gone))).go();
     await (delete(categories)..where(
           (c) =>
               c.deletedAt.isSmallerThanValue(cutoff) & c.id.isNotInQuery(used),
@@ -119,7 +148,9 @@ class AppDatabase extends _$AppDatabase {
       if (!details.wasCreated) {
         await transaction(() async {
           await delete(transactions).go(); // FK order: entries first
+          await delete(limits).go();
           await delete(categories).go();
+          await delete(budgets).go();
           await delete(profiles).go();
           await delete(periodRules).go();
         });

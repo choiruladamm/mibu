@@ -177,7 +177,7 @@ Status fase 0:
 | F0.1 | `Period` + resolver + unit test | ✅ |
 | F0.2 | tabel `periodRules` + `periodsProvider` / `currentPeriodProvider` | ✅ |
 | F0.3 | jendela "bulan ini" lewat resolver + test regression | ✅ |
-| F0.4 | tabel `budgets` + `limits` gantiin `profile.monthlyBudget` + `categories.monthlyLimit` | — |
+| F0.4 | tabel `budgets` + `limits` gantiin `profile.monthlyBudget` + `categories.monthlyLimit` | ✅ |
 | F0.5 | helper copy periode + test literal "bulan ini" | — |
 | F0.6 | sisa hari dari `period.end`, `categories.isPayday` | — |
 
