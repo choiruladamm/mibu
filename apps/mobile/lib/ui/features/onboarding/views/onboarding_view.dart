@@ -24,6 +24,39 @@ class _OnboardingViewState extends State<OnboardingView> {
   late int _step = widget.initialStep;
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Decode the step 2/3 art now so it's ready when the step fades in.
+    for (final i in [2, 3]) {
+      precacheImage(
+        AssetImage('assets/images/onboarding_$i.png'),
+        context,
+        onError: (_, _) {},
+      );
+    }
+  }
+
+  /// Crossfade on [_step]; the old child fades out on top, the new one sets
+  /// the size.
+  /// [fill]: both children get the whole box (the fixed-height art).
+  Widget _swap(Widget child, {bool fill = false}) => AnimatedSwitcher(
+    duration: AppMotion.select,
+    layoutBuilder: (current, previous) => Stack(
+      alignment: Alignment.topLeft,
+      fit: fill ? StackFit.expand : StackFit.loose,
+      children: [
+        for (final p in previous)
+          if (fill)
+            Positioned.fill(child: p)
+          else
+            Positioned(top: 0, left: 0, right: 0, child: p),
+        ?current,
+      ],
+    ),
+    child: KeyedSubtree(key: ValueKey(_step), child: child),
+  );
+
+  @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
     final isLast = _step == 3;
@@ -76,44 +109,56 @@ class _OnboardingViewState extends State<OnboardingView> {
                   const SizedBox(height: 20),
                   SizedBox(
                     height: 340,
-                    child: Center(
-                      child: switch (_step) {
-                        1 => const _PocketsIllustration(),
-                        // 2/3: images rendered from the design board (24px pad
-                        // around the 342×340 frame so rotated chips/shadow fit).
-                        _ => OverflowBox(
-                          maxWidth: 390,
-                          maxHeight: 388,
-                          child: Image.asset(
-                            'assets/images/onboarding_$_step.png',
-                            width: 390,
-                            height: 388,
-                            excludeFromSemantics: true,
+                    child: _swap(
+                      fill: true,
+                      Center(
+                        child: switch (_step) {
+                          1 => const _PocketsIllustration(),
+                          // 2/3: images rendered from the design board (24px pad
+                          // around the 342×340 frame so rotated chips/shadow fit).
+                          _ => OverflowBox(
+                            maxWidth: 390,
+                            maxHeight: 388,
+                            child: Image.asset(
+                              'assets/images/onboarding_$_step.png',
+                              width: 390,
+                              height: 388,
+                              excludeFromSemantics: true,
+                            ),
                           ),
-                        ),
-                      },
+                        },
+                      ),
                     ),
                   ),
                   const SizedBox(height: 28),
-                  Text(
-                    l.onboardingCounter(_step),
-                    style: AppText.caption.copyWith(color: AppColors.muted),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    title,
-                    style: AppText.title.copyWith(
-                      fontSize: 34,
-                      letterSpacing: -0.03 * 34,
-                      height: 1.08,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    body,
-                    style: AppText.label.copyWith(
-                      height: 1.45,
-                      color: AppColors.muted,
+                  _swap(
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l.onboardingCounter(_step),
+                          style: AppText.caption.copyWith(
+                            color: AppColors.muted,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          title,
+                          style: AppText.title.copyWith(
+                            fontSize: 34,
+                            letterSpacing: -0.03 * 34,
+                            height: 1.08,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          body,
+                          style: AppText.label.copyWith(
+                            height: 1.45,
+                            color: AppColors.muted,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const Spacer(),
