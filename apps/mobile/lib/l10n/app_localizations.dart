@@ -853,7 +853,7 @@ abstract class AppLocalizations {
   /// No description provided for @pocketRelease.
   ///
   /// In id, this message translates to:
-  /// **'lepas limit'**
+  /// **'copot limit'**
   String get pocketRelease;
 
   /// No description provided for @limitSetTitle.
@@ -871,7 +871,7 @@ abstract class AppLocalizations {
   /// No description provided for @limitReleasedTitle.
   ///
   /// In id, this message translates to:
-  /// **'limit {name} dilepas'**
+  /// **'limit {name} dicopot'**
   String limitReleasedTitle(String name);
 
   /// No description provided for @limitReleasedSub.
@@ -879,6 +879,48 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'{n, plural, =0{{name} tetap ada, cuma nggak dibatesin} other{{name} & {n} catatannya tetap ada}}'**
   String limitReleasedSub(int n, String name);
+
+  /// No description provided for @limitOffTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'copot limit {name}?'**
+  String limitOffTitle(String name);
+
+  /// No description provided for @limitOffSub.
+  ///
+  /// In id, this message translates to:
+  /// **'toplesnya ilang, {name} jadi “belum ada limit”.'**
+  String limitOffSub(String name);
+
+  /// No description provided for @limitOffBusyTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'kamu udah {n}× catat {name} bulan ini'**
+  String limitOffBusyTitle(String name, int n);
+
+  /// No description provided for @limitOffBusySub.
+  ///
+  /// In id, this message translates to:
+  /// **'termasuk yang paling sering. tanpa limit, mibu nggak bakal ngingetin kalau {name} mulai kebablasan.'**
+  String limitOffBusySub(String name);
+
+  /// No description provided for @limitOffNoWarn.
+  ///
+  /// In id, this message translates to:
+  /// **'nggak ada peringatan “hampir abis” lagi'**
+  String get limitOffNoWarn;
+
+  /// No description provided for @limitOffFreed.
+  ///
+  /// In id, this message translates to:
+  /// **'{amount} balik jadi belum dijatah di budget'**
+  String limitOffFreed(String amount);
+
+  /// No description provided for @limitOffKept.
+  ///
+  /// In id, this message translates to:
+  /// **'{n, plural, =0{catatan lama tetap aman, nggak kehapus} other{{n} catatan ({amount}) tetap aman, nggak kehapus}}'**
+  String limitOffKept(int n, String amount);
 
   /// No description provided for @setLimitTitle.
   ///

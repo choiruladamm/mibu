@@ -377,17 +377,33 @@ void main() {
     await db.close();
   });
 
-  testWidgets('lepas limit: jar leaves, entries stay, batalin restores', (
+  testWidgets('copot limit: asks first, jar leaves, entries stay, batalin', (
     tester,
   ) async {
     final db = await pump(tester, const Size(390, 844));
 
-    await tester.ensureVisible(find.text('lepas limit'));
+    await tester.ensureVisible(find.text('copot limit'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('lepas limit'));
+    await tester.tap(find.text('copot limit'));
+    await settle(tester);
+    expect(find.text('copot limit anabul?'), findsOneWidget);
+    expect(
+      find.text('nggak ada peringatan “hampir abis” lagi'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('× catat'), findsNothing);
+
+    // nggak jadi: nothing changes.
+    await tester.tap(find.text('nggak jadi'));
+    await settle(tester);
+    expect(await limitOf(db, 'anabul'), 1000000);
+
+    await tester.tap(find.text('copot limit'));
+    await settle(tester);
+    await tester.tap(find.text('copot limit').last); // the sheet's button
     await settle(tester);
     expect(await limitOf(db, 'anabul'), isNull);
-    expect(find.text('limit anabul dilepas'), findsOneWidget);
+    expect(find.text('limit anabul dicopot'), findsOneWidget);
     expect(find.text('anabul & 2 catatannya tetap ada'), findsOneWidget);
     expect(find.bySemanticsLabel('anabul, 90% kepake'), findsNothing);
 

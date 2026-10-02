@@ -39,7 +39,7 @@ Tanda: **[diupdate]** = aturan/perilaku berubah dari design, **[perlu design]** 
   - Hero `sisa jajan {bulan}` = Σlimit − Σkepake.
   - **[perlu design]** Sub-baris hero bisa di-tap: "Rp2,34jt dari Rp7,4jt kepake · budget Rp6,9jt" → BudgetSheet 00.16. Budget kosong → "pasang budget".
   - **[v2]** Toples per buat apa yang pakai limit (isi = % kepake, animasi 300ms), "N pakai limit · urut dari yang paling kepake", toples putus-putus `limit` → sheet pasang limit. Pilih satu → kartu detail: status `aman` / `hampir abis` (≥85%) / `belum kepake`, "jatah sisa dari Rp…", "kira-kira Rp… sehari".
-  - **[v2]** Kartu detail: `atur limit` → 03.5, `lepas limit` → langsung + toast "limit X dilepas · X & N catatannya tetap ada · batalin".
+  - **[v2]** Kartu detail: `atur limit` → 03.5, `copot limit` → LimitOffSheet ("copot limit X?", dampak: nggak ada peringatan, limit balik ke belum dijatah, N catatan bulan ini tetap aman; kartu "kamu udah N× catat X bulan ini" kalau ≥10 catatan bulan ini; toples redup + badge "−") → `copot limit` + toast "limit X dicopot · X & N catatannya tetap ada · batalin" / `nggak jadi`.
   - **[v2]** Header `+ pasang limit` → sheet "pasang limit ke…": buat apa pengeluaran yang belum pakai limit, urut paling kepake bulan ini ("N catatan · Rp… udah kepake bulan ini"), pilih → PocketLimit + "toples langsung keisi X% · sisa jatah Rp…" → `pasang limit Rp…` + toast "limit X Rp… kepasang · N catatan bulan ini langsung keitung · batalin". Kosong: "semua buat apa udah pakai limit". Bawah: `bikin kategori baru` → 03.4, "pemasukan (gajian dkk) nggak bisa dikasih limit".
   - **[v2]** "belum ada limit · Rp… bulan ini" + `semua` → 03.3: 2 chip teratas → langsung ke step limit, `+N` → sheet. Belum ada sama sekali → kartu "pasang limit pertama".
   - `isi ulang` ditunda.
@@ -74,7 +74,7 @@ Tanda: **[diupdate]** = aturan/perilaku berubah dari design, **[perlu design]** 
 - [ ] **03.4 bikin baru / 03.5 edit** (satu widget, `mode=new|edit`)
   - Nama + emoji otomatis dari kata kunci (makan, kopi, kucing, bensin, …) sampai user pilih manual. Saran 3 emoji + palet 16.
   - `masuk ke`: pengeluaran / pemasukan.
-  - **[v2]** Switch `limit bulanan` (hint "nggak wajib, bisa dipasang nanti" / "jadi toples · mibu ngingetin kalau mau abis"), default mati kecuali dari 02.2. Edit + limit nyala → link `lepas limit` (langsung kesimpan + toast batalin).
+  - **[v2]** Switch `limit bulanan` (hint "nggak wajib, bisa dipasang nanti" / "jadi toples · mibu ngingetin kalau mau abis"), default mati kecuali dari 02.2. Edit + limit nyala → link `copot limit` → LimitOffSheet → kesimpan langsung, 03.5 tetap kebuka (switch mati) + toast batalin (switch nyala lagi).
   - PocketLimit 00.15 (ketik / geser / preset Rp100K · 300K · 600K · 1jt). **[diupdate]** Switch cuma buat kategori pengeluaran. Kategori pemasukan (gajian) cuma muncul pas catat pemasukan.
   - Edit: info pemakaian ("12 catatan · Rp840K tahun ini") + tombol hapus → 03.6.
 - [ ] **03.6 hapus kategori** — wajib pindahin catatan ke kategori lain / tanpa kategori, tombol **tahan buat hapus** (1 detik), state sukses + `batalin`.

@@ -458,7 +458,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get pocketManage => 'atur limit';
 
   @override
-  String get pocketRelease => 'lepas limit';
+  String get pocketRelease => 'copot limit';
 
   @override
   String limitSetTitle(String name, String amount) {
@@ -478,7 +478,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String limitReleasedTitle(String name) {
-    return 'limit $name dilepas';
+    return 'limit $name dicopot';
   }
 
   @override
@@ -488,6 +488,45 @@ class AppLocalizationsId extends AppLocalizations {
       locale: localeName,
       other: '$name & $n catatannya tetap ada',
       zero: '$name tetap ada, cuma nggak dibatesin',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String limitOffTitle(String name) {
+    return 'copot limit $name?';
+  }
+
+  @override
+  String limitOffSub(String name) {
+    return 'toplesnya ilang, $name jadi “belum ada limit”.';
+  }
+
+  @override
+  String limitOffBusyTitle(String name, int n) {
+    return 'kamu udah $n× catat $name bulan ini';
+  }
+
+  @override
+  String limitOffBusySub(String name) {
+    return 'termasuk yang paling sering. tanpa limit, mibu nggak bakal ngingetin kalau $name mulai kebablasan.';
+  }
+
+  @override
+  String get limitOffNoWarn => 'nggak ada peringatan “hampir abis” lagi';
+
+  @override
+  String limitOffFreed(String amount) {
+    return '$amount balik jadi belum dijatah di budget';
+  }
+
+  @override
+  String limitOffKept(int n, String amount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n catatan ($amount) tetap aman, nggak kehapus',
+      zero: 'catatan lama tetap aman, nggak kehapus',
     );
     return '$_temp0';
   }

@@ -24,7 +24,7 @@ import '../../../core/widgets/icon_sheet.dart';
 enum CategoryOrigin { catat, kantong, atur }
 
 /// 03.4 bikin baru (no [category]) / 03.5 edit. Saves and pops the
-/// saved category, or null on batal / lepas limit. [origin] picks the 03.4
+/// saved category, or null on batal. Copot limit keeps it open. [origin] picks the 03.4
 /// variant; [CategoryOrigin.kantong] always has a limit (03.4b), the others
 /// start without one.
 Future<Category?> showCategoryForm(
@@ -145,265 +145,291 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
       padding: EdgeInsets.only(bottom: bottom),
       child: SizedBox(
         height: 820,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 10, 20, 28),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: AppColors.line,
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              Row(
+        // Own messenger: "limit X dicopot" floats over the open sheet.
+        child: ScaffoldMessenger(
+          child: Scaffold(
+            backgroundColor: Colors.transparent,
+            resizeToAvoidBottomInset: false,
+            body: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 10, 20, 28),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  SizedBox(
-                    width: 64,
-                    height: AppSpace.minTouch,
-                    child: TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        alignment: Alignment.centerLeft,
-                        foregroundColor: AppColors.ink,
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: AppColors.line,
+                        borderRadius: BorderRadius.circular(3),
                       ),
-                      child: Text(l.cancel, style: AppText.label),
                     ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 64,
+                        height: AppSpace.minTouch,
+                        child: TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            alignment: Alignment.centerLeft,
+                            foregroundColor: AppColors.ink,
+                          ),
+                          child: Text(l.cancel, style: AppText.label),
+                        ),
+                      ),
+                      Expanded(
+                        child: Semantics(
+                          header: true,
+                          child: Text(
+                            _edit != null
+                                ? l.categoryEditTitle
+                                : l.categoryNewTitle,
+                            textAlign: TextAlign.center,
+                            style: AppText.label.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 64),
+                    ],
                   ),
                   Expanded(
-                    child: Semantics(
-                      header: true,
-                      child: Text(
-                        _edit != null
-                            ? l.categoryEditTitle
-                            : l.categoryNewTitle,
-                        textAlign: TextAlign.center,
-                        style: AppText.label.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 64),
-                ],
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const SizedBox(height: 10),
-                      Center(
-                        child: _EmojiDisc(
-                          _emoji,
-                          label: l.categoryChangeIcon,
-                          onTap: _openIcons,
-                        ),
-                      ),
-                      if (_edit != null) ...[
-                        const SizedBox(height: 10),
-                        Center(
-                          child: _UsageChip(
-                            usage == null || usage.count == 0
-                                ? [l.categoryUnused]
-                                : [
-                                    l.manageUses(usage.count),
-                                    l.categoryUsageYear(
-                                      rupiahCompact(usage.spentThisYear),
-                                    ),
-                                  ],
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: 16),
-                      _NameField(
-                        controller: _name,
-                        hint: l.categoryNameHint,
-                        label: l.categoryNameLabel,
-                        onChanged: (v) => setState(() {
-                          if (!_locked) _emoji = suggestEmoji(v).first;
-                        }),
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        textBaseline: TextBaseline.alphabetic,
-                        spacing: 12,
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Expanded(
-                            child: Text(
-                              name.isEmpty
-                                  ? l.categorySuggest
-                                  : l.categorySuggestFor(name),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppText.label.copyWith(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                              ),
+                          const SizedBox(height: 10),
+                          Center(
+                            child: _EmojiDisc(
+                              _emoji,
+                              label: l.categoryChangeIcon,
+                              onTap: _openIcons,
                             ),
                           ),
-                          Text(
-                            l.categorySuggestSource,
-                            style: AppText.caption.copyWith(
-                              color: AppColors.muted,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        spacing: 10,
-                        children: [
-                          for (final e in suggestEmoji(name))
-                            _EmojiButton(
-                              emoji: e,
-                              label: l.categoryUseEmoji(e),
-                              on: e == _emoji,
-                              onTap: () => _pickEmoji(e),
-                            ),
-                          Expanded(
-                            child: Align(
-                              alignment: Alignment.centerRight,
-                              child: FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: _AllIcons(
-                                  label: l.categoryAllIcons,
-                                  onTap: _openIcons,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (!_fromPocket) ...[
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                l.categoryKindLabel,
-                                style: AppText.label,
-                              ),
-                            ),
-                            Flexible(
-                              flex: 3,
-                              child: FittedBox(
-                                fit: BoxFit.scaleDown,
-                                alignment: Alignment.centerRight,
-                                child: _KindSegment(
-                                  kind: _kind,
-                                  labels: (l.kindOut, l.kindIn),
-                                  onPick: (k) => setState(() => _kind = k),
-                                ),
+                          if (_edit != null) ...[
+                            const SizedBox(height: 10),
+                            Center(
+                              child: _UsageChip(
+                                usage == null || usage.count == 0
+                                    ? [l.categoryUnused]
+                                    : [
+                                        l.manageUses(usage.count),
+                                        l.categoryUsageYear(
+                                          rupiahCompact(usage.spentThisYear),
+                                        ),
+                                      ],
                               ),
                             ),
                           ],
-                        ),
-                      ],
-                      // Pockets track spending only. The limit stays
-                      // in the draft if they flip back.
-                      if (expense) ...[
-                        if (!_fromPocket) ...[
-                          const SizedBox(height: 14),
-                          _PocketSwitch(
-                            on: _pocket,
-                            title: l.categoryPocket,
-                            hint: _pocket
-                                ? l.categoryPocketOn
-                                : l.categoryPocketOff,
-                            onChanged: (v) => setState(() => _pocket = v),
+                          const SizedBox(height: 16),
+                          _NameField(
+                            controller: _name,
+                            hint: l.categoryNameHint,
+                            label: l.categoryNameLabel,
+                            onChanged: (v) => setState(() {
+                              if (!_locked) _emoji = suggestEmoji(v).first;
+                            }),
                           ),
-                        ],
-                        if (_pocket) ...[
-                          const SizedBox(height: 14),
-                          PocketLimit(
-                            value: _limit,
-                            budget: ref
-                                .watch(profileProvider)
-                                .value
-                                ?.monthlyBudget,
-                            others: others,
-                            monthDays: DateTime(now.year, now.month + 1, 0).day,
-                            onChanged: (v) => setState(() => _limit = v),
-                            onSetBudget: () => editBudget(context, ref),
-                          ),
-                          if (_edit case Category(
-                            :final id,
-                            :final name,
-                            monthlyLimit: final limit?,
-                          ))
-                            Center(
-                              child: TextButton(
-                                onPressed: () async {
-                                  await releaseLimit(
-                                    context,
-                                    ref,
-                                    id: id,
-                                    name: name,
-                                    limit: limit,
-                                  );
-                                  if (context.mounted) {
-                                    Navigator.of(context).pop();
-                                  }
-                                },
-                                style: TextButton.styleFrom(
-                                  foregroundColor: AppColors.ink,
-                                ),
+                          const SizedBox(height: 16),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.baseline,
+                            textBaseline: TextBaseline.alphabetic,
+                            spacing: 12,
+                            children: [
+                              Expanded(
                                 child: Text(
-                                  l.pocketRelease,
+                                  name.isEmpty
+                                      ? l.categorySuggest
+                                      : l.categorySuggestFor(name),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                   style: AppText.label.copyWith(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    decoration: TextDecoration.underline,
-                                    decorationColor: AppColors.ink,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ),
-                            ),
-                        ],
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                spacing: 10,
-                children: [
-                  if (_edit case final c?)
-                    _TrashButton(
-                      label: l.deleteCategory,
-                      onTap: () async {
-                        if (await showCategoryDelete(context, c) &&
-                            context.mounted) {
-                          Navigator.of(context).pop();
-                        }
-                      },
-                    ),
-                  Expanded(
-                    child: PrimaryButton(
-                      label:
-                          (_edit != null
-                          ? l.categorySave
-                          : widget.origin == CategoryOrigin.catat
-                          ? l.categoryCreateUse
-                          : l.categoryCreate)(
-                            _emoji,
-                            name.isEmpty ? l.categoryFallbackName : name,
+                              Text(
+                                l.categorySuggestSource,
+                                style: AppText.caption.copyWith(
+                                  color: AppColors.muted,
+                                ),
+                              ),
+                            ],
                           ),
-                      onPressed: canSave ? _save : null,
+                          const SizedBox(height: 10),
+                          Row(
+                            spacing: 10,
+                            children: [
+                              for (final e in suggestEmoji(name))
+                                _EmojiButton(
+                                  emoji: e,
+                                  label: l.categoryUseEmoji(e),
+                                  on: e == _emoji,
+                                  onTap: () => _pickEmoji(e),
+                                ),
+                              Expanded(
+                                child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: _AllIcons(
+                                      label: l.categoryAllIcons,
+                                      onTap: _openIcons,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (!_fromPocket) ...[
+                            const SizedBox(height: 16),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    l.categoryKindLabel,
+                                    style: AppText.label,
+                                  ),
+                                ),
+                                Flexible(
+                                  flex: 3,
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    alignment: Alignment.centerRight,
+                                    child: _KindSegment(
+                                      kind: _kind,
+                                      labels: (l.kindOut, l.kindIn),
+                                      onPick: (k) => setState(() => _kind = k),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                          // Pockets track spending only. The limit stays
+                          // in the draft if they flip back.
+                          if (expense) ...[
+                            if (!_fromPocket) ...[
+                              const SizedBox(height: 14),
+                              _PocketSwitch(
+                                on: _pocket,
+                                title: l.categoryPocket,
+                                hint: _pocket
+                                    ? l.categoryPocketOn
+                                    : l.categoryPocketOff,
+                                onChanged: (v) => setState(() => _pocket = v),
+                              ),
+                            ],
+                            if (_pocket) ...[
+                              const SizedBox(height: 14),
+                              PocketLimit(
+                                value: _limit,
+                                budget: ref
+                                    .watch(profileProvider)
+                                    .value
+                                    ?.monthlyBudget,
+                                others: others,
+                                monthDays: DateTime(
+                                  now.year,
+                                  now.month + 1,
+                                  0,
+                                ).day,
+                                onChanged: (v) => setState(() => _limit = v),
+                                onSetBudget: () => editBudget(context, ref),
+                              ),
+                              if (_edit case Category(
+                                :final id,
+                                :final emoji,
+                                :final name,
+                                monthlyLimit: final limit?,
+                              ))
+                                Center(
+                                  // Below the sheet's messenger, so the toast
+                                  // floats over 03.5 (which stays open).
+                                  child: Builder(
+                                    builder: (context) => TextButton(
+                                      onPressed: () async {
+                                        final off = await releaseLimit(
+                                          context,
+                                          ref,
+                                          id: id,
+                                          emoji: emoji,
+                                          name: name,
+                                          limit: limit,
+                                          toastBottom: 100,
+                                          onUndo: () {
+                                            if (mounted) {
+                                              setState(() {
+                                                _pocket = true;
+                                                _limit = limit;
+                                              });
+                                            }
+                                          },
+                                        );
+                                        if (off && mounted) {
+                                          setState(() => _pocket = false);
+                                        }
+                                      },
+                                      style: TextButton.styleFrom(
+                                        foregroundColor: AppColors.ink,
+                                      ),
+                                      child: Text(
+                                        l.pocketRelease,
+                                        style: AppText.label.copyWith(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                          decoration: TextDecoration.underline,
+                                          decorationColor: AppColors.ink,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ],
+                        ],
+                      ),
                     ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    spacing: 10,
+                    children: [
+                      if (_edit case final c?)
+                        _TrashButton(
+                          label: l.deleteCategory,
+                          onTap: () async {
+                            if (await showCategoryDelete(context, c) &&
+                                context.mounted) {
+                              Navigator.of(context).pop();
+                            }
+                          },
+                        ),
+                      Expanded(
+                        child: PrimaryButton(
+                          label:
+                              (_edit != null
+                              ? l.categorySave
+                              : widget.origin == CategoryOrigin.catat
+                              ? l.categoryCreateUse
+                              : l.categoryCreate)(
+                                _emoji,
+                                name.isEmpty ? l.categoryFallbackName : name,
+                              ),
+                          onPressed: canSave ? _save : null,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
         ),
       ),

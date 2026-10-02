@@ -159,6 +159,7 @@ class _PocketsViewState extends ConsumerState<PocketsView> {
                           context,
                           ref,
                           id: selected.id,
+                          emoji: selected.emoji,
                           name: selected.name,
                           limit: selected.budget,
                         ),

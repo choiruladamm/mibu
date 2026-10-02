@@ -157,7 +157,13 @@ void main() {
     expect(pocket.spent, before.spent); // nothing moved, already counted
     expect(await repo.watchFreeCategories(now).first, isEmpty);
 
-    // lepas limit: category + entries stay, it just leaves the jars.
+    // copot limit sheet: this month's count + spend match the jar.
+    expect(await repo.monthUsage(belanja, now), (
+      count: before.count,
+      spent: before.spent,
+    ));
+
+    // copot limit: category + entries stay, it just leaves the jars.
     await repo.setLimit(belanja, null);
     expect(
       (await repo.watchPockets(now).first).map((p) => p.id),

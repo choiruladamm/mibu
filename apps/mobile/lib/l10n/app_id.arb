@@ -376,7 +376,7 @@
     }
   },
   "pocketManage": "atur limit",
-  "pocketRelease": "lepas limit",
+  "pocketRelease": "copot limit",
   "limitSetTitle": "limit {name} {amount} kepasang",
   "@limitSetTitle": {
     "placeholders": {
@@ -396,7 +396,7 @@
       }
     }
   },
-  "limitReleasedTitle": "limit {name} dilepas",
+  "limitReleasedTitle": "limit {name} dicopot",
   "@limitReleasedTitle": {
     "placeholders": {
       "name": {
@@ -415,6 +415,19 @@
       }
     }
   },
+  "limitOffTitle": "copot limit {name}?",
+  "@limitOffTitle": {"placeholders": {"name": {"type": "String"}}},
+  "limitOffSub": "toplesnya ilang, {name} jadi “belum ada limit”.",
+  "@limitOffSub": {"placeholders": {"name": {"type": "String"}}},
+  "limitOffBusyTitle": "kamu udah {n}× catat {name} bulan ini",
+  "@limitOffBusyTitle": {"placeholders": {"name": {"type": "String"}, "n": {"type": "int"}}},
+  "limitOffBusySub": "termasuk yang paling sering. tanpa limit, mibu nggak bakal ngingetin kalau {name} mulai kebablasan.",
+  "@limitOffBusySub": {"placeholders": {"name": {"type": "String"}}},
+  "limitOffNoWarn": "nggak ada peringatan “hampir abis” lagi",
+  "limitOffFreed": "{amount} balik jadi belum dijatah di budget",
+  "@limitOffFreed": {"placeholders": {"amount": {"type": "String"}}},
+  "limitOffKept": "{n, plural, =0{catatan lama tetap aman, nggak kehapus} other{{n} catatan ({amount}) tetap aman, nggak kehapus}}",
+  "@limitOffKept": {"placeholders": {"n": {"type": "int"}, "amount": {"type": "String"}}},
   "setLimitTitle": "pasang limit ke…",
   "setLimitHintOrder": "urut paling kepake",
   "setLimitHintCounts": "catatan lama langsung keitung",

@@ -134,24 +134,29 @@ void main() {
     await db.close();
   });
 
-  testWidgets('03.5 lepas limit: saved at once, closes, batalin', (
+  testWidgets('03.5 copot limit: asks, saved at once, stays open, batalin', (
     tester,
   ) async {
     final db = await pump(tester, const PocketsView());
     await tester.ensureVisible(find.text('atur limit'));
     await tester.tap(find.text('atur limit'));
     await settle(tester);
-    await tester.ensureVisible(find.text('lepas limit').last);
-    await tester.tap(find.text('lepas limit').last);
+    await tester.ensureVisible(find.text('copot limit').last);
+    await tester.tap(find.text('copot limit').last);
+    await settle(tester);
+    expect(find.text('copot limit anabul?'), findsOneWidget);
+    await tester.tap(find.text('copot limit').last); // the sheet's button
     await settle(tester);
     await settle(tester);
 
-    expect(find.text('edit'), findsNothing);
+    expect(find.text('edit'), findsOneWidget); // 03.5 stays open
     expect((await row(db, 'anabul')).monthlyLimit, isNull);
-    expect(find.text('limit anabul dilepas'), findsOneWidget);
+    expect(find.text('limit anabul dicopot'), findsOneWidget);
+    expect(find.text('opsional, bisa nanti'), findsOneWidget); // switch off
     await tester.tap(find.text('batalin'));
     await settle(tester);
     expect((await row(db, 'anabul')).monthlyLimit, 1000000);
+    expect(find.text('opsional, bisa nanti'), findsNothing); // back on
 
     await tester.pumpWidget(const SizedBox());
     await db.close();

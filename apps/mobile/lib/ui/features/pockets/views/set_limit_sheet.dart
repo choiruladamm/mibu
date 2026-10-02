@@ -16,6 +16,7 @@ import '../../../core/widgets/toast.dart';
 import '../../budget/views/budget_sheet.dart';
 import '../../categories/views/category_form_sheet.dart';
 import '../view_models/pockets_view_model.dart';
+import 'limit_off_sheet.dart';
 import '../../../core/widgets/meta_line.dart';
 import '../../../core/widgets/app_emoji.dart';
 
@@ -50,28 +51,47 @@ Future<void> showSetLimit(
   );
 }
 
-/// Lepas limit (02.2 kartu detail, 03.5): clears it right away, toast with
-/// batalin puts [limit] back. Shows the toast before returning, so a sheet
-/// can pop right after.
-Future<void> releaseLimit(
+/// Copot limit (02.2 kartu detail, 03.5): LimitOffSheet first; on copot
+/// clears it right away, toast with batalin puts [limit] back (then runs
+/// [onUndo]). False = nggak jadi, nothing changed.
+Future<bool> releaseLimit(
   BuildContext context,
   WidgetRef ref, {
   required String id,
+  required String emoji,
   required String name,
   required int limit,
+  VoidCallback? onUndo,
+  double toastBottom = 28,
 }) async {
   final repo = ref.read(financeRepositoryProvider);
+  final month = await repo.monthUsage(id, ref.read(nowProvider));
+  if (!context.mounted) return false;
+  final ok = await showLimitOff(
+    context,
+    emoji: emoji,
+    name: name,
+    limit: limit,
+    spent: month.spent,
+    count: month.count,
+  );
+  if (!ok) return false;
   await repo.setLimit(id, null);
   final usage = await repo.watchCategoryUsage(ref.read(nowProvider)).first;
-  if (!context.mounted) return;
+  if (!context.mounted) return true;
   final l = AppLocalizations.of(context)!;
   showToast(
     context,
     icon: ToastIcon.check,
     title: l.limitReleasedTitle(name),
     sub: l.limitReleasedSub(usage[id]?.count ?? 0, name),
-    onUndo: () => repo.setLimit(id, limit),
+    bottom: toastBottom,
+    onUndo: () async {
+      await repo.setLimit(id, limit);
+      onUndo?.call();
+    },
   );
+  return true;
 }
 
 class _Picked {

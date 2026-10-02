@@ -441,6 +441,26 @@ class FinanceRepository {
         ),
       );
 
+  /// This month's entries and expense (positive) of one category, for the
+  /// copot limit sheet.
+  Future<({int count, int spent})> monthUsage(String id, DateTime now) async {
+    final count = _tx.id.count();
+    final spent = _tx.amount.sum(filter: _tx.amount.isSmallerThanValue(0));
+    final r =
+        await (_db.selectOnly(_tx)
+              ..addColumns([count, spent])
+              ..where(
+                _tx.deletedAt.isNull() &
+                    _tx.categoryId.equals(id) &
+                    _tx.at.isBiggerOrEqualValue(DateTime(now.year, now.month)) &
+                    _tx.at.isSmallerThanValue(
+                      DateTime(now.year, now.month + 1),
+                    ),
+              ))
+            .getSingle();
+    return (count: r.read(count) ?? 0, spent: -(r.read(spent) ?? 0));
+  }
+
   /// Per category: entries (all time) and expense this year, positive.
   /// "12 catatan · Rp840K tahun ini" in 03.3 / 03.5 / 03.6.
   Stream<Map<String, ({int count, int spentThisYear})>> watchCategoryUsage(
