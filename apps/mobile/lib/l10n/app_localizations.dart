@@ -2188,6 +2188,18 @@ abstract class AppLocalizations {
   /// **'buat apa aja'**
   String get settingsCategories;
 
+  /// No description provided for @settingsCategoriesHint.
+  ///
+  /// In id, this message translates to:
+  /// **'nama, ikon & limit'**
+  String get settingsCategoriesHint;
+
+  /// No description provided for @settingsCategoriesMore.
+  ///
+  /// In id, this message translates to:
+  /// **'+{n}'**
+  String settingsCategoriesMore(int n);
+
   /// No description provided for @settingsPayday.
   ///
   /// In id, this message translates to:

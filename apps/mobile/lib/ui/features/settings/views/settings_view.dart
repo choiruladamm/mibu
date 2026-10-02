@@ -9,6 +9,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../routing/router.dart';
 import '../../../core/money.dart';
 import '../../../core/tokens.dart';
+import '../../../core/widgets/app_emoji.dart';
 import '../../../core/widgets/meta_line.dart';
 import '../../../core/widgets/tab_bar.dart';
 import '../../budget/views/budget_sheet.dart';
@@ -102,7 +103,11 @@ class SettingsView extends ConsumerWidget {
                     _Row(
                       icon: HugeIcons.strokeRoundedTag01,
                       title: l.settingsCategories,
-                      trailing: Text('${s.categories}'),
+                      hint: l.settingsCategoriesHint,
+                      trailing: _IconStack(
+                        icons: s.topIcons,
+                        more: s.moreCategories,
+                      ),
                       onTap: () => showCategoryManage(context),
                     ),
                     _Row(
@@ -338,6 +343,58 @@ class _BudgetCard extends StatelessWidget {
 
 /// A 60px row in a group card: icon disc, title (+ hint), then a trailing
 /// value, chevron or switch ([switchOn] non-null).
+/// "buat apa aja" trailing: the 3 most used icons overlapping, then "+8".
+class _IconStack extends StatelessWidget {
+  const _IconStack({required this.icons, required this.more});
+
+  final List<String> icons;
+  final int more;
+
+  static const _size = 28.0, _overlap = 8.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      spacing: 6,
+      children: [
+        if (icons.isNotEmpty)
+          ExcludeSemantics(
+            child: SizedBox(
+              width: _size + (_size - _overlap) * (icons.length - 1),
+              height: _size,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  for (final (i, e) in icons.indexed)
+                    Positioned(
+                      left: i * (_size - _overlap),
+                      child: Container(
+                        width: _size,
+                        height: _size,
+                        alignment: Alignment.center,
+                        decoration: const BoxDecoration(
+                          color: AppColors.paper,
+                          shape: BoxShape.circle,
+                          // Ring in the card's own mist so they read as stacked.
+                          boxShadow: [
+                            BoxShadow(color: AppColors.mist, spreadRadius: 2),
+                          ],
+                        ),
+                        child: AppEmoji(e, size: 20),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        if (more > 0) Text(l.settingsCategoriesMore(more)),
+      ],
+    );
+  }
+}
+
 class _Row extends StatelessWidget {
   const _Row({
     required this.icon,

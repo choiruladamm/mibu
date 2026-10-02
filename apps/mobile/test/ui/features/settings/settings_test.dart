@@ -9,6 +9,7 @@ import 'package:mibu/ui/core/clock.dart';
 import 'package:mibu/ui/core/finance_providers.dart';
 import 'package:mibu/ui/core/money.dart';
 import 'package:mibu/ui/core/theme.dart';
+import 'package:mibu/ui/core/widgets/app_emoji.dart';
 import 'package:mibu/ui/features/settings/views/settings_view.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -73,6 +74,17 @@ void main() {
 
     expect(find.text('pengaturan'), findsWidgets); // title + tab
     expect(find.text('budget bulanan'), findsOneWidget);
+    // buat apa aja: hint + the 3 most used icons stacked, then the rest.
+    expect(find.text('nama, ikon & limit'), findsOneWidget);
+    expect(find.text('+3'), findsOneWidget); // fixture: 6 buat apa
+    final row = find.ancestor(
+      of: find.text('nama, ikon & limit'),
+      matching: find.byType(InkWell),
+    );
+    expect(
+      find.descendant(of: row, matching: find.byType(AppEmoji)),
+      findsNWidgets(3),
+    );
     expect(find.text('Rp8jt'), findsOneWidget);
     expect(find.text('/ bulan'), findsOneWidget);
     expect(find.text('buat apa aja'), findsOneWidget);

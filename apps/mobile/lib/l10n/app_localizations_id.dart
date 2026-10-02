@@ -1317,6 +1317,14 @@ class AppLocalizationsId extends AppLocalizations {
   String get settingsCategories => 'buat apa aja';
 
   @override
+  String get settingsCategoriesHint => 'nama, ikon & limit';
+
+  @override
+  String settingsCategoriesMore(int n) {
+    return '+$n';
+  }
+
+  @override
   String get settingsPayday => 'tanggal gajian';
 
   @override
