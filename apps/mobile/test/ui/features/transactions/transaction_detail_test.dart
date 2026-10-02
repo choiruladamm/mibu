@@ -12,6 +12,8 @@ import 'package:mibu/ui/core/theme.dart';
 import 'package:mibu/ui/features/add_entry/view_models/add_entry_view_model.dart';
 import 'package:mibu/ui/features/transactions/views/transaction_detail_view.dart';
 
+import '../../../meta.dart';
+
 void main() {
   final now = DateTime(2026, 10, 14, 14, 50);
   late AppDatabase db;
@@ -63,7 +65,7 @@ void main() {
     await settle();
     expect(find.text('petshop'), findsOneWidget);
     expect(find.text('sel 13 okt'), findsOneWidget);
-    expect(find.text('dibayar sel, 13 okt · 14.32'), findsOneWidget);
+    expect(findMeta(['sel 13 okt', '14.32']), findsOneWidget);
     expect(find.text('tambahin catatan'), findsOneWidget);
     expect(find.text('🐶 anabul'), findsOneWidget);
     expect(find.text('jatah sisa Rp100K dari limit Rp1jt'), findsOneWidget);

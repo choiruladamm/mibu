@@ -15,6 +15,7 @@ import '../../../core/finance_providers.dart';
 import '../view_models/categories_view_model.dart';
 import '../../pockets/views/set_limit_sheet.dart';
 import 'category_delete_sheet.dart';
+import '../../../core/widgets/meta_line.dart';
 
 /// Where a new category is made from (03.4 / 03.4b / 03.4c / 03.4d).
 enum CategoryOrigin { catat, kantong, atur }
@@ -212,11 +213,13 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
                         Center(
                           child: _UsageChip(
                             usage == null || usage.count == 0
-                                ? l.categoryUnused
-                                : l.categoryUsage(
-                                    usage.count,
-                                    rupiahCompact(usage.spentThisYear),
-                                  ),
+                                ? [l.categoryUnused]
+                                : [
+                                    l.manageUses(usage.count),
+                                    l.categoryUsageYear(
+                                      rupiahCompact(usage.spentThisYear),
+                                    ),
+                                  ],
                           ),
                         ),
                       ],
@@ -532,9 +535,9 @@ class _ContextChip extends StatelessWidget {
 }
 
 class _UsageChip extends StatelessWidget {
-  const _UsageChip(this.text);
+  const _UsageChip(this.parts);
 
-  final String text;
+  final List<String> parts;
 
   @override
   Widget build(BuildContext context) {
@@ -546,7 +549,7 @@ class _UsageChip extends StatelessWidget {
         color: AppColors.mist,
         borderRadius: BorderRadius.circular(AppRadius.pill),
       ),
-      child: Text(text, style: AppText.caption),
+      child: MetaLine(parts, style: AppText.caption),
     );
   }
 }

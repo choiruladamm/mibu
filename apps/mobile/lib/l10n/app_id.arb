@@ -12,7 +12,8 @@
   "onboardingSkip": "lewati",
   "onboardingNext": "lanjut",
   "onboardingStart": "mulai sekarang",
-  "onboardingFooter": "masuk pakai google / apple · tanpa password",
+  "onboardingFooter": "masuk pakai google / apple",
+  "onboardingNoPassword": "tanpa password",
   "onboardingCounter": "0{step} / 03",
   "@onboardingCounter": {
     "placeholders": {
@@ -41,7 +42,7 @@
   "pocketHoliday": "liburan",
   "addEntry": "catat",
   "search": "cari",
-  "seeAll": "lihat semua",
+  "seeAll": "liat semua",
   "today": "hari ini",
   "prediction": "prediksi",
   "monthPickerLabel": "ganti bulan, sekarang {month}",
@@ -55,7 +56,7 @@
   "homeMonthlyBalance": "saldo per bulan",
   "homeTapMonthHint": "tap bulannya buat intip",
   "homeRecent": "baru aja",
-  "homePockets": "kantong · paling kepake duluan",
+  "homePockets": "kantong",
   "homeTodayTotal": "{total} hari ini",
   "@homeTodayTotal": {
     "placeholders": {
@@ -292,7 +293,7 @@
       }
     }
   },
-  "pocketsSpentOf": "{spent} dari {limit} kepake · ",
+  "pocketsSpentOf": "{spent} dari {limit} kepake",
   "@pocketsSpentOf": {
     "placeholders": {
       "spent": {
@@ -311,15 +312,14 @@
       }
     }
   },
-  "pocketsOrder": " · urut dari yang paling kepake",
   "pocketsSwipe": "geser",
   "pocketsNewJar": "pasang limit ke yang lain",
   "pocketsFirstTitle": "pasang limit pertama",
   "pocketsFirstBody": "pasang limit ke makan, ngopi, atau ojol. catatan bulan ini langsung keitung.",
   "pocketsFirstButton": "pasang limit",
-  "pocketsFreeTitle": "belum ada limit · ",
+  "pocketsFreeTitle": "belum ada limit",
+  "pocketsNoLimit": "belum ada limit",
   "pocketsFreeSuffix": " bulan ini",
-  "pocketsFreeManage": "semua",
   "pocketsFreeChip": "pasang limit buat {name}",
   "@pocketsFreeChip": {
     "placeholders": {
@@ -416,13 +416,36 @@
     }
   },
   "setLimitTitle": "pasang limit ke…",
-  "setLimitHint": "yang belum pakai limit, urut dari paling kepake bulan ini. catatan bulan ini langsung keitung.",
-  "setLimitMeta": "{n, plural, =0{belum dipakai bulan ini} other{{n} catatan · {amount} udah kepake bulan ini}}",
-  "@setLimitMeta": {
+  "setLimitHintOrder": "urut paling kepake",
+  "setLimitHintCounts": "catatan lama langsung keitung",
+  "setLimitCount": "{n, plural, =0{belum kepake} other{{n} catatan}}",
+  "@setLimitCount": {
     "placeholders": {
       "n": {
         "type": "int"
-      },
+      }
+    }
+  },
+  "setLimitSpent": "{amount} udah kepake bulan ini",
+  "@setLimitSpent": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "setLimitUnused": "belum kepake bulan ini",
+  "setLimitFilled": "keisi {pct}%",
+  "@setLimitFilled": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "setLimitLeft": "sisa jatah {amount}",
+  "@setLimitLeft": {
+    "placeholders": {
       "amount": {
         "type": "String"
       }
@@ -433,17 +456,6 @@
   "setLimitNewCategory": "bikin kategori baru",
   "setLimitIncomeNote": "pemasukan (gajian dkk) nggak bisa dikasih limit",
   "setLimitBack": "ganti",
-  "setLimitFill": "toples langsung keisi {pct}% · sisa jatah {amount}",
-  "@setLimitFill": {
-    "placeholders": {
-      "pct": {
-        "type": "int"
-      },
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
   "setLimitSave": "pasang limit {amount}",
   "@setLimitSave": {
     "placeholders": {
@@ -607,12 +619,9 @@
     }
   },
   "categoryFallbackName": "baru",
-  "categoryUsage": "{count} catatan · {amount} tahun ini",
-  "@categoryUsage": {
+  "categoryUsageYear": "{amount} tahun ini",
+  "@categoryUsageYear": {
     "placeholders": {
-      "count": {
-        "type": "int"
-      },
       "amount": {
         "type": "String"
       }
@@ -709,13 +718,13 @@
       }
     }
   },
-  "deleteUsage": "{count} catatan · {amount} pakai kategori ini",
-  "@deleteUsage": {
+  "deleteUsageIn": "{amount} di {name}",
+  "@deleteUsageIn": {
     "placeholders": {
-      "count": {
-        "type": "int"
-      },
       "amount": {
+        "type": "String"
+      },
+      "name": {
         "type": "String"
       }
     }
@@ -841,22 +850,6 @@
     }
   },
   "receiptTitle": "struk",
-  "receiptPaid": "dibayar {date}",
-  "@receiptPaid": {
-    "placeholders": {
-      "date": {
-        "type": "String"
-      }
-    }
-  },
-  "receiptReceived": "masuk {date}",
-  "@receiptReceived": {
-    "placeholders": {
-      "date": {
-        "type": "String"
-      }
-    }
-  },
   "receiptKind": "jenis",
   "receiptNote": "catatan",
   "receiptAddNote": "tambahin catatan",
@@ -1014,14 +1007,7 @@
     }
   },
   "setupDaily": "aman jajan per hari",
-  "setupUntil": "sampai gajian · {days} hari lagi",
-  "@setupUntil": {
-    "placeholders": {
-      "days": {
-        "type": "int"
-      }
-    }
-  },
+  "setupUntil": "sampai gajian",
   "setupNext": "lanjut",
   "setupPocketsTitle": "mau mulai pasang limit ke apa?",
   "setupPocketsBody": "pilih aja dulu, nominalnya bisa diubah nanti.",

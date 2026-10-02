@@ -7,6 +7,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../core/dashed.dart';
 import '../../../core/money.dart';
 import '../../../core/tokens.dart';
+import '../../../core/widgets/meta_line.dart';
 
 /// 01.1 onboarding — one widget, step 1 | 2 | 3.
 class OnboardingView extends StatefulWidget {
@@ -191,8 +192,8 @@ class _OnboardingViewState extends State<OnboardingView> {
                   SizedBox(
                     height: 48,
                     child: Center(
-                      child: Text(
-                        l.onboardingFooter,
+                      child: MetaLine(
+                        [l.onboardingFooter, l.onboardingNoPassword],
                         style: AppText.label.copyWith(
                           fontSize: 14,
                           color: AppColors.muted,
@@ -280,16 +281,14 @@ class _PocketsIllustration extends StatelessWidget {
                 borderRadius: BorderRadius.circular(22),
               ),
               alignment: Alignment.center,
-              child: Text.rich(
-                TextSpan(
-                  text: '💼  ${l.onboardingSalaryIn} · ',
-                  children: [
-                    TextSpan(
-                      text: rupiahCompact(8500000),
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                  ],
-                ),
+              child: MetaLine.rich(
+                [
+                  TextSpan(text: '💼 ${l.onboardingSalaryIn}'),
+                  TextSpan(
+                    text: rupiahCompact(8500000),
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ],
                 style: AppText.label.copyWith(
                   fontSize: 15,
                   color: AppColors.paper,

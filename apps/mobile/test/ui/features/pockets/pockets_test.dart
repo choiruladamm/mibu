@@ -11,6 +11,8 @@ import 'package:mibu/ui/core/clock.dart';
 import 'package:mibu/ui/core/theme.dart';
 import 'package:mibu/ui/features/pockets/views/pockets_view.dart';
 
+import '../../../meta.dart';
+
 void main() {
   Future<AppDatabase> pump(
     WidgetTester tester,
@@ -65,7 +67,7 @@ void main() {
     expect(find.text('18 hari lagi'), findsOneWidget);
     expect(
       find.text(
-        'Rp1,66jt dari Rp3,3jt kepake · budget Rp8jt',
+        'Rp1,66jt dari Rp3,3jt kepake\uFFFCbudget Rp8jt', // dot = placeholder
         findRichText: true,
       ),
       findsOneWidget,
@@ -105,7 +107,7 @@ void main() {
     }
 
     Future<void> openSheet() async {
-      await tester.tap(find.textContaining('kepake ·', findRichText: true));
+      await tester.tap(find.textContaining('kepake', findRichText: true));
       await tester.pumpAndSettle();
     }
 
@@ -172,7 +174,7 @@ void main() {
     tester,
   ) async {
     final db = await pump(tester, const Size(390, 844));
-    await tester.tap(find.textContaining('kepake ·', findRichText: true));
+    await tester.tap(find.textContaining('kepake', findRichText: true));
     await tester.pumpAndSettle();
     expect(find.text('budget bulanan'), findsOneWidget);
 
@@ -226,25 +228,14 @@ void main() {
   ) async {
     final db = await pump(tester, const Size(390, 844));
 
-    expect(
-      find.textContaining(
-        '4 pakai limit · urut dari yang paling kepake',
-        findRichText: true,
-      ),
-      findsOneWidget,
-    );
+    expect(find.text('4 pakai limit'), findsOneWidget);
     // 4 jars + limit fit in 342px: nothing to swipe to.
     expect(find.text('geser'), findsNothing);
     expect(find.bySemanticsLabel('pasang limit ke yang lain'), findsOneWidget);
 
     // belanja is the only expense category without a limit; income stays out.
-    expect(
-      find.textContaining(
-        'belum ada limit · Rp2,4jt bulan ini',
-        findRichText: true,
-      ),
-      findsOneWidget,
-    );
+    expect(find.text('belum ada limit'), findsOneWidget);
+    expect(find.text('Rp2,4jt bulan ini', findRichText: true), findsOneWidget);
     expect(find.bySemanticsLabel('pasang limit buat belanja'), findsOneWidget);
     expect(find.text('gajian'), findsNothing);
     expect(find.textContaining('+'), findsNothing);
@@ -330,7 +321,7 @@ void main() {
     await tester.tap(find.text('pasang limit'));
     await tester.pumpAndSettle();
     expect(find.text('pasang limit ke…'), findsOneWidget);
-    expect(find.text('1 catatan · Rp2,4jt udah kepake bulan ini'), findsOne);
+    expect(find.text('1 catatan'), findsOne); // row; amount on the right
     expect(find.text('gajian'), findsNothing); // income never shows
     expect(find.text('bikin kategori baru'), findsOneWidget);
 
@@ -338,10 +329,7 @@ void main() {
     await tester.pumpAndSettle();
     // 2.399.000 × 1,4 rounded up to 100K
     expect(find.text('pasang limit Rp3,4jt'), findsOneWidget);
-    expect(
-      find.text('toples langsung keisi 71% · sisa jatah Rp1jt'),
-      findsOneWidget,
-    );
+    expect(findMeta(['keisi 71%', 'sisa jatah Rp1jt']), findsOneWidget);
 
     await tester.tap(find.text('pasang limit Rp3,4jt'));
     await settle(tester);

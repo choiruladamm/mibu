@@ -9,6 +9,7 @@ import '../dates.dart';
 import '../money.dart';
 import '../tokens.dart';
 import 'sheet.dart';
+import 'meta_line.dart';
 
 /// 00.12 DateSheet — month grid; resolves to the picked day (date-only).
 Future<DateTime?> showDateSheet(
@@ -159,12 +160,13 @@ class _DateSheetState extends ConsumerState<_DateSheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: 1,
                     children: [
-                      Text(
-                        '${relativeDay(l, _sel, today)} · ${dayLabel(_sel)}',
-                        style: AppText.caption.copyWith(
-                          fontWeight: FontWeight.w600,
+                      MetaLine.rich([
+                        TextSpan(text: relativeDay(l, _sel, today)),
+                        TextSpan(
+                          text: dayLabel(_sel),
+                          style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
-                      ),
+                      ], style: AppText.caption),
                       Text(
                         selDay == null
                             ? l.noEntriesThatDay

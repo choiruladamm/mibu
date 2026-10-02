@@ -11,6 +11,7 @@ import '../../../core/clock.dart';
 import '../../../core/measure.dart';
 import '../../../core/money.dart';
 import '../../../core/tokens.dart';
+import '../../../core/widgets/meta_line.dart';
 
 final _dots = NumberFormat('#,##0', 'id_ID');
 
@@ -408,7 +409,10 @@ class _SetupViewState extends ConsumerState<SetupView> {
                           fontFeatures: const [FontFeature.tabularFigures()],
                         ),
                       ),
-                      Text(l.setupUntil(left), style: muted),
+                      MetaLine([
+                        l.setupUntil,
+                        l.pocketsDaysLeft(left),
+                      ], style: muted),
                     ],
                   ),
                 ),

@@ -16,6 +16,7 @@ import '../../../core/widgets/toast.dart';
 import '../../budget/views/budget_sheet.dart';
 import '../../categories/views/category_form_sheet.dart';
 import '../view_models/pockets_view_model.dart';
+import '../../../core/widgets/meta_line.dart';
 
 /// 02.2 "pasang limit ke…". With [pick] it opens straight on its limit step
 /// (the "belum ada limit" chips). Saves, selects the jar and shows the toast
@@ -205,7 +206,12 @@ class _SetLimitSheetState extends ConsumerState<SetLimitSheet> {
                     const SizedBox(height: 8),
                     Center(
                       child: _Pill(
-                        l.setLimitMeta(f.count, rupiahCompact(f.spent)),
+                        f.count == 0
+                            ? [l.setLimitUnused]
+                            : [
+                                l.setLimitCount(f.count),
+                                l.setLimitSpent(rupiahCompact(f.spent)),
+                              ],
                       ),
                     ),
                     const SizedBox(height: 18),
@@ -227,11 +233,13 @@ class _SetLimitSheetState extends ConsumerState<SetLimitSheet> {
                         color: AppColors.mist,
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Text(
-                        l.setLimitFill(
-                          pct.clamp(0, 100),
-                          rupiahCompact((_limit - f.spent).clamp(0, _limit)),
-                        ),
+                      child: MetaLine(
+                        [
+                          l.setLimitFilled(pct.clamp(0, 100)),
+                          l.setLimitLeft(
+                            rupiahCompact((_limit - f.spent).clamp(0, _limit)),
+                          ),
+                        ],
                         style: AppText.label.copyWith(
                           fontSize: 14,
                           height: 1.4,
@@ -309,7 +317,7 @@ class _ListStep extends StatelessWidget {
             const Spacer(),
           ] else ...[
             const SizedBox(height: 6),
-            Text(l.setLimitHint, style: muted),
+            MetaLine([l.setLimitHintOrder, l.setLimitHintCounts], style: muted),
             const SizedBox(height: 12),
             Expanded(
               child: ListView(
@@ -384,7 +392,7 @@ class _Row extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      l.setLimitMeta(f.count, rupiahCompact(f.spent)),
+                      l.setLimitCount(f.count), // the amount sits on the right
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppText.caption.copyWith(color: AppColors.muted),
@@ -415,9 +423,9 @@ class _Row extends StatelessWidget {
 }
 
 class _Pill extends StatelessWidget {
-  const _Pill(this.text);
+  const _Pill(this.parts);
 
-  final String text;
+  final List<String> parts;
 
   @override
   Widget build(BuildContext context) {
@@ -429,8 +437,8 @@ class _Pill extends StatelessWidget {
         color: AppColors.mist,
         borderRadius: BorderRadius.circular(AppRadius.pill),
       ),
-      child: Text(
-        text,
+      child: MetaLine(
+        parts,
         style: AppText.caption.copyWith(
           fontFeatures: const [FontFeature.tabularFigures()],
         ),

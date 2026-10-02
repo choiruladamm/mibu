@@ -10,6 +10,8 @@ import 'package:mibu/ui/core/theme.dart';
 import 'package:mibu/ui/features/add_entry/views/add_entry_view.dart';
 import 'package:mibu/ui/features/pockets/views/pockets_view.dart';
 
+import '../../../meta.dart';
+
 void main() {
   final now = DateTime(2026, 10, 14, 14, 50);
 
@@ -117,7 +119,7 @@ void main() {
     await settle(tester);
     expect(find.text('edit'), findsOneWidget);
     expect(find.text('dari: buat apa aja'), findsOneWidget);
-    expect(find.text('2 catatan · Rp900K tahun ini'), findsOneWidget);
+    expect(findMeta(['2 catatan', 'Rp900K tahun ini']), findsOneWidget);
     expect(find.text('1.000.000'), findsOneWidget); // anabul's limit
 
     await tester.tap(find.text('pemasukan'));

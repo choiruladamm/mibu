@@ -11,6 +11,8 @@ import 'package:mibu/ui/core/widgets/month_menu.dart';
 import 'package:mibu/ui/features/transactions/view_models/transactions_view_model.dart';
 import 'package:mibu/ui/features/transactions/views/transactions_view.dart';
 
+import '../../../meta.dart';
+
 void main() {
   testWidgets('04.1: month tiles, day groups, filter, month switch', (
     tester,
@@ -54,8 +56,8 @@ void main() {
     expect(find.text('7 catatan'), findsNWidgets(2)); // header + filter row
     expect(find.text('Rp0'), findsOneWidget); // no income yet
     expect(find.text('-Rp4,06jt'), findsNWidgets(2)); // pengeluaran, selisih
-    expect(find.text('hari ini · rab 14 okt'), findsOneWidget);
-    expect(find.text('kemarin · sel 13 okt'), findsOneWidget);
+    expect(findMeta(['hari ini', 'rab 14 okt']), findsOneWidget);
+    expect(findMeta(['kemarin', 'sel 13 okt']), findsOneWidget);
     expect(find.text('-Rp1,02jt'), findsOneWidget); // 13 okt total
     expect(find.bySemanticsLabel('november belum kejadian'), findsOneWidget);
 

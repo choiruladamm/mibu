@@ -19,6 +19,7 @@ import '../../../core/widgets/confirm_modal.dart';
 import '../../../core/widgets/nav_header.dart';
 import '../../../core/widgets/note_sheet.dart';
 import '../../../core/widgets/toast.dart';
+import '../../../core/widgets/meta_line.dart';
 
 final transactionProvider = StreamProvider.autoDispose
     .family<Transaction?, String>(
@@ -356,10 +357,8 @@ class _Receipt extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              Text(
-                (t.amount < 0 ? l.receiptPaid : l.receiptReceived)(
-                  '${dayLabel(t.at)} · ${_time.format(t.at)}',
-                ),
+              MetaLine(
+                [_headerDay.format(t.at).toLowerCase(), _time.format(t.at)],
                 textAlign: TextAlign.center,
                 style: muted.copyWith(fontSize: 14),
               ),

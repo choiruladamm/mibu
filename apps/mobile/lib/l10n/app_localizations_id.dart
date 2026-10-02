@@ -46,7 +46,10 @@ class AppLocalizationsId extends AppLocalizations {
   String get onboardingStart => 'mulai sekarang';
 
   @override
-  String get onboardingFooter => 'masuk pakai google / apple · tanpa password';
+  String get onboardingFooter => 'masuk pakai google / apple';
+
+  @override
+  String get onboardingNoPassword => 'tanpa password';
 
   @override
   String onboardingCounter(int step) {
@@ -98,7 +101,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get search => 'cari';
 
   @override
-  String get seeAll => 'lihat semua';
+  String get seeAll => 'liat semua';
 
   @override
   String get today => 'hari ini';
@@ -121,7 +124,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get homeRecent => 'baru aja';
 
   @override
-  String get homePockets => 'kantong · paling kepake duluan';
+  String get homePockets => 'kantong';
 
   @override
   String homeTodayTotal(String total) {
@@ -370,16 +373,13 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String pocketsSpentOf(String spent, String limit) {
-    return '$spent dari $limit kepake · ';
+    return '$spent dari $limit kepake';
   }
 
   @override
   String pocketsCount(int n) {
     return '$n pakai limit';
   }
-
-  @override
-  String get pocketsOrder => ' · urut dari yang paling kepake';
 
   @override
   String get pocketsSwipe => 'geser';
@@ -398,13 +398,13 @@ class AppLocalizationsId extends AppLocalizations {
   String get pocketsFirstButton => 'pasang limit';
 
   @override
-  String get pocketsFreeTitle => 'belum ada limit · ';
+  String get pocketsFreeTitle => 'belum ada limit';
+
+  @override
+  String get pocketsNoLimit => 'belum ada limit';
 
   @override
   String get pocketsFreeSuffix => ' bulan ini';
-
-  @override
-  String get pocketsFreeManage => 'semua';
 
   @override
   String pocketsFreeChip(String name) {
@@ -501,18 +501,38 @@ class AppLocalizationsId extends AppLocalizations {
   String get setLimitTitle => 'pasang limit ke…';
 
   @override
-  String get setLimitHint =>
-      'yang belum pakai limit, urut dari paling kepake bulan ini. catatan bulan ini langsung keitung.';
+  String get setLimitHintOrder => 'urut paling kepake';
 
   @override
-  String setLimitMeta(int n, String amount) {
+  String get setLimitHintCounts => 'catatan lama langsung keitung';
+
+  @override
+  String setLimitCount(int n) {
     String _temp0 = intl.Intl.pluralLogic(
       n,
       locale: localeName,
-      other: '$n catatan · $amount udah kepake bulan ini',
-      zero: 'belum dipakai bulan ini',
+      other: '$n catatan',
+      zero: 'belum kepake',
     );
     return '$_temp0';
+  }
+
+  @override
+  String setLimitSpent(String amount) {
+    return '$amount udah kepake bulan ini';
+  }
+
+  @override
+  String get setLimitUnused => 'belum kepake bulan ini';
+
+  @override
+  String setLimitFilled(int pct) {
+    return 'keisi $pct%';
+  }
+
+  @override
+  String setLimitLeft(String amount) {
+    return 'sisa jatah $amount';
   }
 
   @override
@@ -530,11 +550,6 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get setLimitBack => 'ganti';
-
-  @override
-  String setLimitFill(int pct, String amount) {
-    return 'toples langsung keisi $pct% · sisa jatah $amount';
-  }
 
   @override
   String setLimitSave(String amount) {
@@ -705,8 +720,8 @@ class AppLocalizationsId extends AppLocalizations {
   String get categoryFallbackName => 'baru';
 
   @override
-  String categoryUsage(int count, String amount) {
-    return '$count catatan · $amount tahun ini';
+  String categoryUsageYear(String amount) {
+    return '$amount tahun ini';
   }
 
   @override
@@ -794,8 +809,8 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
-  String deleteUsage(int count, String amount) {
-    return '$count catatan · $amount pakai kategori ini';
+  String deleteUsageIn(String amount, String name) {
+    return '$amount di $name';
   }
 
   @override
@@ -896,16 +911,6 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get receiptTitle => 'struk';
-
-  @override
-  String receiptPaid(String date) {
-    return 'dibayar $date';
-  }
-
-  @override
-  String receiptReceived(String date) {
-    return 'masuk $date';
-  }
 
   @override
   String get receiptKind => 'jenis';
@@ -1061,9 +1066,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get setupDaily => 'aman jajan per hari';
 
   @override
-  String setupUntil(int days) {
-    return 'sampai gajian · $days hari lagi';
-  }
+  String get setupUntil => 'sampai gajian';
 
   @override
   String get setupNext => 'lanjut';

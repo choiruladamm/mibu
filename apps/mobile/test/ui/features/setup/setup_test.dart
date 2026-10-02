@@ -10,6 +10,8 @@ import 'package:mibu/ui/core/clock.dart';
 import 'package:mibu/ui/core/theme.dart';
 import 'package:mibu/ui/features/setup/views/setup_view.dart';
 
+import '../../../meta.dart';
+
 void main() {
   final now = DateTime(2026, 10, 14, 14, 50);
 
@@ -63,11 +65,11 @@ void main() {
     expect(find.text('2.500.000'), findsOneWidget);
     // 25th: 11 days incl. today → 2.500.000 ÷ 11
     expect(find.text('Rp227K'), findsOneWidget);
-    expect(find.text('sampai gajian · 11 hari lagi'), findsOneWidget);
+    expect(findMeta(['sampai gajian', '11 hari lagi']), findsOneWidget);
 
     await tester.tap(find.bySemanticsLabel('akhir bulan'));
     await tester.pump();
-    expect(find.text('sampai gajian · 17 hari lagi'), findsOneWidget);
+    expect(findMeta(['sampai gajian', '17 hari lagi']), findsOneWidget);
 
     await tester.enterText(find.byType(TextField), '3000000');
     await tester.pump();

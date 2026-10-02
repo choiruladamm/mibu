@@ -9,6 +9,8 @@ import 'package:mibu/ui/core/clock.dart';
 import 'package:mibu/ui/core/theme.dart';
 import 'package:mibu/ui/features/pockets/views/pockets_view.dart';
 
+import '../../../meta.dart';
+
 void main() {
   testWidgets('03.6 from 03.5: move to makan, hold, batalin, then beres', (
     tester,
@@ -76,7 +78,7 @@ void main() {
     await settle();
 
     expect(find.text('hapus anabul?'), findsOneWidget);
-    expect(find.text('2 catatan · Rp900K pakai kategori ini'), findsOneWidget);
+    expect(findMeta(['2 catatan', 'Rp900K di anabul']), findsOneWidget);
     await tester.tap(find.bySemanticsLabel('makan').last);
     await tester.pump();
 

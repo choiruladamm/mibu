@@ -17,6 +17,7 @@ import '../../categories/views/category_form_sheet.dart';
 import '../../categories/views/category_manage_sheet.dart';
 import '../view_models/pockets_view_model.dart';
 import 'set_limit_sheet.dart';
+import '../../../core/widgets/meta_line.dart';
 
 /// 02.2 kantong. Isi ulang and impian are post-MVP.
 class PocketsView extends ConsumerStatefulWidget {
@@ -246,11 +247,15 @@ class _BudgetLine extends StatelessWidget {
                 Flexible(
                   child: Text.rich(
                     TextSpan(
-                      text: l.pocketsSpentOf(
-                        rupiahCompact(state.spent),
-                        rupiahCompact(state.limit),
-                      ),
-                      children: [
+                      children: MetaLine.join([
+                        TextSpan(
+                          text: state.pockets.isEmpty
+                              ? l.pocketsNoLimit
+                              : l.pocketsSpentOf(
+                                  rupiahCompact(state.spent),
+                                  rupiahCompact(state.limit),
+                                ),
+                        ),
                         TextSpan(
                           text: budget == null
                               ? l.pocketsSetBudget
@@ -266,7 +271,7 @@ class _BudgetLine extends StatelessWidget {
                             decorationColor: AppColors.ink,
                           ),
                         ),
-                      ],
+                      ]),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -437,10 +442,7 @@ class _JarsState extends State<_Jars> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
-    final small = AppText.caption.copyWith(
-      fontSize: 12,
-      color: AppColors.muted,
-    );
+    final small = AppText.caption.copyWith(color: AppColors.muted);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -449,27 +451,13 @@ class _JarsState extends State<_Jars> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              // Section title: title left, info right, no dot.
               Flexible(
-                child: Text.rich(
-                  TextSpan(
-                    text: l.pocketsCount(widget.pockets.length),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.ink,
-                    ),
-                    children: [
-                      TextSpan(
-                        text: l.pocketsOrder,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w400,
-                          color: AppColors.muted,
-                        ),
-                      ),
-                    ],
-                  ),
+                child: Text(
+                  l.pocketsCount(widget.pockets.length),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: small,
+                  style: AppText.label.copyWith(fontWeight: FontWeight.w600),
                 ),
               ),
               if (_more)
@@ -759,29 +747,18 @@ class _FreeSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: 10,
         children: [
+          // Section title: title left, tappable info right (→ 03.3).
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
               Flexible(
-                child: Text.rich(
-                  TextSpan(
-                    text: l.pocketsFreeTitle,
-                    children: [
-                      TextSpan(
-                        text: rupiahCompact(total),
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.ink,
-                        ),
-                      ),
-                      TextSpan(text: l.pocketsFreeSuffix),
-                    ],
-                  ),
+                child: Text(
+                  l.pocketsFreeTitle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: style,
+                  style: AppText.label.copyWith(fontWeight: FontWeight.w600),
                 ),
               ),
               const SizedBox(width: 12),
@@ -793,18 +770,26 @@ class _FreeSection extends StatelessWidget {
                   child: Row(
                     spacing: 2,
                     children: [
-                      Text(
-                        l.pocketsFreeManage,
-                        style: style.copyWith(
-                          color: AppColors.ink,
-                          fontWeight: FontWeight.w500,
+                      Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: rupiahCompact(total),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.ink,
+                              ),
+                            ),
+                            TextSpan(text: l.pocketsFreeSuffix),
+                          ],
                         ),
+                        style: style,
                       ),
                       const HugeIcon(
                         icon: HugeIcons.strokeRoundedArrowRight01,
-                        size: 16,
+                        size: 14,
                         strokeWidth: AppStroke.iconOnInkSmall,
-                        color: AppColors.ink,
+                        color: AppColors.muted,
                       ),
                     ],
                   ),

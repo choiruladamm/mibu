@@ -22,6 +22,7 @@ import '../../../core/widgets/tab_bar.dart';
 import '../../../core/widgets/tx_row.dart';
 import '../../transactions/view_models/transactions_view_model.dart';
 import '../view_models/home_view_model.dart';
+import '../../../core/widgets/meta_line.dart';
 
 final _monthFull = DateFormat.MMMM('id');
 final _dayTitle = DateFormat('EEE d MMM', 'id');
@@ -87,10 +88,6 @@ class _HomeViewState extends ConsumerState<HomeView> {
     final l = AppLocalizations.of(context)!;
     final now = ref.watch(nowProvider);
     final caption = AppText.caption.copyWith(color: AppColors.muted);
-    final link = AppText.caption.copyWith(
-      decoration: TextDecoration.underline,
-      decorationColor: AppColors.ink,
-    );
     final safeTop = MediaQuery.paddingOf(context).top;
     final top = math.max(safeTop, AppSpace.contentTop);
     final stickyTop = math.max(safeTop, AppSpace.contentTop - 4);
@@ -170,17 +167,31 @@ class _HomeViewState extends ConsumerState<HomeView> {
                       crossAxisAlignment: CrossAxisAlignment.baseline,
                       textBaseline: TextBaseline.alphabetic,
                       children: [
+                        // Section title: title left, info right, no dot.
                         Flexible(
                           child: Text(
                             l.homePockets,
-                            style: caption,
+                            style: AppText.label.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         const SizedBox(width: 12),
                         GestureDetector(
                           onTap: () => goTab(context, AppTab.pockets),
-                          child: Text(l.seeAll, style: link),
+                          child: Row(
+                            spacing: 2,
+                            children: [
+                              Text(l.seeAll, style: caption),
+                              const HugeIcon(
+                                icon: HugeIcons.strokeRoundedArrowRight01,
+                                size: 14,
+                                strokeWidth: AppStroke.iconOnInkSmall,
+                                color: AppColors.muted,
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -463,17 +474,15 @@ class _Hero extends StatelessWidget {
             ),
           ),
           Flexible(
-            child: Text.rich(
-              overflow: TextOverflow.ellipsis,
-              TextSpan(
-                text: '${chip.text} · ',
-                children: [
-                  TextSpan(
-                    text: chip.value,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                ],
-              ),
+            child: MetaLine.rich(
+              [
+                TextSpan(text: chip.text),
+                TextSpan(
+                  text: chip.value,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ],
+              onInk: true,
               style: AppText.label.copyWith(
                 fontSize: 14,
                 color: AppColors.paper,
@@ -724,9 +733,9 @@ class _DayHeader extends StatelessWidget {
     final l = AppLocalizations.of(context)!;
     final date = _dayTitle.format(group.day).toLowerCase();
     final title = switch (daysBetween(today, group.day)) {
-      0 => '${l.today} · $date',
-      -1 => '${l.yesterday} · $date',
-      _ => date,
+      0 => [l.today, date],
+      -1 => [l.yesterday, date],
+      _ => [date],
     };
     final style = AppText.caption.copyWith(
       fontSize: 12,
@@ -753,9 +762,7 @@ class _DayHeader extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Flexible(
-              child: Text(title, overflow: TextOverflow.ellipsis, style: style),
-            ),
+            Flexible(child: MetaLine(title, style: style)),
             if (group.rows.isNotEmpty)
               Text(rupiahSigned(group.total), style: style),
           ],
@@ -1007,7 +1014,7 @@ class _BalanceChartState extends State<_BalanceChart>
       if (sel == now) l.today,
       if (sel > now) l.prediction,
       _monthShort.format(months[sel].month).toLowerCase(),
-    ].join(' · ');
+    ];
     final pillVal =
         '${sel > now ? '± ' : ''}${rupiahCompact(months[sel].amount)}';
 
@@ -1098,8 +1105,9 @@ class _BalanceChartState extends State<_BalanceChart>
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
+                          MetaLine(
                             pillTop,
+                            tight: true,
                             style: AppText.micro.copyWith(
                               color: AppColors.muted,
                             ),

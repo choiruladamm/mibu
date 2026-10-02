@@ -3,6 +3,7 @@ import 'package:hugeicons/hugeicons.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../tokens.dart';
+import 'meta_line.dart';
 
 const _undoWindow = Duration(seconds: 5);
 
@@ -129,10 +130,10 @@ class _Toast extends StatelessWidget {
                           color: AppColors.onInk,
                         ),
                       ),
-                      Text(
-                        sub,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      // " · " in [sub] marks MetaLine parts (dots on ink).
+                      MetaLine(
+                        sub.split(' · '),
+                        onInk: true,
                         style: AppText.caption.copyWith(
                           color: AppColors.onInkMuted,
                         ),

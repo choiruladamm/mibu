@@ -14,6 +14,7 @@ import '../../../core/widgets/month_menu.dart';
 import '../../../core/widgets/nav_header.dart';
 import '../../../core/widgets/tx_row.dart';
 import '../view_models/transactions_view_model.dart';
+import '../../../core/widgets/meta_line.dart';
 
 final _monthName = DateFormat('MMMM', 'id');
 final _monthShort = DateFormat('MMM', 'id');
@@ -591,13 +592,13 @@ class _DayGroup extends StatelessWidget {
     final l = AppLocalizations.of(context)!;
     final date = _dayTitle.format(group.day).toLowerCase();
     final title = switch (daysBetween(today, group.day)) {
-      0 => '${l.today} · $date',
-      -1 => '${l.yesterday} · $date',
-      _ => date,
+      0 => [l.today, date],
+      -1 => [l.yesterday, date],
+      _ => [date],
     };
     return Semantics(
       container: true,
-      label: title,
+      label: title.join(', '),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -615,9 +616,8 @@ class _DayGroup extends StatelessWidget {
               spacing: 12,
               children: [
                 Expanded(
-                  child: Text(
+                  child: MetaLine(
                     title,
-                    overflow: TextOverflow.ellipsis,
                     style: AppText.caption.copyWith(
                       fontWeight: FontWeight.w600,
                     ),

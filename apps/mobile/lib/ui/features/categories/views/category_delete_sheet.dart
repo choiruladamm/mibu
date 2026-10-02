@@ -9,6 +9,7 @@ import '../../../core/money.dart';
 import '../../../core/tokens.dart';
 import '../../../core/widgets/sheet.dart';
 import '../view_models/categories_view_model.dart';
+import '../../../core/widgets/meta_line.dart';
 
 /// 03.6 hapus kategori. True when it ended deleted (beres or dismissed
 /// after the delete); false when cancelled or undone.
@@ -122,11 +123,14 @@ class _CategoryDeleteSheetState extends ConsumerState<CategoryDeleteSheet>
                               emoji: _c.emoji,
                               title: l.deleteTitle(_c.name),
                               sub: count == 0
-                                  ? l.deleteUnused
-                                  : l.deleteUsage(
-                                      count,
-                                      rupiahCompact(usage!.spentThisYear),
-                                    ),
+                                  ? [l.deleteUnused]
+                                  : [
+                                      l.manageUses(count),
+                                      l.deleteUsageIn(
+                                        rupiahCompact(usage!.spentThisYear),
+                                        _c.name,
+                                      ),
+                                    ],
                             ),
                             if (count > 0) ...[
                               const SizedBox(height: 22),
@@ -217,7 +221,8 @@ class _CategoryDeleteSheetState extends ConsumerState<CategoryDeleteSheet>
 class _Header extends StatelessWidget {
   const _Header({required this.emoji, required this.title, required this.sub});
 
-  final String emoji, title, sub;
+  final String emoji, title;
+  final List<String> sub; // MetaLine parts
 
   @override
   Widget build(BuildContext context) {
@@ -275,7 +280,7 @@ class _Header extends StatelessWidget {
                   style: AppText.headline.copyWith(fontWeight: FontWeight.w600),
                 ),
               ),
-              Text(
+              MetaLine(
                 sub,
                 style: AppText.label.copyWith(
                   fontSize: 14,

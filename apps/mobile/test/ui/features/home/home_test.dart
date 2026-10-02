@@ -77,14 +77,15 @@ void main() {
     // (4.530.000 + 27.000) ÷ 11 days to payday − 27.000
     expect(find.textContaining('Rp387K', findRichText: true), findsOneWidget);
 
-    expect(find.text('kantong · paling kepake duluan'), findsOneWidget);
+    expect(find.text('kantong'), findsOneWidget);
+    expect(find.text('liat semua'), findsOneWidget);
     expect(find.text('🐶 90%'), findsOneWidget);
     expect(find.text('☕ 60%'), findsOneWidget);
 
     expect(find.text('baru aja'), findsOneWidget);
     expect(find.text('-Rp27K hari ini'), findsOneWidget);
-    expect(find.text('hari ini · rab 14 okt'), findsOneWidget);
-    expect(find.text('kemarin · sel 13 okt'), findsOneWidget);
+    expect(findMeta(['hari ini', 'rab 14 okt']), findsOneWidget);
+    expect(findMeta(['kemarin', 'sel 13 okt']), findsOneWidget);
     expect(find.text('sen 12 okt'), findsOneWidget);
     expect(find.text('-Rp1,02jt'), findsOneWidget); // kemarin: 3 entries
     expect(findMeta(['gojek', '11.05']), findsOneWidget);
@@ -102,7 +103,7 @@ void main() {
     await tester.tap(find.text('nov'));
     await tester.pumpAndSettle();
 
-    expect(find.text('prediksi · nov'), findsOneWidget);
+    expect(findMeta(['prediksi', 'nov']), findsOneWidget);
     expect(find.text('± Rp6,39jt'), findsOneWidget);
     expect(find.text('november'), findsOneWidget);
     expect(find.text('saldo kamu'), findsOneWidget);
@@ -120,15 +121,12 @@ void main() {
     expect(find.text('saldo akhir september'), findsOneWidget);
     expect(find.text('8.589.000'), findsOneWidget);
     // budget Rp8jt − Rp2.612.500 spent
-    expect(
-      find.textContaining('sisa akhir bulan · Rp5,39jt', findRichText: true),
-      findsOneWidget,
-    );
+    expect(findMeta(['sisa akhir bulan', 'Rp5,39jt']), findsOneWidget);
     expect(find.text('terakhir di september'), findsOneWidget);
     expect(find.text('liat semua di september (2)'), findsOneWidget);
     expect(find.text('🐶 0%'), findsOneWidget); // no anabul that month
     expect(find.text('hari ini'), findsNothing);
-    expect(find.textContaining('hari ini ·'), findsNothing);
+    expect(findMeta(['hari ini', 'okt']), findsNothing);
   });
 
   testWidgets('beranda: month menu follows data, locks the future', (
@@ -196,7 +194,7 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('baru aja'), findsNothing);
-    expect(find.textContaining('liat semua'), findsNothing);
+    expect(find.textContaining('liat semua '), findsNothing);
   });
 
   testWidgets('beranda: today empty keeps the group with a thin catat row', (
@@ -208,10 +206,10 @@ void main() {
         .write(TransactionsCompanion(deletedAt: Value(now)));
     await pump(tester, db);
 
-    expect(find.text('hari ini · rab 14 okt'), findsOneWidget);
+    expect(findMeta(['hari ini', 'rab 14 okt']), findsOneWidget);
     expect(find.text('belum ada catatan hari ini'), findsOneWidget);
     expect(find.text('Rp0 hari ini'), findsOneWidget);
-    expect(find.text('kemarin · sel 13 okt'), findsOneWidget);
+    expect(findMeta(['kemarin', 'sel 13 okt']), findsOneWidget);
     expect(find.text('belum ada catatan'), findsNothing); // not the big card
   });
 
@@ -230,7 +228,7 @@ void main() {
     expect(find.text('saldo akhir juni'), findsOneWidget);
     expect(find.text('terakhir di juni'), findsOneWidget);
     expect(find.text('belum ada catatan di juni'), findsOneWidget);
-    expect(find.textContaining('liat semua'), findsNothing);
+    expect(find.textContaining('liat semua '), findsNothing);
   });
 
   // Regression: a failing query (e.g. stale dev DB missing a table) used to
