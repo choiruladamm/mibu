@@ -184,11 +184,19 @@ class _HomeViewState extends ConsumerState<HomeView> {
                       ],
                     ),
                   ),
-                  if (s.pockets.isNotEmpty) ...[
-                    const SizedBox(height: 10),
-                    _PocketPills(pockets: s.pockets),
-                  ],
-                  if (s.noEntries) const _NoEntries() else _Recent(state: s),
+                  _Swap(
+                    id: s.month,
+                    child: s.pockets.isEmpty
+                        ? const SizedBox.shrink()
+                        : Padding(
+                            padding: const EdgeInsets.only(top: 10),
+                            child: _PocketPills(pockets: s.pockets),
+                          ),
+                  ),
+                  _Swap(
+                    id: (s.month, s.noEntries),
+                    child: s.noEntries ? const _NoEntries() : _Recent(state: s),
+                  ),
                 ],
               ),
             ),
@@ -371,12 +379,14 @@ class _Hero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final digits = rupiah(balance).replaceFirst('Rp', '');
     return Column(
       children: [
-        Text(
-          label,
-          style: AppText.label.copyWith(fontSize: 14, color: AppColors.muted),
+        _Swap(
+          id: label,
+          child: Text(
+            label,
+            style: AppText.label.copyWith(fontSize: 14, color: AppColors.muted),
+          ),
         ),
         const SizedBox(height: 6),
         // Long balances shrink instead of overflowing.
@@ -397,63 +407,111 @@ class _Hero extends StatelessWidget {
                   ),
                 ),
               ),
-              Text(digits, style: AppText.display.copyWith(height: 1)),
+              // Counts from the old balance to the new one.
+              TweenAnimationBuilder(
+                tween: IntTween(end: balance),
+                duration: AppMotion.fill,
+                curve: AppMotion.ease,
+                builder: (context, v, _) => Text(
+                  rupiah(v).replaceFirst('Rp', ''),
+                  style: AppText.display.copyWith(height: 1),
+                ),
+              ),
             ],
           ),
         ),
-        if (chip case final chip?) ...[
-          const SizedBox(height: 14),
+        _Swap(
+          id: chip?.text,
+          child: switch (chip) {
+            final c? => _chipPill(c),
+            null => const SizedBox.shrink(),
+          },
+        ),
+      ],
+    );
+  }
+
+  static Widget _chipPill(_ChipData chip) => Padding(
+    padding: const EdgeInsets.only(top: 14),
+    child: Container(
+      height: 34,
+      padding: const EdgeInsets.only(left: 6, right: 14),
+      decoration: BoxDecoration(
+        color: AppColors.ink,
+        borderRadius: BorderRadius.circular(AppRadius.pill),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 8,
+        children: [
           Container(
-            height: 34,
-            padding: const EdgeInsets.only(left: 6, right: 14),
-            decoration: BoxDecoration(
-              color: AppColors.ink,
-              borderRadius: BorderRadius.circular(AppRadius.pill),
+            alignment: Alignment.center,
+            width: 24,
+            height: 24,
+            decoration: const BoxDecoration(
+              color: AppColors.paper,
+              shape: BoxShape.circle,
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              spacing: 8,
-              children: [
-                Container(
-                  alignment: Alignment.center,
-                  width: 24,
-                  height: 24,
-                  decoration: const BoxDecoration(
-                    color: AppColors.paper,
-                    shape: BoxShape.circle,
+            child: HugeIcon(
+              icon: chip.alert
+                  ? HugeIcons.strokeRoundedAlert02
+                  : HugeIcons.strokeRoundedTick02,
+              size: 14,
+              strokeWidth: AppStroke.iconOnInkSmall,
+              color: AppColors.ink,
+            ),
+          ),
+          Flexible(
+            child: Text.rich(
+              overflow: TextOverflow.ellipsis,
+              TextSpan(
+                text: '${chip.text} · ',
+                children: [
+                  TextSpan(
+                    text: chip.value,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
-                  child: HugeIcon(
-                    icon: chip.alert
-                        ? HugeIcons.strokeRoundedAlert02
-                        : HugeIcons.strokeRoundedTick02,
-                    size: 14,
-                    strokeWidth: AppStroke.iconOnInkSmall,
-                    color: AppColors.ink,
-                  ),
-                ),
-                Flexible(
-                  child: Text.rich(
-                    overflow: TextOverflow.ellipsis,
-                    TextSpan(
-                      text: '${chip.text} · ',
-                      children: [
-                        TextSpan(
-                          text: chip.value,
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                      ],
-                    ),
-                    style: AppText.label.copyWith(
-                      fontSize: 14,
-                      color: AppColors.paper,
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
+              style: AppText.label.copyWith(
+                fontSize: 14,
+                color: AppColors.paper,
+              ),
             ),
           ),
         ],
-      ],
+      ),
+    ),
+  );
+}
+
+/// Content that fades to its replacement when [id] changes while the height
+/// follows the new child, so swapping months doesn't jump.
+class _Swap extends StatelessWidget {
+  const _Swap({required this.id, required this.child});
+
+  final Object? id;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSize(
+      duration: AppMotion.select,
+      curve: AppMotion.ease,
+      alignment: Alignment.topCenter,
+      child: AnimatedSwitcher(
+        duration: AppMotion.select,
+        // Only the new child sets the height; the old one fades out on top.
+        layoutBuilder: (current, previous) => Stack(
+          alignment: Alignment.topCenter,
+          children: [
+            for (final p in previous)
+              Positioned(top: 0, left: 0, right: 0, child: p),
+            ?current,
+          ],
+        ),
+        child: KeyedSubtree(key: ValueKey(id), child: child),
+      ),
     );
   }
 }
