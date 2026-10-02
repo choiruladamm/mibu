@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 
 import '../../../../data/repositories/finance_repository.dart';
+import '../../../../domain/emoji_search.dart';
 import '../../../../domain/models/finance.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../core/clock.dart';
@@ -63,7 +64,7 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
   Category? get _edit => widget.category;
 
   late final _name = TextEditingController(text: _edit?.name ?? widget.name);
-  late String _emoji = _edit?.emoji ?? emojiIdeas(widget.name).first;
+  late String _emoji = _edit?.emoji ?? suggestEmoji(widget.name).first;
   late bool _locked = _edit != null; // emoji follows the name until picked
   bool get _fromPocket =>
       _edit == null && widget.origin == CategoryOrigin.kantong;
@@ -216,7 +217,7 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
                         hint: l.categoryNameHint,
                         label: l.categoryNameLabel,
                         onChanged: (v) => setState(() {
-                          if (!_locked) _emoji = emojiIdeas(v).first;
+                          if (!_locked) _emoji = suggestEmoji(v).first;
                         }),
                       ),
                       const SizedBox(height: 16),
@@ -234,7 +235,7 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
                               ),
                             ),
                           ),
-                          for (final e in emojiIdeas(name))
+                          for (final e in suggestEmoji(name))
                             Padding(
                               padding: const EdgeInsets.only(left: 8),
                               child: _EmojiButton(

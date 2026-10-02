@@ -135,36 +135,6 @@ int daysLeftInMonth(DateTime now) =>
   );
 }
 
-const _emojiIdeas = {
-  'gym': ['🏋️', '🧘', '🏃'],
-  'makan': ['🍜', '🍛', '🍲'],
-  'mie': ['🍜', '🥢', '🍲'],
-  'kos': ['🏠', '🔑', '🏢'],
-  'sewa': ['🏠', '🔑', '🏢'],
-  'kado': ['🎁', '💐', '🎀'],
-  'buku': ['📚', '📖', '✏️'],
-  'game': ['🎮', '🕹️', '🎲'],
-  'musik': ['🎧', '🎸', '🎵'],
-  'pulsa': ['📱', '📶', '🔌'],
-  'bensin': ['⛽', '🛵', '🅿️'],
-  'motor': ['🛵', '⛽', '🔧'],
-  'kopi': ['☕', '🧋', '🥐'],
-  'anak': ['🧸', '🍼', '🎒'],
-  'kucing': ['🐱', '🐟', '🧶'],
-  'anjing': ['🐶', '🦴', '🐾'],
-  'liburan': ['✈️', '🧳', '🏝️'],
-  'skincare': ['🧴', '💆', '✨'],
-};
-
-/// 03.4 "saran": 3 emoji for a category name, by Indonesian keyword.
-List<String> emojiIdeas(String name) {
-  final n = name.trim().toLowerCase();
-  for (final MapEntry(:key, :value) in _emojiIdeas.entries) {
-    if (n.contains(key)) return value;
-  }
-  return const ['✨', '🧾', '📦'];
-}
-
 class Transaction {
   const Transaction({
     required this.id,

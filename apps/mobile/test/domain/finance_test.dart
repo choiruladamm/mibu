@@ -132,12 +132,6 @@ void main() {
     ));
   });
 
-  test('emojiIdeas matches keywords inside the name', () {
-    expect(emojiIdeas('Kopi Susu'), ['☕', '🧋', '🥐']);
-    expect(emojiIdeas('makan siang').first, '🍜');
-    expect(emojiIdeas('zakat'), ['✨', '🧾', '📦']);
-  });
-
   test('budgetPrefill rounds Σ limits up to Rp500K', () {
     expect(budgetPrefill(7400000), 7500000);
     expect(budgetPrefill(7500000), 7500000);
