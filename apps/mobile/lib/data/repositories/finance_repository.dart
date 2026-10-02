@@ -45,6 +45,9 @@ class FinanceRepository {
                     monthlyBudget: r.monthlyBudget,
                     hideAmounts: r.hideAmounts,
                     onboarded: r.onboardedAt != null,
+                    recentSearches: r.recentSearches.isEmpty
+                        ? const []
+                        : r.recentSearches.split('\n'),
                   ),
           );
 
@@ -245,6 +248,11 @@ class FinanceRepository {
         _tx.at.isSmallerThanValue(DateTime(month.year, month.month + 1)),
   ).watch().map((rows) => rows.map(_transaction).toList());
 
+  /// 04.2 cari di semua bulan: every live entry, newest first.
+  Stream<List<Transaction>> watchAll() => _joined(
+    _tx.deletedAt.isNull(),
+  ).watch().map((rows) => rows.map(_transaction).toList());
+
   /// Ekspor CSV: every live entry, newest first.
   Future<List<Transaction>> allTransactions() async =>
       (await _joined(_tx.deletedAt.isNull()).get()).map(_transaction).toList();
@@ -423,6 +431,15 @@ class FinanceRepository {
         ),
       );
 
+  /// 04.2b terakhir dicari.
+  Future<void> setRecentSearches(List<String> recent) =>
+      (_db.update(_db.profiles)..where((p) => p.deletedAt.isNull())).write(
+        ProfilesCompanion(
+          recentSearches: Value(recent.join('\n')),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+
   /// Per category: entries (all time) and expense this year, positive.
   /// "12 catatan · Rp840K tahun ini" in 03.3 / 03.5 / 03.6.
   Stream<Map<String, ({int count, int spentThisYear})>> watchCategoryUsage(
@@ -557,6 +574,10 @@ class FinanceRepository {
 
 final financeRepositoryProvider = Provider<FinanceRepository>(
   (ref) => FinanceRepository(ref.watch(appDatabaseProvider)),
+);
+
+final allTransactionsProvider = StreamProvider<List<Transaction>>(
+  (ref) => ref.watch(financeRepositoryProvider).watchAll(),
 );
 
 final categoriesProvider = StreamProvider<List<Category>>(

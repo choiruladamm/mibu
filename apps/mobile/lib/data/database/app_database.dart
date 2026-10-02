@@ -31,6 +31,8 @@ class Profiles extends Table with SyncColumns {
   IntColumn get monthlyBudget => integer().nullable()(); // null = not set
   BoolColumn get hideAmounts => boolean().withDefault(const Constant(false))();
   DateTimeColumn get onboardedAt => dateTime().nullable()();
+  TextColumn get recentSearches =>
+      text().withDefault(const Constant(''))(); // newline-separated, ≤ 5
 }
 
 @DataClassName('CategoryRow')

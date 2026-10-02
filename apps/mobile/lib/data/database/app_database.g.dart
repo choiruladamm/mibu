@@ -122,6 +122,18 @@ class $ProfilesTable extends Profiles
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _recentSearchesMeta = const VerificationMeta(
+    'recentSearches',
+  );
+  @override
+  late final GeneratedColumn<String> recentSearches = GeneratedColumn<String>(
+    'recent_searches',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -134,6 +146,7 @@ class $ProfilesTable extends Profiles
     monthlyBudget,
     hideAmounts,
     onboardedAt,
+    recentSearches,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -222,6 +235,15 @@ class $ProfilesTable extends Profiles
         ),
       );
     }
+    if (data.containsKey('recent_searches')) {
+      context.handle(
+        _recentSearchesMeta,
+        recentSearches.isAcceptableOrUnknown(
+          data['recent_searches']!,
+          _recentSearchesMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -271,6 +293,10 @@ class $ProfilesTable extends Profiles
         DriftSqlType.dateTime,
         data['${effectivePrefix}onboarded_at'],
       ),
+      recentSearches: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}recent_searches'],
+      )!,
     );
   }
 
@@ -291,6 +317,7 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
   final int? monthlyBudget;
   final bool hideAmounts;
   final DateTime? onboardedAt;
+  final String recentSearches;
   const ProfileRow({
     required this.id,
     required this.createdAt,
@@ -302,6 +329,7 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
     this.monthlyBudget,
     required this.hideAmounts,
     this.onboardedAt,
+    required this.recentSearches,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -322,6 +350,7 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
     if (!nullToAbsent || onboardedAt != null) {
       map['onboarded_at'] = Variable<DateTime>(onboardedAt);
     }
+    map['recent_searches'] = Variable<String>(recentSearches);
     return map;
   }
 
@@ -343,6 +372,7 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
       onboardedAt: onboardedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(onboardedAt),
+      recentSearches: Value(recentSearches),
     );
   }
 
@@ -362,6 +392,7 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
       monthlyBudget: serializer.fromJson<int?>(json['monthlyBudget']),
       hideAmounts: serializer.fromJson<bool>(json['hideAmounts']),
       onboardedAt: serializer.fromJson<DateTime?>(json['onboardedAt']),
+      recentSearches: serializer.fromJson<String>(json['recentSearches']),
     );
   }
   @override
@@ -378,6 +409,7 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
       'monthlyBudget': serializer.toJson<int?>(monthlyBudget),
       'hideAmounts': serializer.toJson<bool>(hideAmounts),
       'onboardedAt': serializer.toJson<DateTime?>(onboardedAt),
+      'recentSearches': serializer.toJson<String>(recentSearches),
     };
   }
 
@@ -392,6 +424,7 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
     Value<int?> monthlyBudget = const Value.absent(),
     bool? hideAmounts,
     Value<DateTime?> onboardedAt = const Value.absent(),
+    String? recentSearches,
   }) => ProfileRow(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
@@ -405,6 +438,7 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
         : this.monthlyBudget,
     hideAmounts: hideAmounts ?? this.hideAmounts,
     onboardedAt: onboardedAt.present ? onboardedAt.value : this.onboardedAt,
+    recentSearches: recentSearches ?? this.recentSearches,
   );
   ProfileRow copyWithCompanion(ProfilesCompanion data) {
     return ProfileRow(
@@ -426,6 +460,9 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
       onboardedAt: data.onboardedAt.present
           ? data.onboardedAt.value
           : this.onboardedAt,
+      recentSearches: data.recentSearches.present
+          ? data.recentSearches.value
+          : this.recentSearches,
     );
   }
 
@@ -441,7 +478,8 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
           ..write('payday: $payday, ')
           ..write('monthlyBudget: $monthlyBudget, ')
           ..write('hideAmounts: $hideAmounts, ')
-          ..write('onboardedAt: $onboardedAt')
+          ..write('onboardedAt: $onboardedAt, ')
+          ..write('recentSearches: $recentSearches')
           ..write(')'))
         .toString();
   }
@@ -458,6 +496,7 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
     monthlyBudget,
     hideAmounts,
     onboardedAt,
+    recentSearches,
   );
   @override
   bool operator ==(Object other) =>
@@ -472,7 +511,8 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
           other.payday == this.payday &&
           other.monthlyBudget == this.monthlyBudget &&
           other.hideAmounts == this.hideAmounts &&
-          other.onboardedAt == this.onboardedAt);
+          other.onboardedAt == this.onboardedAt &&
+          other.recentSearches == this.recentSearches);
 }
 
 class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
@@ -486,6 +526,7 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
   final Value<int?> monthlyBudget;
   final Value<bool> hideAmounts;
   final Value<DateTime?> onboardedAt;
+  final Value<String> recentSearches;
   final Value<int> rowid;
   const ProfilesCompanion({
     this.id = const Value.absent(),
@@ -498,6 +539,7 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
     this.monthlyBudget = const Value.absent(),
     this.hideAmounts = const Value.absent(),
     this.onboardedAt = const Value.absent(),
+    this.recentSearches = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ProfilesCompanion.insert({
@@ -511,6 +553,7 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
     this.monthlyBudget = const Value.absent(),
     this.hideAmounts = const Value.absent(),
     this.onboardedAt = const Value.absent(),
+    this.recentSearches = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : openingBalance = Value(openingBalance),
        openingAt = Value(openingAt),
@@ -526,6 +569,7 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
     Expression<int>? monthlyBudget,
     Expression<bool>? hideAmounts,
     Expression<DateTime>? onboardedAt,
+    Expression<String>? recentSearches,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -539,6 +583,7 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
       if (monthlyBudget != null) 'monthly_budget': monthlyBudget,
       if (hideAmounts != null) 'hide_amounts': hideAmounts,
       if (onboardedAt != null) 'onboarded_at': onboardedAt,
+      if (recentSearches != null) 'recent_searches': recentSearches,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -554,6 +599,7 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
     Value<int?>? monthlyBudget,
     Value<bool>? hideAmounts,
     Value<DateTime?>? onboardedAt,
+    Value<String>? recentSearches,
     Value<int>? rowid,
   }) {
     return ProfilesCompanion(
@@ -567,6 +613,7 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
       monthlyBudget: monthlyBudget ?? this.monthlyBudget,
       hideAmounts: hideAmounts ?? this.hideAmounts,
       onboardedAt: onboardedAt ?? this.onboardedAt,
+      recentSearches: recentSearches ?? this.recentSearches,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -604,6 +651,9 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
     if (onboardedAt.present) {
       map['onboarded_at'] = Variable<DateTime>(onboardedAt.value);
     }
+    if (recentSearches.present) {
+      map['recent_searches'] = Variable<String>(recentSearches.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -623,6 +673,7 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
           ..write('monthlyBudget: $monthlyBudget, ')
           ..write('hideAmounts: $hideAmounts, ')
           ..write('onboardedAt: $onboardedAt, ')
+          ..write('recentSearches: $recentSearches, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1817,6 +1868,7 @@ typedef $$ProfilesTableCreateCompanionBuilder = ProfilesCompanion Function({
   Value<int?> monthlyBudget,
   Value<bool> hideAmounts,
   Value<DateTime?> onboardedAt,
+  Value<String> recentSearches,
   Value<int> rowid,
 });
 typedef $$ProfilesTableUpdateCompanionBuilder = ProfilesCompanion Function({
@@ -1830,6 +1882,7 @@ typedef $$ProfilesTableUpdateCompanionBuilder = ProfilesCompanion Function({
   Value<int?> monthlyBudget,
   Value<bool> hideAmounts,
   Value<DateTime?> onboardedAt,
+  Value<String> recentSearches,
   Value<int> rowid,
 });
 
@@ -1889,6 +1942,11 @@ class $$ProfilesTableFilterComposer
 
   ColumnFilters<DateTime> get onboardedAt => $composableBuilder(
     column: $table.onboardedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get recentSearches => $composableBuilder(
+    column: $table.recentSearches,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1951,6 +2009,11 @@ class $$ProfilesTableOrderingComposer
     column: $table.onboardedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get recentSearches => $composableBuilder(
+    column: $table.recentSearches,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ProfilesTableAnnotationComposer
@@ -1999,6 +2062,11 @@ class $$ProfilesTableAnnotationComposer
     column: $table.onboardedAt,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get recentSearches => $composableBuilder(
+    column: $table.recentSearches,
+    builder: (column) => column,
+  );
 }
 
 class $$ProfilesTableTableManager
@@ -2042,6 +2110,7 @@ class $$ProfilesTableTableManager
                 Value<int?> monthlyBudget = const Value.absent(),
                 Value<bool> hideAmounts = const Value.absent(),
                 Value<DateTime?> onboardedAt = const Value.absent(),
+                Value<String> recentSearches = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ProfilesCompanion(
                 id: id,
@@ -2054,6 +2123,7 @@ class $$ProfilesTableTableManager
                 monthlyBudget: monthlyBudget,
                 hideAmounts: hideAmounts,
                 onboardedAt: onboardedAt,
+                recentSearches: recentSearches,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2068,6 +2138,7 @@ class $$ProfilesTableTableManager
                 Value<int?> monthlyBudget = const Value.absent(),
                 Value<bool> hideAmounts = const Value.absent(),
                 Value<DateTime?> onboardedAt = const Value.absent(),
+                Value<String> recentSearches = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ProfilesCompanion.insert(
                 id: id,
@@ -2080,6 +2151,7 @@ class $$ProfilesTableTableManager
                 monthlyBudget: monthlyBudget,
                 hideAmounts: hideAmounts,
                 onboardedAt: onboardedAt,
+                recentSearches: recentSearches,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

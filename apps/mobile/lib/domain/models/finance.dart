@@ -39,6 +39,7 @@ class Profile {
     this.monthlyBudget,
     this.hideAmounts = false,
     this.onboarded = false,
+    this.recentSearches = const [],
   });
 
   /// Before 01.4 atur awal has run.
@@ -54,6 +55,7 @@ class Profile {
   final int? monthlyBudget; // budget bulanan, set by the user; null = not set
   final bool hideAmounts;
   final bool onboarded; // 01.4 atur awal done (or skipped with "nanti aja")
+  final List<String> recentSearches; // 04.2b terakhir dicari, newest first
 }
 
 /// 01.4b kantong pertama: presets with the board's monthly limits.
