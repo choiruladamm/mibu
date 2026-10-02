@@ -19,6 +19,9 @@ import '../ui/features/transactions/views/edit_entry_view.dart';
 import '../ui/features/transactions/views/transaction_detail_view.dart';
 import '../ui/features/transactions/views/transactions_view.dart';
 
+/// How /catat opens when it isn't blank.
+enum AddEntryStart { salary }
+
 abstract final class Routes {
   static const onboarding = '/onboarding';
   static const setup = '/atur-awal';
@@ -133,8 +136,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: Routes.addEntry,
-        // extra: an entry to "catat lagi" from (04.3).
-        builder: (_, state) => AddEntryView(again: state.extra as Transaction?),
+        // extra: an entry to "catat lagi" from (04.3), or
+        // [AddEntryStart.salary] from the beranda chip.
+        builder: (_, state) => AddEntryView(
+          again: state.extra is Transaction ? state.extra as Transaction : null,
+          salary: state.extra == AddEntryStart.salary,
+        ),
       ),
       GoRoute(
         path: Routes.transactions,

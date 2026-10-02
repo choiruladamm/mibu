@@ -476,6 +476,25 @@ class FinanceRepository {
     );
   }
 
+  /// Amount of the newest live gajian income (null = never logged), the
+  /// starting suggestion when logging the next one.
+  Future<int?> lastSalary() async {
+    final c = _db.categories;
+    final row =
+        await (_db.select(_tx).join([
+                innerJoin(c, c.id.equalsExp(_tx.categoryId)),
+              ])
+              ..where(
+                _tx.deletedAt.isNull() &
+                    _tx.amount.isBiggerThanValue(0) &
+                    c.isPayday.equals(true),
+              )
+              ..orderBy([OrderingTerm.desc(_tx.at)])
+              ..limit(1))
+            .getSingleOrNull();
+    return row?.readTable(_tx).amount;
+  }
+
   /// Dates of live gajian income (payday categories), newest first.
   Stream<List<DateTime>> watchSalaryDates() {
     final c = _db.categories;

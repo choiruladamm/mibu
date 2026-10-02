@@ -690,6 +690,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get keySave => 'simpan';
 
   @override
+  String get amountSuggested => 'kayak gaji terakhir, ketik buat ganti';
+
+  @override
   String get amountTypeHint => 'ketik nominal';
 
   @override

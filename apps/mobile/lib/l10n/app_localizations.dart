@@ -1162,6 +1162,12 @@ abstract class AppLocalizations {
   /// **'simpan'**
   String get keySave;
 
+  /// No description provided for @amountSuggested.
+  ///
+  /// In id, this message translates to:
+  /// **'kayak gaji terakhir, ketik buat ganti'**
+  String get amountSuggested;
+
   /// No description provided for @amountTypeHint.
   ///
   /// In id, this message translates to:

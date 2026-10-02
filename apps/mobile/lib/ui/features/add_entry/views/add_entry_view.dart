@@ -22,10 +22,13 @@ import '../../../core/widgets/app_emoji.dart';
 
 /// 03.1 catat — opened from + on every tab; pops on close / save.
 class AddEntryView extends ConsumerStatefulWidget {
-  const AddEntryView({super.key, this.again});
+  const AddEntryView({super.key, this.again, this.salary = false});
 
   /// "catat lagi" (04.3): start with this entry's kind, category and place.
   final Transaction? again;
+
+  /// "catat gajian" (02.1): a pemasukan under gajian, last salary suggested.
+  final bool salary;
 
   @override
   ConsumerState<AddEntryView> createState() => _AddEntryViewState();
@@ -43,6 +46,8 @@ class _AddEntryViewState extends ConsumerState<AddEntryView> {
     if (widget.again case final t?) {
       // Providers can't change mid-build; the push transition hides the frame.
       WidgetsBinding.instance.addPostFrameCallback((_) => _vm.again(t));
+    } else if (widget.salary) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _vm.startSalary());
     }
   }
 
@@ -152,9 +157,17 @@ class _AddEntryViewState extends ConsumerState<AddEntryView> {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        _AmountLine(_expression(s.draft)),
+                        _AmountLine(
+                          s.suggested
+                              ? l.amountSuggested
+                              : _expression(s.draft),
+                        ),
                         const SizedBox(height: 2),
-                        _Amount(total: s.amount, sign: income ? '+' : '-'),
+                        _Amount(
+                          total: s.amount,
+                          sign: income ? '+' : '-',
+                          suggested: s.suggested,
+                        ),
                         const SizedBox(height: 6),
                         _AmountLine(
                           s.amount == 0
@@ -299,10 +312,15 @@ class _AmountLine extends StatelessWidget {
 
 /// Big amount with a blinking caret; shrinks 68 → 54 → 44 as it grows.
 class _Amount extends StatefulWidget {
-  const _Amount({required this.total, required this.sign});
+  const _Amount({
+    required this.total,
+    required this.sign,
+    this.suggested = false,
+  });
 
   final int total;
   final String sign;
+  final bool suggested; // muted: a suggestion, not typed yet
 
   @override
   State<_Amount> createState() => _AmountState();
@@ -352,7 +370,11 @@ class _AmountState extends State<_Amount> with SingleTickerProviderStateMixin {
             ),
             Text(
               shown,
-              style: AppText.displayXl.copyWith(fontSize: size, height: 1),
+              style: AppText.displayXl.copyWith(
+                fontSize: size,
+                height: 1,
+                color: widget.suggested ? AppColors.grey400 : null,
+              ),
             ),
             Padding(
               padding: const EdgeInsets.only(top: 6),

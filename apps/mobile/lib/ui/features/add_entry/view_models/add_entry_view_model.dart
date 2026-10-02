@@ -16,6 +16,7 @@ class AddEntryState {
     this.category,
     this.place = '',
     this.note = (text: '', tags: const []),
+    this.suggested = false,
   });
 
   final CategoryKind kind;
@@ -24,6 +25,10 @@ class AddEntryState {
   final Category? category; // null = tanpa kategori
   final String place;
   final Note note;
+
+  /// The amount is a suggestion (last gajian), not typed: shown muted, and
+  /// the first key replaces it.
+  final bool suggested;
 
   int get amount => draftTotal(draft);
   bool get canSave => amount > 0;
@@ -35,6 +40,7 @@ class AddEntryState {
     Category? Function()? category,
     String? place,
     Note? note,
+    bool? suggested,
   }) => AddEntryState(
     kind: kind ?? this.kind,
     day: day ?? this.day,
@@ -42,6 +48,7 @@ class AddEntryState {
     category: category != null ? category() : this.category,
     place: place ?? this.place,
     note: note ?? this.note,
+    suggested: suggested ?? this.suggested,
   );
 }
 
@@ -57,14 +64,40 @@ class AddEntry extends Notifier<AddEntryState> {
     kind: kind,
     // Income categories only show for income and vice versa.
     category: state.category?.kind == kind ? null : () => null,
+    // A gajian suggestion makes no sense under the other kind.
+    draft: state.suggested && kind != state.kind ? emptyDraft : null,
+    suggested: state.suggested && kind == state.kind,
   );
 
-  void press(String key) =>
-      state = state.copyWith(draft: draftPress(state.draft, key));
+  void press(String key) => state = state.copyWith(
+    // A suggestion is replaced by the first digit; "+" builds on it.
+    draft: draftPress(
+      state.suggested && key != '+' ? emptyDraft : state.draft,
+      key,
+    ),
+    suggested: false,
+  );
 
-  void backspace() => state = state.copyWith(draft: draftBack(state.draft));
+  void backspace() =>
+      state = state.copyWith(draft: draftBack(state.draft), suggested: false);
 
-  void clear() => state = state.copyWith(draft: emptyDraft);
+  void clear() => state = state.copyWith(draft: emptyDraft, suggested: false);
+
+  /// Beranda "catat gajian": a pemasukan under the gajian category, the last
+  /// salary as the amount to change.
+  Future<void> startSalary() async {
+    final repo = ref.read(financeRepositoryProvider);
+    final cats = await repo
+        .watchCategories(ref.read(currentPeriodProvider))
+        .first;
+    final last = await repo.lastSalary();
+    state = state.copyWith(
+      kind: CategoryKind.income,
+      category: () => cats.where((c) => c.isPayday).firstOrNull,
+      draft: last == null ? emptyDraft : (parts: const [], digits: '$last'),
+      suggested: last != null,
+    );
+  }
 
   void pickDay(DateTime day) => state = state.copyWith(day: dateOnly(day));
 

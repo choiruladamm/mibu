@@ -499,6 +499,7 @@
   "keyClear": "kosongin semua",
   "keyClearShort": "kosongin",
   "keySave": "simpan",
+  "amountSuggested": "kayak gaji terakhir, ketik buat ganti",
   "amountTypeHint": "ketik nominal",
   "amountInWords": "{words} rupiah",
   "@amountInWords": {

@@ -441,7 +441,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
         value: null,
         icon: _ChipIcon.plus,
         outline: true,
-        onTap: () => context.push(Routes.addEntry),
+        onTap: () => context.push(Routes.addEntry, extra: AddEntryStart.salary),
       );
     } else if (s.overBudget) {
       chip = (
