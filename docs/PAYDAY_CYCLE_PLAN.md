@@ -178,7 +178,7 @@ Status fase 0:
 | F0.2 | tabel `periodRules` + `periodsProvider` / `currentPeriodProvider` | ✅ |
 | F0.3 | jendela "bulan ini" lewat resolver + test regression | ✅ |
 | F0.4 | tabel `budgets` + `limits` gantiin `profile.monthlyBudget` + `categories.monthlyLimit` | ✅ |
-| F0.5 | helper copy periode + test literal "bulan ini" | — |
+| F0.5 | test yang nolak literal "bulan ini" di `lib/ui` ([copy_guard_test.dart](../apps/mobile/test/ui/copy_guard_test.dart)). `periodLabel` / `periodRange` nunggu pemakai pertamanya di fase 2; `periodNoun` nggak perlu karena prinsip 3 (nama tetap bulan) bikin "bulan ini" tetap bener | ✅ |
 | F0.6 | sisa hari dari `period.end`, `categories.isPayday` | — |
 
 Masih asumsi bulan kalender (aman di v1, dibenerin pas fase 2 bareng labelnya):
