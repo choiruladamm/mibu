@@ -11,6 +11,7 @@ import '../../../core/tokens.dart';
 import '../../../core/widgets/new_tile.dart';
 import '../../../core/widgets/sheet.dart';
 import '../view_models/categories_view_model.dart';
+import 'category_delete_sheet.dart';
 import 'category_form_sheet.dart';
 
 /// 03.3 atur kategori — from 03.2 "atur" and (M6) 02.4.
@@ -97,7 +98,7 @@ class _CategoryManageSheetState extends ConsumerState<CategoryManageSheet>
                     wiggle: still ? null : _wiggle,
                     phase: (i % 4) * 0.25,
                     onTap: () => showCategoryForm(context, category: c),
-                    onDelete: () {}, // → 03.6
+                    onDelete: () => showCategoryDelete(context, c),
                     onDragStart: () => _order = [for (final c in shown) c.id],
                     onHover: (dragged) => _moveTo(dragged, c.id),
                     onDragEnd: () async {

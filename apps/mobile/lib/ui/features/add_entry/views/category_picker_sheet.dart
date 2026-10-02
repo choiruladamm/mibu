@@ -81,9 +81,9 @@ class _CategoryPickerState extends ConsumerState<_CategoryPicker> {
         if (r.category.kind == widget.kind) r,
     ].take(3);
     // Fresh copy, in case 03.3 renamed it.
-    final picked = [
-      ...?ref.watch(categoriesProvider).value,
-    ].where((c) => c.id == _picked?.id).firstOrNull;
+    final picked = [...?ref.watch(categoriesProvider).value]
+        .where((c) => c.id == _picked?.id)
+        .firstOrNull;
 
     return SheetFrame(
       title: l.pickerTitle,

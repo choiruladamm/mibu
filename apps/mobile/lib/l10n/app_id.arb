@@ -474,5 +474,76 @@
         "type": "String"
       }
     }
-  }
+  },
+  "deleteTitle": "hapus {name}?",
+  "@deleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteUsage": "{count} catatan · {amount} pakai kategori ini",
+  "@deleteUsage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteUnused": "belum ada catatan pakai kategori ini",
+  "deleteMoveTo": "pindahin {count} catatan itu ke",
+  "@deleteMoveTo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteCount": "{count} catatan",
+  "@deleteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteHold": "tahan buat hapus",
+  "deleteHolding": "tahan terus…",
+  "deleteHoldLabel": "tahan buat hapus {name}",
+  "@deleteHoldLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteCancel": "nggak jadi",
+  "deleteDoneTitle": "{name} udah dihapus",
+  "@deleteDoneTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteDoneMoved": "{count} catatan sekarang pindah ke {emoji} {name}.",
+  "@deleteDoneMoved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "emoji": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteDoneEmpty": "nggak ada catatan yang ikut pindah.",
+  "deleteCategory": "hapus kategori"
 }

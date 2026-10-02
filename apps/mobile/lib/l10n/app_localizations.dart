@@ -1017,6 +1017,84 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'{name} itu buat pemasukan, jadi cuma muncul pas kamu catat pemasukan.'**
   String manageIncomeNote(String name);
+
+  /// No description provided for @deleteTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'hapus {name}?'**
+  String deleteTitle(String name);
+
+  /// No description provided for @deleteUsage.
+  ///
+  /// In id, this message translates to:
+  /// **'{count} catatan · {amount} pakai kategori ini'**
+  String deleteUsage(int count, String amount);
+
+  /// No description provided for @deleteUnused.
+  ///
+  /// In id, this message translates to:
+  /// **'belum ada catatan pakai kategori ini'**
+  String get deleteUnused;
+
+  /// No description provided for @deleteMoveTo.
+  ///
+  /// In id, this message translates to:
+  /// **'pindahin {count} catatan itu ke'**
+  String deleteMoveTo(int count);
+
+  /// No description provided for @deleteCount.
+  ///
+  /// In id, this message translates to:
+  /// **'{count} catatan'**
+  String deleteCount(int count);
+
+  /// No description provided for @deleteHold.
+  ///
+  /// In id, this message translates to:
+  /// **'tahan buat hapus'**
+  String get deleteHold;
+
+  /// No description provided for @deleteHolding.
+  ///
+  /// In id, this message translates to:
+  /// **'tahan terus…'**
+  String get deleteHolding;
+
+  /// No description provided for @deleteHoldLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'tahan buat hapus {name}'**
+  String deleteHoldLabel(String name);
+
+  /// No description provided for @deleteCancel.
+  ///
+  /// In id, this message translates to:
+  /// **'nggak jadi'**
+  String get deleteCancel;
+
+  /// No description provided for @deleteDoneTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'{name} udah dihapus'**
+  String deleteDoneTitle(String name);
+
+  /// No description provided for @deleteDoneMoved.
+  ///
+  /// In id, this message translates to:
+  /// **'{count} catatan sekarang pindah ke {emoji} {name}.'**
+  String deleteDoneMoved(int count, String emoji, String name);
+
+  /// No description provided for @deleteDoneEmpty.
+  ///
+  /// In id, this message translates to:
+  /// **'nggak ada catatan yang ikut pindah.'**
+  String get deleteDoneEmpty;
+
+  /// No description provided for @deleteCategory.
+  ///
+  /// In id, this message translates to:
+  /// **'hapus kategori'**
+  String get deleteCategory;
 }
 
 class _AppLocalizationsDelegate

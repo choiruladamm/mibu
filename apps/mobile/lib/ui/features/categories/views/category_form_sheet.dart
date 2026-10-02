@@ -13,6 +13,7 @@ import '../../../core/widgets/sheet.dart';
 import '../../budget/views/budget_sheet.dart';
 import '../../home/view_models/home_view_model.dart';
 import '../view_models/categories_view_model.dart';
+import 'category_delete_sheet.dart';
 
 /// 03.4 kategori baru (no [category]) / 03.5 edit. Saves and pops the
 /// saved category, or null on batal.
@@ -326,14 +327,66 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
                 ),
               ),
               const SizedBox(height: 16),
-              PrimaryButton(
-                label: (_edit == null ? l.categoryCreate : l.categorySave)(
-                  _emoji,
-                  name.isEmpty ? l.categoryFallbackName : name,
-                ),
-                onPressed: canSave ? _save : null,
+              Row(
+                spacing: 10,
+                children: [
+                  if (_edit case final c?)
+                    _TrashButton(
+                      label: l.deleteCategory,
+                      onTap: () async {
+                        if (await showCategoryDelete(context, c) &&
+                            context.mounted) {
+                          Navigator.of(context).pop();
+                        }
+                      },
+                    ),
+                  Expanded(
+                    child: PrimaryButton(
+                      label:
+                          (_edit == null ? l.categoryCreate : l.categorySave)(
+                            _emoji,
+                            name.isEmpty ? l.categoryFallbackName : name,
+                          ),
+                      onPressed: canSave ? _save : null,
+                    ),
+                  ),
+                ],
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TrashButton extends StatelessWidget {
+  const _TrashButton({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: label,
+      excludeSemantics: true,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 56,
+          height: 56,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: AppColors.ink, width: AppStroke.outline),
+          ),
+          child: const HugeIcon(
+            icon: HugeIcons.strokeRoundedDelete02,
+            size: 22,
+            strokeWidth: AppStroke.icon,
+            color: AppColors.ink,
           ),
         ),
       ),

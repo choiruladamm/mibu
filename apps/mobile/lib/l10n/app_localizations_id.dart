@@ -559,4 +559,57 @@ class AppLocalizationsId extends AppLocalizations {
   String manageIncomeNote(String name) {
     return '$name itu buat pemasukan, jadi cuma muncul pas kamu catat pemasukan.';
   }
+
+  @override
+  String deleteTitle(String name) {
+    return 'hapus $name?';
+  }
+
+  @override
+  String deleteUsage(int count, String amount) {
+    return '$count catatan · $amount pakai kategori ini';
+  }
+
+  @override
+  String get deleteUnused => 'belum ada catatan pakai kategori ini';
+
+  @override
+  String deleteMoveTo(int count) {
+    return 'pindahin $count catatan itu ke';
+  }
+
+  @override
+  String deleteCount(int count) {
+    return '$count catatan';
+  }
+
+  @override
+  String get deleteHold => 'tahan buat hapus';
+
+  @override
+  String get deleteHolding => 'tahan terus…';
+
+  @override
+  String deleteHoldLabel(String name) {
+    return 'tahan buat hapus $name';
+  }
+
+  @override
+  String get deleteCancel => 'nggak jadi';
+
+  @override
+  String deleteDoneTitle(String name) {
+    return '$name udah dihapus';
+  }
+
+  @override
+  String deleteDoneMoved(int count, String emoji, String name) {
+    return '$count catatan sekarang pindah ke $emoji $name.';
+  }
+
+  @override
+  String get deleteDoneEmpty => 'nggak ada catatan yang ikut pindah.';
+
+  @override
+  String get deleteCategory => 'hapus kategori';
 }
