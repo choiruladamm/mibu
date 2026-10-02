@@ -23,7 +23,7 @@ Status: disepakati 2026-10-01. Daftar fitur lengkap ada di [FEATURES.md](FEATURE
 | edit catatan 04.4, tanpa field berulang | |
 | statistik 02.3 | |
 | cari 04.2, versi simpel | |
-| pengaturan 02.4: kategori, kantong, sembunyiin nominal, **ekspor csv** | sisa item pengaturan |
+| pengaturan 02.4: kartu budget → 00.16, buat apa aja, limit bulanan, sembunyiin nominal, **ekspor csv**, versi | reminder harian, rekap mingguan, kunci face id, mode terang/gelap, backup & pulihin, chip `mulai tgl 1` |
 
 Alur first-run: onboarding 01.1 → atur awal 01.4 → kantong pertama 01.4b → beranda 02.1. Layar login dilewati.
 
@@ -204,6 +204,17 @@ tahun:           kepake > limit → lewat budget
 - Nominal cuma angka, tanpa nol di depan. Maks 10 digit di keypad, 12 digit di atur awal.
 - Tanggal dan bulan di masa depan nggak bisa dipilih.
 - Kategori pemasukan (mis. gajian) cuma muncul pas catat pemasukan.
+
+### Sembunyiin nominal
+
+Board nggak nentuin layar mana yang di-mask, jadi ini keputusan kita. `profile.hideAmounts` nyala → nominal tampil `Rp•••`, tap sekali buat intip (balik ke `•••` pas keluar layar):
+
+- saldo hero + chip aman jajan di 02.1
+- kepake / sisa di kantong 02.2
+- nominal di TxRow dan struk 04.3
+- hero budget di 02.4
+
+Input (keypad) dan ekspor CSV nggak di-mask.
 
 ## Ekspor CSV
 

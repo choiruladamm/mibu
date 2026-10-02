@@ -53,12 +53,12 @@ Tanda: **[diupdate]** = aturan/perilaku berubah dari design, **[perlu design]** 
     - **[perlu design]** Budget kosong → section diganti kartu "pasang budget bulanan biar mibu bisa ngecek ritme kamu" → BudgetSheet 00.16.
   - `larinya ke mana`: 4 kategori teratas (stacked bar + list).
 - [ ] **02.4 pengaturan**
-  - Kartu setup: `budget bulanan` → BudgetSheet 00.16, `mulai tgl 1`, `N kantong` → 02.2.
+  - Kartu setup: `budget bulanan` → BudgetSheet 00.16, `N limit` → 02.2 (board masih "N kantong"). Chip `mulai tgl 1` nggak bisa di-tap, **[ditunda]** dibuang dari build.
   - duit: `buat apa aja` → 03.3, `limit bulanan` → 02.2.
-  - kebiasaan: `pengingat harian` (21.00, switch), `rekap mingguan` (switch).
-  - privasi: `kunci pakai face id`, `sembunyiin nominal` (tampil ••• sampai di-tap).
-  - tampilan: `mode` terang / gelap / auto.
-  - data: `ekspor ke csv`, `backup & pulihin` (iCloud).
+  - kebiasaan: `pengingat harian` (21.00, switch), `rekap mingguan` (switch). **[ditunda]**
+  - privasi: `sembunyiin nominal` (tampil ••• sampai di-tap). `kunci pakai face id` **[ditunda]**.
+  - tampilan: `mode` terang / gelap / auto. **[ditunda]** (light only)
+  - data: `ekspor ke csv` (board nulis "export"). `backup & pulihin` (iCloud) **[ditunda]**.
   - Footer versi.
 
 ## 03 · Catat & buat apa
@@ -124,6 +124,6 @@ Tanda: **[diupdate]** = aturan/perilaku berubah dari design, **[perlu design]** 
 - Algoritma prediksi saldo bulan depan.
 - Threshold notif kantong (asumsi 85%).
 - Recurring: engine auto-create, edit satu vs semua. Catat (03.1) belum ada kontrol berulang.
-- Durasi undo, layar mana aja yang di-mask "sembunyiin nominal", Face ID versi Android, palet dark mode.
+- Durasi undo, Face ID versi Android, palet dark mode.
 - State loading/error/empty pertama kali (beranda/statistik/kantong tanpa data).
 - Inkonsisten kecil: "jajan" di daftar pindah kategori nggak ada di set kategori; "gajian" muncul di picker mode pengeluaran; 04.4 nggak pakai DayStrip (build pakai DayStrip 00.11); tombol 04.4 "simpan perubahan" + pill "2 perubahan · batalin" nggak muat di 390 (build: "simpan"); ConfirmModal 00.6 masih copy inggris "now 90% used / after 45%" (build: "sekarang 90% kepake / abis ini 45%"); struk 04.3 "#0413" belum ada kolom no. struk (build: tanggal aja).
