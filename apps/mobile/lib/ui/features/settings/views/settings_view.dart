@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../data/repositories/finance_repository.dart';
 import '../../../../domain/models/finance.dart';
@@ -16,6 +17,8 @@ import '../../budget/views/budget_sheet.dart';
 import '../../categories/views/category_manage_sheet.dart';
 import '../view_models/settings_view_model.dart';
 import 'payday_sheet.dart';
+
+final _payDay = DateFormat('EEE d MMM', 'id');
 
 /// 02.4 pengaturan. Reminder, rekap, face id, mode and backup are post-MVP.
 class SettingsView extends ConsumerWidget {
@@ -127,15 +130,21 @@ class SettingsView extends ConsumerWidget {
                     _Row(
                       icon: HugeIcons.strokeRoundedMoney01,
                       title: l.settingsPayday,
+                      // The date is shown because a weekend payday moves to the
+                      // Friday before: "tiap tgl 25" alone would look miscounted.
                       hint: switch (s.paydayInfo.status) {
                         PaydayStatus.today => l.paydayToday,
                         PaydayStatus.late => l.paydayLate(
                           s.paydayInfo.lateDays,
                         ),
-                        PaydayStatus.upcoming => l.paydayIn(
-                          s.paydayInfo.daysLeft,
-                        ),
+                        PaydayStatus.upcoming => null,
                       },
+                      hintParts: s.paydayInfo.status == PaydayStatus.upcoming
+                          ? [
+                              _payDay.format(s.paydayInfo.next).toLowerCase(),
+                              l.paydayNextIn(s.paydayInfo.daysLeft),
+                            ]
+                          : null,
                       trailing: Text(
                         s.payday == 31
                             ? l.settingsPaydayEnd
@@ -401,6 +410,7 @@ class _Row extends StatelessWidget {
     required this.title,
     required this.onTap,
     this.hint,
+    this.hintParts,
     this.trailing,
     this.chevron = true,
     this.switchOn,
@@ -409,6 +419,7 @@ class _Row extends StatelessWidget {
   final List<List<dynamic>> icon;
   final String title;
   final String? hint;
+  final List<String>? hintParts; // hint as a MetaLine (dot-separated)
   final Widget? trailing;
   final bool chevron;
   final bool? switchOn;
@@ -455,7 +466,16 @@ class _Row extends StatelessWidget {
                     spacing: 1,
                     children: [
                       Text(title, style: AppText.label),
-                      if (hint != null)
+                      if (hintParts case final parts?)
+                        MetaLine(
+                          parts,
+                          tight: true,
+                          style: AppText.caption.copyWith(
+                            fontSize: 12,
+                            color: AppColors.muted,
+                          ),
+                        )
+                      else if (hint != null)
                         Text(
                           hint!,
                           style: AppText.caption.copyWith(

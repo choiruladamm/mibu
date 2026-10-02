@@ -144,9 +144,10 @@ void main() {
         (await tester.runAsync(() => db.select(db.profiles).getSingle()))!
             .payday;
 
-    // 25 okt 2026 is a Sunday → paid Fri 23: 14 → 23 okt = 9 days.
+    // 25 okt 2026 is a Sunday → paid Fri 23: 14 → 23 okt = 9 days. The row
+    // names the date, so "tiap tgl 25" doesn't look miscounted.
     expect(find.text('tiap tgl 25'), findsOneWidget);
-    expect(find.text('gajian lagi 9 hari'), findsOneWidget);
+    expect(findMeta(['jum 23 okt', '9 hari lagi']), findsOneWidget);
 
     await tester.tap(find.text('tanggal gajian'));
     await settle();
