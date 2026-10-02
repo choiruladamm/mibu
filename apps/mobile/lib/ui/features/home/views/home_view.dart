@@ -263,7 +263,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                 ],
                               ),
                             ),
-                            Flexible(child: picker()),
+                            picker(),
                             const SizedBox(width: 8),
                             _SearchButton(label: l.search, size: 40),
                           ],
