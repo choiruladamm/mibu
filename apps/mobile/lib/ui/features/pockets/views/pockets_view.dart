@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -926,6 +928,29 @@ class _Jar extends StatelessWidget {
                       color: AppColors.ink,
                     ),
                   ),
+                  // Lewat limit: white "!" pill low in the full jar.
+                  if (pocket.status == PocketStatus.over)
+                    Positioned(
+                      left: 7,
+                      bottom: 8,
+                      child: Container(
+                        width: 36,
+                        height: 20,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: AppColors.paper,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          '!',
+                          style: AppText.micro.copyWith(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.ink,
+                          ),
+                        ),
+                      ),
+                    ),
                   Positioned(
                     left: 7,
                     top: 7,
@@ -965,18 +990,15 @@ class _Detail extends StatelessWidget {
 
   final Pocket pocket;
   final int daysLeft;
-  final VoidCallback onManage; // atur limit → 03.5
-  final VoidCallback onRelease; // lepas limit
+  final VoidCallback onManage; // atur / naikin limit → 03.5
+  final VoidCallback onRelease; // copot limit
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
-    final muted = AppText.label.copyWith(fontSize: 14, color: AppColors.muted);
-    final (status, ink) = switch (pocket.status) {
-      PocketStatus.safe => (l.pocketStatusSafe, false),
-      PocketStatus.almostOut => (l.pocketStatusAlmostOut, true),
-      PocketStatus.unused => (l.pocketStatusUnused, false),
-    };
+    final muted = AppText.caption.copyWith(color: AppColors.muted);
+    final status = pocket.status;
+    final over = status == PocketStatus.over;
     final left = pocket.left;
 
     return Semantics(
@@ -990,82 +1012,95 @@ class _Detail extends StatelessWidget {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: 10,
+          spacing: 12,
           children: [
             Row(
-              spacing: 8,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 12,
               children: [
-                AppEmoji(pocket.emoji, size: 23),
                 Expanded(
-                  child: Text(
-                    pocket.name,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppText.label.copyWith(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                Container(
-                  height: 28,
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: ink ? AppColors.ink : AppColors.paper,
-                    borderRadius: BorderRadius.circular(AppRadius.pill),
-                    border: ink
-                        ? null
-                        : Border.all(
-                            color: AppColors.ink,
-                            width: AppStroke.outline,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 6,
+                    children: [
+                      Text(
+                        pocket.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppText.label.copyWith(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            // Over: the excess, never a negative.
+                            context.rpCompact(left.abs()),
+                            style: AppText.headline.copyWith(
+                              fontSize: 36,
+                              height: 1,
+                              letterSpacing: -1.08,
+                            ),
                           ),
+                        ),
+                      ),
+                      MetaLine([
+                        over ? l.pocketOverLabel : l.pocketLeftLabel,
+                        l.pocketLimitOf(context.rpCompact(pocket.budget)),
+                      ], style: muted),
+                      Text(
+                        over
+                            ? l.pocketOverDays(daysLeft)
+                            : l.pocketDaily(
+                                context.rpCompact(left ~/ daysLeft),
+                              ),
+                        style: muted,
+                      ),
+                    ],
                   ),
-                  child: Text(
-                    status,
-                    style: AppText.caption.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: ink ? AppColors.paper : AppColors.ink,
+                ),
+                Column(
+                  spacing: 8,
+                  children: [
+                    _StatusChip(
+                      label: switch (status) {
+                        PocketStatus.safe => l.pocketStatusSafe,
+                        PocketStatus.almostOut => l.pocketStatusAlmostOut,
+                        PocketStatus.over => l.pocketStatusOver,
+                        PocketStatus.unused => l.pocketStatusUnused,
+                      },
+                      ink: status.ink,
+                    ),
+                    Semantics(
+                      container: true,
+                      image: true,
+                      label: l.pocketUsedPct(pocket.usedPct),
+                      excludeSemantics: true,
+                      child: _UsageRing(pocket: pocket),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Row(
+                spacing: 8,
+                children: [
+                  Expanded(
+                    child: _OutlineButton(
+                      label: over ? l.pocketRaise : l.pocketManage,
+                      ink: over,
+                      onTap: onManage,
                     ),
                   ),
-                ),
-              ],
-            ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              spacing: 8,
-              children: [
-                Text(
-                  context.rpCompact(left),
-                  style: AppText.headline.copyWith(
-                    fontSize: 36,
-                    height: 1,
-                    letterSpacing: -1.08,
-                  ),
-                ),
-                Flexible(
-                  child: Text(
-                    l.pocketLeftOf(context.rpCompact(pocket.budget)),
-                    style: muted,
-                  ),
-                ),
-              ],
-            ),
-            Text(
-              left < 0
-                  ? l.pocketOver(context.rpCompact(-left))
-                  : l.pocketDaily(context.rpCompact(left ~/ daysLeft)),
-              style: muted,
-            ),
-            const SizedBox(height: 2),
-            Row(
-              spacing: 8,
-              children: [
-                Expanded(
-                  child: _OutlineButton(label: l.pocketManage, onTap: onManage),
-                ),
-                _MistButton(label: l.pocketRelease, onTap: onRelease),
-              ],
+                  _MistButton(label: l.pocketRelease, onTap: onRelease),
+                ],
+              ),
             ),
           ],
         ),
@@ -1074,11 +1109,123 @@ class _Detail extends StatelessWidget {
   }
 }
 
+class _StatusChip extends StatelessWidget {
+  const _StatusChip({required this.label, required this.ink});
+
+  final String label;
+  final bool ink;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 28,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: ink ? AppColors.ink : AppColors.paper,
+        borderRadius: BorderRadius.circular(AppRadius.pill),
+        border: ink
+            ? null
+            : Border.all(color: AppColors.ink, width: AppStroke.outline),
+      ),
+      child: Text(
+        label,
+        maxLines: 1,
+        style: AppText.caption.copyWith(
+          fontWeight: FontWeight.w500,
+          color: ink ? AppColors.paper : AppColors.ink,
+        ),
+      ),
+    );
+  }
+}
+
+/// 96px progress ring: ink arc of % kepake on a 9px track; past 100% a thin
+/// outer arc (r 46, 3px) shows the excess. Icon + the real % in the middle.
+class _UsageRing extends StatelessWidget {
+  const _UsageRing({required this.pocket});
+
+  final Pocket pocket;
+
+  @override
+  Widget build(BuildContext context) {
+    final pct = pocket.usedPct;
+    return SizedBox.square(
+      dimension: 96,
+      child: CustomPaint(
+        painter: _RingPainter(pct / 100),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            AppEmoji(pocket.emoji, size: 30),
+            Text(
+              '$pct%',
+              style: AppText.micro.copyWith(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: AppColors.ink,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RingPainter extends CustomPainter {
+  const _RingPainter(this.used);
+
+  final double used; // 1 = limit, may go past
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final c = size.center(Offset.zero);
+    const top = -math.pi / 2;
+    Paint stroke(Color color, double width) => Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = width
+      ..strokeCap = StrokeCap.round
+      ..color = color;
+
+    canvas.drawCircle(c, 38, stroke(AppColors.track, 9));
+    final main = used.clamp(0.0, 1.0);
+    if (main > 0) {
+      canvas.drawArc(
+        Rect.fromCircle(center: c, radius: 38),
+        top,
+        2 * math.pi * main,
+        false,
+        stroke(AppColors.ink, 9),
+      );
+    }
+    final extra = (used - 1).clamp(0.0, 1.0);
+    if (extra > 0) {
+      canvas.drawArc(
+        Rect.fromCircle(center: c, radius: 46),
+        top,
+        2 * math.pi * extra,
+        false,
+        stroke(AppColors.ink, 3),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_RingPainter old) => old.used != used;
+}
+
 class _OutlineButton extends StatelessWidget {
-  const _OutlineButton({required this.label, required this.onTap});
+  const _OutlineButton({
+    required this.label,
+    required this.onTap,
+    this.ink = false,
+  });
 
   final String label;
   final VoidCallback onTap;
+  final bool ink; // filled ink (naikin limit)
 
   @override
   Widget build(BuildContext context) {
@@ -1090,6 +1237,7 @@ class _OutlineButton extends StatelessWidget {
           height: AppSpace.minTouch,
           alignment: Alignment.center,
           decoration: BoxDecoration(
+            color: ink ? AppColors.ink : null,
             borderRadius: BorderRadius.circular(AppRadius.pill),
             border: Border.all(color: AppColors.ink, width: AppStroke.outline),
           ),
@@ -1098,6 +1246,7 @@ class _OutlineButton extends StatelessWidget {
             style: AppText.label.copyWith(
               fontSize: 15,
               fontWeight: FontWeight.w500,
+              color: ink ? AppColors.paper : AppColors.ink,
             ),
           ),
         ),

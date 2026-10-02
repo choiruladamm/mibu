@@ -159,6 +159,7 @@ Satu konsep aja: **buat apa** (= baris `categories`). Kantong bukan benda sendir
 - Sisa jajan (02.2) = Σ limit − Σ kepake semua kantong bulan ini.
 - Persen kepake = round(kepake ÷ limit × 100).
 - Status kantong:
+  - `lewat limit` kalau persen kepake > 100% (100% pas tetap `hampir abis`)
   - `hampir abis` kalau persen kepake ≥ 85%
   - `belum kepake` kalau kepake = 0
   - selain itu `aman`

@@ -307,7 +307,7 @@ class _CategoryTile extends StatelessWidget {
   });
 
   final Category category;
-  final Pocket? pocket; // has a limit → "sisa Rp…"
+  final Pocket? pocket; // has a limit → "sisa Rp…" / "lewat Rp…"
   final bool on;
   final VoidCallback onTap;
 
@@ -373,17 +373,16 @@ class _CategoryTile extends StatelessWidget {
           ),
           if (pocket case final p?)
             Text(
-              AppLocalizations.of(context)!
-                  .leftAmount(rupiahCompact(p.left < 0 ? 0 : p.left)),
+              p.left < 0
+                  ? AppLocalizations.of(context)!
+                        .overAmount(rupiahCompact(-p.left))
+                  : AppLocalizations.of(context)!
+                        .leftAmount(rupiahCompact(p.left)),
               maxLines: 1,
               style: AppText.micro.copyWith(
-                // ≥ 85% kepake: bold ink.
-                fontWeight: p.status == PocketStatus.almostOut
-                    ? FontWeight.w600
-                    : FontWeight.w400,
-                color: p.status == PocketStatus.almostOut
-                    ? AppColors.ink
-                    : AppColors.subtle,
+                // ≥ 85% kepake or lewat: bold ink.
+                fontWeight: p.status.ink ? FontWeight.w600 : FontWeight.w400,
+                color: p.status.ink ? AppColors.ink : AppColors.subtle,
               ),
             ),
         ],

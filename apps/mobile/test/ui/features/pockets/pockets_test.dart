@@ -77,14 +77,46 @@ void main() {
     expect(find.text('anabul'), findsOneWidget);
     expect(find.text('hampir abis'), findsOneWidget);
     expect(find.text('Rp100K'), findsOneWidget);
-    expect(find.text('jatah sisa dari limit Rp1jt'), findsOneWidget);
+    expect(findMeta(['jatah sisa', 'limit Rp1jt']), findsOneWidget);
     expect(find.text('≈ Rp5,6K/hari sampai akhir bulan'), findsOneWidget);
+    expect(find.bySemanticsLabel('90% kepake'), findsOneWidget); // ring
+    expect(find.text('atur limit'), findsOneWidget);
 
     await tester.tap(find.bySemanticsLabel('ngopi, 60% kepake'));
     await tester.pumpAndSettle();
     expect(find.text('ngopi'), findsOneWidget);
     expect(find.text('aman'), findsOneWidget);
     expect(find.text('Rp120K'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox());
+    await db.close();
+  });
+
+  testWidgets('kelewat limit: excess, rem dulu, naikin limit, ! in jar', (
+    tester,
+  ) async {
+    // anabul Rp900K of a Rp800K limit → 113%.
+    final db = await pump(
+      tester,
+      const Size(390, 844),
+      initial: (db) async {
+        final anabul = await (db.select(
+          db.categories,
+        )..where((c) => c.name.equals('anabul'))).getSingle();
+        await FinanceRepository(db).setLimit(anabul.id, 800000);
+        return anabul.id;
+      },
+    );
+
+    expect(find.text('! lewat limit'), findsOneWidget);
+    expect(find.text('Rp100K'), findsOneWidget); // the excess
+    expect(findMeta(['kelewat', 'limit Rp800K']), findsOneWidget);
+    expect(find.text('masih 18 hari lagi, rem dulu ya'), findsOneWidget);
+    expect(find.bySemanticsLabel('113% kepake'), findsOneWidget);
+    expect(find.text('113%'), findsWidgets); // ring + jar
+    expect(find.text('naikin limit'), findsOneWidget);
+    expect(find.text('atur limit'), findsNothing);
+    expect(find.text('!'), findsOneWidget); // jar label
 
     await tester.pumpWidget(const SizedBox());
     await db.close();

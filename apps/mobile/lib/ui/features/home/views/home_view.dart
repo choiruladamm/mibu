@@ -559,7 +559,7 @@ class _PocketPills extends StatelessWidget {
             separatorBuilder: (_, _) => const SizedBox(width: 8),
             itemBuilder: (context, i) {
               final p = pockets[i];
-              final ink = p.status == PocketStatus.almostOut;
+              final ink = p.status.ink;
               return Semantics(
                 button: true,
                 label: l.homePocketPill(p.name, p.usedPct),

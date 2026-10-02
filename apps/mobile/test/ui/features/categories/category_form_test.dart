@@ -168,6 +168,15 @@ void main() {
     await settle(tester);
     // Limits show as "sisa Rp…" under the name; anabul is ≥ 85%.
     expect(find.text('sisa Rp100K'), findsOneWidget);
+    // Past the limit it reads "lewat Rp…" instead.
+    await tester.runAsync(
+      () async =>
+          (db.update(db.categories)..where((c) => c.name.equals('anabul')))
+              .write(const CategoriesCompanion(monthlyLimit: Value(800000))),
+    );
+    await settle(tester);
+    expect(find.text('lewat Rp100K'), findsOneWidget);
+    expect(find.text('sisa Rp100K'), findsNothing);
     await tester.enterText(find.byType(TextField).first, 'gym');
     await tester.pump();
     await tester.tap(find.bySemanticsLabel('bikin “gym”'));

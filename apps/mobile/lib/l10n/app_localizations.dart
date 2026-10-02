@@ -826,23 +826,53 @@ abstract class AppLocalizations {
   /// **'belum kepake'**
   String get pocketStatusUnused;
 
-  /// No description provided for @pocketLeftOf.
+  /// No description provided for @pocketStatusOver.
   ///
   /// In id, this message translates to:
-  /// **'jatah sisa dari limit {limit}'**
-  String pocketLeftOf(String limit);
+  /// **'! lewat limit'**
+  String get pocketStatusOver;
+
+  /// No description provided for @pocketLeftLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'jatah sisa'**
+  String get pocketLeftLabel;
+
+  /// No description provided for @pocketOverLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'kelewat'**
+  String get pocketOverLabel;
+
+  /// No description provided for @pocketLimitOf.
+  ///
+  /// In id, this message translates to:
+  /// **'limit {limit}'**
+  String pocketLimitOf(String limit);
+
+  /// No description provided for @pocketOverDays.
+  ///
+  /// In id, this message translates to:
+  /// **'{n, plural, =1{hari terakhir, rem dulu ya} other{masih {n} hari lagi, rem dulu ya}}'**
+  String pocketOverDays(int n);
+
+  /// No description provided for @pocketRaise.
+  ///
+  /// In id, this message translates to:
+  /// **'naikin limit'**
+  String get pocketRaise;
+
+  /// No description provided for @pocketUsedPct.
+  ///
+  /// In id, this message translates to:
+  /// **'{pct}% kepake'**
+  String pocketUsedPct(int pct);
 
   /// No description provided for @pocketDaily.
   ///
   /// In id, this message translates to:
   /// **'≈ {amount}/hari sampai akhir bulan'**
   String pocketDaily(String amount);
-
-  /// No description provided for @pocketOver.
-  ///
-  /// In id, this message translates to:
-  /// **'lewat {amount}'**
-  String pocketOver(String amount);
 
   /// No description provided for @pocketManage.
   ///

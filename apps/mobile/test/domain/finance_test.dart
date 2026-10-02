@@ -90,12 +90,14 @@ void main() {
     expect(start(DateTime(2025, 12), DateTime(2026, 12)), DateTime(2026, 7));
   });
 
-  test('pocket status: unused, safe, almost out at 85%', () {
+  test('pocket status: unused, safe, almost out at 85%, over past 100%', () {
     Pocket p(int spent) =>
         Pocket(id: '', emoji: '', name: '', budget: 1000000, spent: spent);
     expect(p(0).status, PocketStatus.unused);
     expect(p(844000).status, PocketStatus.safe); // 84%; 84,9% rounds to 85
     expect(p(850000).status, PocketStatus.almostOut);
+    expect(p(1000000).status, PocketStatus.almostOut); // exactly 100%
+    expect(p(1010000).status, PocketStatus.over);
     expect(p(1200000).left, -200000);
   });
 

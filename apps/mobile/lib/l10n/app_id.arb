@@ -351,24 +351,18 @@
   "pocketStatusSafe": "aman",
   "pocketStatusAlmostOut": "hampir abis",
   "pocketStatusUnused": "belum kepake",
-  "pocketLeftOf": "jatah sisa dari limit {limit}",
-  "@pocketLeftOf": {
-    "placeholders": {
-      "limit": {
-        "type": "String"
-      }
-    }
-  },
+  "pocketStatusOver": "! lewat limit",
+  "pocketLeftLabel": "jatah sisa",
+  "pocketOverLabel": "kelewat",
+  "pocketLimitOf": "limit {limit}",
+  "@pocketLimitOf": {"placeholders": {"limit": {"type": "String"}}},
+  "pocketOverDays": "{n, plural, =1{hari terakhir, rem dulu ya} other{masih {n} hari lagi, rem dulu ya}}",
+  "@pocketOverDays": {"placeholders": {"n": {"type": "int"}}},
+  "pocketRaise": "naikin limit",
+  "pocketUsedPct": "{pct}% kepake",
+  "@pocketUsedPct": {"placeholders": {"pct": {"type": "int"}}},
   "pocketDaily": "≈ {amount}/hari sampai akhir bulan",
   "@pocketDaily": {
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
-  "pocketOver": "lewat {amount}",
-  "@pocketOver": {
     "placeholders": {
       "amount": {
         "type": "String"

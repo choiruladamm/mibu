@@ -440,18 +440,41 @@ class AppLocalizationsId extends AppLocalizations {
   String get pocketStatusUnused => 'belum kepake';
 
   @override
-  String pocketLeftOf(String limit) {
-    return 'jatah sisa dari limit $limit';
+  String get pocketStatusOver => '! lewat limit';
+
+  @override
+  String get pocketLeftLabel => 'jatah sisa';
+
+  @override
+  String get pocketOverLabel => 'kelewat';
+
+  @override
+  String pocketLimitOf(String limit) {
+    return 'limit $limit';
+  }
+
+  @override
+  String pocketOverDays(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'masih $n hari lagi, rem dulu ya',
+      one: 'hari terakhir, rem dulu ya',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pocketRaise => 'naikin limit';
+
+  @override
+  String pocketUsedPct(int pct) {
+    return '$pct% kepake';
   }
 
   @override
   String pocketDaily(String amount) {
     return '≈ $amount/hari sampai akhir bulan';
-  }
-
-  @override
-  String pocketOver(String amount) {
-    return 'lewat $amount';
   }
 
   @override

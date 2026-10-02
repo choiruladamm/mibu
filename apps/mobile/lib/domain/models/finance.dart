@@ -88,12 +88,22 @@ class Pocket {
 
   PocketStatus get status => spent == 0
       ? PocketStatus.unused
+      : usedPct > 100
+      ? PocketStatus.over
       : usedPct >= 85
       ? PocketStatus.almostOut
       : PocketStatus.safe;
 }
 
-enum PocketStatus { safe, almostOut, unused }
+enum PocketStatus {
+  safe,
+  almostOut,
+  over,
+  unused;
+
+  /// ≥ 85% kepake: ink chip / pill, bold "sisa".
+  bool get ink => this == almostOut || this == over;
+}
 
 /// BudgetSheet prefill: Σ pocket limits rounded up to Rp500K.
 int budgetPrefill(int pocketsTotal) =>
