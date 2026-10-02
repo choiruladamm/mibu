@@ -189,5 +189,72 @@
   "noteQuickTags": "tag cepet · maks 3",
   "noteWroteBefore": "pernah kamu tulis",
   "noteSave": "simpan catatan",
-  "noteLeaveEmpty": "nggak jadi, kosongin"
+  "noteLeaveEmpty": "nggak jadi, kosongin",
+  "pocketsNew": "baru",
+  "pocketsLeftTitle": "sisa jajan {month}",
+  "@pocketsLeftTitle": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "pocketsSpentOf": "{spent} dari {limit} kepake · {days} hari lagi",
+  "@pocketsSpentOf": {
+    "placeholders": {
+      "spent": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "pocketsEmpty": "belum ada kantong. bikin satu biar jajan ada batasnya.",
+  "pocketJarLabel": "{name}, {pct}% kepake",
+  "@pocketJarLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "pocketSelected": "kantong yang dipilih",
+  "pocketStatusSafe": "aman",
+  "pocketStatusAlmostOut": "hampir abis",
+  "pocketStatusUnused": "belum kepake",
+  "pocketLeftOf": "sisa dari {limit}",
+  "@pocketLeftOf": {
+    "placeholders": {
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "pocketDaily": "kira-kira {amount} sehari buat {days} hari ke depan",
+  "@pocketDaily": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "pocketOver": "kelebihan {amount} bulan ini",
+  "@pocketOver": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "pocketManage": "atur kantong"
 }

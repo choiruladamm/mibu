@@ -567,6 +567,84 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'nggak jadi, kosongin'**
   String get noteLeaveEmpty;
+
+  /// No description provided for @pocketsNew.
+  ///
+  /// In id, this message translates to:
+  /// **'baru'**
+  String get pocketsNew;
+
+  /// No description provided for @pocketsLeftTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'sisa jajan {month}'**
+  String pocketsLeftTitle(String month);
+
+  /// No description provided for @pocketsSpentOf.
+  ///
+  /// In id, this message translates to:
+  /// **'{spent} dari {limit} kepake · {days} hari lagi'**
+  String pocketsSpentOf(String spent, String limit, int days);
+
+  /// No description provided for @pocketsEmpty.
+  ///
+  /// In id, this message translates to:
+  /// **'belum ada kantong. bikin satu biar jajan ada batasnya.'**
+  String get pocketsEmpty;
+
+  /// No description provided for @pocketJarLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'{name}, {pct}% kepake'**
+  String pocketJarLabel(String name, int pct);
+
+  /// No description provided for @pocketSelected.
+  ///
+  /// In id, this message translates to:
+  /// **'kantong yang dipilih'**
+  String get pocketSelected;
+
+  /// No description provided for @pocketStatusSafe.
+  ///
+  /// In id, this message translates to:
+  /// **'aman'**
+  String get pocketStatusSafe;
+
+  /// No description provided for @pocketStatusAlmostOut.
+  ///
+  /// In id, this message translates to:
+  /// **'hampir abis'**
+  String get pocketStatusAlmostOut;
+
+  /// No description provided for @pocketStatusUnused.
+  ///
+  /// In id, this message translates to:
+  /// **'belum kepake'**
+  String get pocketStatusUnused;
+
+  /// No description provided for @pocketLeftOf.
+  ///
+  /// In id, this message translates to:
+  /// **'sisa dari {limit}'**
+  String pocketLeftOf(String limit);
+
+  /// No description provided for @pocketDaily.
+  ///
+  /// In id, this message translates to:
+  /// **'kira-kira {amount} sehari buat {days} hari ke depan'**
+  String pocketDaily(String amount, int days);
+
+  /// No description provided for @pocketOver.
+  ///
+  /// In id, this message translates to:
+  /// **'kelebihan {amount} bulan ini'**
+  String pocketOver(String amount);
+
+  /// No description provided for @pocketManage.
+  ///
+  /// In id, this message translates to:
+  /// **'atur kantong'**
+  String get pocketManage;
 }
 
 class _AppLocalizationsDelegate

@@ -109,7 +109,7 @@ class HomeView extends ConsumerWidget {
                         children: [
                           Text(l.tabPockets, style: caption),
                           GestureDetector(
-                            onTap: () {}, // → 02.2 kantong
+                            onTap: () => goTab(context, AppTab.pockets),
                             child: Text(l.seeAll, style: link),
                           ),
                         ],
@@ -175,7 +175,7 @@ class HomeView extends ConsumerWidget {
             alignment: Alignment.bottomCenter,
             child: AppTabBar(
               active: AppTab.home,
-              onSelect: (_) {},
+              onSelect: (tab) => goTab(context, tab),
               onAdd: () => context.push(Routes.addEntry),
             ),
           ),
@@ -330,7 +330,7 @@ class _PocketChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {}, // → 02.2 kantong
+      onTap: () => goTab(context, AppTab.pockets),
       child: Container(
         height: 48,
         alignment: Alignment.center,

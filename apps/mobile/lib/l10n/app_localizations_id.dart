@@ -278,4 +278,56 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get noteLeaveEmpty => 'nggak jadi, kosongin';
+
+  @override
+  String get pocketsNew => 'baru';
+
+  @override
+  String pocketsLeftTitle(String month) {
+    return 'sisa jajan $month';
+  }
+
+  @override
+  String pocketsSpentOf(String spent, String limit, int days) {
+    return '$spent dari $limit kepake · $days hari lagi';
+  }
+
+  @override
+  String get pocketsEmpty =>
+      'belum ada kantong. bikin satu biar jajan ada batasnya.';
+
+  @override
+  String pocketJarLabel(String name, int pct) {
+    return '$name, $pct% kepake';
+  }
+
+  @override
+  String get pocketSelected => 'kantong yang dipilih';
+
+  @override
+  String get pocketStatusSafe => 'aman';
+
+  @override
+  String get pocketStatusAlmostOut => 'hampir abis';
+
+  @override
+  String get pocketStatusUnused => 'belum kepake';
+
+  @override
+  String pocketLeftOf(String limit) {
+    return 'sisa dari $limit';
+  }
+
+  @override
+  String pocketDaily(String amount, int days) {
+    return 'kira-kira $amount sehari buat $days hari ke depan';
+  }
+
+  @override
+  String pocketOver(String amount) {
+    return 'kelebihan $amount bulan ini';
+  }
+
+  @override
+  String get pocketManage => 'atur kantong';
 }
