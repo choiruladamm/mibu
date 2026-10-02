@@ -6,10 +6,11 @@ import '../../../../data/repositories/finance_repository.dart';
 import '../../../../domain/models/finance.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../core/tokens.dart';
+import '../../../core/widgets/new_tile.dart';
 import '../../../core/widgets/sheet.dart';
+import '../../categories/views/category_form_sheet.dart';
 
 /// 03.2 pilih kategori — resolves to the category + place, or null.
-// ponytail: "atur" (03.3) and "baru" / bikin (03.4) land in M3.
 Future<RecentPick?> showCategoryPicker(
   BuildContext context, {
   required CategoryKind kind,
@@ -52,6 +53,17 @@ class _CategoryPickerState extends ConsumerState<_CategoryPicker> {
     _place.dispose();
     _query.dispose();
     super.dispose();
+  }
+
+  /// 03.4 from the grid; the new category comes back picked.
+  Future<void> _create(String term) async {
+    final c = await showCategoryForm(context, kind: widget.kind, name: term);
+    if (c == null || !mounted || c.kind != widget.kind) return;
+    setState(() {
+      _picked = c;
+      _query.clear();
+      if (!_placeTyped) _place.clear();
+    });
   }
 
   @override
@@ -135,32 +147,31 @@ class _CategoryPickerState extends ConsumerState<_CategoryPicker> {
           ],
           const SizedBox(height: 18),
           Expanded(
-            child: cats.isEmpty
-                ? Center(
-                    child: Text(
-                      l.pickerNoMatch,
-                      style: AppText.caption.copyWith(color: AppColors.muted),
-                    ),
-                  )
-                : GridView.count(
-                    crossAxisCount: 4,
-                    mainAxisSpacing: 10,
-                    crossAxisSpacing: 8,
-                    mainAxisExtent: 88,
-                    children: [
-                      for (final c in cats)
-                        _CategoryTile(
-                          category: c,
-                          on: c.id == picked?.id,
-                          // Tap the picked one again to unpick.
-                          onTap: () => setState(() {
-                            _picked = c.id == picked?.id ? null : c;
-                            // The prefilled place belonged to the old pick.
-                            if (!_placeTyped) _place.clear();
-                          }),
-                        ),
-                    ],
+            child: GridView.count(
+              crossAxisCount: 4,
+              mainAxisSpacing: 10,
+              crossAxisSpacing: 8,
+              mainAxisExtent: 88,
+              children: [
+                for (final c in cats)
+                  _CategoryTile(
+                    category: c,
+                    on: c.id == picked?.id,
+                    // Tap the picked one again to unpick.
+                    onTap: () => setState(() {
+                      _picked = c.id == picked?.id ? null : c;
+                      // The prefilled place belonged to the old pick.
+                      if (!_placeTyped) _place.clear();
+                    }),
                   ),
+                NewCategoryTile(
+                  label: term.isNotEmpty && cats.isEmpty
+                      ? l.categoryCreateNamed(term)
+                      : l.categoryNew,
+                  onTap: () => _create(term),
+                ),
+              ],
+            ),
           ),
           Text(
             l.pickerWhere,

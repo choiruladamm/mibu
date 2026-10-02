@@ -11,6 +11,7 @@ import '../../../core/money.dart';
 import '../../../core/tokens.dart';
 import '../../../core/widgets/tab_bar.dart';
 import '../../budget/views/budget_sheet.dart';
+import '../../categories/views/category_form_sheet.dart';
 import '../view_models/pockets_view_model.dart';
 
 /// 02.2 kantong. Isi ulang and impian are post-MVP.
@@ -66,7 +67,17 @@ class PocketsView extends ConsumerWidget {
                           child: Text(l.tabPockets, style: AppText.title),
                         ),
                       ),
-                      _NewButton(label: l.pocketsNew, onTap: () {}), // → 03.4
+                      _NewButton(
+                        label: l.pocketsNew,
+                        onTap: () async {
+                          final c = await showCategoryForm(context);
+                          if (c?.monthlyLimit != null) {
+                            ref
+                                .read(selectedPocketProvider.notifier)
+                                .select(c!.id);
+                          }
+                        },
+                      ),
                     ],
                   ),
                   const SizedBox(height: 22),
@@ -105,7 +116,21 @@ class PocketsView extends ConsumerWidget {
                           .select,
                     ),
                     const SizedBox(height: 18),
-                    _Detail(pocket: selected, daysLeft: s.daysLeft),
+                    _Detail(
+                      pocket: selected,
+                      daysLeft: s.daysLeft,
+                      // A pocket is an expense category with a limit.
+                      onManage: () => showCategoryForm(
+                        context,
+                        category: Category(
+                          id: selected.id,
+                          emoji: selected.emoji,
+                          name: selected.name,
+                          kind: CategoryKind.expense,
+                          monthlyLimit: selected.budget,
+                        ),
+                      ),
+                    ),
                   ],
                 ],
               ),
@@ -424,10 +449,15 @@ class _Jar extends StatelessWidget {
 
 /// Kartu kantong yang dipilih.
 class _Detail extends StatelessWidget {
-  const _Detail({required this.pocket, required this.daysLeft});
+  const _Detail({
+    required this.pocket,
+    required this.daysLeft,
+    required this.onManage,
+  });
 
   final Pocket pocket;
   final int daysLeft;
+  final VoidCallback onManage; // → 03.5
 
   @override
   Widget build(BuildContext context) {
@@ -519,7 +549,7 @@ class _Detail extends StatelessWidget {
               style: muted,
             ),
             const SizedBox(height: 2),
-            _OutlineButton(label: l.pocketManage, onTap: () {}), // → 03.5
+            _OutlineButton(label: l.pocketManage, onTap: onManage),
           ],
         ),
       ),

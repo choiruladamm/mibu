@@ -397,7 +397,7 @@ abstract class AppLocalizations {
   /// No description provided for @pickerSearch.
   ///
   /// In id, this message translates to:
-  /// **'cari kategori'**
+  /// **'cari atau bikin kategori'**
   String get pickerSearch;
 
   /// No description provided for @pickerRecent.
@@ -801,6 +801,180 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'{days} hari lagi'**
   String pocketsDaysLeft(int days);
+
+  /// No description provided for @pickerManage.
+  ///
+  /// In id, this message translates to:
+  /// **'atur'**
+  String get pickerManage;
+
+  /// No description provided for @categoryNew.
+  ///
+  /// In id, this message translates to:
+  /// **'baru'**
+  String get categoryNew;
+
+  /// No description provided for @categoryCreateNamed.
+  ///
+  /// In id, this message translates to:
+  /// **'bikin “{name}”'**
+  String categoryCreateNamed(String name);
+
+  /// No description provided for @categoryNewTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'kategori baru'**
+  String get categoryNewTitle;
+
+  /// No description provided for @categoryEditTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'edit kategori'**
+  String get categoryEditTitle;
+
+  /// No description provided for @cancel.
+  ///
+  /// In id, this message translates to:
+  /// **'batal'**
+  String get cancel;
+
+  /// No description provided for @categoryNameHint.
+  ///
+  /// In id, this message translates to:
+  /// **'kasih nama'**
+  String get categoryNameHint;
+
+  /// No description provided for @categoryNameLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'nama kategori'**
+  String get categoryNameLabel;
+
+  /// No description provided for @categorySuggest.
+  ///
+  /// In id, this message translates to:
+  /// **'saran'**
+  String get categorySuggest;
+
+  /// No description provided for @categorySuggestFor.
+  ///
+  /// In id, this message translates to:
+  /// **'buat “{name}”'**
+  String categorySuggestFor(String name);
+
+  /// No description provided for @categoryUseEmoji.
+  ///
+  /// In id, this message translates to:
+  /// **'pakai {emoji}'**
+  String categoryUseEmoji(String emoji);
+
+  /// No description provided for @categoryKindLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'masuk ke'**
+  String get categoryKindLabel;
+
+  /// No description provided for @categoryPocket.
+  ///
+  /// In id, this message translates to:
+  /// **'kantong bulanan'**
+  String get categoryPocket;
+
+  /// No description provided for @categoryPocketOn.
+  ///
+  /// In id, this message translates to:
+  /// **'mibu ngingetin kalau udah mau abis'**
+  String get categoryPocketOn;
+
+  /// No description provided for @categoryPocketOff.
+  ///
+  /// In id, this message translates to:
+  /// **'tanpa batas, cuma dicatat'**
+  String get categoryPocketOff;
+
+  /// No description provided for @categoryCreate.
+  ///
+  /// In id, this message translates to:
+  /// **'bikin {emoji} {name}'**
+  String categoryCreate(String emoji, String name);
+
+  /// No description provided for @categorySave.
+  ///
+  /// In id, this message translates to:
+  /// **'simpan {emoji} {name}'**
+  String categorySave(String emoji, String name);
+
+  /// No description provided for @categoryFallbackName.
+  ///
+  /// In id, this message translates to:
+  /// **'kategori'**
+  String get categoryFallbackName;
+
+  /// No description provided for @categoryUsage.
+  ///
+  /// In id, this message translates to:
+  /// **'{count} catatan · {amount} tahun ini'**
+  String categoryUsage(int count, String amount);
+
+  /// No description provided for @categoryUnused.
+  ///
+  /// In id, this message translates to:
+  /// **'belum dipakai'**
+  String get categoryUnused;
+
+  /// No description provided for @limitPerMonth.
+  ///
+  /// In id, this message translates to:
+  /// **'/ bulan'**
+  String get limitPerMonth;
+
+  /// No description provided for @limitFieldLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'batas kantong per bulan'**
+  String get limitFieldLabel;
+
+  /// No description provided for @limitSliderLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'geser batas kantong'**
+  String get limitSliderLabel;
+
+  /// No description provided for @limitMax.
+  ///
+  /// In id, this message translates to:
+  /// **'maks Rp100jt'**
+  String get limitMax;
+
+  /// No description provided for @limitPerDay.
+  ///
+  /// In id, this message translates to:
+  /// **'≈ {amount} sehari'**
+  String limitPerDay(String amount);
+
+  /// No description provided for @limitEmpty.
+  ///
+  /// In id, this message translates to:
+  /// **'geser atau ketik'**
+  String get limitEmpty;
+
+  /// No description provided for @limitOver.
+  ///
+  /// In id, this message translates to:
+  /// **'lewat {amount}'**
+  String limitOver(String amount);
+
+  /// No description provided for @limitFree.
+  ///
+  /// In id, this message translates to:
+  /// **'sisa budget {amount}'**
+  String limitFree(String amount);
+
+  /// No description provided for @limitSetBudget.
+  ///
+  /// In id, this message translates to:
+  /// **'＋ pasang budget bulanan'**
+  String get limitSetBudget;
 }
 
 class _AppLocalizationsDelegate

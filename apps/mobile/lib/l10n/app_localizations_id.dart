@@ -179,7 +179,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get pickerTitle => 'ini buat apa?';
 
   @override
-  String get pickerSearch => 'cari kategori';
+  String get pickerSearch => 'cari atau bikin kategori';
 
   @override
   String get pickerRecent => 'terakhir · sekali tap langsung keisi';
@@ -424,4 +424,109 @@ class AppLocalizationsId extends AppLocalizations {
   String pocketsDaysLeft(int days) {
     return '$days hari lagi';
   }
+
+  @override
+  String get pickerManage => 'atur';
+
+  @override
+  String get categoryNew => 'baru';
+
+  @override
+  String categoryCreateNamed(String name) {
+    return 'bikin “$name”';
+  }
+
+  @override
+  String get categoryNewTitle => 'kategori baru';
+
+  @override
+  String get categoryEditTitle => 'edit kategori';
+
+  @override
+  String get cancel => 'batal';
+
+  @override
+  String get categoryNameHint => 'kasih nama';
+
+  @override
+  String get categoryNameLabel => 'nama kategori';
+
+  @override
+  String get categorySuggest => 'saran';
+
+  @override
+  String categorySuggestFor(String name) {
+    return 'buat “$name”';
+  }
+
+  @override
+  String categoryUseEmoji(String emoji) {
+    return 'pakai $emoji';
+  }
+
+  @override
+  String get categoryKindLabel => 'masuk ke';
+
+  @override
+  String get categoryPocket => 'kantong bulanan';
+
+  @override
+  String get categoryPocketOn => 'mibu ngingetin kalau udah mau abis';
+
+  @override
+  String get categoryPocketOff => 'tanpa batas, cuma dicatat';
+
+  @override
+  String categoryCreate(String emoji, String name) {
+    return 'bikin $emoji $name';
+  }
+
+  @override
+  String categorySave(String emoji, String name) {
+    return 'simpan $emoji $name';
+  }
+
+  @override
+  String get categoryFallbackName => 'kategori';
+
+  @override
+  String categoryUsage(int count, String amount) {
+    return '$count catatan · $amount tahun ini';
+  }
+
+  @override
+  String get categoryUnused => 'belum dipakai';
+
+  @override
+  String get limitPerMonth => '/ bulan';
+
+  @override
+  String get limitFieldLabel => 'batas kantong per bulan';
+
+  @override
+  String get limitSliderLabel => 'geser batas kantong';
+
+  @override
+  String get limitMax => 'maks Rp100jt';
+
+  @override
+  String limitPerDay(String amount) {
+    return '≈ $amount sehari';
+  }
+
+  @override
+  String get limitEmpty => 'geser atau ketik';
+
+  @override
+  String limitOver(String amount) {
+    return 'lewat $amount';
+  }
+
+  @override
+  String limitFree(String amount) {
+    return 'sisa budget $amount';
+  }
+
+  @override
+  String get limitSetBudget => '＋ pasang budget bulanan';
 }

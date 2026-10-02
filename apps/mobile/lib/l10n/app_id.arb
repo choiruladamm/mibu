@@ -109,7 +109,7 @@
   "keyThreeZeros": "tambah tiga nol",
   "keyBackspace": "hapus satu angka",
   "pickerTitle": "ini buat apa?",
-  "pickerSearch": "cari kategori",
+  "pickerSearch": "cari atau bikin kategori",
   "pickerRecent": "terakhir · sekali tap langsung keisi",
   "pickerWhere": "di mana",
   "pickerUse": "pakai {emoji} {name}",
@@ -338,5 +338,106 @@
         "type": "int"
       }
     }
-  }
+  },
+  "pickerManage": "atur",
+  "categoryNew": "baru",
+  "categoryCreateNamed": "bikin “{name}”",
+  "@categoryCreateNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryNewTitle": "kategori baru",
+  "categoryEditTitle": "edit kategori",
+  "cancel": "batal",
+  "categoryNameHint": "kasih nama",
+  "categoryNameLabel": "nama kategori",
+  "categorySuggest": "saran",
+  "categorySuggestFor": "buat “{name}”",
+  "@categorySuggestFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryUseEmoji": "pakai {emoji}",
+  "@categoryUseEmoji": {
+    "placeholders": {
+      "emoji": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryKindLabel": "masuk ke",
+  "categoryPocket": "kantong bulanan",
+  "categoryPocketOn": "mibu ngingetin kalau udah mau abis",
+  "categoryPocketOff": "tanpa batas, cuma dicatat",
+  "categoryCreate": "bikin {emoji} {name}",
+  "@categoryCreate": {
+    "placeholders": {
+      "emoji": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "categorySave": "simpan {emoji} {name}",
+  "@categorySave": {
+    "placeholders": {
+      "emoji": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryFallbackName": "kategori",
+  "categoryUsage": "{count} catatan · {amount} tahun ini",
+  "@categoryUsage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryUnused": "belum dipakai",
+  "limitPerMonth": "/ bulan",
+  "limitFieldLabel": "batas kantong per bulan",
+  "limitSliderLabel": "geser batas kantong",
+  "limitMax": "maks Rp100jt",
+  "limitPerDay": "≈ {amount} sehari",
+  "@limitPerDay": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "limitEmpty": "geser atau ketik",
+  "limitOver": "lewat {amount}",
+  "@limitOver": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "limitFree": "sisa budget {amount}",
+  "@limitFree": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "limitSetBudget": "＋ pasang budget bulanan"
 }
