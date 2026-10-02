@@ -72,7 +72,7 @@ Tanda: **[diupdate]** = aturan/perilaku berubah dari design, **[perlu design]** 
   - Chip buat apa → 03.2, `+ catatan` → NoteSheet.
   - `simpan pengeluaran` / `simpan pemasukan` → 02.1.
 - [ ] **03.2 buat apa?** (sheet) — **[v2]** judul "buat apa?", "cari atau bikin…", chip yang pakai limit dapet "sisa Rp…" (tebal kalau ≥85%), boleh dilewati (tanpa kategori), `terakhir` (kategori + tempat sekali tap), grid kategori, field `di mana`, `atur` → 03.3.
-- [ ] **03.3 buat apa aja** — **[v2]** grid; yang pakai limit dapet chip ink "limit Rp…", sisanya "N catatan" / "belum dipakai"; footer 🫙 "yang ada limit jadi toples di tab kantong…"; tap ikon (badge pensil) = IconSheet 00.21, langsung kesimpan + toast "ikon X diganti" `batalin`; tap nama = edit 03.5 (hapus lewat 03.5 → 03.6); tahan & geser = urutin.
+- [ ] **03.3 buat apa aja** — **[v2]** grid; yang pakai limit dapet chip ink "limit Rp…", sisanya "N catatan" / "belum dipakai"; footer 🫙 "yang ada limit jadi toples di tab kantong…"; tap ikon (badge pensil) = IconSheet 00.21, langsung kesimpan + toast "ikon X diganti" `batalin`; tap nama = edit 03.5; tahan & geser = urutin. Tombol tong sampah di header → mode hapus (03.3d): judul "hapus yang mana?", badge − (tile goyang), tap − → 03.6, `selesai` keluar. "lain-lain" (catatan tanpa buat apa, bukan baris database) selalu 🔒, tile redup; "gajian" 🔒 cuma di mode hapus (nama & ikon masih bisa diganti, nggak ada tombol hapus di 03.5). Footer mode hapus: "lain-lain & gajian nggak bisa dihapus…".
 - [ ] **03.4 bikin baru / 03.5 edit** (satu widget, `mode=new|edit`)
   - Nama + emoji otomatis dari kata kunci (makan, kopi, kucing, bensin, …) sampai user pilih manual. Saran 3 emoji + palet 16.
   - `masuk ke`: pengeluaran / pemasukan.

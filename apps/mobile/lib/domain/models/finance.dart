@@ -11,11 +11,13 @@ class Category {
     required this.name,
     required this.kind,
     this.monthlyLimit,
+    this.isPayday = false,
   });
 
   final String id, emoji, name;
   final CategoryKind kind;
   final int? monthlyLimit; // set = kantong
+  final bool isPayday; // gajian: can't be deleted, counts the payday
 }
 
 /// "terakhir" in 03.2: a category + place logged recently.

@@ -90,6 +90,51 @@ void main() {
     await settle();
     expect(await tester.runAsync(ngopi), '☕');
 
+    // lain-lain: entries without a buat apa, locked in both modes.
+    final loose = (await tester.runAsync(
+      () => (db.select(
+        db.transactions,
+      )..where((t) => t.categoryId.isNull() & t.deletedAt.isNull())).get(),
+    ))!.length;
+    expect(find.text('lain-lain'), findsOneWidget);
+    expect(
+      find.text(loose == 0 ? 'belum kepake' : '$loose catatan'),
+      findsWidgets,
+    );
+    expect(find.bySemanticsLabel('dikunci'), findsOneWidget);
+
+    // Mode hapus 03.3d: − on each, gajian + lain-lain locked, no baru.
+    await tester.tap(find.bySemanticsLabel('hapus buat apa'));
+    await settle();
+    expect(find.text('hapus yang mana?'), findsOneWidget);
+    expect(
+      findMeta(['tap − buat hapus', 'catatannya dipindahin dulu, nggak ilang']),
+      findsOneWidget,
+    );
+    expect(find.bySemanticsLabel('hapus anabul'), findsOneWidget);
+    expect(find.bySemanticsLabel('hapus gajian'), findsNothing);
+    expect(find.bySemanticsLabel('dikunci'), findsNWidgets(2));
+    expect(find.bySemanticsLabel('ganti ikon anabul'), findsNothing);
+    expect(find.text('baru'), findsOneWidget); // only 03.2's, behind 03.3
+    expect(
+      find.textContaining('lain-lain & gajian nggak bisa dihapus'),
+      findsOneWidget,
+    );
+
+    // tap − → 03.6, which stays open on top of 03.3.
+    await tester.tap(find.bySemanticsLabel('hapus anabul'));
+    await settle();
+    expect(find.bySemanticsLabel('tahan buat hapus anabul'), findsOneWidget);
+    await tester.tapAt(const Offset(195, 40)); // scrim: back to 03.3d
+    await settle();
+    expect(find.text('hapus yang mana?'), findsOneWidget);
+
+    await tester.tap(find.text('selesai'));
+    await settle();
+    expect(find.text('buat apa aja'), findsOneWidget);
+    expect(find.bySemanticsLabel('ganti ikon anabul'), findsOneWidget);
+    expect(find.text('baru'), findsNWidgets(2)); // 03.3's + 03.2's
+
     // ponytail: tahan & geser is checked by hand on device; after a
     // simulated drag the next frame never returns under flutter_test.
     // Cover reorderCategories in the repo test; revisit the widget drag.

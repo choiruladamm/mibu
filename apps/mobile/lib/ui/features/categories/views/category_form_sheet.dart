@@ -399,7 +399,7 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
                   Row(
                     spacing: 10,
                     children: [
-                      if (_edit case final c?)
+                      if (_edit case final c? when !c.isPayday)
                         _TrashButton(
                           label: l.deleteCategory,
                           onTap: () async {

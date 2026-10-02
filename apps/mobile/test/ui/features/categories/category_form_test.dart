@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mibu/data/database/app_database.dart';
+import 'package:mibu/data/repositories/finance_repository.dart';
 import 'package:mibu/l10n/app_localizations.dart';
 import 'package:mibu/ui/core/clock.dart';
 import 'package:mibu/ui/core/theme.dart';
@@ -158,6 +159,30 @@ void main() {
     await settle(tester);
     expect(await limitOf(db, 'anabul'), 1000000);
     expect(find.text('opsional, bisa nanti'), findsNothing); // back on
+
+    await tester.pumpWidget(const SizedBox());
+    await db.close();
+  });
+
+  testWidgets('03.5: gajian has no hapus (it counts the payday)', (
+    tester,
+  ) async {
+    final db = await pump(tester, const PocketsView());
+    final cats = (await tester.runAsync(
+      () => FinanceRepository(db).watchCategories(cal(now)).first,
+    ))!;
+    final ctx = tester.element(find.byType(PocketsView));
+
+    showCategoryForm(ctx, category: cats.firstWhere((c) => c.isPayday));
+    await settle(tester);
+    expect(find.text('edit'), findsOneWidget);
+    expect(find.bySemanticsLabel('hapus'), findsNothing);
+    await tester.tap(find.text('batal'));
+    await settle(tester);
+
+    showCategoryForm(ctx, category: cats.firstWhere((c) => c.name == 'anabul'));
+    await settle(tester);
+    expect(find.bySemanticsLabel('hapus'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox());
     await db.close();

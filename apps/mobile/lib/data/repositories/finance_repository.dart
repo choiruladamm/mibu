@@ -456,6 +456,7 @@ class FinanceRepository {
     name: r.name,
     kind: r.kind,
     monthlyLimit: limit,
+    isPayday: r.isPayday,
   );
 
   /// Categories, each with its limit in force for [period].

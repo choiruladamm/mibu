@@ -1456,6 +1456,60 @@ abstract class AppLocalizations {
   /// **'edit {name}'**
   String manageEdit(String name);
 
+  /// No description provided for @manageTitleDelete.
+  ///
+  /// In id, this message translates to:
+  /// **'hapus yang mana?'**
+  String get manageTitleDelete;
+
+  /// No description provided for @manageDeleteMode.
+  ///
+  /// In id, this message translates to:
+  /// **'hapus buat apa'**
+  String get manageDeleteMode;
+
+  /// No description provided for @manageDeleteDone.
+  ///
+  /// In id, this message translates to:
+  /// **'selesai'**
+  String get manageDeleteDone;
+
+  /// No description provided for @manageHintMinus.
+  ///
+  /// In id, this message translates to:
+  /// **'tap − buat hapus'**
+  String get manageHintMinus;
+
+  /// No description provided for @manageHintMinusBold.
+  ///
+  /// In id, this message translates to:
+  /// **'tap −'**
+  String get manageHintMinusBold;
+
+  /// No description provided for @manageHintMoved.
+  ///
+  /// In id, this message translates to:
+  /// **'catatannya dipindahin dulu, nggak ilang'**
+  String get manageHintMoved;
+
+  /// No description provided for @manageLocked.
+  ///
+  /// In id, this message translates to:
+  /// **'dikunci'**
+  String get manageLocked;
+
+  /// No description provided for @manageDelete.
+  ///
+  /// In id, this message translates to:
+  /// **'hapus {name}'**
+  String manageDelete(String name);
+
+  /// No description provided for @manageLockedNote.
+  ///
+  /// In id, this message translates to:
+  /// **'lain-lain & gajian nggak bisa dihapus. lain-lain jadi tempat pindahan catatan, gajian dipakai buat ngitung hari gajian.'**
+  String get manageLockedNote;
+
   /// No description provided for @manageIcon.
   ///
   /// In id, this message translates to:

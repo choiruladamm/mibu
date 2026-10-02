@@ -861,6 +861,36 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
+  String get manageTitleDelete => 'hapus yang mana?';
+
+  @override
+  String get manageDeleteMode => 'hapus buat apa';
+
+  @override
+  String get manageDeleteDone => 'selesai';
+
+  @override
+  String get manageHintMinus => 'tap − buat hapus';
+
+  @override
+  String get manageHintMinusBold => 'tap −';
+
+  @override
+  String get manageHintMoved => 'catatannya dipindahin dulu, nggak ilang';
+
+  @override
+  String get manageLocked => 'dikunci';
+
+  @override
+  String manageDelete(String name) {
+    return 'hapus $name';
+  }
+
+  @override
+  String get manageLockedNote =>
+      'lain-lain & gajian nggak bisa dihapus. lain-lain jadi tempat pindahan catatan, gajian dipakai buat ngitung hari gajian.';
+
+  @override
   String manageIcon(String name) {
     return 'ganti ikon $name';
   }

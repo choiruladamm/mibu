@@ -84,8 +84,10 @@ abstract final class AppMotion {
   static const select = Duration(milliseconds: 200); // pill/bar pindah
   static const fill = Duration(milliseconds: 300); // isi toples
   static const sheet = Duration(milliseconds: 280); // sheet naik
+  static const wiggle = Duration(milliseconds: 360); // ±2°, mode hapus 03.3d
   static const cursorBlink = Duration(seconds: 1);
   static const hold = Duration(seconds: 1); // tahan buat hapus, linear
+  static const wiggleAngle = 2.0; // derajat
   static const ease = Curves.easeOut;
 }
 
