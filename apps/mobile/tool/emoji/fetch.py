@@ -1,26 +1,27 @@
 #!/usr/bin/env python3
-"""Bundle Microsoft Fluent Emoji 3D (MIT) for every emoji the app uses.
+"""Bundle Microsoft Fluent Emoji 3D (MIT) for every icon in the catalog.
 
-Run from apps/mobile after adding emoji to the category palette, emojiIdeas
-or any other literal in lib/:  python3 tool/emoji/fetch.py
-Writes assets/emoji/<key>.png (128px), key = hex codepoints without FE0F,
-joined by "_" (see AppEmoji). Needs `gh` (GitHub API) and macOS `sips`.
+Run from apps/mobile after editing lib/domain/emoji_catalog.dart:
+  python3 tool/emoji/fetch.py
+Writes assets/emoji/<key>.webp (256px), key = hex codepoints without FE0F,
+joined by "_" (see AppEmoji), and removes art no longer in the catalog.
+Needs `gh` (GitHub API) and `cwebp` (brew install webp).
 """
 
 import concurrent.futures as cf
-import glob
 import json
 import os
 import re
 import subprocess
 import sys
+import time
 import urllib.parse
 import urllib.request
 
 REPO = "microsoft/fluentui-emoji"
 RAW = f"https://raw.githubusercontent.com/{REPO}/main/"
 OUT = "assets/emoji"
-SIZE = 128  # largest use is 30px × 3x density
+SIZE = 256  # largest use: the 92px icon in 03.4, ~3x density
 
 
 def key(emoji: str) -> str:
@@ -28,21 +29,20 @@ def key(emoji: str) -> str:
 
 
 def used_emoji() -> set[str]:
-    """Emoji literals in lib/ (category palette, ideas, seeds, fallbacks)."""
-    found = set()
-    for path in glob.glob("lib/**/*.dart", recursive=True):
-        if "/l10n/" in path:
-            continue
-        for s in re.findall(r"'([^'\n]{1,8})'", open(path, encoding="utf-8").read()):
-            if any(0x1F000 <= ord(c) <= 0x1FAFF or 0x2600 <= ord(c) <= 0x27BF
-                   for c in s) and not re.search(r"[A-Za-z0-9 ]", s):
-                found.add(s)
-    return found
+    """Every icon in the catalog."""
+    src = open("lib/domain/emoji_catalog.dart", encoding="utf-8").read()
+    return set(re.findall(r"emoji: '([^']+)'", src))
 
 
-def fetch(url: str) -> bytes:
-    with urllib.request.urlopen(url, timeout=30) as r:
-        return r.read()
+def fetch(url: str, tries: int = 4) -> bytes:
+    for i in range(tries):
+        try:
+            with urllib.request.urlopen(url, timeout=30) as r:
+                return r.read()
+        except OSError:
+            if i == tries - 1:
+                raise
+            time.sleep(2 * (i + 1))
 
 
 def main() -> None:
@@ -77,10 +77,19 @@ def main() -> None:
         if png is None:
             missing.append(e)
             continue
-        dest = f"{OUT}/{k}.png"
-        open(dest, "wb").write(fetch(RAW + urllib.parse.quote(png)))
-        subprocess.run(["sips", "-Z", str(SIZE), dest], check=True,
-                       stdout=subprocess.DEVNULL)
+        dest = f"{OUT}/{k}.webp"
+        if os.path.exists(dest):
+            continue
+        src = f"{OUT}/{k}.src.png"
+        open(src, "wb").write(fetch(RAW + urllib.parse.quote(png)))
+        subprocess.run(["cwebp", "-quiet", "-q", "80", "-alpha_q", "90",
+                        "-resize", str(SIZE), str(SIZE), src, "-o", dest],
+                       check=True)
+        os.remove(src)
+    for f in os.listdir(OUT):
+        # PNG = older format or a half-done download; webp off the catalog.
+        if f.endswith(".png") or (f.endswith(".webp") and f[:-5] not in want):
+            os.remove(f"{OUT}/{f}")
     print(f"{len(want) - len(missing)} emoji in {OUT}")
     if missing:
         print("no Fluent 3D art for:", " ".join(missing), file=sys.stderr)
