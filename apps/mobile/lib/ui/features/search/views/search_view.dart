@@ -41,6 +41,7 @@ class _SearchViewState extends ConsumerState<SearchView> {
   static const _preview = 3;
 
   final _controller = TextEditingController();
+  final _focus = FocusNode();
   CategoryKind? _kind; // null = semua
   int? _day; // day of month picked on the summary ticks
   bool _allMonths = false;
@@ -49,6 +50,7 @@ class _SearchViewState extends ConsumerState<SearchView> {
   @override
   void dispose() {
     _controller.dispose();
+    _focus.dispose();
     super.dispose();
   }
 
@@ -261,17 +263,25 @@ class _SearchViewState extends ConsumerState<SearchView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            NavHeader(
-              title: l.search,
-              sub: [_allMonths ? l.searchAllMonths : l.searchSub(monthName)],
-              backLabel: l.home,
-              actionIcon: HugeIcons.strokeRoundedCancel01,
-              actionLabel: l.searchClear,
-              onAction: () => setState(() {
-                _controller.clear();
-                _allMonths = false;
-                _reset();
-              }),
+            // Part of the field: tapping × mustn't unfocus it first
+            // (TapOutsideUnfocus) — closing the keyboard hands the old text
+            // back and undoes the clear.
+            TextFieldTapRegion(
+              child: NavHeader(
+                title: l.search,
+                sub: [_allMonths ? l.searchAllMonths : l.searchSub(monthName)],
+                backLabel: l.home,
+                actionIcon: HugeIcons.strokeRoundedCancel01,
+                actionLabel: l.searchClear,
+                onAction: () {
+                  setState(() {
+                    _controller.clear();
+                    _allMonths = false;
+                    _reset();
+                  });
+                  _focus.requestFocus();
+                },
+              ),
             ),
             Expanded(
               child: ListView(
@@ -286,6 +296,7 @@ class _SearchViewState extends ConsumerState<SearchView> {
                 children: [
                   _Field(
                     controller: _controller,
+                    focus: _focus,
                     hint: l.searchHint,
                     onChanged: (_) => setState(_reset),
                     onSubmitted: _remember,
@@ -294,7 +305,7 @@ class _SearchViewState extends ConsumerState<SearchView> {
                     ...idle()
                   else ...[
                     const SizedBox(height: 16),
-                    Wrap(
+                    Row(
                       spacing: 8,
                       children: [
                         for (final MapEntry(key: k, value: label)
@@ -322,12 +333,14 @@ class _SearchViewState extends ConsumerState<SearchView> {
 class _Field extends StatelessWidget {
   const _Field({
     required this.controller,
+    required this.focus,
     required this.hint,
     required this.onChanged,
     required this.onSubmitted,
   });
 
   final TextEditingController controller;
+  final FocusNode focus;
   final String hint;
   final ValueChanged<String> onChanged, onSubmitted;
 
@@ -352,6 +365,7 @@ class _Field extends StatelessWidget {
           Expanded(
             child: TextField(
               controller: controller,
+              focusNode: focus,
               autofocus: true,
               onChanged: onChanged,
               onSubmitted: onSubmitted,
@@ -604,31 +618,34 @@ class _Summary extends StatelessWidget {
                   ),
           ),
           const SizedBox(height: 8),
-          Semantics(
-            label: l.searchTicksLabel,
-            child: LayoutBuilder(
-              builder: (context, c) {
-                void pick(Offset p) {
-                  final d = s.nearestDay(
-                    (p.dx / c.maxWidth * (last - 1)).round().clamp(
-                          0,
-                          last - 1,
-                        ) +
-                        1,
-                  );
-                  if (d == sel) return;
-                  HapticFeedback.selectionClick();
-                  onPick(d);
-                }
+          // Expanded: absorbs font-metric slack so the fixed-height card never overflows.
+          Expanded(
+            child: Semantics(
+              label: l.searchTicksLabel,
+              child: LayoutBuilder(
+                builder: (context, c) {
+                  void pick(Offset p) {
+                    final d = s.nearestDay(
+                      (p.dx / c.maxWidth * (last - 1)).round().clamp(
+                            0,
+                            last - 1,
+                          ) +
+                          1,
+                    );
+                    if (d == sel) return;
+                    HapticFeedback.selectionClick();
+                    onPick(d);
+                  }
 
-                return GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTapUp: (e) => pick(e.localPosition),
-                  onHorizontalDragStart: (e) => pick(e.localPosition),
-                  onHorizontalDragUpdate: (e) => pick(e.localPosition),
-                  child: _Ticks(summary: s, last: last, selected: sel),
-                );
-              },
+                  return GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTapUp: (e) => pick(e.localPosition),
+                    onHorizontalDragStart: (e) => pick(e.localPosition),
+                    onHorizontalDragUpdate: (e) => pick(e.localPosition),
+                    child: _Ticks(summary: s, last: last, selected: sel),
+                  );
+                },
+              ),
             ),
           ),
           const SizedBox(height: 6),

@@ -8,6 +8,8 @@ import 'package:mibu/data/database/seed.dart';
 import 'package:mibu/l10n/app_localizations.dart';
 import 'package:mibu/ui/core/clock.dart';
 import 'package:mibu/ui/core/theme.dart';
+import 'package:mibu/ui/core/widgets/sheet.dart';
+import 'package:mibu/ui/core/widgets/tap_outside_unfocus.dart';
 import 'package:mibu/ui/features/search/views/search_view.dart';
 import 'package:drift/drift.dart' show DatabaseConnection;
 
@@ -49,12 +51,14 @@ void main() {
           appDatabaseProvider.overrideWithValue(db),
           clockProvider.overrideWithValue(() => now),
         ],
-        child: MaterialApp.router(
-          theme: AppTheme.light,
-          locale: const Locale('id'),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          routerConfig: router,
+        child: TapOutsideUnfocus(
+          child: MaterialApp.router(
+            theme: AppTheme.light,
+            locale: const Locale('id'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            routerConfig: router,
+          ),
         ),
       ),
     );
@@ -87,6 +91,12 @@ void main() {
     await type(tester, 'dokter hewan');
     expect(find.text('coba cari'), findsNothing);
     expect(find.text('pemasukan'), findsOneWidget);
+    // pills sit in one row, each as wide as its label
+    final pills = ['semua', 'pengeluaran', 'pemasukan']
+        .map((t) => tester.getRect(find.text(t)))
+        .toList();
+    expect(pills.map((r) => r.top).toSet(), hasLength(1));
+    expect(pills[0].right, lessThan(pills[1].left));
     expect(findMeta(['1 hasil']), findsOneWidget);
     expect(find.text('-Rp450K'), findsNWidgets(2)); // summary total + row
   });
@@ -184,5 +194,17 @@ void main() {
       find.text('→ /transaksi?month=2026-10&q=o&filter=expenses'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('04.2: × in the header clears the query (keyboard open)', (
+    tester,
+  ) async {
+    await pump(tester);
+    await tester.tap(find.byType(TextField));
+    await type(tester, 'gojek');
+    expect(findMeta(['2 hasil', '2 hari']), findsOneWidget);
+    await tap(tester, find.byType(CircleButton));
+    expect(find.text('gojek'), findsOneWidget); // idea chip only
+    expect(find.text('coba cari'), findsOneWidget);
   });
 }
