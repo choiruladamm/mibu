@@ -17,7 +17,6 @@ import '../../../core/widgets/meta_line.dart';
 import '../../../core/widgets/sheet.dart';
 import '../../../core/widgets/tab_bar.dart';
 import '../../budget/views/budget_sheet.dart';
-import '../../transactions/view_models/transactions_view_model.dart';
 import '../../../core/widgets/app_emoji.dart';
 
 final _day = DateFormat('d', 'id');
@@ -63,7 +62,6 @@ class _StatsViewState extends ConsumerState<StatsView> {
     final now = ref.watch(nowProvider);
     final entries = ref.watch(allTransactionsProvider).value ?? const [];
     final budget = ref.watch(profileProvider).value?.monthlyBudget;
-    final first = ref.watch(firstMonthProvider).value;
     final periods = ref.watch(periodsProvider);
     final span = _span ?? spanOf(_period, now, periods: periods);
     final s = Stats(
@@ -75,7 +73,8 @@ class _StatsViewState extends ConsumerState<StatsView> {
       periods: periods,
     );
     final prev = shiftSpan(_period, span, -1, periods: periods);
-    final hasPrev = first != null && first.isBefore(span.start);
+    // Any entry before this window (first is a month label, not a date).
+    final hasPrev = entries.any((t) => !t.deleted && t.at.isBefore(span.start));
     final isNow = s.current >= 0;
 
     return Scaffold(
@@ -103,6 +102,7 @@ class _StatsViewState extends ConsumerState<StatsView> {
                 stats: s,
                 previous: spentIn(entries, prev),
                 prevSpan: prev,
+                prevMonthKey: periods.periodOf(prev.start).key,
                 onPrev: hasPrev ? () => _go(_period, prev) : null,
                 onNext: isNow
                     ? null
@@ -204,6 +204,7 @@ class _Hero extends StatelessWidget {
     required this.stats,
     required this.previous,
     required this.prevSpan,
+    required this.prevMonthKey,
     required this.onPrev,
     required this.onNext,
   });
@@ -211,6 +212,7 @@ class _Hero extends StatelessWidget {
   final Stats stats;
   final int previous; // spent in the period before
   final Span prevSpan;
+  final DateTime prevMonthKey; // month label of the period before
   final VoidCallback? onPrev, onNext;
 
   @override
@@ -228,8 +230,7 @@ class _Hero extends StatelessWidget {
     final range = switch (s.period) {
       StatsPeriod.week => _range(s.span),
       StatsPeriod.month =>
-        '${_lower(_monthFull, s.span.start)} '
-            '${s.span.start.year}',
+        '${_lower(_monthFull, s.monthKey)} ${s.monthKey.year}',
       StatsPeriod.year =>
         '${_lower(_monthShort, DateTime(2000))} – '
             '${_lower(_monthShort, DateTime(2000, 12))} ${s.span.start.year}',
@@ -240,7 +241,7 @@ class _Hero extends StatelessWidget {
     } else {
       final than = s.period == StatsPeriod.week
           ? (isNow ? l.statsLastWeek : l.statsWeekBefore)
-          : _lower(_monthFull, prevSpan.start);
+          : _lower(_monthFull, prevMonthKey);
       final diff = context.rpCompact((s.total - previous).abs());
       delta = s.total >= previous
           ? l.statsUp(diff, than)
@@ -911,7 +912,7 @@ class _Pace extends StatelessWidget {
           }
         : switch (s.period) {
             StatsPeriod.week => _range(s.span),
-            StatsPeriod.month => _lower(_monthFull, s.span.start),
+            StatsPeriod.month => _lower(_monthFull, s.monthKey),
             StatsPeriod.year => '${s.span.start.year}',
           };
     final headline = switch (pace) {

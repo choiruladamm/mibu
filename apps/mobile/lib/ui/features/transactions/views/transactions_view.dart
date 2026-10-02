@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 
 import '../../../../domain/models/finance.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../../core/clock.dart';
 import '../../../core/dates.dart';
 import '../../../core/finance_providers.dart';
 import '../../../core/money.dart';
@@ -112,7 +111,7 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
                 offset: const Offset(0, 6),
                 child: MonthMenu(
                   selected: s.month,
-                  now: ref.watch(nowProvider),
+                  now: s.current,
                   spent: ref.watch(totalsProvider).value?.spent ?? const {},
                   min: s.months.first,
                   onPick: (month) {
@@ -170,9 +169,8 @@ class _Body extends ConsumerWidget {
           child: _MonthCarousel(
             state: s,
             onPick: go,
-            onBackToNow: () => ref
-                .read(txMonthProvider.notifier)
-                .select(DateTime(s.today.year, s.today.month)),
+            onBackToNow: () =>
+                ref.read(txMonthProvider.notifier).select(s.current),
             titleLink: titleLink,
             menuOpen: menuOpen,
             onToggleMenu: onToggleMenu,
@@ -272,7 +270,7 @@ class _MonthCarousel extends StatelessWidget {
     final l = AppLocalizations.of(context)!;
     final s = state;
     final i = s.selected;
-    final notNow = s.month != DateTime(s.today.year, s.today.month);
+    final notNow = s.month != s.current;
 
     Widget side({
       required String label,

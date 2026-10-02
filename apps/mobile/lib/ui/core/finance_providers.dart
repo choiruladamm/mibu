@@ -29,11 +29,36 @@ final recentPicksProvider = StreamProvider<List<RecentPick>>(
 
 /// Budget periods (fase 0). Calendar months until the rules load, so screens
 /// never wait on it.
-final _periodsStream = StreamProvider<PeriodResolver>(
-  (ref) => ref.watch(financeRepositoryProvider).watchPeriods(),
+final _periodRules = StreamProvider<List<PeriodRule>>(
+  (ref) => ref.watch(financeRepositoryProvider).watchPeriodRules(),
 );
-final periodsProvider = Provider<PeriodResolver>(
-  (ref) => ref.watch(_periodsStream).value ?? const CalendarMonthResolver(),
+final periodsProvider = Provider<PeriodResolver>((ref) {
+  final rules = ref.watch(_periodRules).value;
+  if (rules == null) return const CalendarMonthResolver();
+  return SegmentedResolver([
+    calendarBase,
+    ...rules,
+  ], salaries: ref.watch(salaryDatesProvider).value ?? const []);
+});
+
+/// The gajian day the periods run on today: the rule in force (a change
+/// queued for the next period doesn't count yet), else the profile's.
+final activePaydayProvider = Provider<int>((ref) {
+  final now = ref.watch(nowProvider);
+  final today = DateTime(now.year, now.month, now.day);
+  final inForce = [
+    for (final r in ref.watch(_periodRules).value ?? const <PeriodRule>[])
+      if (r.mode == PeriodMode.payday && !r.effectiveFrom.isAfter(today)) r,
+  ]..sort((a, b) => a.effectiveFrom.compareTo(b.effectiveFrom));
+  return inForce.isNotEmpty
+      ? inForce.last.paydayDay
+      : ref.watch(profileProvider).value?.payday ?? 25;
+});
+
+/// The month label of the budget period now falls in ("oktober" while it's
+/// 25 sep – 24 okt): what the beranda, 04.1 and the menus start on.
+final currentMonthProvider = Provider<DateTime>(
+  (ref) => ref.watch(currentPeriodProvider).key,
 );
 
 /// The budget period [nowProvider] falls in: "bulan ini" everywhere.
@@ -56,7 +81,11 @@ final totalsProvider = StreamProvider<Totals>((ref) {
   if (profile == null) return const Stream.empty();
   return ref
       .watch(financeRepositoryProvider)
-      .watchTotals(profile, ref.watch(nowProvider));
+      .watchTotals(
+        profile,
+        ref.watch(nowProvider),
+        periods: ref.watch(periodsProvider),
+      );
 });
 final pocketsProvider = StreamProvider<List<Pocket>>(
   (ref) => ref

@@ -115,18 +115,20 @@ typedef SearchDay = ({int count, int sum, int income, int expense});
 enum SearchInsight { mixed, daily, single, busiest, biggest }
 
 /// What the 04.2 summary card (00.14 SearchSummary) shows for [hits]
-/// (non-empty, all in one month). [today] = day of month the card counts
-/// up to (the last day for a past month).
+/// (non-empty, all in one period). Days are numbered from 1 at the period's
+/// [start] (a payday period crosses two months; without [start] = the day of
+/// the month). [today] = the day number the card counts up to (the last for
+/// a past period).
 class SearchSummary {
-  SearchSummary(List<Transaction> hits, {required this.today})
+  SearchSummary(List<Transaction> hits, {required this.today, DateTime? start})
     : count = hits.length,
-      byDay = _byDay(hits),
+      byDay = _byDay(hits, start),
       total = hits.fold(0, (sum, t) => sum + t.amount),
       income = hits.fold(0, (sum, t) => sum + (t.amount > 0 ? t.amount : 0)),
       expense = hits.fold(0, (sum, t) => sum + (t.amount < 0 ? t.amount : 0));
 
   final int count, today;
-  final Map<int, SearchDay> byDay; // day of month → that day's hits
+  final Map<int, SearchDay> byDay; // day number in the period → its hits
   final int total; // signed; negative = pengeluaran
   final int income, expense; // expense ≤ 0
 
@@ -173,11 +175,20 @@ class SearchSummary {
     return keys.reduce((a, b) => score(byDay[b]!) > score(byDay[a]!) ? b : a);
   }
 
-  static Map<int, SearchDay> _byDay(List<Transaction> hits) {
+  /// Day number of [at] in the period starting at [start] (1 = first day).
+  static int dayNumber(DateTime at, DateTime? start) => start == null
+      ? at.day
+      : DateTime.utc(at.year, at.month, at.day)
+                .difference(DateTime.utc(start.year, start.month, start.day))
+                .inDays +
+            1;
+
+  static Map<int, SearchDay> _byDay(List<Transaction> hits, DateTime? start) {
     final m = <int, SearchDay>{};
     for (final t in hits) {
-      final b = m[t.at.day] ?? (count: 0, sum: 0, income: 0, expense: 0);
-      m[t.at.day] = (
+      final n = dayNumber(t.at, start);
+      final b = m[n] ?? (count: 0, sum: 0, income: 0, expense: 0);
+      m[n] = (
         count: b.count + 1,
         sum: b.sum + t.amount,
         income: b.income + (t.amount > 0 ? t.amount : 0),

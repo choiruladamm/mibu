@@ -60,7 +60,7 @@ final settingsProvider = Provider<AsyncValue<SettingsState>>((ref) {
       payday: profile.value!.payday == 0 ? 31 : profile.value!.payday,
       paydayInfo: paydayInfo(
         now: ref.watch(nowProvider),
-        payday: profile.value!.payday,
+        payday: ref.watch(activePaydayProvider),
         salaries: ref.watch(salaryDatesProvider).value ?? const [],
       ),
     ),

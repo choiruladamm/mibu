@@ -96,7 +96,8 @@ class Stats {
     required DateTime today,
     int? budget,
     PeriodResolver periods = const CalendarMonthResolver(),
-  }) : bars = barsOf(period, span) {
+  }) : bars = barsOf(period, span),
+       monthKey = periods.periodOf(span.start).key {
     final day = DateTime(today.year, today.month, today.day);
     _expenses = [
       for (final t in entries)
@@ -144,6 +145,10 @@ class Stats {
 
   final StatsPeriod period;
   final Span span;
+
+  /// The month label of the period [span] starts in (what the "bulan" tab
+  /// calls it: 25 sep – 24 okt is "oktober").
+  final DateTime monthKey;
   final List<Span> bars;
   late final List<Transaction> _expenses; // this period's, live
 

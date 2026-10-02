@@ -2412,7 +2412,7 @@ abstract class AppLocalizations {
   /// No description provided for @paydayBudgetNote.
   ///
   /// In id, this message translates to:
-  /// **'budget & limit tetap per bulan, 1–31.'**
+  /// **'budget & limit ngikut gajian. ganti tanggal berlaku mulai periode berikutnya.'**
   String get paydayBudgetNote;
 
   /// No description provided for @paydaySave.
@@ -2432,6 +2432,12 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'gajian jadi {label}'**
   String paydaySavedTitle(String label);
+
+  /// No description provided for @paydaySavedSubLater.
+  ///
+  /// In id, this message translates to:
+  /// **'berlaku mulai {date}, periode ini selesai dulu'**
+  String paydaySavedSubLater(String date);
 
   /// No description provided for @paydaySavedSubToday.
   ///

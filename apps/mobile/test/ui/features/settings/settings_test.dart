@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mibu/data/database/app_database.dart';
+import 'package:mibu/domain/period.dart';
 import 'package:mibu/l10n/app_localizations.dart';
 import 'package:mibu/ui/core/clock.dart';
 import 'package:mibu/ui/core/finance_providers.dart';
@@ -173,7 +174,12 @@ void main() {
       find.textContaining('Rp193K/hari', findRichText: true),
       findsOneWidget,
     );
-    expect(find.text('budget & limit tetap per bulan, 1–31.'), findsOneWidget);
+    expect(
+      find.text(
+        'budget & limit ngikut gajian. ganti tanggal berlaku mulai periode berikutnya.',
+      ),
+      findsOneWidget,
+    );
     await tester.tap(find.text('simpan tgl 28'));
     await settle();
     expect(await saved(), 28);
@@ -204,6 +210,77 @@ void main() {
     await tester.tap(find.text('nggak jadi'));
     await settle();
     expect(await saved(), 25);
+
+    await tester.pumpWidget(const SizedBox());
+    await db.close();
+  });
+
+  testWidgets('tanggal gajian: after the first period it starts next period', (
+    tester,
+  ) async {
+    final db = await pump(tester);
+    Future<void> settle() async {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 50)),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    // A lived-in setup: gajian 25 since January (not in its first period).
+    await tester.runAsync(
+      () => db
+          .into(db.periodRules)
+          .insert(
+            PeriodRulesCompanion.insert(
+              effectiveFrom: DateTime(2026, 1, 1),
+              mode: PeriodMode.payday,
+              paydayDay: 25,
+              shift: const Value(PaydayShift.previousWorkday),
+            ),
+          ),
+    );
+    await settle();
+    Future<List<PeriodRuleRow>> rules() async =>
+        (await tester.runAsync(() => db.select(db.periodRules).get()))!;
+
+    await tester.tap(find.text('tanggal gajian'));
+    await settle();
+    await tester.tap(find.text('10'));
+    await tester.pump();
+    await tester.tap(find.text('simpan tgl 10'));
+    await settle();
+
+    // 14 okt: the running period ("oktober", 25 sep – 22 okt) ends 23 okt.
+    // The 10th starts from there; what's lived stays.
+    final rows = await rules();
+    expect(rows, hasLength(2));
+    final queued = rows.firstWhere(
+      (r) => r.effectiveFrom == DateTime(2026, 10, 23),
+    );
+    expect((queued.mode, queued.paydayDay), (PeriodMode.payday, 10));
+    expect(find.text('gajian jadi tgl 10'), findsOneWidget);
+    expect(
+      find.text('berlaku mulai jum 23 okt, periode ini selesai dulu'),
+      findsOneWidget,
+    );
+    // Today still counts to the old payday.
+    expect(findMeta(['jum 23 okt', '9 hari lagi']), findsOneWidget);
+
+    // Changing again before then updates the queued rule, not a third one.
+    await tester.tap(find.text('tanggal gajian'));
+    await settle();
+    await tester.tap(find.text('15'));
+    await tester.pump();
+    await tester.tap(find.text('simpan tgl 15'));
+    await settle();
+    final again = await rules();
+    expect(again, hasLength(2));
+    expect(
+      again
+          .firstWhere((r) => r.effectiveFrom == DateTime(2026, 10, 23))
+          .paydayDay,
+      15,
+    );
 
     await tester.pumpWidget(const SizedBox());
     await db.close();

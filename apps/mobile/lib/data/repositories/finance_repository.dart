@@ -180,19 +180,13 @@ class FinanceRepository {
     return row?.amount;
   }
 
-  /// Budget periods in force: calendar months, then each saved rule from
-  /// its date on (v1 saves none).
-  Stream<PeriodResolver> watchPeriods() =>
+  /// The saved period rules (01.4 writes the first; a payday change adds
+  /// one). The calendar base before them is [periodRulesWithBase]'s job.
+  Stream<List<PeriodRule>> watchPeriodRules() =>
       (_db.select(
         _db.periodRules,
       )..where((r) => r.deletedAt.isNull())).watch().map(
-        (rows) => SegmentedResolver([
-          (
-            effectiveFrom: DateTime(1970),
-            mode: PeriodMode.calendar,
-            paydayDay: 0,
-            shift: PaydayShift.none,
-          ),
+        (rows) => [
           for (final r in rows)
             (
               effectiveFrom: r.effectiveFrom,
@@ -200,7 +194,16 @@ class FinanceRepository {
               paydayDay: r.paydayDay,
               shift: r.shift,
             ),
-        ]),
+        ],
+      );
+
+  /// Budget periods in force: calendar months until the first rule, then
+  /// each saved rule from its date on. [salaries] = logged gajian, which
+  /// pull a payday period's start forward when it came in early.
+  Stream<PeriodResolver> watchPeriods({List<DateTime> salaries = const []}) =>
+      watchPeriodRules().map(
+        (rules) =>
+            SegmentedResolver([calendarBase, ...rules], salaries: salaries),
       );
 
   /// 01.4 / 01.4b: writes the profile and the starter categories — every
@@ -225,6 +228,25 @@ class FinanceRepository {
       p,
     )..where((r) => r.deletedAt.isNull())).write(row);
     if (updated == 0) await _db.into(p).insert(row);
+
+    // Periods follow gajian from today on; the first one is "siklus pertama"
+    // (clipped to today). Re-running setup keeps the rule it already has.
+    final rules = _db.periodRules;
+    if (await (_db.selectOnly(rules)..addColumns([rules.id.count()]))
+            .map((r) => r.read(rules.id.count()))
+            .getSingle() ==
+        0) {
+      await _db
+          .into(rules)
+          .insert(
+            PeriodRulesCompanion.insert(
+              effectiveFrom: DateTime(now.year, now.month, now.day),
+              mode: PeriodMode.payday,
+              paydayDay: payday,
+              shift: const Value(PaydayShift.previousWorkday),
+            ),
+          );
+    }
 
     final c = _db.categories;
     if (await (_db.selectOnly(c)..addColumns([c.id.count()]))
@@ -275,7 +297,11 @@ class FinanceRepository {
   // ponytail: reads every entry since opening and sums in Dart (local-time
   // months; SQL strftime is UTC). Fine for years of daily use; move to a
   // cached monthly table if it ever shows.
-  Stream<Totals> watchTotals(Profile profile, DateTime now) {
+  Stream<Totals> watchTotals(
+    Profile profile,
+    DateTime now, {
+    PeriodResolver periods = const CalendarMonthResolver(),
+  }) {
     final today = DateTime(now.year, now.month, now.day);
     final q = _db.selectOnly(_tx)
       ..addColumns([_tx.at, _tx.amount])
@@ -287,7 +313,8 @@ class FinanceRepository {
       final nets = <DateTime, int>{}, spent = <DateTime, int>{};
       for (final r in rows) {
         final at = r.read(_tx.at)!, v = r.read(_tx.amount)!;
-        final month = DateTime(at.year, at.month);
+        // Keyed by the period's month label ("oktober" = 25 sep – 24 okt).
+        final month = periods.periodOf(at).key;
         balance += v;
         nets[month] = (nets[month] ?? 0) + v;
         if (v < 0) {
@@ -439,14 +466,16 @@ class FinanceRepository {
           .map((r) => r == null ? null : _transaction(r));
 
   /// First month with an entry (04.1 carousel start); null = none yet.
-  Stream<DateTime?> watchFirstMonth() {
+  Stream<DateTime?> watchFirstMonth({
+    PeriodResolver periods = const CalendarMonthResolver(),
+  }) {
     final first = _tx.at.min();
     final q = _db.selectOnly(_tx)
       ..addColumns([first])
       ..where(_tx.deletedAt.isNull());
     return q.watchSingle().map(
       (r) => switch (r.read(first)) {
-        final at? => DateTime(at.year, at.month),
+        final at? => periods.periodOf(at).key,
         null => null,
       },
     );
@@ -671,11 +700,60 @@ class FinanceRepository {
         ),
       );
 
-  /// 02.4 tanggal gajian (00.24): 1–31, 31 = akhir.
-  Future<void> setPayday(int day) =>
-      (_db.update(_db.profiles)..where((p) => p.deletedAt.isNull())).write(
-        ProfilesCompanion(payday: Value(day), updatedAt: Value(DateTime.now())),
-      );
+  /// 02.4 tanggal gajian (00.24): 1–31, 31 = akhir. Periods already lived
+  /// stay as they were: the new day starts with the next period. Right after
+  /// 01.4 (still in the first period, or no payday rule yet) it applies at
+  /// once, so a wrong pick at setup is a one-tap fix. Returns the date it
+  /// starts on, null = applies now.
+  Future<DateTime?> setPayday(
+    int day, {
+    required PeriodResolver periods,
+    required DateTime now,
+  }) => _db.transaction(() async {
+    await (_db.update(_db.profiles)..where((p) => p.deletedAt.isNull())).write(
+      ProfilesCompanion(payday: Value(day), updatedAt: Value(DateTime.now())),
+    );
+    final today = DateTime(now.year, now.month, now.day);
+    final rules = _db.periodRules;
+    final rows =
+        await (_db.select(rules)
+              ..where((r) => r.deletedAt.isNull())
+              ..orderBy([(r) => OrderingTerm.asc(r.effectiveFrom)]))
+            .get();
+    final payday = rows.where((r) => r.mode == PeriodMode.payday).toList();
+    final current = periods.periodOf(today);
+
+    void write(PeriodRuleRow? row, DateTime from) => row != null
+        ? (_db.update(rules)..where((r) => r.id.equals(row.id))).write(
+            PeriodRulesCompanion(
+              paydayDay: Value(day),
+              updatedAt: Value(DateTime.now()),
+            ),
+          )
+        : _db
+              .into(rules)
+              .insert(
+                PeriodRulesCompanion.insert(
+                  effectiveFrom: from,
+                  mode: PeriodMode.payday,
+                  paydayDay: day,
+                  shift: const Value(PaydayShift.previousWorkday),
+                ),
+              );
+
+    // No payday rule yet, or still inside the first period: now.
+    if (payday.isEmpty ||
+        (payday.length == 1 && current.start == payday.first.effectiveFrom)) {
+      await Future.sync(() => write(payday.firstOrNull, today));
+      return null;
+    }
+    // Otherwise from the end of the running period; a change already queued
+    // for that day is updated instead of stacked.
+    final from = current.end;
+    final queued = payday.where((r) => r.effectiveFrom == from).firstOrNull;
+    await Future.sync(() => write(queued, from));
+    return from;
+  });
 
   /// 02.4 sembunyiin nominal.
   Future<void> setHideAmounts(bool hide) =>

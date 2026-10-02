@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../domain/models/finance.dart';
+import '../../domain/period.dart';
 import 'app_database.dart';
 
 const _uuid = Uuid();
@@ -357,6 +358,16 @@ Future<void> seedDemo(AppDatabase db, DateTime now) async {
         periodStart: from,
         periodEnd: until,
         amount: const Value(6500000),
+      ),
+    );
+    // Realistic data lives in gajian periods, like a real first run.
+    b.insert(
+      db.periodRules,
+      PeriodRulesCompanion.insert(
+        effectiveFrom: DateTime(start.year, start.month, start.day),
+        mode: PeriodMode.payday,
+        paydayDay: 25,
+        shift: const Value(PaydayShift.previousWorkday),
       ),
     );
     for (final (i, (emoji, name, kind, limit)) in categoryList.indexed) {

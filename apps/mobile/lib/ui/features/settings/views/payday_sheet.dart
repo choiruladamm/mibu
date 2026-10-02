@@ -22,7 +22,12 @@ Future<void> editPayday(BuildContext context, WidgetRef ref) async {
   final day = await showAppSheet<int>(context, _PaydaySheet(saved: saved));
   if (day == null || day == saved || !context.mounted) return;
 
-  await repo.setPayday(day);
+  final now = ref.read(clockProvider)();
+  final startsOn = await repo.setPayday(
+    day,
+    periods: ref.read(periodsProvider),
+    now: now,
+  );
   if (!context.mounted) return;
   final l = AppLocalizations.of(context)!;
   final info = paydayInfo(
@@ -34,10 +39,16 @@ Future<void> editPayday(BuildContext context, WidgetRef ref) async {
     context,
     icon: ToastIcon.check,
     title: l.paydaySavedTitle(_label(l, day)),
-    sub: info.status == PaydayStatus.today
+    sub: startsOn != null
+        ? l.paydaySavedSubLater(_nextDay.format(startsOn).toLowerCase())
+        : info.status == PaydayStatus.today
         ? l.paydaySavedSubToday
         : l.paydaySavedSub(info.daysToNext),
-    onUndo: () => repo.setPayday(saved),
+    onUndo: () => repo.setPayday(
+      saved,
+      periods: ref.read(periodsProvider),
+      now: ref.read(clockProvider)(),
+    ),
   );
 }
 
@@ -72,7 +83,7 @@ class _PaydaySheetState extends ConsumerState<_PaydaySheet> {
     // shares, so only the saldo side moves with the date.
     final period = ref.watch(currentPeriodProvider);
     final budget = ref.watch(budgetInPeriodProvider(period)).value;
-    final monthSpent = totals?.spent[DateTime(now.year, now.month)] ?? 0;
+    final monthSpent = totals?.spent[period.key] ?? 0;
     int jajan(PaydayInfo i) => safeToSpendToday(
       balance: totals?.balance ?? 0,
       spentToday: totals?.spentToday ?? 0,

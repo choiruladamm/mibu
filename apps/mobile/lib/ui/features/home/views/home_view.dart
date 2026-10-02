@@ -347,7 +347,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
               child: Consumer(
                 builder: (context, ref, _) => MonthMenu(
                   selected: s.selected,
-                  now: now,
+                  now: ref.watch(currentMonthProvider),
                   spent: ref.watch(totalsProvider).value?.spent ?? const {},
                   onPick: (month) {
                     ref.read(homeMonthProvider.notifier).select(month);
@@ -451,10 +451,13 @@ class _HomeViewState extends ConsumerState<HomeView> {
     if (s.isBudget) {
       sub = l.heroFromBudget(context.rpCompact(s.budget ?? 0));
     } else if (!s.isCurrent) {
-      sub = l.heroPer(
-        DateTime(s.month.year, s.month.month + 1, 0).day,
-        _monthShort.format(s.month).toLowerCase(),
+      // The period's last day (it ends the day before the next payday).
+      final last = DateTime(
+        s.period.end.year,
+        s.period.end.month,
+        s.period.end.day - 1,
       );
+      sub = l.heroPer(last.day, _monthShort.format(last).toLowerCase());
     } else if (s.overBudget) {
       sub = l.heroBudgetOverSub(context.rpCompact(-(left ?? 0)));
       warn = true;

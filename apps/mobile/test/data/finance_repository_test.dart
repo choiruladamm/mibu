@@ -81,6 +81,76 @@ void main() {
     expect(payday.map((c) => c.name), ['gajian']);
   });
 
+  test(
+    'totals follow the payday periods; a payday change starts later',
+    () async {
+      // Fresh install on 14 okt: gajian 25 from today.
+      final fresh = AppDatabase(
+        DatabaseConnection(
+          NativeDatabase.memory(),
+          closeStreamsSynchronously: true,
+        ),
+        () => now,
+        (_, _) async {},
+      );
+      addTearDown(fresh.close);
+      final r = FinanceRepository(fresh);
+      await r.completeSetup(
+        openingBalance: 1000000,
+        payday: 25,
+        pockets: {'makan'},
+        now: now,
+        period: cal(now),
+      );
+      final rules = await r.watchPeriodRules().first;
+      expect(rules, hasLength(1));
+      expect(
+        (rules.single.mode, rules.single.paydayDay, rules.single.effectiveFrom),
+        (PeriodMode.payday, 25, DateTime(2026, 10, 14)),
+      );
+
+      // Still in the first period ("siklus pertama", 14 okt – 22 okt): the
+      // correction applies at once, in the same row.
+      final periods = (await r.watchPeriods().first);
+      expect(periods.periodOf(now).start, DateTime(2026, 10, 14));
+      final startsOn = await r.setPayday(10, periods: periods, now: now);
+      expect(startsOn, isNull);
+      final after = await r.watchPeriodRules().first;
+      expect((after.length, after.single.paydayDay), (1, 10));
+      expect((await r.watchProfile(cal(now)).first).payday, 10);
+
+      // Spending lands in the period named for its month: 24 sep (payday 25
+      // → "oktober" 25 sep – 24 okt) is the same period as 5 okt.
+      final p25 = SegmentedResolver([
+        (
+          effectiveFrom: DateTime(2026, 1, 1),
+          mode: PeriodMode.payday,
+          paydayDay: 25,
+          shift: PaydayShift.none,
+        ),
+      ]);
+      // Entries before the opening date aren't in the totals: open on 1 sep.
+      await (fresh.update(fresh.profiles))
+          .write(ProfilesCompanion(openingAt: Value(DateTime(2026, 9, 1))));
+      final cat = (await r.watchCategories(cal(now)).first).first.id;
+      for (final at in [DateTime(2026, 9, 26), DateTime(2026, 10, 5)]) {
+        await r.addTransaction(
+          amount: -100000,
+          categoryId: cat,
+          place: 'x',
+          note: '',
+          tags: const [],
+          at: at,
+        );
+      }
+      final totals = await r
+          .watchTotals(await r.watchProfile(cal(now)).first, now, periods: p25)
+          .first;
+      expect(totals.spent[DateTime(2026, 10)], 200000); // both in "oktober"
+      expect(totals.spent[DateTime(2026, 9)], isNull);
+    },
+  );
+
   test('periods: calendar months until a rule says otherwise', () async {
     final none = await repo.watchPeriods().first;
     expect(none.periodOf(now).start, DateTime(2026, 10));

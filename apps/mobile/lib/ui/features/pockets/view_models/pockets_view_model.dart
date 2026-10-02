@@ -61,7 +61,7 @@ final pocketsScreenProvider = Provider<AsyncValue<PocketsState>>((ref) {
   return switch (ref.watch(pocketsProvider)) {
     AsyncData(:final value) when free.hasValue => AsyncData(
       PocketsState(
-        month: now,
+        month: period.key,
         pockets: value,
         selected:
             value
@@ -70,12 +70,7 @@ final pocketsScreenProvider = Provider<AsyncValue<PocketsState>>((ref) {
             value.firstOrNull,
         daysLeft: period.daysLeft(now),
         budget: budget,
-        monthSpent:
-            ref.watch(totalsProvider).value?.spent[DateTime(
-              now.year,
-              now.month,
-            )] ??
-            0,
+        monthSpent: ref.watch(totalsProvider).value?.spent[period.key] ?? 0,
         free: free.value!,
       ),
     ),

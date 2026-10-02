@@ -1465,7 +1465,8 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
-  String get paydayBudgetNote => 'budget & limit tetap per bulan, 1–31.';
+  String get paydayBudgetNote =>
+      'budget & limit ngikut gajian. ganti tanggal berlaku mulai periode berikutnya.';
 
   @override
   String paydaySave(String label) {
@@ -1478,6 +1479,11 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String paydaySavedTitle(String label) {
     return 'gajian jadi $label';
+  }
+
+  @override
+  String paydaySavedSubLater(String date) {
+    return 'berlaku mulai $date, periode ini selesai dulu';
   }
 
   @override

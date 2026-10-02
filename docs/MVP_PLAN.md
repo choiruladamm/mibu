@@ -194,9 +194,13 @@ Satu konsep aja: **buat apa** (= baris `categories`). Kantong bukan benda sendir
 
 ### Budget & kantong
 
-> Periode budget lewat `Period` + resolver (fase 0 siklus gajian), lihat [PAYDAY_CYCLE_PLAN.md](PAYDAY_CYCLE_PLAN.md). v1 tetap bulan kalender.
+> **Periode = dari satu gajian ke gajian berikutnya**, dan itu satu-satunya periode di seluruh app: budget, limit, kantong, sisa budget, aman jajan, statistik "bulan", 04.1, cari, menu bulan, dan titik grafik saldo. Gajian tgl 1 = sama dengan bulan kalender. Detail dan alasan di [PAYDAY_CYCLE_PLAN.md](PAYDAY_CYCLE_PLAN.md).
+>
+> - **Nama periode** = bulan yang paling banyak harinya: gajian tgl ≥ 16 → bulan tempat periode berakhir ("oktober" = 25 sep – 24 okt), gajian ≤ 15 → bulan mulai. Selalu satu nama per bulan, berurutan. UI tetap milih "bulan"; label itu dipetakan ke periodenya (`periodForMonth`).
+> - **Gaji cair duluan:** pemasukan gajian yang dicatat ≤ 3 hari sebelum jadwal memulai periode baru di tanggal itu. Gaji telat nggak memperpanjang periode.
+> - **Periode pertama** user baru mulai dari tanggal 01.4 ("siklus pertama"). Aturan nggak pernah ngubah periode yang udah lewat: ganti tanggal gajian berlaku mulai periode berikutnya (di periode pertama langsung, buat benerin salah pilih).
+> - Sebelum ada aturan periode (data contoh `seedFixture`) periode = bulan kalender.
 
-- Periode budget = bulan kalender, mulai tanggal 1. Tanggal gajian cuma dipakai buat aman jajan.
 - Budget bulanan = baris `budgets` yang berlaku (di kode: `Profile.monthlyBudget`), diisi user, bukan turunan. Boleh beda dari Σ `monthlyLimit`. **[diupdate]**
   - Diisi lewat BudgetSheet 00.16 **[perlu design]**, dibuka dari PocketLimit 00.15 + hero 02.2 (M3), kartu 02.4 + ritme budget 02.3 (M6).
   - Kosong → prefill Σ limit kantong dibulatin ke atas per Rp500K. `hapus budget` = balik ke null. Maks 12 digit.

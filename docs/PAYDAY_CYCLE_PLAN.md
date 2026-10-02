@@ -172,6 +172,15 @@ Fase 0 dikerjain dengan penyesuaian ini, biar cocok sama aturan repo (CLAUDE.md,
 
 Di v1 (di luar fase 0) tanggal gajian udah dipakai buat aman jajan: weekend digeser ke jumat sebelumnya otomatis (`previousWorkday`, tanpa tanggal merah), gaji dicatat ≤ 3 hari sebelum gajian = udah gajian, state hari-H / telat lihat MVP_PLAN › Aman jajan. Toggle "cair duluan kalau libur" + tanggal merah tetap fase 2.
 
+**Periode gajian jadi default (dipromosikan dari fase 2, 2026-10-03):** dipakai langsung karena budget per bulan kalender nggak cocok sama gajian tgl 25 (kos dan tagihan wajib kebayar tgl 26–30 masuk "bulan lalu"), dan aman jajan nyampur dua cakrawala (saldo ÷ hari sampai gajian, budget ÷ hari sampai akhir bulan). Keputusan yang diambil:
+
+1. **Nama:** bulan yang paling banyak harinya (gajian ≥ 16 → bulan berakhir, ≤ 15 → bulan mulai). Aturan titik tengah dicoba dan dibuang: bisa ngelewatin bulan (februari pendek).
+2. **Gaji cair duluan:** batas periode ngikutin tanggal gaji yang dicatat (≤ 3 hari sebelum jadwal, yang paling awal). Telat nggak memperpanjang.
+3. **"Bulan" di seluruh UI = periode**, termasuk grafik saldo dan prediksi. Bulan depan tetap cuma intip.
+4. **Periode pertama** mulai dari tanggal install. **Ganti tanggal gajian:** mulai periode berikutnya (di periode pertama langsung).
+
+Yang belum: label range tanggal ("25 sep – 24 okt") di menu bulan / 04.1 / statistik, dan label "siklus pertama". Selama gajian diganti di tengah jalan, nama periode bisa dobel sekali di titik pergantian (jarang, dibiarin dulu).
+
 Status fase 0:
 
 | # | Isi | Status |

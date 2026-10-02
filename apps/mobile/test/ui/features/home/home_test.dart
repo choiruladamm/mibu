@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mibu/domain/models/finance.dart';
+import 'package:mibu/domain/period.dart';
 import 'package:mibu/data/repositories/finance_repository.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:mibu/data/database/app_database.dart';
 import 'package:mibu/data/database/seed.dart';
 import 'package:mibu/l10n/app_localizations.dart';
 import 'package:mibu/ui/core/clock.dart';
+import 'package:mibu/ui/core/money.dart';
 import 'package:mibu/ui/core/theme.dart';
 import 'package:mibu/ui/core/widgets/month_menu.dart';
 import 'package:mibu/ui/core/finance_providers.dart';
@@ -440,4 +442,81 @@ void main() {
       );
     });
   });
+
+  group(
+    'periode gajian (gajian tgl 25; okt: 25 sep – 22 okt, jum 23 = gajian)',
+    () {
+      /// Fixture db with a payday rule, plus Rp100K spent on 27 sep: inside the
+      /// "oktober" period, outside the calendar October.
+      Future<AppDatabase> paydayDb(WidgetTester tester) async {
+        final db = memoryDb();
+        await tester.runAsync(() async {
+          await db
+              .into(db.periodRules)
+              .insert(
+                PeriodRulesCompanion.insert(
+                  effectiveFrom: DateTime(2026, 1, 1),
+                  mode: PeriodMode.payday,
+                  paydayDay: 25,
+                  shift: const Value(PaydayShift.previousWorkday),
+                ),
+              );
+          final makan = await (db.select(
+            db.categories,
+          )..where((c) => c.name.equals('makan'))).getSingle();
+          await FinanceRepository(db).addTransaction(
+            amount: -100000,
+            categoryId: makan.id,
+            place: 'warteg',
+            note: '',
+            tags: const [],
+            at: DateTime(2026, 9, 27, 12),
+          );
+        });
+        return db;
+      }
+
+      testWidgets('sisa budget counts from the last payday, not the 1st', (
+        tester,
+      ) async {
+        final db = await paydayDb(tester);
+        await pump(tester, db);
+        // Every expense since 25 sep, not just October's.
+        final spent = (await tester.runAsync(
+          () =>
+              (db.select(db.transactions)..where(
+                    (t) =>
+                        t.amount.isSmallerThanValue(0) &
+                        t.at.isBiggerOrEqualValue(DateTime(2026, 9, 25)) &
+                        t.at.isSmallerThanValue(DateTime(2026, 10, 23)),
+                  ))
+                  .get(),
+        ))!.fold<int>(0, (a, t) => a - t.amount);
+        expect(spent, greaterThan(4159000 - 1)); // october's + the 27 sep one
+
+        await tester.tap(find.text('saldo kamu'));
+        await settle(tester);
+        final left = 8000000 - spent;
+        expect(find.text(rupiah(left).replaceFirst('Rp', '')), findsOneWidget);
+        expect(find.text('oktober'), findsWidgets); // still "oktober"
+      });
+
+      testWidgets('04.1 oktober includes the 27 sep entry', (tester) async {
+        final db = await paydayDb(tester);
+        await pump(tester, db);
+        final rows = (await tester.runAsync(() async {
+          final repo = FinanceRepository(db);
+          final period = (await repo.watchPeriods().first).periodForMonth(
+            DateTime(2026, 10),
+          );
+          return repo.watchPeriod(period).first;
+        }))!;
+        expect(rows.any((t) => t.at == DateTime(2026, 9, 27, 12)), isTrue);
+        expect(
+          rows.every((t) => !t.at.isBefore(DateTime(2026, 9, 25))),
+          isTrue,
+        );
+      });
+    },
+  );
 }

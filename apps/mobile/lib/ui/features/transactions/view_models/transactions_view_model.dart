@@ -17,10 +17,7 @@ class TxMonth extends Notifier<DateTime> {
   final DateTime? initial;
 
   @override
-  DateTime build() {
-    final now = ref.read(clockProvider)();
-    return initial ?? DateTime(now.year, now.month);
-  }
+  DateTime build() => initial ?? ref.read(currentMonthProvider);
 
   void select(DateTime month) => state = month;
 }
@@ -63,11 +60,13 @@ final monthTransactionsProvider =
     StreamProvider.family<List<Transaction>, DateTime>(
       (ref, month) => ref
           .watch(financeRepositoryProvider)
-          .watchPeriod(ref.watch(periodsProvider).periodOf(month)),
+          .watchPeriod(ref.watch(periodsProvider).periodForMonth(month)),
     );
 
 final firstMonthProvider = StreamProvider<DateTime?>(
-  (ref) => ref.watch(financeRepositoryProvider).watchFirstMonth(),
+  (ref) => ref
+      .watch(financeRepositoryProvider)
+      .watchFirstMonth(periods: ref.watch(periodsProvider)),
 );
 
 typedef DayGroup = ({DateTime day, int total, List<Transaction> rows});
@@ -92,11 +91,16 @@ class TransactionsState {
   final int count;
 
   DateTime get month => months[selected];
+
+  /// The month label of the period we're in now (the last before the future
+  /// one).
+  DateTime get current => months[months.length - 2];
   bool get hasPrev => selected > 0;
   bool get nextIsFuture => selected + 1 >= months.length - 1;
 }
 
-/// Months from [first] to [now]'s, plus one future month.
+/// Month labels from [first] to [now]'s (a month label: first of the month a
+/// budget period is named after), plus one future one.
 List<DateTime> txMonths(DateTime? first, DateTime now) {
   final last = DateTime(now.year, now.month);
   var m = first ?? last;
@@ -135,7 +139,9 @@ final transactionsProvider =
         if (!rows.hasValue || !first.hasValue) return const AsyncLoading();
 
         final now = ref.watch(nowProvider);
-        var months = txMonths(first.value, now);
+        final periods = ref.watch(periodsProvider);
+        final period = periods.periodForMonth(month);
+        var months = txMonths(first.value, ref.watch(currentMonthProvider));
         if (!months.contains(month)) months = [month, ...months]..sort();
         final filter = ref.watch(txFilterProvider);
         final search = ref.watch(txSearchProvider);
@@ -144,7 +150,9 @@ final transactionsProvider =
               in search == null
                   ? rows.value!
                   : searchEntries(rows.value!, search.q))
-            if (search?.day == null || t.at.day == search!.day)
+            // search.day = day number within the period (1 = its first day).
+            if (search?.day == null ||
+                daysBetween(period.start, t.at) + 1 == search!.day)
               if (switch (filter) {
                 TxFilter.all => true,
                 TxFilter.expenses => t.amount < 0,

@@ -166,6 +166,14 @@ typedef PeriodRule = ({
   PaydayShift shift,
 });
 
+/// Before any saved rule: calendar months.
+final PeriodRule calendarBase = (
+  effectiveFrom: DateTime(1970),
+  mode: PeriodMode.calendar,
+  paydayDay: 0,
+  shift: PaydayShift.none,
+);
+
 /// Picks the rule in force on a date (latest [PeriodRule.effectiveFrom] ≤
 /// it), so past periods keep the rules of their time. A period that straddles
 /// a rule change is clipped to it ("siklus pertama"). Dates before the first

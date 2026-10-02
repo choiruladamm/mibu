@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../data/repositories/finance_repository.dart';
 import '../../../../domain/models/finance.dart';
+import '../../../../domain/period.dart';
 import '../../../../domain/search.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../routing/router.dart';
@@ -45,7 +46,7 @@ class _SearchViewState extends ConsumerState<SearchView> {
   final _controller = TextEditingController();
   final _focus = FocusNode();
   CategoryKind? _kind; // null = semua
-  int? _day; // day of month picked on the summary ticks
+  int? _day; // day number in the period picked on the summary ticks
   bool _allMonths = false;
   bool _expanded = false; // all months: "liat N lagi" opens in place
 
@@ -83,7 +84,9 @@ class _SearchViewState extends ConsumerState<SearchView> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
     final now = ref.watch(nowProvider);
-    final month = widget.month ?? DateTime(now.year, now.month);
+    final periods = ref.watch(periodsProvider);
+    final DateTime month = widget.month ?? ref.watch(currentMonthProvider);
+    final period = periods.periodForMonth(month);
     final monthName = _name(month);
     final inMonth = ref.watch(monthTransactionsProvider(month)).value ?? [];
     final all = ref.watch(allTransactionsProvider);
@@ -96,7 +99,7 @@ class _SearchViewState extends ConsumerState<SearchView> {
         ? hits
         : [
             for (final t in hits)
-              if (t.at.day == _day) t,
+              if (SearchSummary.dayNumber(t.at, period.start) == _day) t,
           ];
     final kindLabel = {
       null: l.txAll,
@@ -162,11 +165,9 @@ class _SearchViewState extends ConsumerState<SearchView> {
           ? const <Transaction>[]
           : [
               for (final t in searchEntries(everything, q, kind: _kind))
-                if (t.at.year != month.year || t.at.month != month.month) t,
+                if (periods.periodOf(t.at).key != month) t,
             ];
-      final months = {
-        for (final t in elsewhere) DateTime(t.at.year, t.at.month),
-      };
+      final months = {for (final t in elsewhere) periods.periodOf(t.at).key};
       final otherKind = _kind == null
           ? 0
           : searchEntries(pool, q).length; // no hits: all are the other kind
@@ -232,9 +233,10 @@ class _SearchViewState extends ConsumerState<SearchView> {
         _Summary(
           hits: hits,
           month: month,
-          today: month.year == now.year && month.month == now.month
-              ? now.day
-              : DateTime(month.year, month.month + 1, 0).day,
+          period: period,
+          today: period.contains(now)
+              ? SearchSummary.dayNumber(now, period.start)
+              : period.length,
           selected: _day,
           onPick: (d) => setState(() => _day = d),
         ),
@@ -479,14 +481,16 @@ class _Summary extends StatelessWidget {
   const _Summary({
     required this.hits,
     required this.month,
+    required this.period,
     required this.today,
     required this.selected,
     required this.onPick,
   });
 
   final List<Transaction> hits;
-  final DateTime month; // first of month
-  final int today; // day of month the card counts up to
+  final DateTime month; // the month label the period is named after
+  final Period period;
+  final int today; // day number in the period the card counts up to
   final int? selected;
   final ValueChanged<int?> onPick;
 
@@ -496,12 +500,19 @@ class _Summary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
-    final s = SearchSummary(hits, today: today);
+    final s = SearchSummary(hits, today: today, start: period.start);
     final sel = s.byDay.containsKey(selected) ? selected : null;
-    final last = DateTime(month.year, month.month + 1, 0).day;
+    final last = period.length;
     final mo = _mo.format(month).toLowerCase();
-    String day(int d) =>
-        _wd.format(DateTime(month.year, month.month, d)).toLowerCase();
+    String day(int d) => _wd
+        .format(
+          DateTime(
+            period.start.year,
+            period.start.month,
+            period.start.day + d - 1,
+          ),
+        )
+        .toLowerCase();
     String money(int v) => context.rpSigned(v);
 
     final right = s.count == 1

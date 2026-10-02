@@ -5,6 +5,7 @@ import '../../../../data/repositories/finance_repository.dart';
 import '../../../../domain/models/finance.dart';
 import '../../../core/clock.dart';
 import '../../../core/dates.dart';
+import '../../../../domain/period.dart';
 import '../../../core/finance_providers.dart';
 import '../../transactions/view_models/transactions_view_model.dart';
 
@@ -13,10 +14,8 @@ typedef HomeMonthSelection = ({DateTime selected, DateTime start});
 /// Month picked in the chart or in 00.8 (first of month, up to now + 2 for a
 /// predicted peek) and the first month of the 6-month chart window.
 class HomeMonth extends Notifier<HomeMonthSelection> {
-  DateTime get _now {
-    final now = ref.read(nowProvider);
-    return DateTime(now.year, now.month);
-  }
+  /// The month label of the budget period we're in now.
+  DateTime get _now => ref.read(currentMonthProvider);
 
   @override
   HomeMonthSelection build() {
@@ -39,7 +38,7 @@ typedef HomeChart = ({List<MonthBalance> months, DateTime selected, int now});
 /// Chart inputs only (totals + pick), so the chart reacts the moment a month
 /// is picked instead of waiting for that month's pockets and rows to load.
 final homeChartProvider = Provider<HomeChart?>((ref) {
-  final now = ref.watch(nowProvider);
+  final now = ref.watch(currentMonthProvider);
   final pick = ref.watch(homeMonthProvider);
   final totals = ref.watch(totalsProvider).value;
   if (totals == null) return null;
@@ -74,6 +73,7 @@ class HomeState {
     required this.payday,
     required this.safeToSpendToday,
     required this.safe,
+    required this.period,
     required this.budget,
     required this.monthSpent,
     required this.periodDays,
@@ -99,6 +99,7 @@ class HomeState {
   final PaydayInfo payday; // today, telat, or how long until gajian
   final int safeToSpendToday; // negative = overspent today
   final SafeShare safe; // the shares behind it, for "dari mana angkanya?"
+  final Period period; // the budget period [month] is named after
   final int? budget; // in force for [month]; null = none
   final int monthSpent; // expenses in [month], positive
   final int periodDays; // length of [month]'s period (rata²/hari)
@@ -130,7 +131,7 @@ class HomeState {
 /// package:stack_trace chains Flutter can't demangle).
 final homeProvider = Provider<AsyncValue<HomeState>>((ref) {
   final now = ref.watch(nowProvider);
-  final cur = DateTime(now.year, now.month);
+  final cur = ref.watch(currentMonthProvider);
   final pick = ref.watch(homeMonthProvider);
   final month = pick.selected.isAfter(cur) ? cur : pick.selected;
   final isCurrent = month == cur;
@@ -138,13 +139,11 @@ final homeProvider = Provider<AsyncValue<HomeState>>((ref) {
 
   final profile = ref.watch(profileProvider);
   final periods = ref.watch(periodsProvider);
-  final period = periods.periodOf(month);
+  final period = periods.periodForMonth(month);
   final budgetIn = ref.watch(budgetInPeriodProvider(period));
   final totals = ref.watch(totalsProvider);
   final chart = ref.watch(homeChartProvider);
-  final pockets = ref.watch(
-    pocketsInPeriodProvider(ref.watch(periodsProvider).periodOf(month)),
-  );
+  final pockets = ref.watch(pocketsInPeriodProvider(period));
   final own = ref.watch(monthTransactionsProvider(month));
   // Early in the month "baru aja" reaches back into the last one.
   final spill =
@@ -181,7 +180,7 @@ final homeProvider = Provider<AsyncValue<HomeState>>((ref) {
     final today = dateOnly(now);
     final payday = paydayInfo(
       now: now,
-      payday: profile.payday,
+      payday: ref.watch(activePaydayProvider),
       salaries: ref.watch(salaryDatesProvider).value ?? const [],
     );
     final noEntries = first.value == null;
@@ -205,7 +204,7 @@ final homeProvider = Provider<AsyncValue<HomeState>>((ref) {
     final balance = isCurrent
         ? totals.balance
         : monthEndBalance(
-            now: now,
+            now: cur,
             balance: totals.balance,
             nets: totals.nets,
             month: month,
@@ -239,6 +238,7 @@ final homeProvider = Provider<AsyncValue<HomeState>>((ref) {
           budgetLeft: isCurrent && budget != null ? budget - monthSpent : null,
           budgetDays: budgetDaysLeft,
         ),
+        period: period,
         budget: budget,
         monthSpent: monthSpent,
         periodDays: period.length,
