@@ -3,6 +3,8 @@
 Sumber: Claude Design "mibu" (https://claude.ai/artifact/25RLRcYScmmPDzjBvg9Zz8). Nomor = id screen di canvas, pakai di tiket.
 Semua nominal di design = data contoh.
 
+Tanda: **[diupdate]** = aturan/perilaku berubah dari design, **[perlu design]** = belum ada di canvas, nunggu board.
+
 ## Aturan global
 
 - Locale `id-ID`, IDR tanpa desimal, titik ribuan (`Rp4.530.000`), minggu mulai senin.
@@ -35,6 +37,7 @@ Semua nominal di design = data contoh.
   - `baru aja`: 2 transaksi terakhir → 04.3, `lihat semua` → 04.1.
 - [ ] **02.2 kantong**
   - Hero `sisa jajan {bulan}` = Σlimit − Σkepake.
+  - **[perlu design]** Sub-baris hero bisa di-tap: "Rp2,34jt dari Rp7,4jt kepake · budget Rp6,9jt" → BudgetSheet 00.16. Budget kosong → "pasang budget".
   - Toples per kantong (isi = % kepake, animasi 300ms), pilih satu → kartu detail: status `aman` / `hampir abis` (≥85%) / `belum kepake`, sisa dari limit, "kira-kira Rp… sehari".
   - Tombol `isi ulang`, `atur kantong` → 03.5, `baru` → 03.4.
   - `impian` (goals): kartu kosong `pasang target` — flow belum didesain.
@@ -42,10 +45,12 @@ Semua nominal di design = data contoh.
   - Navigasi periode ‹ ›, total + delta vs periode lalu.
   - Bar chart (bar masa depan = `belum`), garis rata², tap bar → pill nominal.
   - `sekilas`: paling boros · paling hemat · rata² harian/mingguan/bulanan.
-  - `ritme budget`: uang kepake % vs waktu jalan %, status `aman` / `lewat budget` / `di bawah budget`.
+  - `ritme budget`: uang kepake % vs waktu jalan %, status `aman` / `hampir abis` / `lewat budget` / `di bawah budget`. Basisnya `monthlyBudget` (lihat MVP_PLAN › Statistik).
+    - **[diupdate]** Status `hampir abis` (≥85% limit, minggu/bulan) ditambah.
+    - **[perlu design]** Budget kosong → section diganti kartu "pasang budget bulanan biar mibu bisa ngecek ritme kamu" → BudgetSheet 00.16.
   - `larinya ke mana`: 4 kategori teratas (stacked bar + list).
 - [ ] **02.4 pengaturan**
-  - Kartu setup: `budget bulanan`, `mulai tgl 1`, `N kantong` → 02.2.
+  - Kartu setup: `budget bulanan` → BudgetSheet 00.16, `mulai tgl 1`, `N kantong` → 02.2.
   - duit: `kategori` → 03.3, `kantong` → 02.2.
   - kebiasaan: `pengingat harian` (21.00, switch), `rekap mingguan` (switch).
   - privasi: `kunci pakai face id`, `sembunyiin nominal` (tampil ••• sampai di-tap).
@@ -66,7 +71,7 @@ Semua nominal di design = data contoh.
 - [ ] **03.4 kategori baru / 03.5 edit** (satu widget, `mode=new|edit`)
   - Nama + emoji otomatis dari kata kunci (makan, kopi, kucing, bensin, …) sampai user pilih manual. Saran 3 emoji + palet 16.
   - `masuk ke`: pengeluaran / pemasukan.
-  - Switch `kantong bulanan` + limit preset Rp100K / 300K / 600K / 1jt. Kategori pemasukan (gajian) cuma muncul pas catat pemasukan.
+  - Switch `kantong bulanan` + PocketLimit 00.15 (ketik / geser / preset Rp100K · 300K · 600K · 1jt). **[diupdate]** Switch cuma buat kategori pengeluaran. Kategori pemasukan (gajian) cuma muncul pas catat pemasukan.
   - Edit: info pemakaian ("12 catatan · Rp840K tahun ini") + tombol hapus → 03.6.
 - [ ] **03.6 hapus kategori** — wajib pindahin catatan ke kategori lain / tanpa kategori, tombol **tahan buat hapus** (1 detik), state sukses + `batalin`.
 
@@ -93,6 +98,8 @@ Semua nominal di design = data contoh.
 | 00.12 | DateSheet | kalender bulan, titik jumlah catatan, peringatan dobel |
 | 00.13 | NoteSheet | maks 80 karakter, maks 3 tag, catatan terakhir |
 | 00.14 | SearchSummary | insight + tick harian yang bisa di-drag |
+| 00.15 | PocketLimit | input batas kantong: ketik, slider (garis sisa budget), preset chip. Dipakai 03.4/03.5, nanti 01.4b. **[perlu design]** budget kosong → garis diganti link "pasang budget bulanan" → 00.16 |
+| 00.16 | BudgetSheet | **[perlu design]** sheet "budget bulanan": AmountField + keypad (maks 12 digit), info live "kantong kamu total Rp… · sisa bebas / kurang Rp…", prefill Σlimit dibulatin ke atas per 500K kalau kosong, `simpan` / `hapus budget`. Dibuka dari 00.15, 02.2, 02.3, 02.4 |
 
 ## Entitas
 
@@ -107,10 +114,10 @@ Semua nominal di design = data contoh.
 
 - Backend: Firebase vs Supabase, offline/sync, backup Android (iCloud doang di design).
 - Rumus "aman jajan hari ini": basisnya saldo atau sisa budget? Angka di beranda nggak cocok sama dua-duanya.
-- Siklus budget: tanggal 1 vs tanggal gajian. Budget bulanan (Rp13,2jt) ≠ Σlimit kantong (Rp7,4jt).
-- Flow belum ada: edit budget/gajian/saldo, pilih jam pengingat, isi ulang, patungan, target impian, foto struk, logout, hapus akun.
+- Siklus budget: tanggal 1 vs tanggal gajian. Budget bulanan = angka yang diisi user (02.4), bukan Σlimit kantong.
+- Flow belum ada: edit gajian/saldo (budget → 00.16), pilih jam pengingat, isi ulang, patungan, target impian, foto struk, logout, hapus akun.
 - Algoritma prediksi saldo bulan depan.
-- Limit kantong cuma preset, belum ada input custom. Threshold notif kantong (asumsi 85%).
+- Threshold notif kantong (asumsi 85%).
 - Recurring: engine auto-create, edit satu vs semua. Catat (03.1) belum ada kontrol berulang.
 - Durasi undo, layar mana aja yang di-mask "sembunyiin nominal", Face ID versi Android, palet dark mode.
 - State loading/error/empty pertama kali (beranda/statistik/kantong tanpa data).

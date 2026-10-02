@@ -40,6 +40,7 @@ erDiagram
         int openingBalance
         datetime openingAt
         int payday "1-28, 0 = akhir"
+        int monthlyBudget "nullable"
         bool hideAmounts
         datetime onboardedAt "nullable"
     }
@@ -71,6 +72,7 @@ profile
   openingBalance  int               -- saldo saat atur awal (rupiah)
   openingAt       datetime          -- sejak kapan transaksi dihitung ke saldo
   payday          int               -- 1–28, 0 = akhir bulan
+  monthlyBudget   int?              -- budget bulanan (02.4); null = belum diisi
   hideAmounts     bool
   onboardedAt     datetime?
 
@@ -137,7 +139,11 @@ aman = floor((saldo + pengeluaranHariIni) / hariSisa) − pengeluaranHariIni
 ### Budget & kantong
 
 - Periode budget = bulan kalender, mulai tanggal 1. Tanggal gajian cuma dipakai buat aman jajan.
-- Budget bulanan = Σ `monthlyLimit` semua kantong.
+- Budget bulanan = `profile.monthlyBudget`, diisi user, bukan turunan. Boleh beda dari Σ `monthlyLimit`. **[diupdate]**
+  - Diisi lewat BudgetSheet 00.16 **[perlu design]**, dibuka dari PocketLimit 00.15 + hero 02.2 (M3), kartu 02.4 + ritme budget 02.3 (M6).
+  - Kosong → prefill Σ limit kantong dibulatin ke atas per Rp500K. `hapus budget` = balik ke null. Maks 12 digit.
+  - Atur awal 01.4 nggak nanya budget; default null.
+- Sisa jajan (02.2) = Σ limit − Σ kepake semua kantong bulan ini.
 - Persen kepake = round(kepake ÷ limit × 100).
 - Status kantong:
   - `hampir abis` kalau persen kepake ≥ 85%
@@ -145,12 +151,40 @@ aman = floor((saldo + pengeluaranHariIni) / hariSisa) − pengeluaranHariIni
   - selain itu `aman`
 - "kira-kira Rp… sehari" = sisa ÷ sisa hari di bulan ini.
 
+### Batas kantong (PocketLimit 00.15, di 03.4 / 03.5)
+
+```
+free = budget − Σ limit kantong lain   (pas edit, kantong ini nggak ikut)
+ujung slider = min(budget, max(1jt, ceil(free × 2 ÷ 500K) × 500K))
+step = 50K (budget ≤ 5jt) · 100K (≤ 20jt) · 250K (di atasnya)
+```
+
+- Garis putus-putus = `free` ("sisa budget Rp…").
+- Ketik manual boleh lewat ujung slider (thumb mentok kanan). Batas keras Rp100jt, maks 9 digit.
+- Limit > `free` → "lewat Rp…" tebal, tetap boleh disimpan. Selain itu "≈ Rp… sehari" = limit ÷ panjang bulan ini **[diupdate]** (prototype bagi 30).
+- `monthlyBudget` null → garis diganti link "pasang budget bulanan" → 00.16 **[perlu design]**, ujung slider Rp2jt.
+- Kantong cuma buat kategori pengeluaran; switch disembunyiin buat pemasukan **[diupdate]**.
+
 ### Statistik
 
 - Rata-rata dihitung dari periode yang udah lewat aja.
-- `lewat budget` kalau kepake > limit periode.
-- Limit mingguan = limit bulanan × 7 ÷ panjang bulan. Limit tahunan = limit bulanan × 12.
-- `di bawah budget` (tahunan) kalau persen kepake < persen waktu jalan. Selain itu `aman`.
+- Ritme budget **[diupdate]** pakai `monthlyBudget` (B) aja, tanpa fallback ke Σ limit: total kepake ngitung semua pengeluaran, termasuk tanpa kategori & non-kantong, jadi Σ limit bukan pembanding yang adil.
+
+```
+limit minggu = B × 7 ÷ panjang bulan   (minggu nyebrang bulan: bulan dari hari seninnya)
+limit bulan  = B
+limit tahun  = B × 12
+
+minggu / bulan:  kepake > limit → lewat budget
+                 kepake ≥ 85% limit → hampir abis
+                 selain itu → aman
+tahun:           kepake > limit → lewat budget
+                 persen kepake < persen waktu jalan → di bawah budget
+                 selain itu → aman
+```
+
+- Periode lalu pakai B yang sekarang (riwayat budget nggak disimpan; tambah tabel riwayat kalau perlu).
+- B null → section ritme budget diganti kartu "pasang budget bulanan" **[perlu design]**. Section lain tetap jalan.
 
 ### Input
 
@@ -186,10 +220,10 @@ aman = floor((saldo + pengeluaranHariIni) / hariSisa) − pengeluaranHariIni
 |---|---|---|
 | M1 | rombak skema + repository + query turunan + test | beranda 02.1 baca dari skema baru |
 | M2 | catat 03.1, pilih kategori 03.2, DayStrip, DateSheet, NoteSheet | catat → beranda langsung update. Inti app, udah bisa dipakai sendiri |
-| M3 | kantong 02.2 + atur / baru / edit / hapus kategori 03.3–03.6 | kantong dan kategori bisa diatur penuh |
+| M3 | kantong 02.2 (tanpa isi ulang & impian) + atur / baru / edit / hapus kategori 03.3–03.6 + PocketLimit 00.15 + kolom `monthlyBudget` + BudgetSheet 00.16 (nunggu design) | kantong dan kategori bisa diatur penuh |
 | M4 | semua transaksi 04.1, struk 04.3 + hapus & undo, edit 04.4 | catatan bisa dilihat, diubah, dihapus |
 | M5 | go_router + first-run (01.1 → 01.4 → 01.4b) | instal baru langsung jalan tanpa seed |
-| M6 | statistik 02.3, pengaturan 02.4, cari 04.2, ekspor CSV | **MVP selesai** |
+| M6 | statistik 02.3 (ritme budget pakai `monthlyBudget`), pengaturan 02.4 (kartu budget → 00.16), cari 04.2, ekspor CSV | **MVP selesai** |
 
 ## Risiko
 
