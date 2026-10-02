@@ -23,6 +23,9 @@ RAW = f"https://raw.githubusercontent.com/{REPO}/main/"
 OUT = "assets/emoji"
 SIZE = 256  # largest use: the 92px icon in 03.4, ~3x density
 
+# Catalog emoji drawn with another emoji's Fluent art (design's pick).
+ART = {"☕": "🍵"}  # kopi: the teacup, not the top-down mug
+
 
 def key(emoji: str) -> str:
     return "_".join(f"{ord(c):x}" for c in emoji if c != "️")
@@ -59,10 +62,15 @@ def main() -> None:
             return meta_path, None
 
     folder = {}  # key → asset folder
+    by_glyph = {}  # every Fluent emoji key → its folder
     with cf.ThreadPoolExecutor(32) as pool:
         for meta_path, g in pool.map(glyph, metas):
-            if g and key(g) in want:
-                folder[key(g)] = meta_path.rsplit("/", 1)[0]
+            if g:
+                by_glyph[key(g)] = meta_path.rsplit("/", 1)[0]
+    for k, e in want.items():
+        src_key = key(ART.get(e, e))
+        if src_key in by_glyph:
+            folder[k] = by_glyph[src_key]
 
     os.makedirs(OUT, exist_ok=True)
     missing = []
