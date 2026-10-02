@@ -97,6 +97,13 @@ enum PocketStatus { safe, almostOut, unused }
 int budgetPrefill(int pocketsTotal) =>
     (pocketsTotal + 499999) ~/ 500000 * 500000;
 
+/// "pasang limit" default for a category that already spent [spent] this
+/// month: 1,4× rounded up to Rp100K, at least Rp300K.
+int suggestedLimit(int spent) {
+  final v = (spent * 14 + 999999) ~/ 1000000 * 100000;
+  return v < 300000 ? 300000 : v;
+}
+
 /// Days left in [now]'s month, today included (never 0).
 int daysLeftInMonth(DateTime now) =>
     DateTime(now.year, now.month + 1, 0).day - now.day + 1;

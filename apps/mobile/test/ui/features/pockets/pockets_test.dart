@@ -75,7 +75,7 @@ void main() {
     expect(find.text('anabul'), findsOneWidget);
     expect(find.text('hampir abis'), findsOneWidget);
     expect(find.text('Rp100K'), findsOneWidget);
-    expect(find.text('sisa dari Rp1jt'), findsOneWidget);
+    expect(find.text('jatah sisa dari limit Rp1jt'), findsOneWidget);
     expect(
       find.text('kira-kira Rp5,6K sehari buat 18 hari ke depan'),
       findsOneWidget,
@@ -224,31 +224,31 @@ void main() {
     expect(find.text('hampir abis'), findsOneWidget);
   });
 
-  testWidgets('kantong: count row, dashed baru jar, tanpa kantong section', (
+  testWidgets('kantong: count row, dashed limit jar, belum ada limit section', (
     tester,
   ) async {
     final db = await pump(tester, const Size(390, 844));
 
     expect(
       find.textContaining(
-        '4 kantong · urut dari yang paling kepake',
+        '4 pakai limit · urut dari yang paling kepake',
         findRichText: true,
       ),
       findsOneWidget,
     );
-    // 4 jars + baru fit in 342px: nothing to swipe to.
+    // 4 jars + limit fit in 342px: nothing to swipe to.
     expect(find.text('geser'), findsNothing);
-    expect(find.bySemanticsLabel('bikin kantong baru'), findsOneWidget);
+    expect(find.bySemanticsLabel('pasang limit ke yang lain'), findsOneWidget);
 
     // belanja is the only expense category without a limit; income stays out.
     expect(
       find.textContaining(
-        'tanpa kantong · Rp2,4jt bulan ini',
+        'belum ada limit · Rp2,4jt bulan ini',
         findRichText: true,
       ),
       findsOneWidget,
     );
-    expect(find.bySemanticsLabel('pasang batas buat belanja'), findsOneWidget);
+    expect(find.bySemanticsLabel('pasang limit buat belanja'), findsOneWidget);
     expect(find.text('gajian'), findsNothing);
     expect(find.textContaining('+'), findsNothing);
 
@@ -301,14 +301,122 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('bikin kantong pertama'), findsOneWidget);
+    expect(find.text('pasang limit pertama'), findsOneWidget);
     expect(find.text('geser'), findsNothing);
     // all five expense categories are now free: top 2 + "+3"
     expect(find.text('+3'), findsOneWidget);
 
-    await tester.tap(find.text('bikin kantong pertama'));
+    await tester.tap(find.text('pasang limit pertama'));
     await tester.pumpAndSettle();
-    expect(find.text('kantong baru'), findsOneWidget);
+    expect(find.text('pasang limit ke…'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox());
+    await db.close();
+  });
+
+  Future<void> settle(WidgetTester tester) async {
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 50)),
+    );
+    await tester.pumpAndSettle();
+  }
+
+  Future<int?> limitOf(AppDatabase db, String name) async => (await (db.select(
+    db.categories,
+  )..where((c) => c.name.equals(name))).getSingle()).monthlyLimit;
+
+  testWidgets('pasang limit: list → limit step → jar + toast, batalin', (
+    tester,
+  ) async {
+    final db = await pump(tester, const Size(390, 844));
+
+    await tester.tap(find.text('pasang limit'));
+    await tester.pumpAndSettle();
+    expect(find.text('pasang limit ke…'), findsOneWidget);
+    expect(find.text('1 catatan · Rp2,4jt udah kepake bulan ini'), findsOne);
+    expect(find.text('gajian'), findsNothing); // income never shows
+    expect(find.text('bikin kategori baru'), findsOneWidget);
+
+    await tester.tap(find.text('belanja').last); // the sheet row
+    await tester.pumpAndSettle();
+    // 2.399.000 × 1,4 rounded up to 100K
+    expect(find.text('pasang limit Rp3,4jt'), findsOneWidget);
+    expect(
+      find.text('toples langsung keisi 71% · sisa jatah Rp1jt'),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.text('pasang limit Rp3,4jt'));
+    await settle(tester);
+    expect(await limitOf(db, 'belanja'), 3400000);
+    expect(find.text('limit belanja Rp3,4jt kepasang'), findsOneWidget);
+    expect(find.text('1 catatan bulan ini langsung keitung'), findsOneWidget);
+    expect(find.text('belanja'), findsOneWidget); // its jar got selected
+    expect(find.textContaining('belum ada limit'), findsNothing);
+
+    await tester.tap(find.text('batalin'));
+    await settle(tester);
+    expect(await limitOf(db, 'belanja'), isNull);
+
+    await tester.pumpWidget(const SizedBox());
+    await db.close();
+  });
+
+  testWidgets('pasang limit from a chip opens its limit step; ganti → list', (
+    tester,
+  ) async {
+    final db = await pump(tester, const Size(390, 844));
+
+    final chip = find.bySemanticsLabel('pasang limit buat belanja');
+    await tester.ensureVisible(chip);
+    await tester.pumpAndSettle();
+    await tester.tap(chip);
+    await tester.pumpAndSettle();
+    expect(find.text('pasang limit Rp3,4jt'), findsOneWidget);
+
+    await tester.tap(find.text('ganti'));
+    await tester.pumpAndSettle();
+    expect(find.text('pasang limit ke…'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox());
+    await db.close();
+  });
+
+  testWidgets('pasang limit: nothing left → empty state', (tester) async {
+    final db = await pump(tester, const Size(390, 844));
+    await tester.runAsync(() async {
+      final id = (await (db.select(
+        db.categories,
+      )..where((c) => c.name.equals('belanja'))).getSingle()).id;
+      await FinanceRepository(db).setLimit(id, 500000);
+    });
+    await settle(tester);
+
+    await tester.tap(find.text('pasang limit'));
+    await tester.pumpAndSettle();
+    expect(find.text('semua buat apa udah pakai limit'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox());
+    await db.close();
+  });
+
+  testWidgets('lepas limit: jar leaves, entries stay, batalin restores', (
+    tester,
+  ) async {
+    final db = await pump(tester, const Size(390, 844));
+
+    await tester.ensureVisible(find.text('lepas limit'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('lepas limit'));
+    await settle(tester);
+    expect(await limitOf(db, 'anabul'), isNull);
+    expect(find.text('limit anabul dilepas'), findsOneWidget);
+    expect(find.text('anabul & 2 catatannya tetap ada'), findsOneWidget);
+    expect(find.bySemanticsLabel('anabul, 90% kepake'), findsNothing);
+
+    await tester.tap(find.text('batalin'));
+    await settle(tester);
+    expect(await limitOf(db, 'anabul'), 1000000);
 
     await tester.pumpWidget(const SizedBox());
     await db.close();

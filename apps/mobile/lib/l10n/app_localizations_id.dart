@@ -359,7 +359,10 @@ class AppLocalizationsId extends AppLocalizations {
   String get noteLeaveEmpty => 'nggak jadi, kosongin';
 
   @override
-  String get pocketsNew => 'baru';
+  String get pocketsSetLimit => 'pasang limit';
+
+  @override
+  String get pocketsJarNew => 'limit';
 
   @override
   String pocketsLeftTitle(String month) {
@@ -372,12 +375,8 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
-  String get pocketsEmpty =>
-      'belum ada kantong. bikin satu biar jajan ada batasnya.';
-
-  @override
   String pocketsCount(int n) {
-    return '$n kantong';
+    return '$n pakai limit';
   }
 
   @override
@@ -387,34 +386,34 @@ class AppLocalizationsId extends AppLocalizations {
   String get pocketsSwipe => 'geser';
 
   @override
-  String get pocketsNewJar => 'bikin kantong baru';
+  String get pocketsNewJar => 'pasang limit ke yang lain';
 
   @override
-  String get pocketsFirstTitle => 'bikin kantong pertama';
+  String get pocketsFirstTitle => 'pasang limit pertama';
 
   @override
   String get pocketsFirstBody =>
-      'kasih batas buat makan, ngopi, atau ojol. mibu ngingetin kalau udah mau abis.';
+      'pasang limit ke makan, ngopi, atau ojol. catatan bulan ini langsung keitung.';
 
   @override
-  String get pocketsFirstButton => 'bikin kantong';
+  String get pocketsFirstButton => 'pasang limit';
 
   @override
-  String get pocketsFreeTitle => 'tanpa kantong · ';
+  String get pocketsFreeTitle => 'belum ada limit · ';
 
   @override
   String get pocketsFreeSuffix => ' bulan ini';
 
   @override
-  String get pocketsFreeManage => 'atur';
+  String get pocketsFreeManage => 'semua';
 
   @override
   String pocketsFreeChip(String name) {
-    return 'pasang batas buat $name';
+    return 'pasang limit buat $name';
   }
 
   @override
-  String get pocketsFreeMore => 'liat kategori lain tanpa kantong';
+  String get pocketsFreeMore => 'liat yang lain belum ada limit';
 
   @override
   String get categoryNewPocketTitle => 'kantong baru';
@@ -453,7 +452,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String pocketLeftOf(String limit) {
-    return 'sisa dari $limit';
+    return 'jatah sisa dari limit $limit';
   }
 
   @override
@@ -467,7 +466,86 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
-  String get pocketManage => 'atur kantong';
+  String get pocketManage => 'atur limit';
+
+  @override
+  String get pocketRelease => 'lepas limit';
+
+  @override
+  String limitSetTitle(String name, String amount) {
+    return 'limit $name $amount kepasang';
+  }
+
+  @override
+  String limitSetSub(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n catatan bulan ini langsung keitung',
+      zero: 'toplesnya udah nongol',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String limitReleasedTitle(String name) {
+    return 'limit $name dilepas';
+  }
+
+  @override
+  String limitReleasedSub(int n, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$name & $n catatannya tetap ada',
+      zero: '$name tetap ada, cuma nggak dibatesin',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get setLimitTitle => 'pasang limit ke…';
+
+  @override
+  String get setLimitHint =>
+      'yang belum pakai limit, urut dari paling kepake bulan ini. catatan bulan ini langsung keitung.';
+
+  @override
+  String setLimitMeta(int n, String amount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n catatan · $amount udah kepake bulan ini',
+      zero: 'belum dipakai bulan ini',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get setLimitEmptyTitle => 'semua buat apa udah pakai limit';
+
+  @override
+  String get setLimitEmptyBody => 'mau ngatur yang lain? bikin baru aja.';
+
+  @override
+  String get setLimitNewCategory => 'bikin kategori baru';
+
+  @override
+  String get setLimitIncomeNote =>
+      'pemasukan (gajian dkk) nggak bisa dikasih limit';
+
+  @override
+  String get setLimitBack => 'ganti';
+
+  @override
+  String setLimitFill(int pct, String amount) {
+    return 'toples langsung keisi $pct% · sisa jatah $amount';
+  }
+
+  @override
+  String setLimitSave(String amount) {
+    return 'pasang limit $amount';
+  }
 
   @override
   String get keyPlus => 'tambah nominal lain';

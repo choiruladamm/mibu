@@ -694,11 +694,17 @@ abstract class AppLocalizations {
   /// **'nggak jadi, kosongin'**
   String get noteLeaveEmpty;
 
-  /// No description provided for @pocketsNew.
+  /// No description provided for @pocketsSetLimit.
   ///
   /// In id, this message translates to:
-  /// **'baru'**
-  String get pocketsNew;
+  /// **'pasang limit'**
+  String get pocketsSetLimit;
+
+  /// No description provided for @pocketsJarNew.
+  ///
+  /// In id, this message translates to:
+  /// **'limit'**
+  String get pocketsJarNew;
 
   /// No description provided for @pocketsLeftTitle.
   ///
@@ -712,16 +718,10 @@ abstract class AppLocalizations {
   /// **'{spent} dari {limit} kepake · '**
   String pocketsSpentOf(String spent, String limit);
 
-  /// No description provided for @pocketsEmpty.
-  ///
-  /// In id, this message translates to:
-  /// **'belum ada kantong. bikin satu biar jajan ada batasnya.'**
-  String get pocketsEmpty;
-
   /// No description provided for @pocketsCount.
   ///
   /// In id, this message translates to:
-  /// **'{n} kantong'**
+  /// **'{n} pakai limit'**
   String pocketsCount(int n);
 
   /// No description provided for @pocketsOrder.
@@ -739,31 +739,31 @@ abstract class AppLocalizations {
   /// No description provided for @pocketsNewJar.
   ///
   /// In id, this message translates to:
-  /// **'bikin kantong baru'**
+  /// **'pasang limit ke yang lain'**
   String get pocketsNewJar;
 
   /// No description provided for @pocketsFirstTitle.
   ///
   /// In id, this message translates to:
-  /// **'bikin kantong pertama'**
+  /// **'pasang limit pertama'**
   String get pocketsFirstTitle;
 
   /// No description provided for @pocketsFirstBody.
   ///
   /// In id, this message translates to:
-  /// **'kasih batas buat makan, ngopi, atau ojol. mibu ngingetin kalau udah mau abis.'**
+  /// **'pasang limit ke makan, ngopi, atau ojol. catatan bulan ini langsung keitung.'**
   String get pocketsFirstBody;
 
   /// No description provided for @pocketsFirstButton.
   ///
   /// In id, this message translates to:
-  /// **'bikin kantong'**
+  /// **'pasang limit'**
   String get pocketsFirstButton;
 
   /// No description provided for @pocketsFreeTitle.
   ///
   /// In id, this message translates to:
-  /// **'tanpa kantong · '**
+  /// **'belum ada limit · '**
   String get pocketsFreeTitle;
 
   /// No description provided for @pocketsFreeSuffix.
@@ -775,19 +775,19 @@ abstract class AppLocalizations {
   /// No description provided for @pocketsFreeManage.
   ///
   /// In id, this message translates to:
-  /// **'atur'**
+  /// **'semua'**
   String get pocketsFreeManage;
 
   /// No description provided for @pocketsFreeChip.
   ///
   /// In id, this message translates to:
-  /// **'pasang batas buat {name}'**
+  /// **'pasang limit buat {name}'**
   String pocketsFreeChip(String name);
 
   /// No description provided for @pocketsFreeMore.
   ///
   /// In id, this message translates to:
-  /// **'liat kategori lain tanpa kantong'**
+  /// **'liat yang lain belum ada limit'**
   String get pocketsFreeMore;
 
   /// No description provided for @categoryNewPocketTitle.
@@ -853,7 +853,7 @@ abstract class AppLocalizations {
   /// No description provided for @pocketLeftOf.
   ///
   /// In id, this message translates to:
-  /// **'sisa dari {limit}'**
+  /// **'jatah sisa dari limit {limit}'**
   String pocketLeftOf(String limit);
 
   /// No description provided for @pocketDaily.
@@ -871,8 +871,98 @@ abstract class AppLocalizations {
   /// No description provided for @pocketManage.
   ///
   /// In id, this message translates to:
-  /// **'atur kantong'**
+  /// **'atur limit'**
   String get pocketManage;
+
+  /// No description provided for @pocketRelease.
+  ///
+  /// In id, this message translates to:
+  /// **'lepas limit'**
+  String get pocketRelease;
+
+  /// No description provided for @limitSetTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'limit {name} {amount} kepasang'**
+  String limitSetTitle(String name, String amount);
+
+  /// No description provided for @limitSetSub.
+  ///
+  /// In id, this message translates to:
+  /// **'{n, plural, =0{toplesnya udah nongol} other{{n} catatan bulan ini langsung keitung}}'**
+  String limitSetSub(int n);
+
+  /// No description provided for @limitReleasedTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'limit {name} dilepas'**
+  String limitReleasedTitle(String name);
+
+  /// No description provided for @limitReleasedSub.
+  ///
+  /// In id, this message translates to:
+  /// **'{n, plural, =0{{name} tetap ada, cuma nggak dibatesin} other{{name} & {n} catatannya tetap ada}}'**
+  String limitReleasedSub(int n, String name);
+
+  /// No description provided for @setLimitTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'pasang limit ke…'**
+  String get setLimitTitle;
+
+  /// No description provided for @setLimitHint.
+  ///
+  /// In id, this message translates to:
+  /// **'yang belum pakai limit, urut dari paling kepake bulan ini. catatan bulan ini langsung keitung.'**
+  String get setLimitHint;
+
+  /// No description provided for @setLimitMeta.
+  ///
+  /// In id, this message translates to:
+  /// **'{n, plural, =0{belum dipakai bulan ini} other{{n} catatan · {amount} udah kepake bulan ini}}'**
+  String setLimitMeta(int n, String amount);
+
+  /// No description provided for @setLimitEmptyTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'semua buat apa udah pakai limit'**
+  String get setLimitEmptyTitle;
+
+  /// No description provided for @setLimitEmptyBody.
+  ///
+  /// In id, this message translates to:
+  /// **'mau ngatur yang lain? bikin baru aja.'**
+  String get setLimitEmptyBody;
+
+  /// No description provided for @setLimitNewCategory.
+  ///
+  /// In id, this message translates to:
+  /// **'bikin kategori baru'**
+  String get setLimitNewCategory;
+
+  /// No description provided for @setLimitIncomeNote.
+  ///
+  /// In id, this message translates to:
+  /// **'pemasukan (gajian dkk) nggak bisa dikasih limit'**
+  String get setLimitIncomeNote;
+
+  /// No description provided for @setLimitBack.
+  ///
+  /// In id, this message translates to:
+  /// **'ganti'**
+  String get setLimitBack;
+
+  /// No description provided for @setLimitFill.
+  ///
+  /// In id, this message translates to:
+  /// **'toples langsung keisi {pct}% · sisa jatah {amount}'**
+  String setLimitFill(int pct, String amount);
+
+  /// No description provided for @setLimitSave.
+  ///
+  /// In id, this message translates to:
+  /// **'pasang limit {amount}'**
+  String setLimitSave(String amount);
 
   /// No description provided for @keyPlus.
   ///

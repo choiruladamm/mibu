@@ -68,7 +68,9 @@ void main() {
     }
 
     await settle();
-    await tester.tap(find.text('atur kantong')); // anabul is selected
+    await tester.ensureVisible(find.text('atur limit'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('atur limit')); // anabul is selected
     await settle();
     await tester.tap(find.bySemanticsLabel('hapus kategori'));
     await settle();

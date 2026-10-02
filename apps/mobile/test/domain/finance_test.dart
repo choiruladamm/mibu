@@ -10,6 +10,14 @@ void main() {
     expect(daysUntilPayday(DateTime(2026, 1, 31), 0), 28); // → 28 feb
   });
 
+  test('suggestedLimit: 1,4× up to Rp100K, min Rp300K', () {
+    expect(suggestedLimit(0), 300000);
+    expect(suggestedLimit(200000), 300000); // 280K → floor
+    expect(suggestedLimit(420000), 600000); // 588K → 600K
+    expect(suggestedLimit(500000), 700000); // exact
+    expect(suggestedLimit(2399000), 3400000); // 3.358.600 → 3,4jt
+  });
+
   test('safeToSpendToday: spending today eats today\'s share', () {
     final now = DateTime(2026, 10, 16);
     int s(int balance, int spent) => safeToSpendToday(

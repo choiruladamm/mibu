@@ -16,6 +16,7 @@ import '../../budget/views/budget_sheet.dart';
 import '../../categories/views/category_form_sheet.dart';
 import '../../categories/views/category_manage_sheet.dart';
 import '../view_models/pockets_view_model.dart';
+import 'set_limit_sheet.dart';
 
 /// 02.2 kantong. Isi ulang and impian are post-MVP.
 class PocketsView extends ConsumerStatefulWidget {
@@ -68,13 +69,8 @@ class _PocketsViewState extends ConsumerState<PocketsView> {
       padding: const EdgeInsets.symmetric(horizontal: AppSpace.gutter),
       child: child,
     );
-    // 03.4b: always a pocket; the new one gets selected.
-    Future<void> newPocket() async {
-      final c = await showCategoryForm(context, origin: CategoryOrigin.kantong);
-      if (c?.monthlyLimit != null) {
-        ref.read(selectedPocketProvider.notifier).select(c!.id);
-      }
-    }
+    // "pasang limit ke…": picks an existing category, not a new one.
+    void setLimit() => showSetLimit(context, ref);
 
     return Scaffold(
       body: Stack(
@@ -96,7 +92,7 @@ class _PocketsViewState extends ConsumerState<PocketsView> {
                             child: Text(l.tabPockets, style: AppText.title),
                           ),
                         ),
-                        _NewButton(label: l.pocketsNew, onTap: newPocket),
+                        _NewButton(label: l.pocketsSetLimit, onTap: setLimit),
                       ],
                     ),
                   ),
@@ -130,7 +126,7 @@ class _PocketsViewState extends ConsumerState<PocketsView> {
                   ),
                   const SizedBox(height: 18),
                   if (selected == null)
-                    gutter(_FirstPocket(onTap: newPocket))
+                    gutter(_FirstPocket(onTap: setLimit))
                   else ...[
                     _Jars(
                       pockets: s.pockets,
@@ -138,7 +134,7 @@ class _PocketsViewState extends ConsumerState<PocketsView> {
                       onSelect: ref
                           .read(selectedPocketProvider.notifier)
                           .select,
-                      onNew: newPocket,
+                      onNew: setLimit,
                     ),
                     const SizedBox(height: 18),
                     gutter(
@@ -156,12 +152,26 @@ class _PocketsViewState extends ConsumerState<PocketsView> {
                             monthlyLimit: selected.budget,
                           ),
                         ),
+                        onRelease: () => releaseLimit(
+                          context,
+                          ref,
+                          id: selected.id,
+                          name: selected.name,
+                          limit: selected.budget,
+                        ),
                       ),
                     ),
                   ],
                   if (s.free.isNotEmpty) ...[
                     const SizedBox(height: 16),
-                    gutter(_FreeSection(free: s.free, total: s.freeSpent)),
+                    gutter(
+                      _FreeSection(
+                        free: s.free,
+                        total: s.freeSpent,
+                        onPick: (f) => showSetLimit(context, ref, pick: f),
+                        onMore: setLimit,
+                      ),
+                    ),
                   ],
                 ],
               ),
@@ -351,7 +361,7 @@ class _Amount extends StatelessWidget {
 }
 
 /// Toples per kantong: fill = % kepake. Left-aligned, always scrollable, a
-/// dashed "baru" jar closes the row. "geser ›" and the right fade show only
+/// dashed "limit" jar closes the row. "geser ›" and the right fade show only
 /// while there's more to scroll to.
 class _Jars extends StatefulWidget {
   const _Jars({
@@ -500,7 +510,7 @@ class _JarsState extends State<_Jars> {
                       label: l.pocketJarLabel(p.name, p.usedPct),
                       onTap: () => widget.onSelect(p.id),
                     ),
-                  _NewJar(label: l.pocketsNew, onTap: widget.onNew),
+                  _NewJar(label: l.pocketsJarNew, onTap: widget.onNew),
                   const SizedBox(width: 10),
                 ],
               ),
@@ -531,7 +541,7 @@ class _JarsState extends State<_Jars> {
   }
 }
 
-/// Dashed "+ baru" jar closing the row: opens 03.4b.
+/// Dashed "+ limit" jar closing the row: opens "pasang limit ke…".
 class _NewJar extends StatelessWidget {
   const _NewJar({required this.label, required this.onTap});
 
@@ -565,9 +575,16 @@ class _NewJar extends StatelessWidget {
                 ),
               ),
             ),
-            Text(
-              label,
-              style: AppText.caption.copyWith(fontWeight: FontWeight.w500),
+            // Jar-wide, so the label never widens the row.
+            SizedBox(
+              width: _Jars._width,
+              child: Text(
+                label,
+                textAlign: TextAlign.center,
+                softWrap: false,
+                overflow: TextOverflow.visible,
+                style: AppText.caption.copyWith(fontWeight: FontWeight.w500),
+              ),
             ),
           ],
         ),
@@ -600,7 +617,7 @@ class _DashedBox extends CustomPainter {
   bool shouldRepaint(_DashedBox old) => old.radius != radius;
 }
 
-/// 02.2d: no pockets yet; the whole card opens 03.4b.
+/// 02.2d: no limits yet; the whole card opens "pasang limit ke…".
 class _FirstPocket extends StatelessWidget {
   const _FirstPocket({required this.onTap});
 
@@ -713,13 +730,20 @@ class _FirstPocket extends StatelessWidget {
   }
 }
 
-/// "tanpa kantong · Rp… bulan ini": expense categories with no limit, the
-/// two biggest as chips (tap = pasang batas), the rest behind "+n".
+/// "belum ada limit · Rp… bulan ini": expense categories with no limit, the
+/// two biggest as chips (tap = their limit step), the rest behind "+n".
 class _FreeSection extends StatelessWidget {
-  const _FreeSection({required this.free, required this.total});
+  const _FreeSection({
+    required this.free,
+    required this.total,
+    required this.onPick,
+    required this.onMore,
+  });
 
   final List<FreeCategory> free; // most spent first
   final int total;
+  final ValueChanged<FreeCategory> onPick;
+  final VoidCallback onMore; // the whole list
 
   @override
   Widget build(BuildContext context) {
@@ -798,8 +822,7 @@ class _FreeSection extends StatelessWidget {
                   label: l.pocketsFreeChip(f.category.name),
                   excludeSemantics: true,
                   child: GestureDetector(
-                    onTap: () =>
-                        showCategoryForm(context, category: f.category),
+                    onTap: () => onPick(f),
                     child: Container(
                       height: 40,
                       padding: const EdgeInsets.only(left: 6, right: 12),
@@ -844,7 +867,7 @@ class _FreeSection extends StatelessWidget {
                   label: l.pocketsFreeMore,
                   excludeSemantics: true,
                   child: GestureDetector(
-                    onTap: () => showCategoryManage(context),
+                    onTap: onMore,
                     child: Container(
                       height: 40,
                       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -958,11 +981,13 @@ class _Detail extends StatelessWidget {
     required this.pocket,
     required this.daysLeft,
     required this.onManage,
+    required this.onRelease,
   });
 
   final Pocket pocket;
   final int daysLeft;
-  final VoidCallback onManage; // → 03.5
+  final VoidCallback onManage; // atur limit → 03.5
+  final VoidCallback onRelease; // lepas limit
 
   @override
   Widget build(BuildContext context) {
@@ -1054,7 +1079,15 @@ class _Detail extends StatelessWidget {
               style: muted,
             ),
             const SizedBox(height: 2),
-            _OutlineButton(label: l.pocketManage, onTap: onManage),
+            Row(
+              spacing: 8,
+              children: [
+                Expanded(
+                  child: _OutlineButton(label: l.pocketManage, onTap: onManage),
+                ),
+                _MistButton(label: l.pocketRelease, onTap: onRelease),
+              ],
+            ),
           ],
         ),
       ),
@@ -1088,6 +1121,33 @@ class _OutlineButton extends StatelessWidget {
               fontWeight: FontWeight.w500,
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MistButton extends StatelessWidget {
+  const _MistButton({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          height: AppSpace.minTouch,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: AppColors.mist,
+            borderRadius: BorderRadius.circular(AppRadius.pill),
+          ),
+          child: Text(label, style: AppText.label.copyWith(fontSize: 15)),
         ),
       ),
     );

@@ -52,9 +52,10 @@ void main() {
     tester,
   ) async {
     final db = await pump(tester, const PocketsView());
-    await tester.tap(
-      find.text('baru').first,
-    ); // header; the jar row has one too
+    await tester.tap(find.text('pasang limit')); // header
+    await settle(tester);
+    await tester.tap(find.text('bikin kategori baru')); // bottom of the sheet
+    await settle(tester);
     await settle(tester);
     // 03.4b: always a pocket, no kind / switch rows.
     expect(find.text('kantong baru'), findsOneWidget);
@@ -110,11 +111,12 @@ void main() {
     await db.close();
   });
 
-  testWidgets('03.5 via atur kantong: usage, switch to income drops limit', (
+  testWidgets('03.5 via atur limit: usage, switch to income drops limit', (
     tester,
   ) async {
     final db = await pump(tester, const PocketsView());
-    await tester.tap(find.text('atur kantong'));
+    await tester.ensureVisible(find.text('atur limit'));
+    await tester.tap(find.text('atur limit'));
     await settle(tester);
     expect(find.text('edit kategori'), findsOneWidget);
     expect(find.text('2 catatan · Rp900K tahun ini'), findsOneWidget);

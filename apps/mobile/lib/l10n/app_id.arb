@@ -276,7 +276,8 @@
   "noteWroteBefore": "pernah kamu tulis",
   "noteSave": "simpan catatan",
   "noteLeaveEmpty": "nggak jadi, kosongin",
-  "pocketsNew": "baru",
+  "pocketsSetLimit": "pasang limit",
+  "pocketsJarNew": "limit",
   "pocketsLeftTitle": "sisa jajan {month}",
   "@pocketsLeftTitle": {
     "placeholders": {
@@ -296,8 +297,7 @@
       }
     }
   },
-  "pocketsEmpty": "belum ada kantong. bikin satu biar jajan ada batasnya.",
-  "pocketsCount": "{n} kantong",
+  "pocketsCount": "{n} pakai limit",
   "@pocketsCount": {
     "placeholders": {
       "n": {
@@ -307,14 +307,14 @@
   },
   "pocketsOrder": " · urut dari yang paling kepake",
   "pocketsSwipe": "geser",
-  "pocketsNewJar": "bikin kantong baru",
-  "pocketsFirstTitle": "bikin kantong pertama",
-  "pocketsFirstBody": "kasih batas buat makan, ngopi, atau ojol. mibu ngingetin kalau udah mau abis.",
-  "pocketsFirstButton": "bikin kantong",
-  "pocketsFreeTitle": "tanpa kantong · ",
+  "pocketsNewJar": "pasang limit ke yang lain",
+  "pocketsFirstTitle": "pasang limit pertama",
+  "pocketsFirstBody": "pasang limit ke makan, ngopi, atau ojol. catatan bulan ini langsung keitung.",
+  "pocketsFirstButton": "pasang limit",
+  "pocketsFreeTitle": "belum ada limit · ",
   "pocketsFreeSuffix": " bulan ini",
-  "pocketsFreeManage": "atur",
-  "pocketsFreeChip": "pasang batas buat {name}",
+  "pocketsFreeManage": "semua",
+  "pocketsFreeChip": "pasang limit buat {name}",
   "@pocketsFreeChip": {
     "placeholders": {
       "name": {
@@ -322,7 +322,7 @@
       }
     }
   },
-  "pocketsFreeMore": "liat kategori lain tanpa kantong",
+  "pocketsFreeMore": "liat yang lain belum ada limit",
   "categoryNewPocketTitle": "kantong baru",
   "categoryChipPocket": "kantong = pengeluaran dengan batas bulanan",
   "categoryChipCatat": "abis dibikin, langsung kepasang di catatan kamu",
@@ -353,7 +353,7 @@
   "pocketStatusSafe": "aman",
   "pocketStatusAlmostOut": "hampir abis",
   "pocketStatusUnused": "belum kepake",
-  "pocketLeftOf": "sisa dari {limit}",
+  "pocketLeftOf": "jatah sisa dari limit {limit}",
   "@pocketLeftOf": {
     "placeholders": {
       "limit": {
@@ -380,7 +380,83 @@
       }
     }
   },
-  "pocketManage": "atur kantong",
+  "pocketManage": "atur limit",
+  "pocketRelease": "lepas limit",
+  "limitSetTitle": "limit {name} {amount} kepasang",
+  "@limitSetTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "limitSetSub": "{n, plural, =0{toplesnya udah nongol} other{{n} catatan bulan ini langsung keitung}}",
+  "@limitSetSub": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "limitReleasedTitle": "limit {name} dilepas",
+  "@limitReleasedTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "limitReleasedSub": "{n, plural, =0{{name} tetap ada, cuma nggak dibatesin} other{{name} & {n} catatannya tetap ada}}",
+  "@limitReleasedSub": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "setLimitTitle": "pasang limit ke…",
+  "setLimitHint": "yang belum pakai limit, urut dari paling kepake bulan ini. catatan bulan ini langsung keitung.",
+  "setLimitMeta": "{n, plural, =0{belum dipakai bulan ini} other{{n} catatan · {amount} udah kepake bulan ini}}",
+  "@setLimitMeta": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "setLimitEmptyTitle": "semua buat apa udah pakai limit",
+  "setLimitEmptyBody": "mau ngatur yang lain? bikin baru aja.",
+  "setLimitNewCategory": "bikin kategori baru",
+  "setLimitIncomeNote": "pemasukan (gajian dkk) nggak bisa dikasih limit",
+  "setLimitBack": "ganti",
+  "setLimitFill": "toples langsung keisi {pct}% · sisa jatah {amount}",
+  "@setLimitFill": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "setLimitSave": "pasang limit {amount}",
+  "@setLimitSave": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "keyPlus": "tambah nominal lain",
   "keyTwoZeros": "tambah dua nol",
   "keyClear": "kosongin semua",
