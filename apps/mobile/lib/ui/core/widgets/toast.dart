@@ -25,6 +25,8 @@ void showToast(
       behavior: SnackBarBehavior.floating,
       backgroundColor: Colors.transparent,
       elevation: 0,
+      // default hardEdge clips the shadow to the snackbar rect → square corners.
+      clipBehavior: Clip.none,
       padding: EdgeInsets.zero,
       margin: EdgeInsets.fromLTRB(16, 0, 16, bottom),
       duration: _undoWindow,
