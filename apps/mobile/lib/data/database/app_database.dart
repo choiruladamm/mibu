@@ -62,6 +62,7 @@ class AppDatabase extends _$AppDatabase {
     QueryExecutor? executor,
     this._now = DateTime.now,
     this._seed = seedFixture,
+    this._reset = false,
   ]) : super(executor ?? driftDatabase(name: 'mibu'));
 
   final DateTime Function() _now;
@@ -69,6 +70,9 @@ class AppDatabase extends _$AppDatabase {
   // Sample data, debug only (see MIBU_SEED below); a release build starts
   // empty and goes through 01.4 atur awal.
   final Seed _seed;
+
+  // Debug: wipe every row on open, then seed again (MIBU_RESET below).
+  final bool _reset;
 
   // Pre-release: schema edited in place; wipe app data on dev devices.
   @override
@@ -78,21 +82,32 @@ class AppDatabase extends _$AppDatabase {
   MigrationStrategy get migration => MigrationStrategy(
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
-      if (details.wasCreated && kDebugMode) await _seed(this, _now());
+      if (!kDebugMode || !(details.wasCreated || _reset)) return;
+      if (!details.wasCreated) {
+        await transaction(() async {
+          await delete(transactions).go(); // FK order: entries first
+          await delete(categories).go();
+          await delete(profiles).go();
+        });
+      }
+      await _seed(this, _now());
     },
   );
 }
 
 /// Debug sample data: `--dart-define=MIBU_SEED=demo|fixture|none`
 /// (none = a real first run through 01.1 → 01.4).
+/// `--dart-define=MIBU_RESET=true` wipes the data on every launch first, so
+/// a dev device behaves like a fresh install (see `make fresh`).
 const _seedMode = String.fromEnvironment('MIBU_SEED', defaultValue: 'demo');
+const _resetOnOpen = bool.fromEnvironment('MIBU_RESET');
 
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
   final db = AppDatabase(null, DateTime.now, switch (_seedMode) {
     'fixture' => seedFixture,
     'none' => (_, _) async {},
     _ => seedDemo,
-  });
+  }, _resetOnOpen);
   ref.onDispose(db.close);
   return db;
 });

@@ -2,7 +2,7 @@ APP := apps/mobile
 FLUTTER := cd $(APP) && fvm flutter
 DART := cd $(APP) && fvm dart
 
-.PHONY: help get gen watch l10n run profile test analyze format check clean
+.PHONY: help get gen watch l10n run fresh reset profile test analyze format check clean
 
 help: ## list commands
 	@grep -E '^[a-z0-9-]+:.*## ' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-8s %s\n", $$1, $$2}'
@@ -19,8 +19,14 @@ watch: ## drift codegen in watch mode
 l10n: ## regenerate AppLocalizations from app_id.arb
 	$(FLUTTER) gen-l10n
 
-run: ## run app (pass device: make run d=<id>)
-	$(FLUTTER) run $(if $(d),-d $(d))
+run: ## run app (device: d=<id>, sample data: seed=demo|fixture|none)
+	$(FLUTTER) run $(if $(d),-d $(d)) $(if $(seed),--dart-define=MIBU_SEED=$(seed))
+
+fresh: ## run as a brand-new install: wipes data each launch → onboarding → 01.4 atur awal
+	$(FLUTTER) run $(if $(d),-d $(d)) --dart-define=MIBU_SEED=none --dart-define=MIBU_RESET=true
+
+reset: ## run with data wiped + re-seeded each launch (seed=demo|fixture, default demo)
+	$(FLUTTER) run $(if $(d),-d $(d)) --dart-define=MIBU_SEED=$(or $(seed),demo) --dart-define=MIBU_RESET=true
 
 profile: ## run app in profile mode, real perf (pass device: make profile d=<id>)
 	$(FLUTTER) run --profile $(if $(d),-d $(d))
