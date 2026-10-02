@@ -77,7 +77,7 @@ Tanda: **[diupdate]** = aturan/perilaku berubah dari design, **[perlu design]** 
 
 ## 04 · Transaksi
 
-- [ ] **04.1 semua transaksi** — carousel bulan, tile pemasukan / pengeluaran / selisih, filter semua / pengeluaran / pemasukan, grup per hari (hari ini · kemarin · sen 12 okt) + total harian, empty state, akhir list `liat {bulan lalu}`.
+- [ ] **04.1 semua transaksi** — carousel bulan (swipe / tap kiri-kanan = ±1 bulan, label lintas tahun `des 24`; tap judul `oktober ▾` → MonthMenu 00.8 dengan bulan sebelum transaksi pertama dikunci; chip `balik ke okt 2026 ›` kalau bukan bulan ini; tanpa dots), tile pemasukan / pengeluaran / selisih, filter semua / pengeluaran / pemasukan, grup per hari (hari ini · kemarin · sen 12 okt) + total harian, empty state, akhir list `liat {bulan lalu}`.
 - [ ] **04.2 cari** — cari kategori/tempat di bulan ini, filter tipe, SearchSummary (total, rata², insight, tick per hari yang bisa di-drag buat filter hari), 3 hasil pertama + `liat N lagi`, saran pencarian, empty state.
 - [ ] **04.3 struk (detail)** — kartu struk: tempat, kategori, nominal, waktu, jenis, berulang, catatan, foto struk. Dampak ke kantong. Aksi: hapus, `patungan`, `catat lagi`, edit → 04.4.
 - [ ] **04.3b/c hapus** — ConfirmModal (dampak kantong sebelum → sesudah), lalu kartu stempel `dihapus` + toast `batalin`.

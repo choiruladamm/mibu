@@ -5,9 +5,12 @@ import 'package:intl/intl.dart';
 
 import '../../../../domain/models/finance.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../core/clock.dart';
 import '../../../core/dates.dart';
+import '../../../core/finance_providers.dart';
 import '../../../core/money.dart';
 import '../../../core/tokens.dart';
+import '../../../core/widgets/month_menu.dart';
 import '../../../core/widgets/nav_header.dart';
 import '../../../core/widgets/tx_row.dart';
 import '../view_models/transactions_view_model.dart';
@@ -35,6 +38,12 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
   /// doesn't blank (and lose its scroll position) between months.
   TransactionsState? _last;
 
+  /// 04.1b: 00.8 MonthMenu under the month title.
+  bool _menuOpen = false;
+  final _titleLink = LayerLink();
+
+  void _toggleMenu() => setState(() => _menuOpen = !_menuOpen);
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
@@ -42,36 +51,88 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
     final onOpen = widget.onOpen;
 
     return Scaffold(
-      body: SafeArea(
-        bottom: false,
-        minimum: const EdgeInsets.only(top: 12),
-        child: Column(
-          children: [
-            NavHeader(
-              title: l.txTitle,
-              sub: s == null ? '' : l.txCount(s.count),
-              backLabel: l.home,
-              actionIcon: HugeIcons.strokeRoundedSearch01,
-              actionLabel: l.search,
-              onAction: null, // → 04.2 cari (M6)
+      body: Stack(
+        children: [
+          SafeArea(
+            bottom: false,
+            minimum: const EdgeInsets.only(top: 12),
+            child: Column(
+              children: [
+                NavHeader(
+                  title: l.txTitle,
+                  sub: s == null ? '' : l.txCount(s.count),
+                  backLabel: l.home,
+                  actionIcon: HugeIcons.strokeRoundedSearch01,
+                  actionLabel: l.search,
+                  onAction: null, // → 04.2 cari (M6)
+                ),
+                Expanded(
+                  child: s == null
+                      ? const SizedBox()
+                      : _Body(
+                          state: s,
+                          onOpen: onOpen,
+                          titleLink: _titleLink,
+                          menuOpen: _menuOpen,
+                          onToggleMenu: _toggleMenu,
+                        ),
+                ),
+              ],
             ),
-            Expanded(
-              child: s == null
-                  ? const SizedBox()
-                  : _Body(state: s, onOpen: onOpen),
+          ),
+          if (_menuOpen && s != null) ...[
+            Positioned.fill(
+              child: Semantics(
+                button: true,
+                label: l.close,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: _toggleMenu,
+                  child: const ColoredBox(color: AppColors.scrim),
+                ),
+              ),
+            ),
+            Align(
+              alignment: Alignment.topLeft,
+              child: CompositedTransformFollower(
+                link: _titleLink,
+                showWhenUnlinked: false,
+                targetAnchor: Alignment.bottomCenter,
+                followerAnchor: Alignment.topCenter,
+                offset: const Offset(0, 6),
+                child: MonthMenu(
+                  selected: s.month,
+                  now: ref.watch(nowProvider),
+                  spent: ref.watch(totalsProvider).value?.spent ?? const {},
+                  min: s.months.first,
+                  onPick: (month) {
+                    ref.read(txMonthProvider.notifier).select(month);
+                    setState(() => _menuOpen = false);
+                  },
+                ),
+              ),
             ),
           ],
-        ),
+        ],
       ),
     );
   }
 }
 
 class _Body extends ConsumerWidget {
-  const _Body({required this.state, required this.onOpen});
+  const _Body({
+    required this.state,
+    required this.onOpen,
+    required this.titleLink,
+    required this.menuOpen,
+    required this.onToggleMenu,
+  });
 
   final TransactionsState state;
   final ValueChanged<Transaction>? onOpen;
+  final LayerLink titleLink;
+  final bool menuOpen;
+  final VoidCallback onToggleMenu;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -96,7 +157,16 @@ class _Body extends ConsumerWidget {
             if (v > 200) prev();
             if (v < -200 && !s.nextIsFuture) go(s.selected + 1);
           },
-          child: _MonthCarousel(state: s, onPick: go),
+          child: _MonthCarousel(
+            state: s,
+            onPick: go,
+            onBackToNow: () => ref
+                .read(txMonthProvider.notifier)
+                .select(DateTime(s.today.year, s.today.month)),
+            titleLink: titleLink,
+            menuOpen: menuOpen,
+            onToggleMenu: onToggleMenu,
+          ),
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
@@ -155,7 +225,7 @@ class _Body extends ConsumerWidget {
               Text(l.txAllShown(month), style: muted),
             if (s.hasPrev)
               _OutlinePill(
-                label: l.txSeeMonth(_short(s.months[s.selected - 1])),
+                label: l.txSeeMonth(_label(s.months[s.selected - 1], s.month)),
                 onTap: prev,
               ),
           ],
@@ -165,26 +235,40 @@ class _Body extends ConsumerWidget {
   }
 }
 
+/// "sep", or "des 24" when [m] is in another year than [around].
+String _label(DateTime m, DateTime around) => m.year == around.year
+    ? _short(m)
+    : '${_short(m)} ${(m.year % 100).toString().padLeft(2, '0')}';
+
 class _MonthCarousel extends StatelessWidget {
-  const _MonthCarousel({required this.state, required this.onPick});
+  const _MonthCarousel({
+    required this.state,
+    required this.onPick,
+    required this.onBackToNow,
+    required this.titleLink,
+    required this.menuOpen,
+    required this.onToggleMenu,
+  });
 
   final TransactionsState state;
   final ValueChanged<int> onPick;
+  final VoidCallback onBackToNow;
+  final LayerLink titleLink;
+  final bool menuOpen;
+  final VoidCallback onToggleMenu;
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
     final s = state;
     final i = s.selected;
-    // Up to 7 dots, sliding with the selection.
-    final from = (i - 3).clamp(0, (s.months.length - 7).clamp(0, 1 << 30));
-    final to = (from + 7).clamp(0, s.months.length);
+    final notNow = s.month != DateTime(s.today.year, s.today.month);
 
     Widget side({
       required String label,
       required String semantics,
       required VoidCallback? onTap,
-      required TextAlign align,
+      required bool left,
     }) => Semantics(
       button: true,
       enabled: onTap != null,
@@ -194,12 +278,10 @@ class _MonthCarousel extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
         child: Container(
-          width: 88,
+          width: 76,
           height: 64,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          alignment: align == TextAlign.left
-              ? Alignment.centerLeft
-              : Alignment.centerRight,
+          padding: EdgeInsets.only(left: left ? 12 : 0, right: left ? 0 : 12),
+          alignment: left ? Alignment.centerLeft : Alignment.centerRight,
           child: Text(
             label,
             style: AppText.body.copyWith(
@@ -216,82 +298,179 @@ class _MonthCarousel extends StatelessWidget {
     final next = s.months[i + 1];
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Row(
-            children: [
-              side(
-                label: s.hasPrev ? _short(s.months[i - 1]) : '',
-                semantics: s.hasPrev
-                    ? l.txSeeMonth(_name(s.months[i - 1]))
-                    : l.txNoPrev,
-                onTap: s.hasPrev ? () => onPick(i - 1) : null,
-                align: TextAlign.left,
-              ),
-              Expanded(
-                child: Semantics(
-                  liveRegion: true,
-                  child: Column(
-                    spacing: 2,
-                    children: [
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          _name(s.month),
-                          style: AppText.title.copyWith(
-                            fontSize: 36,
-                            letterSpacing: -1.08,
-                            height: 1,
-                          ),
-                        ),
-                      ),
-                      Text(
-                        '${s.month.year}',
-                        style: AppText.caption.copyWith(
-                          fontSize: 12,
-                          color: AppColors.muted,
-                        ),
-                      ),
-                    ],
+        CompositedTransformTarget(
+          link: titleLink,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              children: [
+                side(
+                  label: s.hasPrev ? _label(s.months[i - 1], s.month) : '',
+                  semantics: s.hasPrev
+                      ? l.txSeeMonth(_name(s.months[i - 1]))
+                      : l.txNoPrev,
+                  onTap: s.hasPrev ? () => onPick(i - 1) : null,
+                  left: true,
+                ),
+                Expanded(
+                  child: Center(
+                    child: _Title(
+                      month: s.month,
+                      open: menuOpen,
+                      onTap: onToggleMenu,
+                    ),
                   ),
                 ),
-              ),
-              side(
-                label: _short(next),
-                semantics: s.nextIsFuture
-                    ? l.txNotYet(_name(next))
-                    : l.txSeeMonth(_name(next)),
-                onTap: s.nextIsFuture ? null : () => onPick(i + 1),
-                align: TextAlign.right,
-              ),
-            ],
+                side(
+                  label: _label(next, s.month),
+                  semantics: s.nextIsFuture
+                      ? l.txNotYet(_name(next))
+                      : l.txSeeMonth(_name(next)),
+                  onTap: s.nextIsFuture ? null : () => onPick(i + 1),
+                  left: false,
+                ),
+              ],
+            ),
           ),
         ),
-        const SizedBox(height: 8),
-        ExcludeSemantics(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            spacing: 6,
-            children: [
-              for (var j = from; j < to; j++)
-                AnimatedContainer(
-                  duration: AppMotion.select,
-                  curve: AppMotion.ease,
-                  width: j == i ? 18 : 6,
-                  height: 6,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(3),
-                    color: j == i
-                        ? AppColors.ink
-                        : j == s.months.length - 1
-                        ? AppColors.track
-                        : AppColors.line,
+        AnimatedSize(
+          duration: AppMotion.select,
+          curve: AppMotion.ease,
+          alignment: Alignment.topCenter,
+          child: notNow
+              ? Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: _BackToNow(
+                    label: l.txBackToNow(_short(s.today), s.today.year),
+                    onTap: onBackToNow,
                   ),
-                ),
-            ],
-          ),
+                )
+              : const SizedBox(width: double.infinity),
         ),
       ],
+    );
+  }
+}
+
+/// Month name + year; tap opens 00.8 MonthMenu. The caret goes ink while open.
+class _Title extends StatelessWidget {
+  const _Title({required this.month, required this.open, required this.onTap});
+
+  final DateTime month;
+  final bool open;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    return Semantics(
+      button: true,
+      expanded: open,
+      liveRegion: true,
+      label: l.txPickMonth(_name(month), month.year),
+      excludeSemantics: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 2,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                spacing: 6,
+                children: [
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        _name(month),
+                        style: AppText.title.copyWith(
+                          fontSize: 36,
+                          letterSpacing: -1.08,
+                          height: 1,
+                        ),
+                      ),
+                    ),
+                  ),
+                  AnimatedContainer(
+                    duration: AppMotion.select,
+                    width: 26,
+                    height: 26,
+                    decoration: BoxDecoration(
+                      color: open ? AppColors.ink : AppColors.mist,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: HugeIcon(
+                        icon: HugeIcons.strokeRoundedArrowDown01,
+                        size: 18,
+                        strokeWidth: AppStroke.iconOnInkSmall,
+                        color: open ? AppColors.paper : AppColors.ink,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                '${month.year}',
+                style: AppText.caption.copyWith(
+                  fontSize: 12,
+                  color: AppColors.muted,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 04.1c: "balik ke okt 2026 ›" when not on the current month.
+class _BackToNow extends StatelessWidget {
+  const _BackToNow({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Container(
+          height: 30,
+          padding: const EdgeInsets.only(left: 12, right: 8),
+          decoration: BoxDecoration(
+            color: AppColors.mist,
+            borderRadius: BorderRadius.circular(AppRadius.pill),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 2,
+            children: [
+              Text(
+                label,
+                style: AppText.label.copyWith(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const HugeIcon(
+                icon: HugeIcons.strokeRoundedArrowRight01,
+                size: 14,
+                strokeWidth: AppStroke.iconOnInkSmall,
+                color: AppColors.ink,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
