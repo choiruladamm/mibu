@@ -591,5 +591,132 @@
         "type": "String"
       }
     }
+  },
+  "receiptTitle": "struk",
+  "receiptPaid": "dibayar {date}",
+  "@receiptPaid": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "receiptReceived": "masuk {date}",
+  "@receiptReceived": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "receiptKind": "jenis",
+  "receiptNote": "catatan",
+  "receiptAddNote": "tambahin catatan",
+  "receiptPocket": "kantong {name}",
+  "@receiptPocket": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "receiptLeftOf": "sisa {left} dari {limit}",
+  "@receiptLeftOf": {
+    "placeholders": {
+      "left": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "receiptOverOf": "kelebihan {over} dari {limit}",
+  "@receiptOverOf": {
+    "placeholders": {
+      "over": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "receiptShare": "transaksi ini aja udah makan {pct}% kantong.",
+  "@receiptShare": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "receiptAgain": "catat lagi",
+  "receiptEdit": "edit catatan",
+  "entryDelete": "hapus catatan",
+  "receiptDeleted": "dihapus",
+  "receiptBack": "balik ke transaksi",
+  "confirmDeleteTitle": "hapus catatan ini?",
+  "confirmDeleteBody": "{amount} di {place}, {date}. tenang, abis ini masih bisa dibatalin.",
+  "@confirmDeleteBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "place": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "confirmPocket": "{emoji} kantong {name}",
+  "@confirmPocket": {
+    "placeholders": {
+      "emoji": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "confirmPocketAfter": "balik jadi sisa {amount}",
+  "@confirmPocketAfter": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "confirmNow": "sekarang {pct}% kepake",
+  "@confirmNow": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "confirmAfter": "abis ini {pct}%",
+  "@confirmAfter": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "confirmDelete": "hapus",
+  "confirmCancel": "nggak jadi",
+  "entryDeletedToast": "catatan dihapus",
+  "entryDeletedPocket": "kantong {name} balik jadi sisa {amount}",
+  "@entryDeletedPocket": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
   }
 }

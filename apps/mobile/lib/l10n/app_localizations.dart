@@ -1161,6 +1161,156 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'{month} belum kejadian'**
   String txNotYet(String month);
+
+  /// No description provided for @receiptTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'struk'**
+  String get receiptTitle;
+
+  /// No description provided for @receiptPaid.
+  ///
+  /// In id, this message translates to:
+  /// **'dibayar {date}'**
+  String receiptPaid(String date);
+
+  /// No description provided for @receiptReceived.
+  ///
+  /// In id, this message translates to:
+  /// **'masuk {date}'**
+  String receiptReceived(String date);
+
+  /// No description provided for @receiptKind.
+  ///
+  /// In id, this message translates to:
+  /// **'jenis'**
+  String get receiptKind;
+
+  /// No description provided for @receiptNote.
+  ///
+  /// In id, this message translates to:
+  /// **'catatan'**
+  String get receiptNote;
+
+  /// No description provided for @receiptAddNote.
+  ///
+  /// In id, this message translates to:
+  /// **'tambahin catatan'**
+  String get receiptAddNote;
+
+  /// No description provided for @receiptPocket.
+  ///
+  /// In id, this message translates to:
+  /// **'kantong {name}'**
+  String receiptPocket(String name);
+
+  /// No description provided for @receiptLeftOf.
+  ///
+  /// In id, this message translates to:
+  /// **'sisa {left} dari {limit}'**
+  String receiptLeftOf(String left, String limit);
+
+  /// No description provided for @receiptOverOf.
+  ///
+  /// In id, this message translates to:
+  /// **'kelebihan {over} dari {limit}'**
+  String receiptOverOf(String over, String limit);
+
+  /// No description provided for @receiptShare.
+  ///
+  /// In id, this message translates to:
+  /// **'transaksi ini aja udah makan {pct}% kantong.'**
+  String receiptShare(int pct);
+
+  /// No description provided for @receiptAgain.
+  ///
+  /// In id, this message translates to:
+  /// **'catat lagi'**
+  String get receiptAgain;
+
+  /// No description provided for @receiptEdit.
+  ///
+  /// In id, this message translates to:
+  /// **'edit catatan'**
+  String get receiptEdit;
+
+  /// No description provided for @entryDelete.
+  ///
+  /// In id, this message translates to:
+  /// **'hapus catatan'**
+  String get entryDelete;
+
+  /// No description provided for @receiptDeleted.
+  ///
+  /// In id, this message translates to:
+  /// **'dihapus'**
+  String get receiptDeleted;
+
+  /// No description provided for @receiptBack.
+  ///
+  /// In id, this message translates to:
+  /// **'balik ke transaksi'**
+  String get receiptBack;
+
+  /// No description provided for @confirmDeleteTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'hapus catatan ini?'**
+  String get confirmDeleteTitle;
+
+  /// No description provided for @confirmDeleteBody.
+  ///
+  /// In id, this message translates to:
+  /// **'{amount} di {place}, {date}. tenang, abis ini masih bisa dibatalin.'**
+  String confirmDeleteBody(String amount, String place, String date);
+
+  /// No description provided for @confirmPocket.
+  ///
+  /// In id, this message translates to:
+  /// **'{emoji} kantong {name}'**
+  String confirmPocket(String emoji, String name);
+
+  /// No description provided for @confirmPocketAfter.
+  ///
+  /// In id, this message translates to:
+  /// **'balik jadi sisa {amount}'**
+  String confirmPocketAfter(String amount);
+
+  /// No description provided for @confirmNow.
+  ///
+  /// In id, this message translates to:
+  /// **'sekarang {pct}% kepake'**
+  String confirmNow(int pct);
+
+  /// No description provided for @confirmAfter.
+  ///
+  /// In id, this message translates to:
+  /// **'abis ini {pct}%'**
+  String confirmAfter(int pct);
+
+  /// No description provided for @confirmDelete.
+  ///
+  /// In id, this message translates to:
+  /// **'hapus'**
+  String get confirmDelete;
+
+  /// No description provided for @confirmCancel.
+  ///
+  /// In id, this message translates to:
+  /// **'nggak jadi'**
+  String get confirmCancel;
+
+  /// No description provided for @entryDeletedToast.
+  ///
+  /// In id, this message translates to:
+  /// **'catatan dihapus'**
+  String get entryDeletedToast;
+
+  /// No description provided for @entryDeletedPocket.
+  ///
+  /// In id, this message translates to:
+  /// **'kantong {name} balik jadi sisa {amount}'**
+  String entryDeletedPocket(String name, String amount);
 }
 
 class _AppLocalizationsDelegate

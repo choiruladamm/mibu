@@ -72,6 +72,19 @@ class AddEntry extends Notifier<AddEntryState> {
 
   void setNote(Note note) => state = state.copyWith(note: note);
 
+  /// "catat lagi": same kind, category and place; amount and day stay fresh.
+  Future<void> again(Transaction t) async {
+    final cats = await ref
+        .read(financeRepositoryProvider)
+        .watchCategories()
+        .first;
+    state = state.copyWith(
+      kind: t.kind,
+      category: () => cats.where((c) => c.id == t.categoryId).firstOrNull,
+      place: t.place,
+    );
+  }
+
   Future<void> save() async {
     final s = state;
     if (!s.canSave) return;

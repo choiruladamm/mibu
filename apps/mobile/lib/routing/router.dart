@@ -7,6 +7,8 @@ import '../ui/features/add_entry/views/add_entry_view.dart';
 import '../ui/features/home/views/home_view.dart';
 import '../ui/features/onboarding/views/onboarding_view.dart';
 import '../ui/features/pockets/views/pockets_view.dart';
+import '../domain/models/finance.dart';
+import '../ui/features/transactions/views/transaction_detail_view.dart';
 import '../ui/features/transactions/views/transactions_view.dart';
 
 abstract final class Routes {
@@ -15,6 +17,7 @@ abstract final class Routes {
   static const pockets = '/kantong';
   static const addEntry = '/catat';
   static const transactions = '/transaksi';
+  static String transaction(String id) => '$transactions/$id';
 }
 
 /// Tab bar → tab route. Stats / settings land in M6.
@@ -48,10 +51,23 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       _tab(Routes.home, const HomeView()),
       _tab(Routes.pockets, const PocketsView()),
-      GoRoute(path: Routes.addEntry, builder: (_, _) => const AddEntryView()),
+      GoRoute(
+        path: Routes.addEntry,
+        // extra: an entry to "catat lagi" from (04.3).
+        builder: (_, state) => AddEntryView(again: state.extra as Transaction?),
+      ),
       GoRoute(
         path: Routes.transactions,
-        builder: (_, _) => const TransactionsView(),
+        builder: (context, _) => TransactionsView(
+          onOpen: (t) => context.push(Routes.transaction(t.id)),
+        ),
+        routes: [
+          GoRoute(
+            path: ':id',
+            builder: (_, state) =>
+                TransactionDetailView(id: state.pathParameters['id']!),
+          ),
+        ],
       ),
     ],
   );

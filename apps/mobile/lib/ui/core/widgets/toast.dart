@@ -10,12 +10,14 @@ enum ToastIcon { trash, check }
 
 /// 00.18 UndoToast, floating at the bottom (02.2, 02.4c/d, 04.3c). With
 /// [onUndo] it gets "batalin" and a 5s timer bar. Gone after 5s either way.
+/// [bottom] lifts it over a screen's own bottom link (04.3c).
 void showToast(
   BuildContext context, {
   required ToastIcon icon,
   required String title,
   required String sub,
   VoidCallback? onUndo,
+  double bottom = 28,
 }) {
   final messenger = ScaffoldMessenger.of(context)..hideCurrentSnackBar();
   messenger.showSnackBar(
@@ -24,7 +26,7 @@ void showToast(
       backgroundColor: Colors.transparent,
       elevation: 0,
       padding: EdgeInsets.zero,
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 28),
+      margin: EdgeInsets.fromLTRB(16, 0, 16, bottom),
       duration: _undoWindow,
       content: _Toast(
         icon: icon,

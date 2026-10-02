@@ -655,4 +655,103 @@ class AppLocalizationsId extends AppLocalizations {
   String txNotYet(String month) {
     return '$month belum kejadian';
   }
+
+  @override
+  String get receiptTitle => 'struk';
+
+  @override
+  String receiptPaid(String date) {
+    return 'dibayar $date';
+  }
+
+  @override
+  String receiptReceived(String date) {
+    return 'masuk $date';
+  }
+
+  @override
+  String get receiptKind => 'jenis';
+
+  @override
+  String get receiptNote => 'catatan';
+
+  @override
+  String get receiptAddNote => 'tambahin catatan';
+
+  @override
+  String receiptPocket(String name) {
+    return 'kantong $name';
+  }
+
+  @override
+  String receiptLeftOf(String left, String limit) {
+    return 'sisa $left dari $limit';
+  }
+
+  @override
+  String receiptOverOf(String over, String limit) {
+    return 'kelebihan $over dari $limit';
+  }
+
+  @override
+  String receiptShare(int pct) {
+    return 'transaksi ini aja udah makan $pct% kantong.';
+  }
+
+  @override
+  String get receiptAgain => 'catat lagi';
+
+  @override
+  String get receiptEdit => 'edit catatan';
+
+  @override
+  String get entryDelete => 'hapus catatan';
+
+  @override
+  String get receiptDeleted => 'dihapus';
+
+  @override
+  String get receiptBack => 'balik ke transaksi';
+
+  @override
+  String get confirmDeleteTitle => 'hapus catatan ini?';
+
+  @override
+  String confirmDeleteBody(String amount, String place, String date) {
+    return '$amount di $place, $date. tenang, abis ini masih bisa dibatalin.';
+  }
+
+  @override
+  String confirmPocket(String emoji, String name) {
+    return '$emoji kantong $name';
+  }
+
+  @override
+  String confirmPocketAfter(String amount) {
+    return 'balik jadi sisa $amount';
+  }
+
+  @override
+  String confirmNow(int pct) {
+    return 'sekarang $pct% kepake';
+  }
+
+  @override
+  String confirmAfter(int pct) {
+    return 'abis ini $pct%';
+  }
+
+  @override
+  String get confirmDelete => 'hapus';
+
+  @override
+  String get confirmCancel => 'nggak jadi';
+
+  @override
+  String get entryDeletedToast => 'catatan dihapus';
+
+  @override
+  String entryDeletedPocket(String name, String amount) {
+    return 'kantong $name balik jadi sisa $amount';
+  }
 }

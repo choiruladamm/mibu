@@ -266,7 +266,7 @@ class FinanceRepository {
         ),
       );
 
-  /// 04.4: kind stays; [amount] is signed.
+  /// 04.4: kind stays; [amount] is signed. [tags] null = keep.
   Future<void> updateTransaction(
     String id, {
     required int amount,
@@ -274,12 +274,14 @@ class FinanceRepository {
     required String place,
     required String note,
     required DateTime at,
+    List<String>? tags,
   }) => (_db.update(_tx)..where((t) => t.id.equals(id))).write(
     TransactionsCompanion(
       amount: Value(amount),
       categoryId: Value(categoryId),
       place: Value(place.trim()),
       note: Value(note.trim()),
+      tags: tags == null ? const Value.absent() : Value(tags.join(',')),
       at: Value(at),
       updatedAt: Value(DateTime.now()),
     ),

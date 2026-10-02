@@ -21,7 +21,10 @@ import 'category_picker_sheet.dart';
 
 /// 03.1 catat — opened from + on every tab; pops on close / save.
 class AddEntryView extends ConsumerStatefulWidget {
-  const AddEntryView({super.key});
+  const AddEntryView({super.key, this.again});
+
+  /// "catat lagi" (04.3): start with this entry's kind, category and place.
+  final Transaction? again;
 
   @override
   ConsumerState<AddEntryView> createState() => _AddEntryViewState();
@@ -32,6 +35,15 @@ class _AddEntryViewState extends ConsumerState<AddEntryView> {
   bool _saving = false;
 
   AddEntry get _vm => ref.read(addEntryProvider.notifier);
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.again case final t?) {
+      // Providers can't change mid-build; the push transition hides the frame.
+      WidgetsBinding.instance.addPostFrameCallback((_) => _vm.again(t));
+    }
+  }
 
   DateTime get _today => dateOnly(ref.read(clockProvider)());
 

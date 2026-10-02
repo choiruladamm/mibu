@@ -162,7 +162,11 @@ class HomeView extends ConsumerWidget {
                         spacing: 2,
                         children: [
                           for (final tx in s.recent)
-                            TxRow(tx: tx, onTap: () {}), // → 04.3 detail
+                            TxRow(
+                              tx: tx,
+                              onTap: () =>
+                                  context.push(Routes.transaction(tx.id)),
+                            ),
                         ],
                       ),
                     ),
