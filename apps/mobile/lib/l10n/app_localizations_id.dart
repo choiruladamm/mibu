@@ -1391,6 +1391,47 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
+  String get iconSheetTitle => 'pilih ikon';
+
+  @override
+  String get iconSearchHint => 'cari ikon… kopi, motor, kado';
+
+  @override
+  String get iconSearchLabel => 'cari ikon';
+
+  @override
+  String iconCount(int n) {
+    return '$n ikon';
+  }
+
+  @override
+  String iconEmpty(String q) {
+    return 'belum ada ikon “$q”';
+  }
+
+  @override
+  String get iconEmptyTry => 'coba kata lain, misalnya';
+
+  @override
+  String iconGroup(String group) {
+    String _temp0 = intl.Intl.selectLogic(group, {
+      'makan': 'makan',
+      'jalan': 'jalan',
+      'rumah': 'rumah',
+      'belanja': 'belanja',
+      'hiburan': 'hiburan',
+      'hewan': 'hewan',
+      'duit': 'duit',
+      'sehat': 'sehat',
+      'sekolah': 'sekolah',
+      'kerja': 'kerja',
+      'sosial': 'sosial',
+      'other': 'semua',
+    });
+    return '$_temp0';
+  }
+
+  @override
   String get searchTry => 'coba cari';
 
   @override

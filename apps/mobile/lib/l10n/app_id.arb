@@ -1296,6 +1296,34 @@
       }
     }
   },
+  "iconSheetTitle": "pilih ikon",
+  "iconSearchHint": "cari ikon… kopi, motor, kado",
+  "iconSearchLabel": "cari ikon",
+  "iconCount": "{n} ikon",
+  "@iconCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "iconEmpty": "belum ada ikon “{q}”",
+  "@iconEmpty": {
+    "placeholders": {
+      "q": {
+        "type": "String"
+      }
+    }
+  },
+  "iconEmptyTry": "coba kata lain, misalnya",
+  "iconGroup": "{group, select, makan{makan} jalan{jalan} rumah{rumah} belanja{belanja} hiburan{hiburan} hewan{hewan} duit{duit} sehat{sehat} sekolah{sekolah} kerja{kerja} sosial{sosial} other{semua}}",
+  "@iconGroup": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
   "searchTry": "coba cari",
   "searchAllMonths": "di semua bulan",
   "searchSubKind": "di {kind} {month}",

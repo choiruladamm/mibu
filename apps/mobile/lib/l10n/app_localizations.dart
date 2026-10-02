@@ -2338,6 +2338,48 @@ abstract class AppLocalizations {
   /// **'+ {n} lainnya'**
   String statsMoreN(int n);
 
+  /// No description provided for @iconSheetTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'pilih ikon'**
+  String get iconSheetTitle;
+
+  /// No description provided for @iconSearchHint.
+  ///
+  /// In id, this message translates to:
+  /// **'cari ikon… kopi, motor, kado'**
+  String get iconSearchHint;
+
+  /// No description provided for @iconSearchLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'cari ikon'**
+  String get iconSearchLabel;
+
+  /// No description provided for @iconCount.
+  ///
+  /// In id, this message translates to:
+  /// **'{n} ikon'**
+  String iconCount(int n);
+
+  /// No description provided for @iconEmpty.
+  ///
+  /// In id, this message translates to:
+  /// **'belum ada ikon “{q}”'**
+  String iconEmpty(String q);
+
+  /// No description provided for @iconEmptyTry.
+  ///
+  /// In id, this message translates to:
+  /// **'coba kata lain, misalnya'**
+  String get iconEmptyTry;
+
+  /// No description provided for @iconGroup.
+  ///
+  /// In id, this message translates to:
+  /// **'{group, select, makan{makan} jalan{jalan} rumah{rumah} belanja{belanja} hiburan{hiburan} hewan{hewan} duit{duit} sehat{sehat} sekolah{sekolah} kerja{kerja} sosial{sosial} other{semua}}'**
+  String iconGroup(String group);
+
   /// No description provided for @searchTry.
   ///
   /// In id, this message translates to:
