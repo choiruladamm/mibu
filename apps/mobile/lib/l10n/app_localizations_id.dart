@@ -161,6 +161,77 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
+  String get infoWhere => 'dari mana angkanya?';
+
+  @override
+  String get infoOk => 'ngerti';
+
+  @override
+  String get infoSaldoTitle => 'saldo kamu';
+
+  @override
+  String get infoSaldoBody =>
+      'saldo awal + semua catatan sejak itu. sisa bulan lalu ikut kebawa.';
+
+  @override
+  String get infoBudgetTitle => 'sisa budget';
+
+  @override
+  String infoBudgetBody(String budget, String spent, String left) {
+    return 'budget $budget − semua pengeluaran $spent = $left.';
+  }
+
+  @override
+  String infoBudgetBodyOver(String budget, String spent, String over) {
+    return 'budget $budget − semua pengeluaran $spent = kelewat $over.';
+  }
+
+  @override
+  String get infoSafeTitle => 'aman jajan hari ini';
+
+  @override
+  String infoSafeBody(int days, String saldo, int budgetDays, String budget) {
+    return 'jatah hari ini = yang lebih kecil dari saldo ÷ $days hari ($saldo) dan sisa budget ÷ $budgetDays hari ($budget), dikurangi yang udah kepake hari ini.';
+  }
+
+  @override
+  String infoSafeBodyNoBudget(int days, String saldo) {
+    return 'jatah hari ini = saldo ÷ $days hari ($saldo), dikurangi yang udah kepake hari ini.';
+  }
+
+  @override
+  String get infoJarTitle => 'sisa jajan';
+
+  @override
+  String infoJarBody(String limit, String spent, String left) {
+    return 'total limit kantong $limit − kepake di kantong $spent = $left.';
+  }
+
+  @override
+  String infoJarBudgetBody(
+    String budget,
+    String spent,
+    String left,
+    String outside,
+  ) {
+    return 'budget $budget − semua pengeluaran $spent = $left. pengeluaran di luar kantong ($outside) ikut ngurangin budget, tapi nggak ngurangin sisa jajan.';
+  }
+
+  @override
+  String get infoConflict =>
+      'sisa jajan lebih gede dari sisa budget. pegang yang lebih kecil biar nggak kelewat budget.';
+
+  @override
+  String pocketsBudgetOver(String amount) {
+    return 'budget udah kelewat $amount';
+  }
+
+  @override
+  String pocketsBudgetShort(String amount) {
+    return 'sisa budget cuma $amount';
+  }
+
+  @override
   String get heroBudgetLeft => 'sisa budget';
 
   @override

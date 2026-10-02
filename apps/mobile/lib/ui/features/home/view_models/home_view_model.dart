@@ -73,6 +73,7 @@ class HomeState {
     required this.today,
     required this.payday,
     required this.safeToSpendToday,
+    required this.safe,
     required this.budget,
     required this.monthSpent,
     required this.periodDays,
@@ -97,6 +98,7 @@ class HomeState {
   final DateTime today;
   final PaydayInfo payday; // today, telat, or how long until gajian
   final int safeToSpendToday; // negative = overspent today
+  final SafeShare safe; // the shares behind it, for "dari mana angkanya?"
   final int? budget; // in force for [month]; null = none
   final int monthSpent; // expenses in [month], positive
   final int periodDays; // length of [month]'s period (rata²/hari)
@@ -226,6 +228,13 @@ final homeProvider = Provider<AsyncValue<HomeState>>((ref) {
           spentToday: totals.spentToday,
           // On payday / telat the hero swaps the chip for "catat gajian"
           // (02.1p o–q); the figure still counts to the next payday.
+          days: payday.daysToNext,
+          budgetLeft: isCurrent && budget != null ? budget - monthSpent : null,
+          budgetDays: budgetDaysLeft,
+        ),
+        safe: safeShare(
+          balance: totals.balance,
+          spentToday: totals.spentToday,
           days: payday.daysToNext,
           budgetLeft: isCurrent && budget != null ? budget - monthSpent : null,
           budgetDays: budgetDaysLeft,

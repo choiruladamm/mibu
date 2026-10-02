@@ -358,6 +358,107 @@ abstract class AppLocalizations {
   /// **'belum ada catatan di {month}'**
   String homeMonthEmpty(String month);
 
+  /// No description provided for @infoWhere.
+  ///
+  /// In id, this message translates to:
+  /// **'dari mana angkanya?'**
+  String get infoWhere;
+
+  /// No description provided for @infoOk.
+  ///
+  /// In id, this message translates to:
+  /// **'ngerti'**
+  String get infoOk;
+
+  /// No description provided for @infoSaldoTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'saldo kamu'**
+  String get infoSaldoTitle;
+
+  /// No description provided for @infoSaldoBody.
+  ///
+  /// In id, this message translates to:
+  /// **'saldo awal + semua catatan sejak itu. sisa bulan lalu ikut kebawa.'**
+  String get infoSaldoBody;
+
+  /// No description provided for @infoBudgetTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'sisa budget'**
+  String get infoBudgetTitle;
+
+  /// No description provided for @infoBudgetBody.
+  ///
+  /// In id, this message translates to:
+  /// **'budget {budget} − semua pengeluaran {spent} = {left}.'**
+  String infoBudgetBody(String budget, String spent, String left);
+
+  /// No description provided for @infoBudgetBodyOver.
+  ///
+  /// In id, this message translates to:
+  /// **'budget {budget} − semua pengeluaran {spent} = kelewat {over}.'**
+  String infoBudgetBodyOver(String budget, String spent, String over);
+
+  /// No description provided for @infoSafeTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'aman jajan hari ini'**
+  String get infoSafeTitle;
+
+  /// No description provided for @infoSafeBody.
+  ///
+  /// In id, this message translates to:
+  /// **'jatah hari ini = yang lebih kecil dari saldo ÷ {days} hari ({saldo}) dan sisa budget ÷ {budgetDays} hari ({budget}), dikurangi yang udah kepake hari ini.'**
+  String infoSafeBody(int days, String saldo, int budgetDays, String budget);
+
+  /// No description provided for @infoSafeBodyNoBudget.
+  ///
+  /// In id, this message translates to:
+  /// **'jatah hari ini = saldo ÷ {days} hari ({saldo}), dikurangi yang udah kepake hari ini.'**
+  String infoSafeBodyNoBudget(int days, String saldo);
+
+  /// No description provided for @infoJarTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'sisa jajan'**
+  String get infoJarTitle;
+
+  /// No description provided for @infoJarBody.
+  ///
+  /// In id, this message translates to:
+  /// **'total limit kantong {limit} − kepake di kantong {spent} = {left}.'**
+  String infoJarBody(String limit, String spent, String left);
+
+  /// No description provided for @infoJarBudgetBody.
+  ///
+  /// In id, this message translates to:
+  /// **'budget {budget} − semua pengeluaran {spent} = {left}. pengeluaran di luar kantong ({outside}) ikut ngurangin budget, tapi nggak ngurangin sisa jajan.'**
+  String infoJarBudgetBody(
+    String budget,
+    String spent,
+    String left,
+    String outside,
+  );
+
+  /// No description provided for @infoConflict.
+  ///
+  /// In id, this message translates to:
+  /// **'sisa jajan lebih gede dari sisa budget. pegang yang lebih kecil biar nggak kelewat budget.'**
+  String get infoConflict;
+
+  /// No description provided for @pocketsBudgetOver.
+  ///
+  /// In id, this message translates to:
+  /// **'budget udah kelewat {amount}'**
+  String pocketsBudgetOver(String amount);
+
+  /// No description provided for @pocketsBudgetShort.
+  ///
+  /// In id, this message translates to:
+  /// **'sisa budget cuma {amount}'**
+  String pocketsBudgetShort(String amount);
+
   /// No description provided for @heroBudgetLeft.
   ///
   /// In id, this message translates to:

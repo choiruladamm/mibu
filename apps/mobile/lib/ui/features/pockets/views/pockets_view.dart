@@ -20,6 +20,7 @@ import '../../categories/views/category_form_sheet.dart';
 import '../../categories/views/category_manage_sheet.dart';
 import '../view_models/pockets_view_model.dart';
 import 'set_limit_sheet.dart';
+import '../../../core/widgets/info_dialog.dart';
 import '../../../core/widgets/meta_line.dart';
 import '../../../core/widgets/app_emoji.dart';
 
@@ -105,7 +106,7 @@ class _PocketsViewState extends ConsumerState<PocketsView> {
                   gutter(
                     Row(
                       children: [
-                        Expanded(
+                        Flexible(
                           child: Text(
                             l.pocketsLeftTitle(
                               _monthFull.format(s.month).toLowerCase(),
@@ -113,6 +114,13 @@ class _PocketsViewState extends ConsumerState<PocketsView> {
                             style: muted,
                           ),
                         ),
+                        // "?" always; an ink "!" when sisa jajan promises more
+                        // than the budget has left.
+                        InfoDisc(
+                          alert: s.conflict,
+                          onTap: () => _info(context, s),
+                        ),
+                        const Spacer(),
                         _DaysChip(l.pocketsDaysLeft(s.daysLeft)),
                       ],
                     ),
@@ -129,6 +137,41 @@ class _PocketsViewState extends ConsumerState<PocketsView> {
                       ),
                     ),
                   ),
+                  if (s.conflict)
+                    gutter(
+                      GestureDetector(
+                        onTap: () => _info(context, s),
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Row(
+                            spacing: 6,
+                            children: [
+                              const HugeIcon(
+                                icon: HugeIcons.strokeRoundedAlert02,
+                                size: 14,
+                                strokeWidth: 2,
+                                color: AppColors.ink,
+                              ),
+                              Flexible(
+                                child: Text(
+                                  (s.budgetLeft ?? 0) < 0
+                                      ? l.pocketsBudgetOver(
+                                          context.rpCompact(-s.budgetLeft!),
+                                        )
+                                      : l.pocketsBudgetShort(
+                                          context.rpCompact(s.budgetLeft ?? 0),
+                                        ),
+                                  style: AppText.caption.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.ink,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                   const SizedBox(height: 18),
                   if (selected == null)
                     gutter(_FirstPocket(onTap: setLimit))
@@ -224,6 +267,37 @@ class _DaysChip extends StatelessWidget {
 }
 
 /// "Rp2,34jt dari Rp7,4jt kepake · budget Rp8jt ›" — opens 00.16.
+/// "?" on the hero: where sisa jajan comes from, and why it can differ from
+/// the sisa budget on the beranda.
+void _info(BuildContext context, PocketsState s) {
+  final l = AppLocalizations.of(context)!;
+  final rp = context.rpCompact;
+  final budget = s.budget;
+  final left = s.budgetLeft;
+  showNumbersInfo(
+    context,
+    lines: [
+      (
+        title: l.infoJarTitle,
+        body: l.infoJarBody(rp(s.limit), rp(s.spent), rp(s.left)),
+      ),
+      if (budget != null && left != null)
+        (
+          title: l.infoBudgetTitle,
+          body: left < 0
+              ? l.infoBudgetBodyOver(rp(budget), rp(s.monthSpent), rp(-left))
+              : l.infoJarBudgetBody(
+                  rp(budget),
+                  rp(s.monthSpent),
+                  rp(left),
+                  rp((s.monthSpent - s.spent).clamp(0, 1 << 40)),
+                ),
+        ),
+    ],
+    note: s.conflict ? l.infoConflict : null,
+  );
+}
+
 class _BudgetLine extends StatelessWidget {
   const _BudgetLine({required this.state, required this.onTap});
 

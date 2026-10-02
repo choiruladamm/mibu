@@ -70,6 +70,37 @@ void main() {
     });
   });
 
+  test('safeShare: the smaller of saldo and budget wins, explained', () {
+    // saldo 985K over 20 days, 34K spent today; budget 984K over 29 days.
+    var b = safeShare(
+      balance: 985000,
+      spentToday: 34000,
+      days: 20,
+      budgetLeft: 984000,
+      budgetDays: 29,
+    );
+    expect((b.saldoShare, b.budgetShare, b.budgetBinds), (50950, 35103, true));
+    expect(b.share - 34000, 1103); // what the chip shows: Rp1,1K left today
+
+    // No budget: saldo only.
+    b = safeShare(balance: 985000, spentToday: 34000, days: 20);
+    expect((b.share, b.budgetShare, b.budgetBinds), (50950, null, false));
+
+    // Same figure as safeToSpendToday.
+    expect(
+      safeToSpendToday(
+        balance: 985000,
+        spentToday: 34000,
+        days: 20,
+        budgetLeft: 984000,
+        budgetDays: 29,
+      ),
+      1103,
+    );
+    // Nothing to divide: zeros, no negative surprise.
+    expect(safeShare(balance: 0, spentToday: 0, days: 5).share, 0);
+  });
+
   test('suggestedLimit: 1,4× up to Rp100K, min Rp300K', () {
     expect(suggestedLimit(0), 300000);
     expect(suggestedLimit(200000), 300000); // 280K → floor

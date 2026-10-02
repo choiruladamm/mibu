@@ -25,6 +25,7 @@ class PocketsState {
     required this.selected,
     required this.daysLeft,
     required this.budget,
+    required this.monthSpent,
     required this.free,
   });
 
@@ -33,12 +34,21 @@ class PocketsState {
   final Pocket? selected; // null = no pockets yet
   final int daysLeft; // in this month, today included
   final int? budget; // budget bulanan; null = not set
+  final int monthSpent; // every expense this month, pockets or not
   final List<FreeCategory> free; // tanpa kantong
 
   int get limit => pockets.fold(0, (sum, p) => sum + p.budget);
   int get spent => pockets.fold(0, (sum, p) => sum + p.spent);
   int get left => limit - spent; // "sisa jajan"
   int get freeSpent => free.fold(0, (sum, f) => sum + f.spent);
+
+  /// budget − every expense this month; negative = kelewat. Null without one.
+  int? get budgetLeft => budget == null ? null : budget! - monthSpent;
+
+  /// "sisa jajan" promises more than the budget has left: the two figures
+  /// disagree, and the smaller one is the one to trust.
+  bool get conflict =>
+      pockets.isNotEmpty && budgetLeft != null && left > budgetLeft!;
 }
 
 /// 02.2 kantong state.
@@ -60,6 +70,12 @@ final pocketsScreenProvider = Provider<AsyncValue<PocketsState>>((ref) {
             value.firstOrNull,
         daysLeft: period.daysLeft(now),
         budget: budget,
+        monthSpent:
+            ref.watch(totalsProvider).value?.spent[DateTime(
+              now.year,
+              now.month,
+            )] ??
+            0,
         free: free.value!,
       ),
     ),

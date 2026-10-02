@@ -26,6 +26,7 @@ import '../../../core/widgets/tx_row.dart';
 import '../../transactions/view_models/transactions_view_model.dart';
 import '../view_models/home_view_model.dart';
 import '../../budget/views/budget_sheet.dart';
+import '../../../core/widgets/info_dialog.dart';
 import '../../../core/widgets/meta_line.dart';
 import '../../../core/widgets/app_emoji.dart';
 
@@ -141,6 +142,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                     onFlip: () => _flip(s),
                     onHintOk: () =>
                         ref.read(financeRepositoryProvider).markHeroHintSeen(),
+                    onInfo: () => _info(s, l),
                     onSetBudget: () => editBudget(context, ref),
                   ),
                   const SizedBox(height: 18),
@@ -360,6 +362,54 @@ class _HomeViewState extends ConsumerState<HomeView> {
     );
   }
 
+  /// "?" next to the hero's small line: how saldo, sisa budget and aman jajan
+  /// are worked out, with this user's numbers.
+  void _info(HomeState s, AppLocalizations l) {
+    final rp = context.rpCompact;
+    InfoLine saldo() => (title: l.infoSaldoTitle, body: l.infoSaldoBody);
+    InfoLine budget() {
+      final left = s.budgetLeft ?? 0;
+      return (
+        title: l.infoBudgetTitle,
+        body: left < 0
+            ? l.infoBudgetBodyOver(
+                rp(s.budget ?? 0),
+                rp(s.monthSpent),
+                rp(-left),
+              )
+            : l.infoBudgetBody(rp(s.budget ?? 0), rp(s.monthSpent), rp(left)),
+      );
+    }
+
+    showNumbersInfo(
+      context,
+      lines: [
+        if (s.isBudget) ...[
+          budget(),
+          saldo(),
+        ] else ...[
+          saldo(),
+          if (s.canFlip) budget(),
+        ],
+        if (s.isCurrent)
+          (
+            title: l.infoSafeTitle,
+            body: s.safe.budgetShare == null
+                ? l.infoSafeBodyNoBudget(
+                    s.payday.daysToNext,
+                    rp(s.safe.saldoShare),
+                  )
+                : l.infoSafeBody(
+                    s.payday.daysToNext,
+                    rp(s.safe.saldoShare),
+                    s.budgetDaysLeft,
+                    rp(s.safe.budgetShare!),
+                  ),
+          ),
+      ],
+    );
+  }
+
   /// Hero pill: saldo ⇄ sisa budget. Remembered, haptic, and using it once
   /// retires the hint.
   void _flip(HomeState s) {
@@ -543,12 +593,13 @@ class _Hero extends StatelessWidget {
     required this.onFlip,
     required this.onHintOk,
     required this.onSetBudget,
+    required this.onInfo,
   });
 
   final _HeroData data;
   final bool canFlip, showHint;
   final String flipAria;
-  final VoidCallback onFlip, onHintOk, onSetBudget;
+  final VoidCallback onFlip, onHintOk, onSetBudget, onInfo;
 
   @override
   Widget build(BuildContext context) {
@@ -660,7 +711,7 @@ class _Hero extends StatelessWidget {
         _Swap(
           id: (data.sub, data.setBudget),
           child: SizedBox(
-            height: 20,
+            height: 28,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               spacing: 6,
@@ -691,6 +742,7 @@ class _Hero extends StatelessWidget {
                     ),
                   ),
                 ),
+                InfoDisc(onTap: onInfo, target: 28),
                 if (data.setBudget)
                   GestureDetector(
                     onTap: onSetBudget,

@@ -466,4 +466,40 @@ void main() {
     await tester.pumpWidget(const SizedBox());
     await db.close();
   });
+
+  testWidgets('"?" explains sisa jajan; "!" when the budget has less left', (
+    tester,
+  ) async {
+    final db = await pump(tester, const Size(390, 844));
+    // Budget Rp8jt: Rp3,94jt left, more than sisa jajan Rp1,64jt → quiet "?".
+    expect(find.text('!'), findsNothing);
+    await tester.tap(find.bySemanticsLabel('dari mana angkanya?'));
+    await settle(tester);
+    expect(
+      find.text(
+        'total limit kantong Rp3,3jt − kepake di kantong Rp1,66jt = Rp1,64jt.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.textContaining('ikut ngurangin budget'), findsOneWidget);
+    expect(find.textContaining('sisa jajan lebih gede'), findsNothing);
+    await tester.tap(find.text('ngerti'));
+    await settle(tester);
+
+    // Budget Rp5jt: Rp0,94jt left < sisa jajan → the "?" turns "!" + a line.
+    await tester.runAsync(() => setBudgetOf(db, 5000000));
+    await settle(tester);
+    expect(find.text('!'), findsOneWidget);
+    expect(find.text('sisa budget cuma Rp941K'), findsOneWidget);
+    await tester.tap(find.bySemanticsLabel('dari mana angkanya?'));
+    await settle(tester);
+    expect(find.textContaining('sisa jajan lebih gede'), findsOneWidget);
+    await tester.tap(find.text('ngerti'));
+    await settle(tester);
+
+    // Budget gone: its own wording.
+    await tester.runAsync(() => setBudgetOf(db, 1500000));
+    await settle(tester);
+    expect(find.text('budget udah kelewat Rp2,56jt'), findsOneWidget);
+  });
 }

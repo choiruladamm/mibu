@@ -270,12 +270,45 @@ PaydayInfo paydayInfo({
   return upcoming;
 }
 
-/// "aman jajan hari ini": today's share of the balance over [days] (usually
-/// [PaydayInfo.daysToNext]), minus what's already spent today. With a budget
-/// ([budgetLeft] = budget − spent this period, [budgetDays] = days left in
-/// the period) it's the smaller of that and the budget's own share, so the
-/// chip never invites going past the budget the user set. Negative =
-/// overspent today. See MVP_PLAN.md.
+/// Where "aman jajan hari ini" comes from: today's share by saldo, by budget
+/// (null without one), and the one used. [share] is before today's spending.
+typedef SafeShare = ({
+  int saldoShare,
+  int? budgetShare,
+  int share,
+  bool budgetBinds, // the budget share is the smaller one
+});
+
+/// The shares behind [safeToSpendToday], also shown by the "dari mana
+/// angkanya?" dialog so the explanation can't drift from the figure.
+SafeShare safeShare({
+  required int balance,
+  required int spentToday,
+  required int days,
+  int? budgetLeft,
+  int budgetDays = 1,
+}) {
+  if (balance <= 0 || days <= 0) {
+    return (saldoShare: 0, budgetShare: null, share: 0, budgetBinds: false);
+  }
+  final saldo = (balance + spentToday) ~/ days;
+  final budget = budgetLeft == null
+      ? null
+      : (budgetLeft + spentToday) ~/ (budgetDays < 1 ? 1 : budgetDays);
+  final binds = budget != null && budget < saldo;
+  return (
+    saldoShare: saldo,
+    budgetShare: budget,
+    share: binds ? budget : saldo,
+    budgetBinds: binds,
+  );
+}
+
+/// "aman jajan hari ini": today's [safeShare] minus what's already spent
+/// today. With a budget ([budgetLeft] = budget − spent this period,
+/// [budgetDays] = days left in the period) it's the smaller of the saldo and
+/// budget shares, so the chip never invites going past the budget the user
+/// set. Negative = overspent today. See MVP_PLAN.md.
 int safeToSpendToday({
   required int balance,
   required int spentToday,
@@ -284,12 +317,14 @@ int safeToSpendToday({
   int budgetDays = 1,
 }) {
   if (balance <= 0 || days <= 0) return 0;
-  final bySaldo = (balance + spentToday) ~/ days - spentToday;
-  if (budgetLeft == null) return bySaldo;
-  final byBudget =
-      (budgetLeft + spentToday) ~/ (budgetDays < 1 ? 1 : budgetDays) -
+  return safeShare(
+        balance: balance,
+        spentToday: spentToday,
+        days: days,
+        budgetLeft: budgetLeft,
+        budgetDays: budgetDays,
+      ).share -
       spentToday;
-  return bySaldo < byBudget ? bySaldo : byBudget;
 }
 
 int _monthIndex(DateTime m) => m.year * 12 + m.month;

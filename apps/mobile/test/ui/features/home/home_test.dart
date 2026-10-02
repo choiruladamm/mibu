@@ -363,6 +363,31 @@ void main() {
     expect(find.text('3.059.000'), findsOneWidget);
   });
 
+  testWidgets('hero: "?" explains saldo, sisa budget and aman jajan', (
+    tester,
+  ) async {
+    await pump(tester, memoryDb());
+    await tester.tap(find.bySemanticsLabel('dari mana angkanya?'));
+    await settle(tester);
+
+    expect(find.text('dari mana angkanya?'), findsOneWidget);
+    expect(find.textContaining('saldo awal + semua catatan'), findsOneWidget);
+    expect(
+      find.text('budget Rp8jt − semua pengeluaran Rp4,06jt = Rp3,94jt.'),
+      findsOneWidget,
+    );
+    // The same shares the chip is made of: saldo ÷ 9, budget ÷ 18 (smaller).
+    expect(
+      find.textContaining(
+        'saldo ÷ 9 hari (Rp506K) dan sisa budget ÷ 18 hari (Rp220K)',
+      ),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('ngerti'));
+    await settle(tester);
+    expect(find.text('dari mana angkanya?'), findsNothing);
+  });
+
   group('hari gajian (25 okt 2026 is a Sunday → paid Fri 23)', () {
     testWidgets('hari-H, salary not logged: ajak catat, no division', (
       tester,
