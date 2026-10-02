@@ -1960,6 +1960,12 @@ abstract class AppLocalizations {
   /// **'di {month}'**
   String searchSub(String month);
 
+  /// No description provided for @txSearchSub.
+  ///
+  /// In id, this message translates to:
+  /// **'“{q}”'**
+  String txSearchSub(String q);
+
   /// No description provided for @searchClear.
   ///
   /// In id, this message translates to:
@@ -1969,7 +1975,7 @@ abstract class AppLocalizations {
   /// No description provided for @searchHint.
   ///
   /// In id, this message translates to:
-  /// **'apa aja…'**
+  /// **'cari apa aja…'**
   String get searchHint;
 
   /// No description provided for @searchResults.

@@ -1068,8 +1068,16 @@
       }
     }
   },
+  "txSearchSub": "“{q}”",
+  "@txSearchSub": {
+    "placeholders": {
+      "q": {
+        "type": "String"
+      }
+    }
+  },
   "searchClear": "hapus pencarian",
-  "searchHint": "apa aja…",
+  "searchHint": "cari apa aja…",
   "searchResults": "{n} hasil",
   "@searchResults": {
     "placeholders": {

@@ -52,6 +52,7 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
     final s = _last = ref.watch(transactionsProvider).value ?? _last;
+    final search = ref.watch(txSearchProvider);
     final onOpen = widget.onOpen;
 
     return Scaffold(
@@ -64,7 +65,10 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
               children: [
                 NavHeader(
                   title: l.txTitle,
-                  sub: [if (s != null) l.txCount(s.count)],
+                  sub: [
+                    if (search != null) l.txSearchSub(search.q),
+                    if (s != null) l.txCount(s.count),
+                  ],
                   backLabel: l.home,
                   actionIcon: HugeIcons.strokeRoundedSearch01,
                   actionLabel: l.search,

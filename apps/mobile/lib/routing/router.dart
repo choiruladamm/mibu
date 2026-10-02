@@ -32,6 +32,22 @@ abstract final class Routes {
   static const transactions = '/transaksi';
   static String transactionsIn(DateTime month) =>
       '$transactions?month=${month.year}-${month.month.toString().padLeft(2, '0')}';
+
+  /// 04.2 "liat N lagi": 04.1 in [month] narrowed to the search.
+  static String transactionsFound(
+    DateTime month,
+    String q, {
+    TxFilter filter = TxFilter.all,
+    int? day,
+  }) => Uri(
+    path: transactions,
+    queryParameters: {
+      'month': '${month.year}-${month.month.toString().padLeft(2, '0')}',
+      'q': q,
+      if (filter != TxFilter.all) 'filter': filter.name,
+      'day': ?day?.toString(),
+    },
+  ).toString();
   static String transaction(String id) => '$transactions/$id';
   static String editEntry(String id) => '$transactions/$id/edit';
 }
@@ -116,11 +132,24 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.transactions,
         builder: (context, state) => ProviderScope(
-          // ?month=2026-09 from 02.1 "liat semua di september".
+          // ?month=2026-09 from 02.1 "liat semua di september";
+          // &q=kopi&filter=expenses&day=13 from 04.2 "liat N lagi".
           overrides: [
             txMonthProvider.overrideWith(
               () => TxMonth(_monthParam(state.uri.queryParameters['month'])),
             ),
+            txFilterProvider.overrideWith(
+              () => TxFilterNotifier(
+                TxFilter.values
+                        .asNameMap()[state.uri.queryParameters['filter']] ??
+                    TxFilter.all,
+              ),
+            ),
+            if (state.uri.queryParameters['q'] case final q?)
+              txSearchProvider.overrideWithValue((
+                q: q,
+                day: int.tryParse(state.uri.queryParameters['day'] ?? ''),
+              )),
           ],
           child: TransactionsView(
             onOpen: (t) => context.push(Routes.transaction(t.id)),

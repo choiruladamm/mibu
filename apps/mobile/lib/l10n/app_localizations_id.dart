@@ -1160,10 +1160,15 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
+  String txSearchSub(String q) {
+    return '“$q”';
+  }
+
+  @override
   String get searchClear => 'hapus pencarian';
 
   @override
-  String get searchHint => 'apa aja…';
+  String get searchHint => 'cari apa aja…';
 
   @override
   String searchResults(int n) {

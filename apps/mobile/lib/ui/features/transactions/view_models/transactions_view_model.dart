@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../data/repositories/finance_repository.dart';
 import '../../../../domain/models/finance.dart';
+import '../../../../domain/search.dart';
 import '../../../core/clock.dart';
 import '../../../core/dates.dart';
 
@@ -32,8 +33,12 @@ final txMonthProvider = NotifierProvider.autoDispose<TxMonth, DateTime>(
 );
 
 class TxFilterNotifier extends Notifier<TxFilter> {
+  TxFilterNotifier([this.initial = TxFilter.all]);
+
+  final TxFilter initial;
+
   @override
-  TxFilter build() => TxFilter.all;
+  TxFilter build() => initial;
 
   void select(TxFilter f) => state = f;
 }
@@ -41,7 +46,17 @@ class TxFilterNotifier extends Notifier<TxFilter> {
 final txFilterProvider =
     NotifierProvider.autoDispose<TxFilterNotifier, TxFilter>(
       TxFilterNotifier.new,
+      dependencies: const [],
     );
+
+/// 04.2 "liat N lagi": 04.1 narrowed to a search term (and one day of the
+/// month); null = no search.
+typedef TxSearch = ({String q, int? day});
+
+final txSearchProvider = Provider.autoDispose<TxSearch?>(
+  (_) => null,
+  dependencies: const [],
+);
 
 final monthTransactionsProvider =
     StreamProvider.family<List<Transaction>, DateTime>(
@@ -106,7 +121,7 @@ List<DayGroup> groupByDay(List<Transaction> rows) {
 /// 04.1 semua transaksi.
 final transactionsProvider =
     Provider.autoDispose<AsyncValue<TransactionsState>>(
-      dependencies: [txMonthProvider],
+      dependencies: [txMonthProvider, txFilterProvider, txSearchProvider],
       (ref) {
         final month = ref.watch(txMonthProvider);
         final rows = ref.watch(monthTransactionsProvider(month));
@@ -120,8 +135,12 @@ final transactionsProvider =
         var months = txMonths(first.value, now);
         if (!months.contains(month)) months = [month, ...months]..sort();
         final filter = ref.watch(txFilterProvider);
+        final search = ref.watch(txSearchProvider);
         final shown = [
-          for (final t in rows.value!)
+          for (final t in search == null
+              ? rows.value!
+              : searchEntries(rows.value!, search.q))
+            if (search?.day == null || t.at.day == search!.day)
             if (switch (filter) {
               TxFilter.all => true,
               TxFilter.expenses => t.amount < 0,
