@@ -140,6 +140,7 @@
     }
   },
   "monthMenuFuture": "belum kejadian",
+  "monthMenuEarly": "belum ada catatan",
   "close": "tutup",
   "expense": "pengeluaran",
   "income": "pemasukan",
@@ -715,6 +716,28 @@
     "placeholders": {
       "month": {
         "type": "String"
+      }
+    }
+  },
+  "txBackToNow": "balik ke {month} {year}",
+  "@txBackToNow": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "txPickMonth": "{month} {year}, ganti bulan",
+  "@txPickMonth": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "year": {
+        "type": "int"
       }
     }
   },

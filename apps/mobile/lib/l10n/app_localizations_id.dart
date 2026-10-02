@@ -197,6 +197,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get monthMenuFuture => 'belum kejadian';
 
   @override
+  String get monthMenuEarly => 'belum ada catatan';
+
+  @override
   String get close => 'tutup';
 
   @override
@@ -789,6 +792,16 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String txNotYet(String month) {
     return '$month belum kejadian';
+  }
+
+  @override
+  String txBackToNow(String month, int year) {
+    return 'balik ke $month $year';
+  }
+
+  @override
+  String txPickMonth(String month, int year) {
+    return '$month $year, ganti bulan';
   }
 
   @override

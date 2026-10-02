@@ -418,6 +418,12 @@ abstract class AppLocalizations {
   /// **'belum kejadian'**
   String get monthMenuFuture;
 
+  /// No description provided for @monthMenuEarly.
+  ///
+  /// In id, this message translates to:
+  /// **'belum ada catatan'**
+  String get monthMenuEarly;
+
   /// No description provided for @close.
   ///
   /// In id, this message translates to:
@@ -1383,6 +1389,18 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'{month} belum kejadian'**
   String txNotYet(String month);
+
+  /// No description provided for @txBackToNow.
+  ///
+  /// In id, this message translates to:
+  /// **'balik ke {month} {year}'**
+  String txBackToNow(String month, int year);
+
+  /// No description provided for @txPickMonth.
+  ///
+  /// In id, this message translates to:
+  /// **'{month} {year}, ganti bulan'**
+  String txPickMonth(String month, int year);
 
   /// No description provided for @receiptTitle.
   ///

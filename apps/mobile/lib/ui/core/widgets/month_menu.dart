@@ -8,7 +8,8 @@ import '../../../l10n/app_localizations.dart';
 import '../tokens.dart';
 
 /// 00.8 MonthMenu — popover under 00.7 MonthPicker: 12 months of a year with
-/// a mini bar of spending each; months after [now]'s are locked.
+/// a mini bar of spending each; months after [now]'s, and before [min]'s,
+/// are locked.
 class MonthMenu extends StatefulWidget {
   const MonthMenu({
     super.key,
@@ -16,6 +17,7 @@ class MonthMenu extends StatefulWidget {
     required this.now,
     required this.spent,
     required this.onPick,
+    this.min,
   });
 
   /// First of the picked month.
@@ -25,6 +27,10 @@ class MonthMenu extends StatefulWidget {
   /// First of month → expenses, for the mini bars.
   final Map<DateTime, int> spent;
   final ValueChanged<DateTime> onPick;
+
+  /// First month with entries (first of month); earlier months are locked
+  /// and the year step stops at its year. Null = no lower limit.
+  final DateTime? min;
 
   static const width = 300.0;
 
@@ -82,7 +88,9 @@ class _MonthMenuState extends State<MonthMenu> {
                   _YearStep(
                     label: l.monthMenuPrevYear,
                     icon: HugeIcons.strokeRoundedArrowLeft01,
-                    onTap: () => setState(() => _year--),
+                    onTap: widget.min == null || _year > widget.min!.year
+                        ? () => setState(() => _year--)
+                        : null,
                   ),
                   SizedBox(
                     width: 48,
@@ -122,7 +130,7 @@ class _MonthMenuState extends State<MonthMenu> {
                     semantics: _semantics(l, DateTime(_year, m)),
                     selected: DateTime(_year, m) == widget.selected,
                     isNow: DateTime(_year, m) == _cur,
-                    locked: DateTime(_year, m).isAfter(_cur),
+                    locked: _isLocked(DateTime(_year, m)),
                     fill: peak == 0
                         ? 0
                         : (widget.spent[DateTime(_year, m)] ?? 0) / peak,
@@ -192,9 +200,15 @@ class _MonthMenuState extends State<MonthMenu> {
     );
   }
 
+  bool _isLocked(DateTime m) =>
+      m.isAfter(_cur) || (widget.min != null && m.isBefore(widget.min!));
+
   String _semantics(AppLocalizations l, DateTime m) => [
     l.monthMenuCell(_full.format(m).toLowerCase(), m.year),
-    if (m.isAfter(_cur)) l.monthMenuFuture,
+    if (m.isAfter(_cur))
+      l.monthMenuFuture
+    else if (_isLocked(m))
+      l.monthMenuEarly,
     if (m == _cur) l.monthMenuNow,
   ].join(', ');
 }
