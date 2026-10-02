@@ -161,7 +161,12 @@ void main() {
     await tester.pump();
     expect(find.text('rab 28 okt'), findsOneWidget);
     expect(find.text('14 hari lagi'), findsOneWidget);
-    expect(find.textContaining('/hari', findRichText: true), findsOneWidget);
+    // Same figure as the beranda chip (Rp193K: the budget share is the
+    // smaller one), and it doesn't move with the date, so nothing is struck.
+    expect(
+      find.textContaining('Rp193K/hari', findRichText: true),
+      findsOneWidget,
+    );
     expect(find.text('budget & limit tetap per bulan, 1–31.'), findsOneWidget);
     await tester.tap(find.text('simpan tgl 28'));
     await settle();

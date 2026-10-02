@@ -68,16 +68,25 @@ class _PaydaySheetState extends ConsumerState<_PaydaySheet> {
     final totals = ref.watch(totalsProvider).value;
     PaydayInfo infoFor(int d) =>
         paydayInfo(now: now, payday: d, salaries: salaries);
+    // Same figure as the beranda chip: the smaller of the saldo and budget
+    // shares, so only the saldo side moves with the date.
+    final period = ref.watch(currentPeriodProvider);
+    final budget = ref.watch(budgetInPeriodProvider(period)).value;
+    final monthSpent = totals?.spent[DateTime(now.year, now.month)] ?? 0;
     int jajan(PaydayInfo i) => safeToSpendToday(
       balance: totals?.balance ?? 0,
       spentToday: totals?.spentToday ?? 0,
       days: i.daysToNext,
+      budgetLeft: budget == null ? null : budget - monthSpent,
+      budgetDays: period.daysLeft(now),
     );
 
     final info = infoFor(_sel);
     final today = info.status == PaydayStatus.today;
     final nextDate = today ? DateTime(now.year, now.month, now.day) : info.next;
     final changed = _sel != widget.saved;
+    final before = jajan(infoFor(widget.saved));
+    final after = jajan(info);
     final custom = !paydayChoices.contains(_sel);
     final muted = AppText.label.copyWith(color: AppColors.muted);
 
@@ -185,10 +194,10 @@ class _PaydaySheetState extends ConsumerState<_PaydaySheet> {
           _NextCard(
             date: _nextDay.format(nextDate).toLowerCase(),
             inText: today ? l.paydayNextToday : l.paydayNextIn(info.daysToNext),
-            before: changed
-                ? rupiahCompact(jajan(infoFor(widget.saved)))
-                : null,
-            after: rupiahCompact(jajan(info)),
+            // Struck through only when the figure really moves (a binding
+            // budget keeps it the same).
+            before: changed && before != after ? rupiahCompact(before) : null,
+            after: rupiahCompact(after),
           ),
           const SizedBox(height: 12),
           Padding(
