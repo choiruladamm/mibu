@@ -544,6 +544,18 @@ abstract class AppLocalizations {
   /// **'di mana'**
   String get pickerWhere;
 
+  /// No description provided for @placeHint.
+  ///
+  /// In id, this message translates to:
+  /// **'mis. warteg, indomaret, gofood'**
+  String get placeHint;
+
+  /// No description provided for @placeHintFor.
+  ///
+  /// In id, this message translates to:
+  /// **'mis. {places}'**
+  String placeHintFor(String places);
+
   /// No description provided for @pickerUse.
   ///
   /// In id, this message translates to:

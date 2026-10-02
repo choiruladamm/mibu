@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../data/repositories/finance_repository.dart';
 import '../../../../domain/models/finance.dart';
+import '../../../../domain/place_hints.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../core/clock.dart';
 import '../../../core/dates.dart';
@@ -152,6 +153,13 @@ class _EditFormState extends ConsumerState<_EditForm> {
       for (final cat in ref.watch(categoriesProvider).value ?? <Category>[])
         if (cat.kind == _o.kind) cat,
     ];
+    final examples = placeExamples(
+      cats.where((cat) => cat.id == _category).firstOrNull?.emoji,
+      [
+        for (final r in ref.watch(recentPicksProvider).value ?? <RecentPick>[])
+          if (r.category.id == _category) r.place,
+      ],
+    );
     final input = AppText.label.copyWith(fontSize: 17);
 
     return Scaffold(
@@ -273,6 +281,9 @@ class _EditFormState extends ConsumerState<_EditForm> {
                       child: _MistField(
                         controller: _place,
                         label: l.editPlace,
+                        hint: examples == null
+                            ? l.placeHint
+                            : l.placeHintFor(examples.join(', ')),
                         style: input,
                         onChanged: (_) => setState(() {}),
                       ),

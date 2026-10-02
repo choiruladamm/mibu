@@ -270,6 +270,14 @@ class AppLocalizationsId extends AppLocalizations {
   String get pickerWhere => 'di mana';
 
   @override
+  String get placeHint => 'mis. warteg, indomaret, gofood';
+
+  @override
+  String placeHintFor(String places) {
+    return 'mis. $places';
+  }
+
+  @override
   String pickerUse(String emoji, String name) {
     return 'pakai $emoji $name';
   }

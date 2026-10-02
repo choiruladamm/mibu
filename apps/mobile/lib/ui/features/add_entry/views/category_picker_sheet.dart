@@ -4,6 +4,7 @@ import 'package:hugeicons/hugeicons.dart';
 
 import '../../../../data/repositories/finance_repository.dart';
 import '../../../../domain/models/finance.dart';
+import '../../../../domain/place_hints.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../core/finance_providers.dart';
 import '../../../core/money.dart';
@@ -78,9 +79,10 @@ class _CategoryPickerState extends ConsumerState<_CategoryPicker> {
       for (final c in ref.watch(categoriesProvider).value ?? const <Category>[])
         if (c.kind == widget.kind && (term.isEmpty || c.name.contains(term))) c,
     ];
+    final allRecents =
+        ref.watch(recentPicksProvider).value ?? const <RecentPick>[];
     final recents = [
-      for (final r
-          in ref.watch(recentPicksProvider).value ?? const <RecentPick>[])
+      for (final r in allRecents)
         if (r.category.kind == widget.kind) r,
     ].take(3);
     final pockets = {
@@ -91,6 +93,10 @@ class _CategoryPickerState extends ConsumerState<_CategoryPicker> {
     final picked = [...?ref.watch(categoriesProvider).value]
         .where((c) => c.id == _picked?.id)
         .firstOrNull;
+    final examples = placeExamples(picked?.emoji, [
+      for (final r in allRecents)
+        if (r.category.id == picked?.id) r.place,
+    ]);
 
     return SheetFrame(
       title: l.pickerTitle,
@@ -219,6 +225,13 @@ class _CategoryPickerState extends ConsumerState<_CategoryPicker> {
             onChanged: (_) => _placeTyped = true,
             style: AppText.label.copyWith(fontSize: 17),
             decoration: InputDecoration(
+              hintText: examples == null
+                  ? l.placeHint
+                  : l.placeHintFor(examples.join(', ')),
+              hintStyle: AppText.label.copyWith(
+                fontSize: 17,
+                color: AppColors.subtle,
+              ),
               filled: true,
               fillColor: AppColors.mist,
               contentPadding: const EdgeInsets.symmetric(

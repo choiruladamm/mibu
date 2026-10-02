@@ -585,7 +585,9 @@ final categoriesProvider = StreamProvider<List<Category>>(
   (ref) => ref.watch(financeRepositoryProvider).watchCategories(),
 );
 final recentPicksProvider = StreamProvider<List<RecentPick>>(
-  (ref) => ref.watch(financeRepositoryProvider).watchRecentPicks(),
+  // ponytail: last 30 combos also feed the per-category "di mana" hint; a
+  // per-category query if heavy users miss their places.
+  (ref) => ref.watch(financeRepositoryProvider).watchRecentPicks(limit: 30),
 );
 final recentNotesProvider = StreamProvider<List<({String text, DateTime at})>>(
   (ref) => ref.watch(financeRepositoryProvider).watchRecentNotes(),

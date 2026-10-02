@@ -199,6 +199,13 @@
   "pickerSearch": "cari atau bikin…",
   "pickerRecent": "terakhir dipakai",
   "pickerWhere": "di mana",
+  "placeHint": "mis. warteg, indomaret, gofood",
+  "placeHintFor": "mis. {places}",
+  "@placeHintFor": {
+    "placeholders": {
+      "places": {"type": "String"}
+    }
+  },
   "pickerUse": "pakai {emoji} {name}",
   "@pickerUse": {
     "placeholders": {
