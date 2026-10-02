@@ -9,6 +9,7 @@ import 'package:mibu/l10n/app_localizations.dart';
 import 'package:mibu/ui/core/clock.dart';
 import 'package:mibu/ui/core/theme.dart';
 import 'package:mibu/ui/core/widgets/month_menu.dart';
+import 'package:mibu/ui/core/finance_providers.dart';
 import 'package:mibu/ui/features/home/view_models/home_view_model.dart';
 import 'package:mibu/ui/features/home/views/home_view.dart';
 

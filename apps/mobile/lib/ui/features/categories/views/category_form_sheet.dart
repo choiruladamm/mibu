@@ -11,7 +11,7 @@ import '../../../core/tokens.dart';
 import '../../../core/widgets/pocket_limit.dart';
 import '../../../core/widgets/sheet.dart';
 import '../../budget/views/budget_sheet.dart';
-import '../../home/view_models/home_view_model.dart';
+import '../../../core/finance_providers.dart';
 import '../view_models/categories_view_model.dart';
 import 'category_delete_sheet.dart';
 

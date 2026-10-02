@@ -10,7 +10,7 @@ import '../../../core/tokens.dart';
 import '../../../core/widgets/amount_keypad.dart';
 import '../../../core/widgets/sheet.dart';
 import '../../../core/widgets/toast.dart';
-import '../../home/view_models/home_view_model.dart';
+import '../../../core/finance_providers.dart';
 
 /// Opens 00.16 and applies the result: saved → toast, hapus → toast with
 /// batalin. Entry points: 02.2 hero, 00.15 PocketLimit, 02.3, 02.4.

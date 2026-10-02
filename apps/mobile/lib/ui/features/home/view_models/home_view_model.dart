@@ -5,22 +5,8 @@ import '../../../../data/repositories/finance_repository.dart';
 import '../../../../domain/models/finance.dart';
 import '../../../core/clock.dart';
 import '../../../core/dates.dart';
+import '../../../core/finance_providers.dart';
 import '../../transactions/view_models/transactions_view_model.dart';
-
-final profileProvider = StreamProvider<Profile>(
-  (ref) => ref.watch(financeRepositoryProvider).watchProfile(),
-);
-final totalsProvider = StreamProvider<Totals>((ref) {
-  final profile = ref.watch(profileProvider).value;
-  if (profile == null) return const Stream.empty();
-  return ref
-      .watch(financeRepositoryProvider)
-      .watchTotals(profile, ref.watch(nowProvider));
-});
-final pocketsProvider = StreamProvider<List<Pocket>>(
-  (ref) =>
-      ref.watch(financeRepositoryProvider).watchPockets(ref.watch(nowProvider)),
-);
 
 typedef HomeMonthSelection = ({DateTime selected, DateTime start});
 

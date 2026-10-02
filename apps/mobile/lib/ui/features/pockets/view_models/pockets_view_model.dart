@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../data/repositories/finance_repository.dart';
 import '../../../../domain/models/finance.dart';
 import '../../../core/clock.dart';
-import '../../home/view_models/home_view_model.dart';
+import '../../../core/finance_providers.dart';
 
 /// Jar tapped in 02.2; null = first pocket.
 class SelectedPocket extends Notifier<String?> {

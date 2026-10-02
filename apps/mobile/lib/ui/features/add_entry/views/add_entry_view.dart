@@ -15,7 +15,7 @@ import '../../../core/widgets/date_sheet.dart';
 import '../../../core/widgets/day_strip.dart';
 import '../../../core/widgets/note_sheet.dart';
 import '../../../core/widgets/sheet.dart';
-import '../../home/view_models/home_view_model.dart';
+import '../../../core/finance_providers.dart';
 import '../view_models/add_entry_view_model.dart';
 import 'category_picker_sheet.dart';
 

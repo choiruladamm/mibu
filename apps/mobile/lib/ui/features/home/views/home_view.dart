@@ -13,6 +13,7 @@ import '../../../../routing/router.dart';
 import '../../../core/clock.dart';
 import '../../../core/dashed.dart';
 import '../../../core/dates.dart';
+import '../../../core/finance_providers.dart';
 import '../../../core/money.dart';
 import '../../../core/tokens.dart';
 import '../../../core/widgets/month_menu.dart';
