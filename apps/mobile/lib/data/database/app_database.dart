@@ -27,6 +27,7 @@ class Profiles extends Table with SyncColumns {
   IntColumn get openingBalance => integer()();
   DateTimeColumn get openingAt => dateTime()();
   IntColumn get payday => integer()(); // 1–28, 0 = last day of month
+  IntColumn get monthlyBudget => integer().nullable()(); // null = not set
   BoolColumn get hideAmounts => boolean().withDefault(const Constant(false))();
   DateTimeColumn get onboardedAt => dateTime().nullable()();
 }
@@ -90,6 +91,7 @@ class AppDatabase extends _$AppDatabase {
           openingBalance: 3000000,
           openingAt: DateTime(now.year, now.month - 3),
           payday: 25,
+          monthlyBudget: const Value(8000000),
           onboardedAt: Value(now),
         ),
       );

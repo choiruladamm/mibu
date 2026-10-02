@@ -36,6 +36,7 @@ class FinanceRepository {
                     openingBalance: r.openingBalance,
                     openingAt: r.openingAt,
                     payday: r.payday,
+                    monthlyBudget: r.monthlyBudget,
                     hideAmounts: r.hideAmounts,
                   ),
           );
@@ -232,6 +233,124 @@ class FinanceRepository {
           at: at,
         ),
       );
+
+  /// Per category: entries (all time) and expense this year, positive.
+  /// "12 catatan · Rp840K tahun ini" in 03.3 / 03.5 / 03.6.
+  Stream<Map<String, ({int count, int spentThisYear})>> watchCategoryUsage(
+    DateTime now,
+  ) {
+    final count = _tx.id.count();
+    final spent = _tx.amount.sum(
+      filter:
+          _tx.amount.isSmallerThanValue(0) &
+          _tx.at.isBiggerOrEqualValue(DateTime(now.year)) &
+          _tx.at.isSmallerThanValue(DateTime(now.year + 1)),
+    );
+    final q = _db.selectOnly(_tx)
+      ..addColumns([_tx.categoryId, count, spent])
+      ..where(_tx.deletedAt.isNull() & _tx.categoryId.isNotNull())
+      ..groupBy([_tx.categoryId]);
+    return q.watch().map(
+      (rows) => {
+        for (final r in rows)
+          r.read(_tx.categoryId)!: (
+            count: r.read(count)!,
+            spentThisYear: -(r.read(spent) ?? 0),
+          ),
+      },
+    );
+  }
+
+  /// New category at the end of the list; returns its id.
+  Future<String> addCategory({
+    required String emoji,
+    required String name,
+    required CategoryKind kind,
+    required int? monthlyLimit,
+  }) async {
+    final c = _db.categories;
+    final last = c.sortOrder.max();
+    final row = await (_db.selectOnly(c)..addColumns([last])).getSingle();
+    final inserted = await _db
+        .into(c)
+        .insertReturning(
+          CategoriesCompanion.insert(
+            emoji: emoji,
+            name: name.trim().toLowerCase(),
+            kind: kind,
+            monthlyLimit: Value(_limitFor(kind, monthlyLimit)),
+            sortOrder: Value((row.read(last) ?? -1) + 1),
+          ),
+        );
+    return inserted.id;
+  }
+
+  Future<void> updateCategory(
+    String id, {
+    required String emoji,
+    required String name,
+    required CategoryKind kind,
+    required int? monthlyLimit,
+  }) => (_db.update(_db.categories)..where((c) => c.id.equals(id))).write(
+    CategoriesCompanion(
+      emoji: Value(emoji),
+      name: Value(name.trim().toLowerCase()),
+      kind: Value(kind),
+      monthlyLimit: Value(_limitFor(kind, monthlyLimit)),
+      updatedAt: Value(DateTime.now()),
+    ),
+  );
+
+  /// Pockets track spending only, so income categories never keep a limit.
+  static int? _limitFor(CategoryKind kind, int? limit) =>
+      kind == CategoryKind.income ? null : limit;
+
+  /// 03.3 "tahan & geser": [ids] in their new order.
+  Future<void> reorderCategories(List<String> ids) => _db.batch((b) {
+    final now = DateTime.now();
+    for (final (i, id) in ids.indexed) {
+      b.update(
+        _db.categories,
+        CategoriesCompanion(sortOrder: Value(i), updatedAt: Value(now)),
+        where: (c) => c.id.equals(id),
+      );
+    }
+  });
+
+  /// 03.6: moves the category's entries to [moveTo] (null = tanpa kategori),
+  /// then soft-deletes it. Returns the moved entry ids for [undoDeleteCategory].
+  Future<List<String>> deleteCategory(String id, {required String? moveTo}) =>
+      _db.transaction(() async {
+        final now = DateTime.now();
+        final moved =
+            await (_db.update(
+              _tx,
+            )..where((t) => t.categoryId.equals(id))).writeReturning(
+              TransactionsCompanion(
+                categoryId: Value(moveTo),
+                updatedAt: Value(now),
+              ),
+            );
+        await (_db.update(_db.categories)..where((c) => c.id.equals(id))).write(
+          CategoriesCompanion(deletedAt: Value(now), updatedAt: Value(now)),
+        );
+        return [for (final t in moved) t.id];
+      });
+
+  /// "batalin" on 03.6: restores the category and moves [txIds] back.
+  Future<void> undoDeleteCategory(String id, List<String> txIds) =>
+      _db.transaction(() async {
+        final now = DateTime.now();
+        await (_db.update(_db.categories)..where((c) => c.id.equals(id))).write(
+          CategoriesCompanion(
+            deletedAt: const Value(null),
+            updatedAt: Value(now),
+          ),
+        );
+        await (_db.update(_tx)..where((t) => t.id.isIn(txIds))).write(
+          TransactionsCompanion(categoryId: Value(id), updatedAt: Value(now)),
+        );
+      });
 }
 
 final financeRepositoryProvider = Provider<FinanceRepository>(

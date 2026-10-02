@@ -3,6 +3,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mibu/data/database/app_database.dart';
 import 'package:mibu/data/repositories/finance_repository.dart';
+import 'package:mibu/domain/models/finance.dart';
 
 void main() {
   final now = DateTime(2026, 10, 14, 14, 50);
@@ -26,6 +27,7 @@ void main() {
     () async {
       final profile = await repo.watchProfile().first;
       expect(profile.payday, 25);
+      expect(profile.monthlyBudget, 8000000);
 
       final totals = await repo.watchTotals(profile, now).first;
       expect(totals.balance, 4530000);
@@ -100,5 +102,84 @@ void main() {
         .watchDays(DateTime(2026, 10), DateTime(2026, 11))
         .first;
     expect(days[DateTime(2026, 10, 14)], (count: 2, net: -52000)); // + gojek
+  });
+
+  Future<String> idOf(String name) async => (await (db.select(
+    db.categories,
+  )..where((c) => c.name.equals(name))).getSingle()).id;
+
+  test(
+    'add / update category: trimmed lowercase, last, income drops limit',
+    () async {
+      final id = await repo.addCategory(
+        emoji: '🏋️',
+        name: ' Gym ',
+        kind: CategoryKind.expense,
+        monthlyLimit: 300000,
+      );
+      var cats = await repo.watchCategories().first;
+      expect(cats.last.id, id);
+      expect(cats.last.name, 'gym');
+      expect(
+        (await repo.watchPockets(now).first).map((p) => p.name),
+        contains('gym'),
+      );
+
+      await repo.updateCategory(
+        id,
+        emoji: '🧘',
+        name: 'yoga',
+        kind: CategoryKind.income,
+        monthlyLimit: 300000,
+      );
+      cats = await repo.watchCategories().first;
+      expect(cats.last.name, 'yoga');
+      expect(cats.last.monthlyLimit, isNull);
+    },
+  );
+
+  test('reorder categories', () async {
+    final ids = [for (final c in await repo.watchCategories().first) c.id];
+    await repo.reorderCategories(ids.reversed.toList());
+    final after = [for (final c in await repo.watchCategories().first) c.id];
+    expect(after, ids.reversed);
+  });
+
+  test('usage: all-time count, this year\'s expense', () async {
+    final usage = await repo.watchCategoryUsage(now).first;
+    expect(usage[await idOf('anabul')], (count: 2, spentThisYear: 900000));
+    expect(usage[await idOf('gajian')]?.count, 3);
+    expect(usage[await idOf('gajian')]?.spentThisYear, 0);
+  });
+
+  test('delete category moves entries, undo restores both', () async {
+    final anabul = await idOf('anabul');
+    final makan = await idOf('makan');
+    final moved = await repo.deleteCategory(anabul, moveTo: makan);
+    expect(moved, hasLength(2));
+
+    expect(
+      (await repo.watchCategories().first).map((c) => c.name),
+      isNot(contains('anabul')),
+    );
+    var pockets = await repo.watchPockets(now).first;
+    expect(pockets.firstWhere((p) => p.name == 'makan').spent, 390000 + 900000);
+
+    await repo.undoDeleteCategory(anabul, moved);
+    pockets = await repo.watchPockets(now).first;
+    expect(pockets.firstWhere((p) => p.name == 'anabul').spent, 900000);
+    expect(pockets.firstWhere((p) => p.name == 'makan').spent, 390000);
+  });
+
+  test('delete to tanpa kategori', () async {
+    final ngopi = await idOf('ngopi');
+    await repo.deleteCategory(ngopi, moveTo: null);
+    final usage = await repo.watchCategoryUsage(now).first;
+    expect(usage[ngopi], isNull);
+    final recent = await repo.watchRecent(limit: 10).first;
+    expect(
+      recent.firstWhere((t) => t.place == 'kopi kenangan').category,
+      isNull,
+    );
   });
 }

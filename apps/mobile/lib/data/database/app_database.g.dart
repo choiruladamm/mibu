@@ -85,6 +85,17 @@ class $ProfilesTable extends Profiles
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _monthlyBudgetMeta = const VerificationMeta(
+    'monthlyBudget',
+  );
+  @override
+  late final GeneratedColumn<int> monthlyBudget = GeneratedColumn<int>(
+    'monthly_budget',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _hideAmountsMeta = const VerificationMeta(
     'hideAmounts',
   );
@@ -120,6 +131,7 @@ class $ProfilesTable extends Profiles
     openingBalance,
     openingAt,
     payday,
+    monthlyBudget,
     hideAmounts,
     onboardedAt,
   ];
@@ -183,6 +195,15 @@ class $ProfilesTable extends Profiles
     } else if (isInserting) {
       context.missing(_paydayMeta);
     }
+    if (data.containsKey('monthly_budget')) {
+      context.handle(
+        _monthlyBudgetMeta,
+        monthlyBudget.isAcceptableOrUnknown(
+          data['monthly_budget']!,
+          _monthlyBudgetMeta,
+        ),
+      );
+    }
     if (data.containsKey('hide_amounts')) {
       context.handle(
         _hideAmountsMeta,
@@ -238,6 +259,10 @@ class $ProfilesTable extends Profiles
         DriftSqlType.int,
         data['${effectivePrefix}payday'],
       )!,
+      monthlyBudget: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}monthly_budget'],
+      ),
       hideAmounts: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}hide_amounts'],
@@ -263,6 +288,7 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
   final int openingBalance;
   final DateTime openingAt;
   final int payday;
+  final int? monthlyBudget;
   final bool hideAmounts;
   final DateTime? onboardedAt;
   const ProfileRow({
@@ -273,6 +299,7 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
     required this.openingBalance,
     required this.openingAt,
     required this.payday,
+    this.monthlyBudget,
     required this.hideAmounts,
     this.onboardedAt,
   });
@@ -288,6 +315,9 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
     map['opening_balance'] = Variable<int>(openingBalance);
     map['opening_at'] = Variable<DateTime>(openingAt);
     map['payday'] = Variable<int>(payday);
+    if (!nullToAbsent || monthlyBudget != null) {
+      map['monthly_budget'] = Variable<int>(monthlyBudget);
+    }
     map['hide_amounts'] = Variable<bool>(hideAmounts);
     if (!nullToAbsent || onboardedAt != null) {
       map['onboarded_at'] = Variable<DateTime>(onboardedAt);
@@ -306,6 +336,9 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
       openingBalance: Value(openingBalance),
       openingAt: Value(openingAt),
       payday: Value(payday),
+      monthlyBudget: monthlyBudget == null && nullToAbsent
+          ? const Value.absent()
+          : Value(monthlyBudget),
       hideAmounts: Value(hideAmounts),
       onboardedAt: onboardedAt == null && nullToAbsent
           ? const Value.absent()
@@ -326,6 +359,7 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
       openingBalance: serializer.fromJson<int>(json['openingBalance']),
       openingAt: serializer.fromJson<DateTime>(json['openingAt']),
       payday: serializer.fromJson<int>(json['payday']),
+      monthlyBudget: serializer.fromJson<int?>(json['monthlyBudget']),
       hideAmounts: serializer.fromJson<bool>(json['hideAmounts']),
       onboardedAt: serializer.fromJson<DateTime?>(json['onboardedAt']),
     );
@@ -341,6 +375,7 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
       'openingBalance': serializer.toJson<int>(openingBalance),
       'openingAt': serializer.toJson<DateTime>(openingAt),
       'payday': serializer.toJson<int>(payday),
+      'monthlyBudget': serializer.toJson<int?>(monthlyBudget),
       'hideAmounts': serializer.toJson<bool>(hideAmounts),
       'onboardedAt': serializer.toJson<DateTime?>(onboardedAt),
     };
@@ -354,6 +389,7 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
     int? openingBalance,
     DateTime? openingAt,
     int? payday,
+    Value<int?> monthlyBudget = const Value.absent(),
     bool? hideAmounts,
     Value<DateTime?> onboardedAt = const Value.absent(),
   }) => ProfileRow(
@@ -364,6 +400,9 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
     openingBalance: openingBalance ?? this.openingBalance,
     openingAt: openingAt ?? this.openingAt,
     payday: payday ?? this.payday,
+    monthlyBudget: monthlyBudget.present
+        ? monthlyBudget.value
+        : this.monthlyBudget,
     hideAmounts: hideAmounts ?? this.hideAmounts,
     onboardedAt: onboardedAt.present ? onboardedAt.value : this.onboardedAt,
   );
@@ -378,6 +417,9 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
           : this.openingBalance,
       openingAt: data.openingAt.present ? data.openingAt.value : this.openingAt,
       payday: data.payday.present ? data.payday.value : this.payday,
+      monthlyBudget: data.monthlyBudget.present
+          ? data.monthlyBudget.value
+          : this.monthlyBudget,
       hideAmounts: data.hideAmounts.present
           ? data.hideAmounts.value
           : this.hideAmounts,
@@ -397,6 +439,7 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
           ..write('openingBalance: $openingBalance, ')
           ..write('openingAt: $openingAt, ')
           ..write('payday: $payday, ')
+          ..write('monthlyBudget: $monthlyBudget, ')
           ..write('hideAmounts: $hideAmounts, ')
           ..write('onboardedAt: $onboardedAt')
           ..write(')'))
@@ -412,6 +455,7 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
     openingBalance,
     openingAt,
     payday,
+    monthlyBudget,
     hideAmounts,
     onboardedAt,
   );
@@ -426,6 +470,7 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
           other.openingBalance == this.openingBalance &&
           other.openingAt == this.openingAt &&
           other.payday == this.payday &&
+          other.monthlyBudget == this.monthlyBudget &&
           other.hideAmounts == this.hideAmounts &&
           other.onboardedAt == this.onboardedAt);
 }
@@ -438,6 +483,7 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
   final Value<int> openingBalance;
   final Value<DateTime> openingAt;
   final Value<int> payday;
+  final Value<int?> monthlyBudget;
   final Value<bool> hideAmounts;
   final Value<DateTime?> onboardedAt;
   final Value<int> rowid;
@@ -449,6 +495,7 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
     this.openingBalance = const Value.absent(),
     this.openingAt = const Value.absent(),
     this.payday = const Value.absent(),
+    this.monthlyBudget = const Value.absent(),
     this.hideAmounts = const Value.absent(),
     this.onboardedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -461,6 +508,7 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
     required int openingBalance,
     required DateTime openingAt,
     required int payday,
+    this.monthlyBudget = const Value.absent(),
     this.hideAmounts = const Value.absent(),
     this.onboardedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -475,6 +523,7 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
     Expression<int>? openingBalance,
     Expression<DateTime>? openingAt,
     Expression<int>? payday,
+    Expression<int>? monthlyBudget,
     Expression<bool>? hideAmounts,
     Expression<DateTime>? onboardedAt,
     Expression<int>? rowid,
@@ -487,6 +536,7 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
       if (openingBalance != null) 'opening_balance': openingBalance,
       if (openingAt != null) 'opening_at': openingAt,
       if (payday != null) 'payday': payday,
+      if (monthlyBudget != null) 'monthly_budget': monthlyBudget,
       if (hideAmounts != null) 'hide_amounts': hideAmounts,
       if (onboardedAt != null) 'onboarded_at': onboardedAt,
       if (rowid != null) 'rowid': rowid,
@@ -501,6 +551,7 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
     Value<int>? openingBalance,
     Value<DateTime>? openingAt,
     Value<int>? payday,
+    Value<int?>? monthlyBudget,
     Value<bool>? hideAmounts,
     Value<DateTime?>? onboardedAt,
     Value<int>? rowid,
@@ -513,6 +564,7 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
       openingBalance: openingBalance ?? this.openingBalance,
       openingAt: openingAt ?? this.openingAt,
       payday: payday ?? this.payday,
+      monthlyBudget: monthlyBudget ?? this.monthlyBudget,
       hideAmounts: hideAmounts ?? this.hideAmounts,
       onboardedAt: onboardedAt ?? this.onboardedAt,
       rowid: rowid ?? this.rowid,
@@ -543,6 +595,9 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
     if (payday.present) {
       map['payday'] = Variable<int>(payday.value);
     }
+    if (monthlyBudget.present) {
+      map['monthly_budget'] = Variable<int>(monthlyBudget.value);
+    }
     if (hideAmounts.present) {
       map['hide_amounts'] = Variable<bool>(hideAmounts.value);
     }
@@ -565,6 +620,7 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
           ..write('openingBalance: $openingBalance, ')
           ..write('openingAt: $openingAt, ')
           ..write('payday: $payday, ')
+          ..write('monthlyBudget: $monthlyBudget, ')
           ..write('hideAmounts: $hideAmounts, ')
           ..write('onboardedAt: $onboardedAt, ')
           ..write('rowid: $rowid')
@@ -1758,6 +1814,7 @@ typedef $$ProfilesTableCreateCompanionBuilder = ProfilesCompanion Function({
   required int openingBalance,
   required DateTime openingAt,
   required int payday,
+  Value<int?> monthlyBudget,
   Value<bool> hideAmounts,
   Value<DateTime?> onboardedAt,
   Value<int> rowid,
@@ -1770,6 +1827,7 @@ typedef $$ProfilesTableUpdateCompanionBuilder = ProfilesCompanion Function({
   Value<int> openingBalance,
   Value<DateTime> openingAt,
   Value<int> payday,
+  Value<int?> monthlyBudget,
   Value<bool> hideAmounts,
   Value<DateTime?> onboardedAt,
   Value<int> rowid,
@@ -1816,6 +1874,11 @@ class $$ProfilesTableFilterComposer
 
   ColumnFilters<int> get payday => $composableBuilder(
     column: $table.payday,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get monthlyBudget => $composableBuilder(
+    column: $table.monthlyBudget,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1874,6 +1937,11 @@ class $$ProfilesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get monthlyBudget => $composableBuilder(
+    column: $table.monthlyBudget,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get hideAmounts => $composableBuilder(
     column: $table.hideAmounts,
     builder: (column) => ColumnOrderings(column),
@@ -1916,6 +1984,11 @@ class $$ProfilesTableAnnotationComposer
 
   GeneratedColumn<int> get payday =>
       $composableBuilder(column: $table.payday, builder: (column) => column);
+
+  GeneratedColumn<int> get monthlyBudget => $composableBuilder(
+    column: $table.monthlyBudget,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<bool> get hideAmounts => $composableBuilder(
     column: $table.hideAmounts,
@@ -1966,6 +2039,7 @@ class $$ProfilesTableTableManager
                 Value<int> openingBalance = const Value.absent(),
                 Value<DateTime> openingAt = const Value.absent(),
                 Value<int> payday = const Value.absent(),
+                Value<int?> monthlyBudget = const Value.absent(),
                 Value<bool> hideAmounts = const Value.absent(),
                 Value<DateTime?> onboardedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -1977,6 +2051,7 @@ class $$ProfilesTableTableManager
                 openingBalance: openingBalance,
                 openingAt: openingAt,
                 payday: payday,
+                monthlyBudget: monthlyBudget,
                 hideAmounts: hideAmounts,
                 onboardedAt: onboardedAt,
                 rowid: rowid,
@@ -1990,6 +2065,7 @@ class $$ProfilesTableTableManager
                 required int openingBalance,
                 required DateTime openingAt,
                 required int payday,
+                Value<int?> monthlyBudget = const Value.absent(),
                 Value<bool> hideAmounts = const Value.absent(),
                 Value<DateTime?> onboardedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -2001,6 +2077,7 @@ class $$ProfilesTableTableManager
                 openingBalance: openingBalance,
                 openingAt: openingAt,
                 payday: payday,
+                monthlyBudget: monthlyBudget,
                 hideAmounts: hideAmounts,
                 onboardedAt: onboardedAt,
                 rowid: rowid,

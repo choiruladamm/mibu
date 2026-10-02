@@ -36,6 +36,7 @@ class Profile {
     required this.openingBalance,
     required this.openingAt,
     required this.payday,
+    this.monthlyBudget,
     this.hideAmounts = false,
   });
 
@@ -49,6 +50,7 @@ class Profile {
   final int openingBalance;
   final DateTime openingAt; // transactions before this aren't in the balance
   final int payday; // 1–28, 0 = last day of month
+  final int? monthlyBudget; // budget bulanan, set by the user; null = not set
   final bool hideAmounts;
 }
 
@@ -66,6 +68,74 @@ class Pocket {
   final int budget, spent;
 
   int get usedPct => budget == 0 ? 0 : (spent * 100 / budget).round();
+  int get left => budget - spent; // negative = over
+
+  PocketStatus get status => spent == 0
+      ? PocketStatus.unused
+      : usedPct >= 85
+      ? PocketStatus.almostOut
+      : PocketStatus.safe;
+}
+
+enum PocketStatus { safe, almostOut, unused }
+
+/// Days left in [now]'s month, today included (never 0).
+int daysLeftInMonth(DateTime now) =>
+    DateTime(now.year, now.month + 1, 0).day - now.day + 1;
+
+/// PocketLimit 00.15 slider scale. [budget] = monthly budget (null = not
+/// set), [others] = Σ limits of the other pockets. [free] = room left in the
+/// budget ("sisa budget"), null when there's no budget. See MVP_PLAN.md.
+({int max, int step, int? free}) pocketLimitScale({
+  required int? budget,
+  required int others,
+}) {
+  if (budget == null || budget <= 0) {
+    return (max: 2000000, step: 50000, free: null);
+  }
+  const half = 500000;
+  final free = budget - others < 0 ? 0 : budget - others;
+  final roundedUp = (free * 2 + half - 1) ~/ half * half;
+  final max = roundedUp < 1000000 ? 1000000 : roundedUp;
+  return (
+    max: max > budget ? budget : max,
+    step: budget <= 5000000
+        ? 50000
+        : budget <= 20000000
+        ? 100000
+        : 250000,
+    free: free,
+  );
+}
+
+const _emojiIdeas = {
+  'gym': ['🏋️', '🧘', '🏃'],
+  'makan': ['🍜', '🍛', '🍲'],
+  'mie': ['🍜', '🥢', '🍲'],
+  'kos': ['🏠', '🔑', '🏢'],
+  'sewa': ['🏠', '🔑', '🏢'],
+  'kado': ['🎁', '💐', '🎀'],
+  'buku': ['📚', '📖', '✏️'],
+  'game': ['🎮', '🕹️', '🎲'],
+  'musik': ['🎧', '🎸', '🎵'],
+  'pulsa': ['📱', '📶', '🔌'],
+  'bensin': ['⛽', '🛵', '🅿️'],
+  'motor': ['🛵', '⛽', '🔧'],
+  'kopi': ['☕', '🧋', '🥐'],
+  'anak': ['🧸', '🍼', '🎒'],
+  'kucing': ['🐱', '🐟', '🧶'],
+  'anjing': ['🐶', '🦴', '🐾'],
+  'liburan': ['✈️', '🧳', '🏝️'],
+  'skincare': ['🧴', '💆', '✨'],
+};
+
+/// 03.4 "saran": 3 emoji for a category name, by Indonesian keyword.
+List<String> emojiIdeas(String name) {
+  final n = name.trim().toLowerCase();
+  for (final MapEntry(:key, :value) in _emojiIdeas.entries) {
+    if (n.contains(key)) return value;
+  }
+  return const ['✨', '🧾', '📦'];
 }
 
 class Transaction {

@@ -41,4 +41,52 @@ void main() {
       8256000,
     ]);
   });
+
+  test('pocket status: unused, safe, almost out at 85%', () {
+    Pocket p(int spent) =>
+        Pocket(id: '', emoji: '', name: '', budget: 1000000, spent: spent);
+    expect(p(0).status, PocketStatus.unused);
+    expect(p(844000).status, PocketStatus.safe); // 84%; 84,9% rounds to 85
+    expect(p(850000).status, PocketStatus.almostOut);
+    expect(p(1200000).left, -200000);
+  });
+
+  test('daysLeftInMonth counts today', () {
+    expect(daysLeftInMonth(DateTime(2026, 10, 16)), 16);
+    expect(daysLeftInMonth(DateTime(2026, 10, 31)), 1);
+    expect(daysLeftInMonth(DateTime(2026, 2, 1)), 28);
+  });
+
+  test('pocketLimitScale follows the PocketLimit rules', () {
+    // design example: 6,9jt − 5,6jt = 1,3jt free → end 3jt
+    expect(pocketLimitScale(budget: 6900000, others: 5600000), (
+      max: 3000000,
+      step: 100000,
+      free: 1300000,
+    ));
+    // min 1jt end, capped at the budget itself
+    expect(pocketLimitScale(budget: 800000, others: 700000), (
+      max: 800000,
+      step: 50000,
+      free: 100000,
+    ));
+    // over budget already → free 0, end 1jt
+    expect(pocketLimitScale(budget: 3000000, others: 4000000), (
+      max: 1000000,
+      step: 50000,
+      free: 0,
+    ));
+    expect(pocketLimitScale(budget: 30000000, others: 0).step, 250000);
+    expect(pocketLimitScale(budget: null, others: 5600000), (
+      max: 2000000,
+      step: 50000,
+      free: null,
+    ));
+  });
+
+  test('emojiIdeas matches keywords inside the name', () {
+    expect(emojiIdeas('Kopi Susu'), ['☕', '🧋', '🥐']);
+    expect(emojiIdeas('makan siang').first, '🍜');
+    expect(emojiIdeas('zakat'), ['✨', '🧾', '📦']);
+  });
 }
