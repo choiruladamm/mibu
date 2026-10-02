@@ -2,12 +2,14 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../ui/core/finance_providers.dart';
 import '../ui/core/tokens.dart';
 import '../ui/core/widgets/tab_bar.dart';
 import '../ui/features/add_entry/views/add_entry_view.dart';
 import '../ui/features/home/views/home_view.dart';
 import '../ui/features/onboarding/views/onboarding_view.dart';
 import '../ui/features/pockets/views/pockets_view.dart';
+import '../ui/features/setup/views/setup_view.dart';
 import '../domain/models/finance.dart';
 import '../ui/features/transactions/view_models/transactions_view_model.dart';
 import '../ui/features/transactions/views/edit_entry_view.dart';
@@ -16,6 +18,7 @@ import '../ui/features/transactions/views/transactions_view.dart';
 
 abstract final class Routes {
   static const onboarding = '/onboarding';
+  static const setup = '/atur-awal';
   static const home = '/';
   static const pockets = '/kantong';
   static String pocketsAt(String id) => '$pockets?pocket=$id';
@@ -49,16 +52,22 @@ DateTime? _monthParam(String? s) {
 
 final routerProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
-    // ponytail: always starts at onboarding; redirect on a "seen onboarding"
-    // flag once login (01.2) exists.
-    initialLocation: Routes.onboarding,
+    // First run until 01.4 atur awal is done; main() loads the profile
+    // before the router exists.
+    initialLocation: ref.read(profileProvider).value?.onboarded ?? false
+        ? Routes.home
+        : Routes.onboarding,
     routes: [
       GoRoute(
         path: Routes.onboarding,
         // TODO: onDone → 01.2 masuk once login is sliced.
-        builder: (context, _) => OnboardingView(
-          onDone: () => context.go(Routes.home, extra: _fadeIn),
-        ),
+        builder: (context, _) =>
+            OnboardingView(onDone: () => context.go(Routes.setup)),
+      ),
+      GoRoute(
+        path: Routes.setup,
+        builder: (context, _) =>
+            SetupView(onDone: () => context.go(Routes.home, extra: _fadeIn)),
       ),
       GoRoute(
         path: Routes.home,

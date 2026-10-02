@@ -1605,6 +1605,144 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'hapus catatan ini'**
   String get editDelete;
+
+  /// No description provided for @setupCounter.
+  ///
+  /// In id, this message translates to:
+  /// **'atur awal · {step} / 02'**
+  String setupCounter(String step);
+
+  /// No description provided for @setupBack.
+  ///
+  /// In id, this message translates to:
+  /// **'balik ke saldo'**
+  String get setupBack;
+
+  /// No description provided for @setupLater.
+  ///
+  /// In id, this message translates to:
+  /// **'nanti aja'**
+  String get setupLater;
+
+  /// No description provided for @setupBalanceTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'saldo kamu sekarang berapa?'**
+  String get setupBalanceTitle;
+
+  /// No description provided for @setupBalanceLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'saldo awal'**
+  String get setupBalanceLabel;
+
+  /// No description provided for @setupPaydayTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'gajian tiap tanggal berapa?'**
+  String get setupPaydayTitle;
+
+  /// No description provided for @setupPaydayBody.
+  ///
+  /// In id, this message translates to:
+  /// **'biar jatah harian dihitung sampai gajian berikutnya'**
+  String get setupPaydayBody;
+
+  /// No description provided for @setupPaydayEnd.
+  ///
+  /// In id, this message translates to:
+  /// **'akhir'**
+  String get setupPaydayEnd;
+
+  /// No description provided for @setupPaydayEndLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'akhir bulan'**
+  String get setupPaydayEndLabel;
+
+  /// No description provided for @setupPaydayLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'tanggal {day}'**
+  String setupPaydayLabel(int day);
+
+  /// No description provided for @setupDaily.
+  ///
+  /// In id, this message translates to:
+  /// **'aman jajan per hari'**
+  String get setupDaily;
+
+  /// No description provided for @setupUntil.
+  ///
+  /// In id, this message translates to:
+  /// **'sampai gajian · {days} hari lagi'**
+  String setupUntil(int days);
+
+  /// No description provided for @setupNext.
+  ///
+  /// In id, this message translates to:
+  /// **'lanjut'**
+  String get setupNext;
+
+  /// No description provided for @setupPocketsTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'mau mulai dari kantong apa?'**
+  String get setupPocketsTitle;
+
+  /// No description provided for @setupPocketsBody.
+  ///
+  /// In id, this message translates to:
+  /// **'pilih aja dulu, nominalnya bisa diubah nanti.'**
+  String get setupPocketsBody;
+
+  /// No description provided for @setupPerMonth.
+  ///
+  /// In id, this message translates to:
+  /// **'{amount}/bln'**
+  String setupPerMonth(String amount);
+
+  /// No description provided for @setupPocketCount.
+  ///
+  /// In id, this message translates to:
+  /// **'{count} kantong'**
+  String setupPocketCount(int count);
+
+  /// No description provided for @setupNoPockets.
+  ///
+  /// In id, this message translates to:
+  /// **'belum ada kantong'**
+  String get setupNoPockets;
+
+  /// No description provided for @setupSummary.
+  ///
+  /// In id, this message translates to:
+  /// **'ringkasan kantong'**
+  String get setupSummary;
+
+  /// No description provided for @setupFree.
+  ///
+  /// In id, this message translates to:
+  /// **'sisa bebas {free} dari saldo {balance}'**
+  String setupFree(String free, String balance);
+
+  /// No description provided for @setupOver.
+  ///
+  /// In id, this message translates to:
+  /// **'lebih {over} dari saldo — santai, nanti gajian nambah'**
+  String setupOver(String over);
+
+  /// No description provided for @setupTapHint.
+  ///
+  /// In id, this message translates to:
+  /// **'tap kantong di atas buat mulai'**
+  String get setupTapHint;
+
+  /// No description provided for @setupDone.
+  ///
+  /// In id, this message translates to:
+  /// **'beres, ke beranda'**
+  String get setupDone;
 }
 
 class _AppLocalizationsDelegate

@@ -25,7 +25,7 @@ Riverpod providers are written by hand (no `riverpod_generator`), declared next 
 ## Structure (`apps/mobile/lib`)
 
 - `domain/models/` — plain models
-- `data/database/` — Drift `AppDatabase`; debug-only seed in `seed.dart` until 01.4 setup exists: `seedFixture` (default, design numbers — tests assert it, don't change) and `seedDemo` (realistic data, used by `appDatabaseProvider` on devices)
+- `data/database/` — Drift `AppDatabase`; debug-only seed in `seed.dart`: `seedFixture` (default, design numbers — tests assert it, don't change) and `seedDemo` (realistic data, used by `appDatabaseProvider` on devices). Pick with `--dart-define=MIBU_SEED=demo|fixture|none` (`none` = real first run 01.1 → 01.4). Release starts empty.
 - `data/repositories/` — map Drift rows → domain models, expose streams
 - `routing/router.dart` — go_router `routerProvider`, `Routes` paths
 - `ui/core/` — `tokens.dart` (design tokens + `AppIcons` for custom-drawn icons), `theme.dart`, `money.dart` (`rupiah`, `rupiahCompact`), `dates.dart` (`dayLabel`, `relativeDay`, Monday weeks), `clock.dart`, `dashed.dart`, shared `widgets/`

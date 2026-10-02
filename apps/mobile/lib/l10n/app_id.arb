@@ -883,5 +883,80 @@
     }
   },
   "editSave": "simpan",
-  "editDelete": "hapus catatan ini"
+  "editDelete": "hapus catatan ini",
+  "setupCounter": "atur awal · {step} / 02",
+  "@setupCounter": {
+    "placeholders": {
+      "step": {
+        "type": "String"
+      }
+    }
+  },
+  "setupBack": "balik ke saldo",
+  "setupLater": "nanti aja",
+  "setupBalanceTitle": "saldo kamu sekarang berapa?",
+  "setupBalanceLabel": "saldo awal",
+  "setupPaydayTitle": "gajian tiap tanggal berapa?",
+  "setupPaydayBody": "biar jatah harian dihitung sampai gajian berikutnya",
+  "setupPaydayEnd": "akhir",
+  "setupPaydayEndLabel": "akhir bulan",
+  "setupPaydayLabel": "tanggal {day}",
+  "@setupPaydayLabel": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "setupDaily": "aman jajan per hari",
+  "setupUntil": "sampai gajian · {days} hari lagi",
+  "@setupUntil": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "setupNext": "lanjut",
+  "setupPocketsTitle": "mau mulai dari kantong apa?",
+  "setupPocketsBody": "pilih aja dulu, nominalnya bisa diubah nanti.",
+  "setupPerMonth": "{amount}/bln",
+  "@setupPerMonth": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "setupPocketCount": "{count} kantong",
+  "@setupPocketCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "setupNoPockets": "belum ada kantong",
+  "setupSummary": "ringkasan kantong",
+  "setupFree": "sisa bebas {free} dari saldo {balance}",
+  "@setupFree": {
+    "placeholders": {
+      "free": {
+        "type": "String"
+      },
+      "balance": {
+        "type": "String"
+      }
+    }
+  },
+  "setupOver": "lebih {over} dari saldo — santai, nanti gajian nambah",
+  "@setupOver": {
+    "placeholders": {
+      "over": {
+        "type": "String"
+      }
+    }
+  },
+  "setupTapHint": "tap kantong di atas buat mulai",
+  "setupDone": "beres, ke beranda"
 }

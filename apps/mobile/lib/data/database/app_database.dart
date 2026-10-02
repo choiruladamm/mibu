@@ -66,8 +66,8 @@ class AppDatabase extends _$AppDatabase {
 
   final DateTime Function() _now;
 
-  // ponytail: sample data (debug only) so screens aren't empty; drop once
-  // 01.4 atur awal writes real data.
+  // Sample data, debug only (see MIBU_SEED below); a release build starts
+  // empty and goes through 01.4 atur awal.
   final Seed _seed;
 
   // Pre-release: schema edited in place; wipe app data on dev devices.

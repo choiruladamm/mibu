@@ -931,4 +931,89 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get editDelete => 'hapus catatan ini';
+
+  @override
+  String setupCounter(String step) {
+    return 'atur awal · $step / 02';
+  }
+
+  @override
+  String get setupBack => 'balik ke saldo';
+
+  @override
+  String get setupLater => 'nanti aja';
+
+  @override
+  String get setupBalanceTitle => 'saldo kamu sekarang berapa?';
+
+  @override
+  String get setupBalanceLabel => 'saldo awal';
+
+  @override
+  String get setupPaydayTitle => 'gajian tiap tanggal berapa?';
+
+  @override
+  String get setupPaydayBody =>
+      'biar jatah harian dihitung sampai gajian berikutnya';
+
+  @override
+  String get setupPaydayEnd => 'akhir';
+
+  @override
+  String get setupPaydayEndLabel => 'akhir bulan';
+
+  @override
+  String setupPaydayLabel(int day) {
+    return 'tanggal $day';
+  }
+
+  @override
+  String get setupDaily => 'aman jajan per hari';
+
+  @override
+  String setupUntil(int days) {
+    return 'sampai gajian · $days hari lagi';
+  }
+
+  @override
+  String get setupNext => 'lanjut';
+
+  @override
+  String get setupPocketsTitle => 'mau mulai dari kantong apa?';
+
+  @override
+  String get setupPocketsBody =>
+      'pilih aja dulu, nominalnya bisa diubah nanti.';
+
+  @override
+  String setupPerMonth(String amount) {
+    return '$amount/bln';
+  }
+
+  @override
+  String setupPocketCount(int count) {
+    return '$count kantong';
+  }
+
+  @override
+  String get setupNoPockets => 'belum ada kantong';
+
+  @override
+  String get setupSummary => 'ringkasan kantong';
+
+  @override
+  String setupFree(String free, String balance) {
+    return 'sisa bebas $free dari saldo $balance';
+  }
+
+  @override
+  String setupOver(String over) {
+    return 'lebih $over dari saldo — santai, nanti gajian nambah';
+  }
+
+  @override
+  String get setupTapHint => 'tap kantong di atas buat mulai';
+
+  @override
+  String get setupDone => 'beres, ke beranda';
 }
