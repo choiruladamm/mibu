@@ -52,14 +52,23 @@ void main() {
     tester,
   ) async {
     final db = await pump(tester, const PocketsView());
-    await tester.tap(find.text('baru'));
+    await tester.tap(
+      find.text('baru').first,
+    ); // header; the jar row has one too
     await settle(tester);
-    expect(find.text('kategori baru'), findsOneWidget);
+    // 03.4b: always a pocket, no kind / switch rows.
+    expect(find.text('kantong baru'), findsOneWidget);
+    expect(
+      find.text('kantong = pengeluaran dengan batas bulanan'),
+      findsOneWidget,
+    );
+    expect(find.text('masuk ke'), findsNothing);
+    expect(find.text('kantong bulanan'), findsNothing);
 
     await tester.enterText(nameField, 'Kopi Susu');
     await tester.pump();
     expect(find.text('buat “kopi susu”'), findsOneWidget);
-    expect(find.text('bikin ☕ kopi susu'), findsOneWidget);
+    expect(find.text('bikin kantong ☕ kopi susu'), findsOneWidget);
 
     // budget 8jt − other pockets 3,3jt = 4,7jt free; 300K ÷ 31 days.
     expect(find.text('sisa budget Rp4,7jt'), findsOneWidget);
@@ -88,9 +97,9 @@ void main() {
     await tester.tap(find.bySemanticsLabel('pakai 🎧'));
     await tester.enterText(nameField, 'kopi');
     await tester.pump();
-    expect(find.text('bikin 🎧 kopi'), findsOneWidget);
+    expect(find.text('bikin kantong 🎧 kopi'), findsOneWidget);
 
-    await tester.tap(find.text('bikin 🎧 kopi'));
+    await tester.tap(find.text('bikin kantong 🎧 kopi'));
     await settle(tester);
     final c = await row(db, 'kopi');
     expect((c.emoji, c.monthlyLimit), ('🎧', 1000000));

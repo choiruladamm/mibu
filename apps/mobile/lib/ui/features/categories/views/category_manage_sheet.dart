@@ -114,7 +114,8 @@ class _CategoryManageSheetState extends ConsumerState<CategoryManageSheet>
                   padding: const EdgeInsets.only(top: 6),
                   child: NewCategoryTile(
                     label: l.categoryNew,
-                    onTap: () => showCategoryForm(context),
+                    onTap: () =>
+                        showCategoryForm(context, origin: CategoryOrigin.atur),
                   ),
                 ),
               ],

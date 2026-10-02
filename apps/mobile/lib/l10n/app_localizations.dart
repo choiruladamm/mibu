@@ -712,6 +712,108 @@ abstract class AppLocalizations {
   /// **'belum ada kantong. bikin satu biar jajan ada batasnya.'**
   String get pocketsEmpty;
 
+  /// No description provided for @pocketsCount.
+  ///
+  /// In id, this message translates to:
+  /// **'{n} kantong'**
+  String pocketsCount(int n);
+
+  /// No description provided for @pocketsOrder.
+  ///
+  /// In id, this message translates to:
+  /// **' · urut dari yang paling kepake'**
+  String get pocketsOrder;
+
+  /// No description provided for @pocketsSwipe.
+  ///
+  /// In id, this message translates to:
+  /// **'geser'**
+  String get pocketsSwipe;
+
+  /// No description provided for @pocketsNewJar.
+  ///
+  /// In id, this message translates to:
+  /// **'bikin kantong baru'**
+  String get pocketsNewJar;
+
+  /// No description provided for @pocketsFirstTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'bikin kantong pertama'**
+  String get pocketsFirstTitle;
+
+  /// No description provided for @pocketsFirstBody.
+  ///
+  /// In id, this message translates to:
+  /// **'kasih batas buat makan, ngopi, atau ojol. mibu ngingetin kalau udah mau abis.'**
+  String get pocketsFirstBody;
+
+  /// No description provided for @pocketsFirstButton.
+  ///
+  /// In id, this message translates to:
+  /// **'bikin kantong'**
+  String get pocketsFirstButton;
+
+  /// No description provided for @pocketsFreeTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'tanpa kantong · '**
+  String get pocketsFreeTitle;
+
+  /// No description provided for @pocketsFreeSuffix.
+  ///
+  /// In id, this message translates to:
+  /// **' bulan ini'**
+  String get pocketsFreeSuffix;
+
+  /// No description provided for @pocketsFreeManage.
+  ///
+  /// In id, this message translates to:
+  /// **'atur'**
+  String get pocketsFreeManage;
+
+  /// No description provided for @pocketsFreeChip.
+  ///
+  /// In id, this message translates to:
+  /// **'pasang batas buat {name}'**
+  String pocketsFreeChip(String name);
+
+  /// No description provided for @pocketsFreeMore.
+  ///
+  /// In id, this message translates to:
+  /// **'liat kategori lain tanpa kantong'**
+  String get pocketsFreeMore;
+
+  /// No description provided for @categoryNewPocketTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'kantong baru'**
+  String get categoryNewPocketTitle;
+
+  /// No description provided for @categoryChipPocket.
+  ///
+  /// In id, this message translates to:
+  /// **'kantong = pengeluaran dengan batas bulanan'**
+  String get categoryChipPocket;
+
+  /// No description provided for @categoryChipCatat.
+  ///
+  /// In id, this message translates to:
+  /// **'abis dibikin, langsung kepasang di catatan kamu'**
+  String get categoryChipCatat;
+
+  /// No description provided for @categoryChipAtur.
+  ///
+  /// In id, this message translates to:
+  /// **'nambah ke daftar kategori kamu'**
+  String get categoryChipAtur;
+
+  /// No description provided for @categoryCreatePocket.
+  ///
+  /// In id, this message translates to:
+  /// **'bikin kantong {emoji} {name}'**
+  String categoryCreatePocket(String emoji, String name);
+
   /// No description provided for @pocketJarLabel.
   ///
   /// In id, this message translates to:

@@ -7,11 +7,13 @@ import 'package:intl/intl.dart';
 import '../../../../domain/models/finance.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../routing/router.dart';
+import '../../../core/dashed.dart';
 import '../../../core/money.dart';
 import '../../../core/tokens.dart';
 import '../../../core/widgets/tab_bar.dart';
 import '../../budget/views/budget_sheet.dart';
 import '../../categories/views/category_form_sheet.dart';
+import '../../categories/views/category_manage_sheet.dart';
 import '../view_models/pockets_view_model.dart';
 
 /// 02.2 kantong. Isi ulang and impian are post-MVP.
@@ -61,71 +63,73 @@ class _PocketsViewState extends ConsumerState<PocketsView> {
     final l = AppLocalizations.of(context)!;
     final muted = AppText.label.copyWith(fontSize: 14, color: AppColors.muted);
     final selected = s.selected;
+    Widget gutter(Widget child) => Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpace.gutter),
+      child: child,
+    );
+    // 03.4b: always a pocket; the new one gets selected.
+    Future<void> newPocket() async {
+      final c = await showCategoryForm(context, origin: CategoryOrigin.kantong);
+      if (c?.monthlyLimit != null) {
+        ref.read(selectedPocketProvider.notifier).select(c!.id);
+      }
+    }
 
     return Scaffold(
       body: Stack(
         children: [
           SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpace.gutter,
-              0,
-              AppSpace.gutter,
-              AppSpace.tabBarClearance,
-            ),
+            padding: const EdgeInsets.only(bottom: AppSpace.tabBarClearance),
             child: SafeArea(
               bottom: false,
               minimum: const EdgeInsets.only(top: AppSpace.contentTop),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Semantics(
-                          header: true,
-                          child: Text(l.tabPockets, style: AppText.title),
-                        ),
-                      ),
-                      _NewButton(
-                        label: l.pocketsNew,
-                        onTap: () async {
-                          final c = await showCategoryForm(context);
-                          if (c?.monthlyLimit != null) {
-                            ref
-                                .read(selectedPocketProvider.notifier)
-                                .select(c!.id);
-                          }
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 22),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          l.pocketsLeftTitle(
-                            _monthFull.format(s.month).toLowerCase(),
+                  gutter(
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Semantics(
+                            header: true,
+                            child: Text(l.tabPockets, style: AppText.title),
                           ),
-                          style: muted,
                         ),
-                      ),
-                      _DaysChip(l.pocketsDaysLeft(s.daysLeft)),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  _Amount(s.left),
-                  const SizedBox(height: 4),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: _BudgetLine(
-                      state: s,
-                      onTap: () => editBudget(context, ref),
+                        _NewButton(label: l.pocketsNew, onTap: newPocket),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 22),
+                  gutter(
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            l.pocketsLeftTitle(
+                              _monthFull.format(s.month).toLowerCase(),
+                            ),
+                            style: muted,
+                          ),
+                        ),
+                        _DaysChip(l.pocketsDaysLeft(s.daysLeft)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  gutter(_Amount(s.left)),
+                  const SizedBox(height: 4),
+                  gutter(
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: _BudgetLine(
+                        state: s,
+                        onTap: () => editBudget(context, ref),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
                   if (selected == null)
-                    Text(l.pocketsEmpty, style: muted)
+                    gutter(_FirstPocket(onTap: newPocket))
                   else ...[
                     _Jars(
                       pockets: s.pockets,
@@ -133,23 +137,30 @@ class _PocketsViewState extends ConsumerState<PocketsView> {
                       onSelect: ref
                           .read(selectedPocketProvider.notifier)
                           .select,
+                      onNew: newPocket,
                     ),
                     const SizedBox(height: 18),
-                    _Detail(
-                      pocket: selected,
-                      daysLeft: s.daysLeft,
-                      // A pocket is an expense category with a limit.
-                      onManage: () => showCategoryForm(
-                        context,
-                        category: Category(
-                          id: selected.id,
-                          emoji: selected.emoji,
-                          name: selected.name,
-                          kind: CategoryKind.expense,
-                          monthlyLimit: selected.budget,
+                    gutter(
+                      _Detail(
+                        pocket: selected,
+                        daysLeft: s.daysLeft,
+                        // A pocket is an expense category with a limit.
+                        onManage: () => showCategoryForm(
+                          context,
+                          category: Category(
+                            id: selected.id,
+                            emoji: selected.emoji,
+                            name: selected.name,
+                            kind: CategoryKind.expense,
+                            monthlyLimit: selected.budget,
+                          ),
                         ),
                       ),
                     ),
+                  ],
+                  if (s.free.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    gutter(_FreeSection(free: s.free, total: s.freeSpent)),
                   ],
                 ],
               ),
@@ -338,12 +349,15 @@ class _Amount extends StatelessWidget {
   }
 }
 
-/// Toples per kantong: fill = % kepake.
+/// Toples per kantong: fill = % kepake. Left-aligned, always scrollable, a
+/// dashed "baru" jar closes the row. "geser ›" and the right fade show only
+/// while there's more to scroll to.
 class _Jars extends StatefulWidget {
   const _Jars({
     required this.pockets,
     required this.selected,
     required this.onSelect,
+    required this.onNew,
   });
 
   static const _width = 50.0;
@@ -351,29 +365,54 @@ class _Jars extends StatefulWidget {
   final List<Pocket> pockets;
   final Pocket selected;
   final ValueChanged<String> onSelect;
+  final VoidCallback onNew;
 
   @override
   State<_Jars> createState() => _JarsState();
 }
 
 class _JarsState extends State<_Jars> {
-  final _selectedKey = GlobalKey();
+  // One key per jar for good: a key hopping between jars would carry the
+  // old jar's fill animation along (the selected jar filling from its
+  // neighbour's level).
+  final _keys = <String, GlobalKey>{};
+  final _scroll = ScrollController();
+  bool _more = false;
 
   @override
   void initState() {
     super.initState();
-    _reveal();
+    _scroll.addListener(_measure);
+    _afterLayout();
   }
 
   @override
   void didUpdateWidget(_Jars old) {
     super.didUpdateWidget(old);
     if (old.selected.id != widget.selected.id) _reveal();
+    _afterLayout();
+  }
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  void _afterLayout() => WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (mounted) _measure();
+  });
+
+  void _measure() {
+    if (!_scroll.hasClients || !_scroll.position.hasContentDimensions) return;
+    final p = _scroll.position;
+    final more = p.maxScrollExtent > 0 && p.pixels < p.maxScrollExtent - 1;
+    if (more != _more) setState(() => _more = more);
   }
 
   /// A deep link (02.1 pill) can select a jar scrolled off to the right.
   void _reveal() => WidgetsBinding.instance.addPostFrameCallback((_) {
-    final ctx = _selectedKey.currentContext;
+    final ctx = _keys[widget.selected.id]?.currentContext;
     if (ctx != null && ctx.mounted) {
       Scrollable.ensureVisible(
         ctx,
@@ -387,31 +426,443 @@ class _JarsState extends State<_Jars> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
-    return LayoutBuilder(
-      builder: (context, box) {
-        // Spread like the design; scroll sideways once they don't fit.
-        final n = widget.pockets.length;
-        final gap = n < 2
-            ? 0.0
-            : ((box.maxWidth - n * _Jars._width) / (n - 1)).clamp(12.0, 80.0);
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          clipBehavior: Clip.none,
+    final small = AppText.caption.copyWith(
+      fontSize: 12,
+      color: AppColors.muted,
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpace.gutter),
           child: Row(
-            spacing: gap,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              for (final p in widget.pockets)
-                _Jar(
-                  key: p.id == widget.selected.id ? _selectedKey : null,
-                  pocket: p,
-                  on: p.id == widget.selected.id,
-                  label: l.pocketJarLabel(p.name, p.usedPct),
-                  onTap: () => widget.onSelect(p.id),
+              Flexible(
+                child: Text.rich(
+                  TextSpan(
+                    text: l.pocketsCount(widget.pockets.length),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.ink,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: l.pocketsOrder,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w400,
+                          color: AppColors.muted,
+                        ),
+                      ),
+                    ],
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: small,
+                ),
+              ),
+              if (_more)
+                Row(
+                  spacing: 2,
+                  children: [
+                    Text(l.pocketsSwipe, style: small),
+                    const HugeIcon(
+                      icon: HugeIcons.strokeRoundedArrowRight01,
+                      size: 14,
+                      strokeWidth: AppStroke.iconOnInkSmall,
+                      color: AppColors.muted,
+                    ),
+                  ],
                 ),
             ],
           ),
-        );
-      },
+        ),
+        const SizedBox(height: 10),
+        Stack(
+          children: [
+            SingleChildScrollView(
+              controller: _scroll,
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpace.gutter,
+                vertical: 6,
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 14,
+                children: [
+                  for (final p in widget.pockets)
+                    _Jar(
+                      key: _keys.putIfAbsent(p.id, GlobalKey.new),
+                      pocket: p,
+                      on: p.id == widget.selected.id,
+                      label: l.pocketJarLabel(p.name, p.usedPct),
+                      onTap: () => widget.onSelect(p.id),
+                    ),
+                  _NewJar(label: l.pocketsNew, onTap: widget.onNew),
+                  const SizedBox(width: 10),
+                ],
+              ),
+            ),
+            if (_more)
+              Positioned(
+                right: 0,
+                top: 0,
+                bottom: 0,
+                width: 48,
+                child: IgnorePointer(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          AppColors.paper.withValues(alpha: 0),
+                          AppColors.paper,
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// Dashed "+ baru" jar closing the row: opens 03.4b.
+class _NewJar extends StatelessWidget {
+  const _NewJar({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    return Semantics(
+      button: true,
+      label: l.pocketsNewJar,
+      excludeSemantics: true,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Column(
+          spacing: 8,
+          children: [
+            CustomPaint(
+              painter: _DashedBox(radius: _Jars._width / 2),
+              child: const SizedBox(
+                width: _Jars._width,
+                height: 176,
+                child: Center(
+                  child: HugeIcon(
+                    icon: HugeIcons.strokeRoundedAdd01,
+                    size: 18,
+                    strokeWidth: AppStroke.iconOnInkSmall,
+                    color: AppColors.ink,
+                  ),
+                ),
+              ),
+            ),
+            Text(
+              label,
+              style: AppText.caption.copyWith(fontWeight: FontWeight.w500),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DashedBox extends CustomPainter {
+  const _DashedBox({required this.radius});
+
+  final double radius;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final r = RRect.fromRectAndRadius(
+      (Offset.zero & size).deflate(AppStroke.outline / 2),
+      Radius.circular(radius),
+    );
+    canvas.drawPath(
+      dashPath(Path()..addRRect(r)),
+      Paint()
+        ..color = AppColors.ink
+        ..strokeWidth = AppStroke.outline
+        ..style = PaintingStyle.stroke,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_DashedBox old) => old.radius != radius;
+}
+
+/// 02.2d: no pockets yet; the whole card opens 03.4b.
+class _FirstPocket extends StatelessWidget {
+  const _FirstPocket({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    return Semantics(
+      button: true,
+      child: GestureDetector(
+        onTap: onTap,
+        child: CustomPaint(
+          painter: const _DashedBox(radius: AppRadius.inkCard),
+          child: Container(
+            // 214 in the design; grows if the text needs more.
+            constraints: const BoxConstraints(minHeight: 214),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+            child: Row(
+              spacing: 20,
+              children: [
+                Container(
+                  width: _Jars._width,
+                  height: 150,
+                  clipBehavior: Clip.antiAlias,
+                  decoration: BoxDecoration(
+                    color: AppColors.mist,
+                    borderRadius: BorderRadius.circular(_Jars._width / 2),
+                  ),
+                  child: Stack(
+                    children: [
+                      Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Container(
+                          width: _Jars._width,
+                          height: 150 * 0.35,
+                          color: AppColors.line,
+                        ),
+                      ),
+                      Positioned(
+                        left: 7,
+                        top: 7,
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          alignment: Alignment.center,
+                          decoration: const BoxDecoration(
+                            color: AppColors.paper,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Text(
+                            '🫙',
+                            style: TextStyle(fontSize: 18),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 6,
+                    children: [
+                      Text(
+                        l.pocketsFirstTitle,
+                        style: AppText.label.copyWith(
+                          fontSize: 20,
+                          height: 1.2,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: -0.2,
+                        ),
+                      ),
+                      Text(
+                        l.pocketsFirstBody,
+                        style: AppText.label.copyWith(
+                          fontSize: 14,
+                          height: 1.4,
+                          color: AppColors.muted,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Container(
+                        height: 36,
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: AppColors.ink,
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: Text(
+                          l.pocketsFirstButton,
+                          style: AppText.label.copyWith(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.paper,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// "tanpa kantong · Rp… bulan ini": expense categories with no limit, the
+/// two biggest as chips (tap = pasang batas), the rest behind "+n".
+class _FreeSection extends StatelessWidget {
+  const _FreeSection({required this.free, required this.total});
+
+  final List<({Category category, int spent})> free; // most spent first
+  final int total;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    final style = AppText.caption.copyWith(
+      fontSize: 13,
+      color: AppColors.muted,
+    );
+    return Semantics(
+      container: true,
+      label: l.pocketsFreeTitle,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 10,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Flexible(
+                child: Text.rich(
+                  TextSpan(
+                    text: l.pocketsFreeTitle,
+                    children: [
+                      TextSpan(
+                        text: rupiahCompact(total),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.ink,
+                        ),
+                      ),
+                      TextSpan(text: l.pocketsFreeSuffix),
+                    ],
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: style,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Semantics(
+                button: true,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => showCategoryManage(context),
+                  child: Row(
+                    spacing: 2,
+                    children: [
+                      Text(
+                        l.pocketsFreeManage,
+                        style: style.copyWith(
+                          color: AppColors.ink,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const HugeIcon(
+                        icon: HugeIcons.strokeRoundedArrowRight01,
+                        size: 16,
+                        strokeWidth: AppStroke.iconOnInkSmall,
+                        color: AppColors.ink,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final f in free.take(2))
+                Semantics(
+                  button: true,
+                  label: l.pocketsFreeChip(f.category.name),
+                  excludeSemantics: true,
+                  child: GestureDetector(
+                    onTap: () =>
+                        showCategoryForm(context, category: f.category),
+                    child: Container(
+                      height: 40,
+                      padding: const EdgeInsets.only(left: 6, right: 12),
+                      decoration: BoxDecoration(
+                        color: AppColors.paper,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: AppColors.divider,
+                          width: AppStroke.hairline,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        spacing: 6,
+                        children: [
+                          Container(
+                            width: 28,
+                            height: 28,
+                            alignment: Alignment.center,
+                            decoration: const BoxDecoration(
+                              color: AppColors.mist,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Text(
+                              f.category.emoji,
+                              style: const TextStyle(fontSize: 15),
+                            ),
+                          ),
+                          Text(
+                            f.category.name,
+                            style: style.copyWith(color: AppColors.ink),
+                          ),
+                          Text(rupiahCompact(f.spent), style: style),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              if (free.length > 2)
+                Semantics(
+                  button: true,
+                  label: l.pocketsFreeMore,
+                  excludeSemantics: true,
+                  child: GestureDetector(
+                    onTap: () => showCategoryManage(context),
+                    child: Container(
+                      height: 40,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: AppColors.mist,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '+${free.length - 2}',
+                        style: style.copyWith(color: AppColors.ink),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

@@ -373,6 +373,65 @@ class AppLocalizationsId extends AppLocalizations {
       'belum ada kantong. bikin satu biar jajan ada batasnya.';
 
   @override
+  String pocketsCount(int n) {
+    return '$n kantong';
+  }
+
+  @override
+  String get pocketsOrder => ' · urut dari yang paling kepake';
+
+  @override
+  String get pocketsSwipe => 'geser';
+
+  @override
+  String get pocketsNewJar => 'bikin kantong baru';
+
+  @override
+  String get pocketsFirstTitle => 'bikin kantong pertama';
+
+  @override
+  String get pocketsFirstBody =>
+      'kasih batas buat makan, ngopi, atau ojol. mibu ngingetin kalau udah mau abis.';
+
+  @override
+  String get pocketsFirstButton => 'bikin kantong';
+
+  @override
+  String get pocketsFreeTitle => 'tanpa kantong · ';
+
+  @override
+  String get pocketsFreeSuffix => ' bulan ini';
+
+  @override
+  String get pocketsFreeManage => 'atur';
+
+  @override
+  String pocketsFreeChip(String name) {
+    return 'pasang batas buat $name';
+  }
+
+  @override
+  String get pocketsFreeMore => 'liat kategori lain tanpa kantong';
+
+  @override
+  String get categoryNewPocketTitle => 'kantong baru';
+
+  @override
+  String get categoryChipPocket => 'kantong = pengeluaran dengan batas bulanan';
+
+  @override
+  String get categoryChipCatat =>
+      'abis dibikin, langsung kepasang di catatan kamu';
+
+  @override
+  String get categoryChipAtur => 'nambah ke daftar kategori kamu';
+
+  @override
+  String categoryCreatePocket(String emoji, String name) {
+    return 'bikin kantong $emoji $name';
+  }
+
+  @override
   String pocketJarLabel(String name, int pct) {
     return '$name, $pct% kepake';
   }

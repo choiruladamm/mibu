@@ -296,6 +296,47 @@
     }
   },
   "pocketsEmpty": "belum ada kantong. bikin satu biar jajan ada batasnya.",
+  "pocketsCount": "{n} kantong",
+  "@pocketsCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "pocketsOrder": " · urut dari yang paling kepake",
+  "pocketsSwipe": "geser",
+  "pocketsNewJar": "bikin kantong baru",
+  "pocketsFirstTitle": "bikin kantong pertama",
+  "pocketsFirstBody": "kasih batas buat makan, ngopi, atau ojol. mibu ngingetin kalau udah mau abis.",
+  "pocketsFirstButton": "bikin kantong",
+  "pocketsFreeTitle": "tanpa kantong · ",
+  "pocketsFreeSuffix": " bulan ini",
+  "pocketsFreeManage": "atur",
+  "pocketsFreeChip": "pasang batas buat {name}",
+  "@pocketsFreeChip": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pocketsFreeMore": "liat kategori lain tanpa kantong",
+  "categoryNewPocketTitle": "kantong baru",
+  "categoryChipPocket": "kantong = pengeluaran dengan batas bulanan",
+  "categoryChipCatat": "abis dibikin, langsung kepasang di catatan kamu",
+  "categoryChipAtur": "nambah ke daftar kategori kamu",
+  "categoryCreatePocket": "bikin kantong {emoji} {name}",
+  "@categoryCreatePocket": {
+    "placeholders": {
+      "emoji": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "pocketJarLabel": "{name}, {pct}% kepake",
   "@pocketJarLabel": {
     "placeholders": {

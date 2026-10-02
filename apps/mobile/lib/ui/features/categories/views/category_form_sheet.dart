@@ -15,16 +15,21 @@ import '../../home/view_models/home_view_model.dart';
 import '../view_models/categories_view_model.dart';
 import 'category_delete_sheet.dart';
 
+/// Where a new category is made from (03.4 / 03.4b / 03.4c / 03.4d).
+enum CategoryOrigin { catat, kantong, atur }
+
 /// 03.4 kategori baru (no [category]) / 03.5 edit. Saves and pops the
-/// saved category, or null on batal.
+/// saved category, or null on batal. [origin] picks the 03.4 variant;
+/// [CategoryOrigin.kantong] is always an expense pocket (03.4b).
 Future<Category?> showCategoryForm(
   BuildContext context, {
   Category? category,
   CategoryKind kind = CategoryKind.expense,
   String name = '',
+  CategoryOrigin origin = CategoryOrigin.catat,
 }) => showAppSheet(
   context,
-  CategoryFormSheet(category: category, kind: kind, name: name),
+  CategoryFormSheet(category: category, kind: kind, name: name, origin: origin),
 );
 
 class CategoryFormSheet extends ConsumerStatefulWidget {
@@ -33,8 +38,10 @@ class CategoryFormSheet extends ConsumerStatefulWidget {
     this.category,
     this.kind = CategoryKind.expense,
     this.name = '',
+    this.origin = CategoryOrigin.catat,
   });
 
+  final CategoryOrigin origin; // new only
   final Category? category; // null = new
   final CategoryKind kind; // new only
   final String name; // new only, e.g. the picker's search term
@@ -55,7 +62,11 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
   late final _name = TextEditingController(text: _edit?.name ?? widget.name);
   late String _emoji = _edit?.emoji ?? emojiIdeas(widget.name).first;
   late bool _locked = _edit != null; // emoji follows the name until picked
-  late CategoryKind _kind = _edit?.kind ?? widget.kind;
+  bool get _fromPocket =>
+      _edit == null && widget.origin == CategoryOrigin.kantong;
+  late CategoryKind _kind = _fromPocket
+      ? CategoryKind.expense
+      : _edit?.kind ?? widget.kind;
   late bool _pocket = _edit == null || _edit!.monthlyLimit != null;
   late int _limit = _edit?.monthlyLimit ?? _defaultLimit;
   bool _saving = false;
@@ -161,9 +172,11 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
                     child: Semantics(
                       header: true,
                       child: Text(
-                        _edit == null
-                            ? l.categoryNewTitle
-                            : l.categoryEditTitle,
+                        _edit != null
+                            ? l.categoryEditTitle
+                            : _fromPocket
+                            ? l.categoryNewPocketTitle
+                            : l.categoryNewTitle,
                         textAlign: TextAlign.center,
                         style: AppText.label.copyWith(
                           fontWeight: FontWeight.w600,
@@ -179,6 +192,16 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      if (_edit == null) ...[
+                        const SizedBox(height: 2),
+                        Center(
+                          child: _UsageChip(switch (widget.origin) {
+                            CategoryOrigin.catat => l.categoryChipCatat,
+                            CategoryOrigin.kantong => l.categoryChipPocket,
+                            CategoryOrigin.atur => l.categoryChipAtur,
+                          }),
+                        ),
+                      ],
                       const SizedBox(height: 14),
                       Center(child: _EmojiDisc(_emoji)),
                       if (_edit != null) ...[
@@ -272,41 +295,45 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              l.categoryKindLabel,
-                              style: AppText.label,
-                            ),
-                          ),
-                          Flexible(
-                            flex: 3,
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              alignment: Alignment.centerRight,
-                              child: _KindSegment(
-                                kind: _kind,
-                                labels: (l.expense, l.income),
-                                onPick: (k) => setState(() => _kind = k),
+                      if (!_fromPocket) ...[
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                l.categoryKindLabel,
+                                style: AppText.label,
                               ),
                             ),
-                          ),
-                        ],
-                      ),
+                            Flexible(
+                              flex: 3,
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerRight,
+                                child: _KindSegment(
+                                  kind: _kind,
+                                  labels: (l.expense, l.income),
+                                  onPick: (k) => setState(() => _kind = k),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                       // Pockets track spending only. The limit stays
                       // in the draft if they flip back.
                       if (expense) ...[
-                        const SizedBox(height: 14),
-                        _PocketSwitch(
-                          on: _pocket,
-                          title: l.categoryPocket,
-                          hint: _pocket
-                              ? l.categoryPocketOn
-                              : l.categoryPocketOff,
-                          onChanged: (v) => setState(() => _pocket = v),
-                        ),
+                        if (!_fromPocket) ...[
+                          const SizedBox(height: 14),
+                          _PocketSwitch(
+                            on: _pocket,
+                            title: l.categoryPocket,
+                            hint: _pocket
+                                ? l.categoryPocketOn
+                                : l.categoryPocketOff,
+                            onChanged: (v) => setState(() => _pocket = v),
+                          ),
+                        ],
                         if (_pocket) ...[
                           const SizedBox(height: 14),
                           PocketLimit(
@@ -343,7 +370,11 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
                   Expanded(
                     child: PrimaryButton(
                       label:
-                          (_edit == null ? l.categoryCreate : l.categorySave)(
+                          (_edit != null
+                          ? l.categorySave
+                          : _fromPocket
+                          ? l.categoryCreatePocket
+                          : l.categoryCreate)(
                             _emoji,
                             name.isEmpty ? l.categoryFallbackName : name,
                           ),

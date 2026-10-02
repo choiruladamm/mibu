@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mibu/data/database/app_database.dart';
 import 'package:mibu/data/repositories/finance_repository.dart';
+import 'package:mibu/domain/models/finance.dart';
 import 'package:mibu/l10n/app_localizations.dart';
 import 'package:mibu/ui/core/clock.dart';
 import 'package:mibu/ui/core/theme.dart';
@@ -221,5 +222,119 @@ void main() {
 
     expect(find.text('anabul'), findsOneWidget);
     expect(find.text('hampir abis'), findsOneWidget);
+  });
+
+  testWidgets('kantong: count row, dashed baru jar, tanpa kantong section', (
+    tester,
+  ) async {
+    final db = await pump(tester, const Size(390, 844));
+
+    expect(
+      find.textContaining(
+        '4 kantong · urut dari yang paling kepake',
+        findRichText: true,
+      ),
+      findsOneWidget,
+    );
+    // 4 jars + baru fit in 342px: nothing to swipe to.
+    expect(find.text('geser'), findsNothing);
+    expect(find.bySemanticsLabel('bikin kantong baru'), findsOneWidget);
+
+    // belanja is the only expense category without a limit; income stays out.
+    expect(
+      find.textContaining(
+        'tanpa kantong · Rp2,4jt bulan ini',
+        findRichText: true,
+      ),
+      findsOneWidget,
+    );
+    expect(find.bySemanticsLabel('pasang batas buat belanja'), findsOneWidget);
+    expect(find.text('gajian'), findsNothing);
+    expect(find.textContaining('+'), findsNothing);
+
+    await tester.pumpWidget(const SizedBox());
+    await db.close();
+  });
+
+  testWidgets('kantong: many pockets scroll, geser hint goes at the end', (
+    tester,
+  ) async {
+    final db = await pump(tester, const Size(390, 844));
+    for (final (i, name) in ['kos', 'tagihan', 'hiburan'].indexed) {
+      await db
+          .into(db.categories)
+          .insert(
+            CategoriesCompanion.insert(
+              emoji: '🏠',
+              name: name,
+              kind: CategoryKind.expense,
+              monthlyLimit: Value(500000 + i),
+              sortOrder: Value(10 + i),
+            ),
+          );
+    }
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 50)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('geser'), findsOneWidget);
+    await tester.drag(
+      find.byType(SingleChildScrollView).at(1),
+      const Offset(-600, 0),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('geser'), findsNothing);
+
+    await tester.pumpWidget(const SizedBox());
+    await db.close();
+  });
+
+  testWidgets('kantong: no pockets shows the first-pocket card', (
+    tester,
+  ) async {
+    final db = await pump(tester, const Size(390, 844));
+    await (db.update(db.categories))
+        .write(const CategoriesCompanion(monthlyLimit: Value(null)));
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 50)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('bikin kantong pertama'), findsOneWidget);
+    expect(find.text('geser'), findsNothing);
+    // all five expense categories are now free: top 2 + "+3"
+    expect(find.text('+3'), findsOneWidget);
+
+    await tester.tap(find.text('bikin kantong pertama'));
+    await tester.pumpAndSettle();
+    expect(find.text('kantong baru'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox());
+    await db.close();
+  });
+
+  // Regression: the selected jar's fill used to start from the previously
+  // selected jar's level (a GlobalKey hopping between jars carried the
+  // animation state along) and then settle on its own.
+  testWidgets('kantong: tapping a jar never animates its fill from another', (
+    tester,
+  ) async {
+    final db = await pump(tester, const Size(390, 844));
+    final makan = find.bySemanticsLabel('makan, 26% kepake');
+    final fill = find.descendant(
+      of: makan,
+      matching: find.byType(AnimatedContainer),
+    );
+    final before = tester.getSize(fill).height;
+
+    await tester.tap(makan);
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(tester.getSize(fill).height, before);
+    expect(before, closeTo(176 * 0.26, 0.5));
+
+    await tester.pumpWidget(const SizedBox());
+    await db.close();
   });
 }
