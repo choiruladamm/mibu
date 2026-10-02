@@ -19,6 +19,10 @@ class Totals {
   final int spentToday; // positive
 }
 
+/// An expense category without a limit, with this month's spending and
+/// entry count ("belum ada limit" + "pasang limit ke…" in 02.2).
+typedef FreeCategory = ({Category category, int spent, int count});
+
 class FinanceRepository {
   FinanceRepository(this._db);
 
@@ -160,13 +164,13 @@ class FinanceRepository {
     );
   }
 
-  /// "tanpa kantong" (02.2): expense categories without a limit plus this
-  /// month's spending, most spent first. Income never shows up here.
-  Stream<List<({Category category, int spent})>> watchFreeCategories(
-    DateTime now,
-  ) {
+  /// "belum ada limit" (02.2): expense categories without a limit plus this
+  /// month's spending and entry count, most spent (then most used) first.
+  /// Income never shows up here.
+  Stream<List<FreeCategory>> watchFreeCategories(DateTime now) {
     final c = _db.categories;
     final spent = _tx.amount.sum();
+    final count = _tx.id.count();
     final q =
         _db.select(c).join([
             leftOuterJoin(
@@ -178,7 +182,7 @@ class FinanceRepository {
                   _tx.at.isSmallerThanValue(DateTime(now.year, now.month + 1)),
             ),
           ])
-          ..addColumns([spent])
+          ..addColumns([spent, count])
           ..where(
             c.deletedAt.isNull() &
                 c.monthlyLimit.isNull() &
@@ -187,10 +191,19 @@ class FinanceRepository {
           ..groupBy([c.id])
           ..orderBy([OrderingTerm.asc(c.sortOrder)]);
     return q.watch().map(
-      (rows) => [
-        for (final r in rows)
-          (category: _category(r.readTable(c)), spent: -(r.read(spent) ?? 0)),
-      ]..sort((a, b) => b.spent.compareTo(a.spent)), // stable: ties keep order
+      (rows) =>
+          [
+            for (final r in rows)
+              (
+                category: _category(r.readTable(c)),
+                spent: -(r.read(spent) ?? 0),
+                count: r.read(count) ?? 0,
+              ),
+          ]..sort(
+            (a, b) => b.spent != a.spent
+                ? b.spent.compareTo(a.spent)
+                : b.count.compareTo(a.count),
+          ), // stable: ties keep order
     );
   }
 
@@ -464,6 +477,19 @@ class FinanceRepository {
     ),
   );
 
+  /// Pasang / atur / lepas limit (02.2, 03.5); null = lepas. Income
+  /// categories are left alone.
+  Future<void> setLimit(String id, int? limit) =>
+      (_db.update(_db.categories)..where(
+            (c) => c.id.equals(id) & c.kind.equalsValue(CategoryKind.expense),
+          ))
+          .write(
+            CategoriesCompanion(
+              monthlyLimit: Value(limit),
+              updatedAt: Value(DateTime.now()),
+            ),
+          );
+
   /// Pockets track spending only, so income categories never keep a limit.
   static int? _limitFor(CategoryKind kind, int? limit) =>
       kind == CategoryKind.income ? null : limit;
@@ -540,7 +566,7 @@ final daysProvider =
 
 /// Expense categories without a limit, with spending in [month]'s month.
 final freeCategoriesProvider =
-    StreamProvider.family<List<({Category category, int spent})>, DateTime>(
+    StreamProvider.family<List<FreeCategory>, DateTime>(
       (ref, month) =>
           ref.watch(financeRepositoryProvider).watchFreeCategories(month),
     );

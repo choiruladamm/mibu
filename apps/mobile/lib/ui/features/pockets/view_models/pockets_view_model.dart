@@ -33,7 +33,7 @@ class PocketsState {
   final Pocket? selected; // null = no pockets yet
   final int daysLeft; // in this month, today included
   final int? budget; // budget bulanan; null = not set
-  final List<({Category category, int spent})> free; // tanpa kantong
+  final List<FreeCategory> free; // tanpa kantong
 
   int get limit => pockets.fold(0, (sum, p) => sum + p.budget);
   int get spent => pockets.fold(0, (sum, p) => sum + p.spent);

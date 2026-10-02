@@ -144,6 +144,116 @@ void main() {
     },
   );
 
+  test('pasang limit: this month\'s entries count right away', () async {
+    final belanja = await idOf('belanja');
+    final free = await repo.watchFreeCategories(now).first;
+    expect(free.map((f) => f.category.name), ['belanja']); // income left out
+    final before = free.single;
+
+    await repo.setLimit(belanja, 600000);
+    final pocket = (await repo.watchPockets(now).first).firstWhere(
+      (p) => p.id == belanja,
+    );
+    expect(pocket.spent, before.spent); // nothing moved, already counted
+    expect(await repo.watchFreeCategories(now).first, isEmpty);
+
+    // lepas limit: category + entries stay, it just leaves the jars.
+    await repo.setLimit(belanja, null);
+    expect(
+      (await repo.watchPockets(now).first).map((p) => p.id),
+      isNot(contains(belanja)),
+    );
+    expect(
+      (await repo.watchCategories().first).map((c) => c.id),
+      contains(belanja),
+    );
+    final back = (await repo.watchFreeCategories(now).first).single;
+    expect(
+      (back.category.id, back.spent, back.count),
+      (belanja, before.spent, before.count),
+    );
+
+    // Income never gets a limit.
+    final gajian = await idOf('gajian');
+    await repo.setLimit(gajian, 500000);
+    expect(
+      (await repo.watchCategories().first)
+          .firstWhere((c) => c.id == gajian)
+          .monthlyLimit,
+      isNull,
+    );
+  });
+
+  test('free categories: count, most spent then most used', () async {
+    final a = await repo.addCategory(
+      emoji: '🎮',
+      name: 'game',
+      kind: CategoryKind.expense,
+      monthlyLimit: null,
+    );
+    final b = await repo.addCategory(
+      emoji: '📚',
+      name: 'buku',
+      kind: CategoryKind.expense,
+      monthlyLimit: null,
+    );
+    for (final (id, amount) in [(a, -5000), (b, -2500), (b, -2500)]) {
+      await repo.addTransaction(
+        amount: amount,
+        categoryId: id,
+        place: '',
+        note: '',
+        tags: const [],
+        at: now,
+      );
+    }
+    final free = await repo.watchFreeCategories(now).first;
+    final tail = free.where((f) => f.category.id == a || f.category.id == b);
+    expect(tail.map((f) => '${f.category.name}${f.spent}/${f.count}'), [
+      'buku5000/2', // same spending, more entries first
+      'game5000/1',
+    ]);
+  });
+
+  test('uncategorized: in totals, in no pocket, counts once edited', () async {
+    final profile = await repo.watchProfile().first;
+    final pocketsBefore = await repo.watchPockets(now).first;
+    final spentBefore =
+        (await repo.watchTotals(profile, now).first).spent[DateTime(2026, 10)]!;
+    await repo.addTransaction(
+      amount: -20000,
+      categoryId: null,
+      place: '',
+      note: '',
+      tags: const [],
+      at: now,
+    );
+    expect(
+      (await repo.watchTotals(profile, now).first).spent[DateTime(2026, 10)],
+      spentBefore + 20000,
+    );
+    expect(
+      (await repo.watchPockets(now).first).map((p) => p.spent),
+      pocketsBefore.map((p) => p.spent),
+    );
+
+    final t = (await repo.watchRecent().first).first;
+    final makan = await idOf('makan');
+    await repo.updateTransaction(
+      t.id,
+      amount: t.amount,
+      categoryId: makan,
+      place: t.place,
+      note: t.note,
+      at: t.at,
+    );
+    int spentOf(List<Pocket> ps) => ps.firstWhere((p) => p.id == makan).spent;
+    expect(
+      spentOf(await repo.watchPockets(now).first),
+      spentOf(pocketsBefore) + 20000,
+    );
+  });
+
   test('reorder categories', () async {
     final ids = [for (final c in await repo.watchCategories().first) c.id];
     await repo.reorderCategories(ids.reversed.toList());

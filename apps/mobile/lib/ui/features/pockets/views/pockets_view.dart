@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../data/repositories/finance_repository.dart';
 import '../../../../domain/models/finance.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../routing/router.dart';
@@ -717,7 +718,7 @@ class _FirstPocket extends StatelessWidget {
 class _FreeSection extends StatelessWidget {
   const _FreeSection({required this.free, required this.total});
 
-  final List<({Category category, int spent})> free; // most spent first
+  final List<FreeCategory> free; // most spent first
   final int total;
 
   @override
