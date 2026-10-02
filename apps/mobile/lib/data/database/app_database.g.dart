@@ -1830,12 +1830,535 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
   }
 }
 
+class $PeriodRulesTable extends PeriodRules
+    with TableInfo<$PeriodRulesTable, PeriodRuleRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PeriodRulesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    clientDefault: _uuid.v4,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: DateTime.now,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: DateTime.now,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _effectiveFromMeta = const VerificationMeta(
+    'effectiveFrom',
+  );
+  @override
+  late final GeneratedColumn<DateTime> effectiveFrom =
+      GeneratedColumn<DateTime>(
+        'effective_from',
+        aliasedName,
+        false,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: true,
+      );
+  @override
+  late final GeneratedColumnWithTypeConverter<PeriodMode, String> mode =
+      GeneratedColumn<String>(
+        'mode',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<PeriodMode>($PeriodRulesTable.$convertermode);
+  static const VerificationMeta _paydayDayMeta = const VerificationMeta(
+    'paydayDay',
+  );
+  @override
+  late final GeneratedColumn<int> paydayDay = GeneratedColumn<int>(
+    'payday_day',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<PaydayShift, String> shift =
+      GeneratedColumn<String>(
+        'shift',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: Constant(PaydayShift.none.name),
+      ).withConverter<PaydayShift>($PeriodRulesTable.$convertershift);
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    effectiveFrom,
+    mode,
+    paydayDay,
+    shift,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'period_rules';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PeriodRuleRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('effective_from')) {
+      context.handle(
+        _effectiveFromMeta,
+        effectiveFrom.isAcceptableOrUnknown(
+          data['effective_from']!,
+          _effectiveFromMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_effectiveFromMeta);
+    }
+    if (data.containsKey('payday_day')) {
+      context.handle(
+        _paydayDayMeta,
+        paydayDay.isAcceptableOrUnknown(data['payday_day']!, _paydayDayMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_paydayDayMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PeriodRuleRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PeriodRuleRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      effectiveFrom: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}effective_from'],
+      )!,
+      mode: $PeriodRulesTable.$convertermode.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}mode'],
+        )!,
+      ),
+      paydayDay: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}payday_day'],
+      )!,
+      shift: $PeriodRulesTable.$convertershift.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}shift'],
+        )!,
+      ),
+    );
+  }
+
+  @override
+  $PeriodRulesTable createAlias(String alias) {
+    return $PeriodRulesTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<PeriodMode, String, String> $convertermode =
+      const EnumNameConverter<PeriodMode>(PeriodMode.values);
+  static JsonTypeConverter2<PaydayShift, String, String> $convertershift =
+      const EnumNameConverter<PaydayShift>(PaydayShift.values);
+}
+
+class PeriodRuleRow extends DataClass implements Insertable<PeriodRuleRow> {
+  final String id;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final DateTime effectiveFrom;
+  final PeriodMode mode;
+  final int paydayDay;
+  final PaydayShift shift;
+  const PeriodRuleRow({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.effectiveFrom,
+    required this.mode,
+    required this.paydayDay,
+    required this.shift,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['effective_from'] = Variable<DateTime>(effectiveFrom);
+    {
+      map['mode'] = Variable<String>(
+        $PeriodRulesTable.$convertermode.toSql(mode),
+      );
+    }
+    map['payday_day'] = Variable<int>(paydayDay);
+    {
+      map['shift'] = Variable<String>(
+        $PeriodRulesTable.$convertershift.toSql(shift),
+      );
+    }
+    return map;
+  }
+
+  PeriodRulesCompanion toCompanion(bool nullToAbsent) {
+    return PeriodRulesCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      effectiveFrom: Value(effectiveFrom),
+      mode: Value(mode),
+      paydayDay: Value(paydayDay),
+      shift: Value(shift),
+    );
+  }
+
+  factory PeriodRuleRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PeriodRuleRow(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      effectiveFrom: serializer.fromJson<DateTime>(json['effectiveFrom']),
+      mode: $PeriodRulesTable.$convertermode.fromJson(
+        serializer.fromJson<String>(json['mode']),
+      ),
+      paydayDay: serializer.fromJson<int>(json['paydayDay']),
+      shift: $PeriodRulesTable.$convertershift.fromJson(
+        serializer.fromJson<String>(json['shift']),
+      ),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'effectiveFrom': serializer.toJson<DateTime>(effectiveFrom),
+      'mode': serializer.toJson<String>(
+        $PeriodRulesTable.$convertermode.toJson(mode),
+      ),
+      'paydayDay': serializer.toJson<int>(paydayDay),
+      'shift': serializer.toJson<String>(
+        $PeriodRulesTable.$convertershift.toJson(shift),
+      ),
+    };
+  }
+
+  PeriodRuleRow copyWith({
+    String? id,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    DateTime? effectiveFrom,
+    PeriodMode? mode,
+    int? paydayDay,
+    PaydayShift? shift,
+  }) => PeriodRuleRow(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    effectiveFrom: effectiveFrom ?? this.effectiveFrom,
+    mode: mode ?? this.mode,
+    paydayDay: paydayDay ?? this.paydayDay,
+    shift: shift ?? this.shift,
+  );
+  PeriodRuleRow copyWithCompanion(PeriodRulesCompanion data) {
+    return PeriodRuleRow(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      effectiveFrom: data.effectiveFrom.present
+          ? data.effectiveFrom.value
+          : this.effectiveFrom,
+      mode: data.mode.present ? data.mode.value : this.mode,
+      paydayDay: data.paydayDay.present ? data.paydayDay.value : this.paydayDay,
+      shift: data.shift.present ? data.shift.value : this.shift,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PeriodRuleRow(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('effectiveFrom: $effectiveFrom, ')
+          ..write('mode: $mode, ')
+          ..write('paydayDay: $paydayDay, ')
+          ..write('shift: $shift')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    effectiveFrom,
+    mode,
+    paydayDay,
+    shift,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PeriodRuleRow &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.effectiveFrom == this.effectiveFrom &&
+          other.mode == this.mode &&
+          other.paydayDay == this.paydayDay &&
+          other.shift == this.shift);
+}
+
+class PeriodRulesCompanion extends UpdateCompanion<PeriodRuleRow> {
+  final Value<String> id;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<DateTime> effectiveFrom;
+  final Value<PeriodMode> mode;
+  final Value<int> paydayDay;
+  final Value<PaydayShift> shift;
+  final Value<int> rowid;
+  const PeriodRulesCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.effectiveFrom = const Value.absent(),
+    this.mode = const Value.absent(),
+    this.paydayDay = const Value.absent(),
+    this.shift = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PeriodRulesCompanion.insert({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    required DateTime effectiveFrom,
+    required PeriodMode mode,
+    required int paydayDay,
+    this.shift = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : effectiveFrom = Value(effectiveFrom),
+       mode = Value(mode),
+       paydayDay = Value(paydayDay);
+  static Insertable<PeriodRuleRow> custom({
+    Expression<String>? id,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<DateTime>? effectiveFrom,
+    Expression<String>? mode,
+    Expression<int>? paydayDay,
+    Expression<String>? shift,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (effectiveFrom != null) 'effective_from': effectiveFrom,
+      if (mode != null) 'mode': mode,
+      if (paydayDay != null) 'payday_day': paydayDay,
+      if (shift != null) 'shift': shift,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PeriodRulesCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<DateTime>? effectiveFrom,
+    Value<PeriodMode>? mode,
+    Value<int>? paydayDay,
+    Value<PaydayShift>? shift,
+    Value<int>? rowid,
+  }) {
+    return PeriodRulesCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      effectiveFrom: effectiveFrom ?? this.effectiveFrom,
+      mode: mode ?? this.mode,
+      paydayDay: paydayDay ?? this.paydayDay,
+      shift: shift ?? this.shift,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (effectiveFrom.present) {
+      map['effective_from'] = Variable<DateTime>(effectiveFrom.value);
+    }
+    if (mode.present) {
+      map['mode'] = Variable<String>(
+        $PeriodRulesTable.$convertermode.toSql(mode.value),
+      );
+    }
+    if (paydayDay.present) {
+      map['payday_day'] = Variable<int>(paydayDay.value);
+    }
+    if (shift.present) {
+      map['shift'] = Variable<String>(
+        $PeriodRulesTable.$convertershift.toSql(shift.value),
+      );
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PeriodRulesCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('effectiveFrom: $effectiveFrom, ')
+          ..write('mode: $mode, ')
+          ..write('paydayDay: $paydayDay, ')
+          ..write('shift: $shift, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $ProfilesTable profiles = $ProfilesTable(this);
   late final $CategoriesTable categories = $CategoriesTable(this);
   late final $TransactionsTable transactions = $TransactionsTable(this);
+  late final $PeriodRulesTable periodRules = $PeriodRulesTable(this);
   late final Index transactionsAt = Index(
     'transactions_at',
     'CREATE INDEX transactions_at ON transactions (at)',
@@ -1852,6 +2375,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     profiles,
     categories,
     transactions,
+    periodRules,
     transactionsAt,
     transactionsCategory,
   ];
@@ -2973,6 +3497,276 @@ typedef $$TransactionsTableProcessedTableManager =
       TransactionRow,
       PrefetchHooks Function({bool categoryId})
     >;
+typedef $$PeriodRulesTableCreateCompanionBuilder =
+    PeriodRulesCompanion Function({
+      Value<String> id,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      required DateTime effectiveFrom,
+      required PeriodMode mode,
+      required int paydayDay,
+      Value<PaydayShift> shift,
+      Value<int> rowid,
+    });
+typedef $$PeriodRulesTableUpdateCompanionBuilder =
+    PeriodRulesCompanion Function({
+      Value<String> id,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<DateTime> effectiveFrom,
+      Value<PeriodMode> mode,
+      Value<int> paydayDay,
+      Value<PaydayShift> shift,
+      Value<int> rowid,
+    });
+
+class $$PeriodRulesTableFilterComposer
+    extends Composer<_$AppDatabase, $PeriodRulesTable> {
+  $$PeriodRulesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get effectiveFrom => $composableBuilder(
+    column: $table.effectiveFrom,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<PeriodMode, PeriodMode, String> get mode =>
+      $composableBuilder(
+        column: $table.mode,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<int> get paydayDay => $composableBuilder(
+    column: $table.paydayDay,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<PaydayShift, PaydayShift, String> get shift =>
+      $composableBuilder(
+        column: $table.shift,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+}
+
+class $$PeriodRulesTableOrderingComposer
+    extends Composer<_$AppDatabase, $PeriodRulesTable> {
+  $$PeriodRulesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get effectiveFrom => $composableBuilder(
+    column: $table.effectiveFrom,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get mode => $composableBuilder(
+    column: $table.mode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get paydayDay => $composableBuilder(
+    column: $table.paydayDay,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get shift => $composableBuilder(
+    column: $table.shift,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PeriodRulesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PeriodRulesTable> {
+  $$PeriodRulesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get effectiveFrom => $composableBuilder(
+    column: $table.effectiveFrom,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<PeriodMode, String> get mode =>
+      $composableBuilder(column: $table.mode, builder: (column) => column);
+
+  GeneratedColumn<int> get paydayDay =>
+      $composableBuilder(column: $table.paydayDay, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<PaydayShift, String> get shift =>
+      $composableBuilder(column: $table.shift, builder: (column) => column);
+}
+
+class $$PeriodRulesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PeriodRulesTable,
+          PeriodRuleRow,
+          $$PeriodRulesTableFilterComposer,
+          $$PeriodRulesTableOrderingComposer,
+          $$PeriodRulesTableAnnotationComposer,
+          $$PeriodRulesTableCreateCompanionBuilder,
+          $$PeriodRulesTableUpdateCompanionBuilder,
+          (
+            PeriodRuleRow,
+            BaseReferences<_$AppDatabase, $PeriodRulesTable, PeriodRuleRow>,
+          ),
+          PeriodRuleRow,
+          PrefetchHooks Function()
+        > {
+  $$PeriodRulesTableTableManager(_$AppDatabase db, $PeriodRulesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PeriodRulesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PeriodRulesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PeriodRulesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<DateTime> effectiveFrom = const Value.absent(),
+                Value<PeriodMode> mode = const Value.absent(),
+                Value<int> paydayDay = const Value.absent(),
+                Value<PaydayShift> shift = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PeriodRulesCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                effectiveFrom: effectiveFrom,
+                mode: mode,
+                paydayDay: paydayDay,
+                shift: shift,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                required DateTime effectiveFrom,
+                required PeriodMode mode,
+                required int paydayDay,
+                Value<PaydayShift> shift = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PeriodRulesCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                effectiveFrom: effectiveFrom,
+                mode: mode,
+                paydayDay: paydayDay,
+                shift: shift,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$PeriodRulesTable, PeriodRuleRow>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $PeriodRulesTable,
+                    PeriodRuleRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PeriodRulesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PeriodRulesTable,
+      PeriodRuleRow,
+      $$PeriodRulesTableFilterComposer,
+      $$PeriodRulesTableOrderingComposer,
+      $$PeriodRulesTableAnnotationComposer,
+      $$PeriodRulesTableCreateCompanionBuilder,
+      $$PeriodRulesTableUpdateCompanionBuilder,
+      (
+        PeriodRuleRow,
+        BaseReferences<_$AppDatabase, $PeriodRulesTable, PeriodRuleRow>,
+      ),
+      PeriodRuleRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -2983,4 +3777,6 @@ class $AppDatabaseManager {
       $$CategoriesTableTableManager(_db, _db.categories);
   $$TransactionsTableTableManager get transactions =>
       $$TransactionsTableTableManager(_db, _db.transactions);
+  $$PeriodRulesTableTableManager get periodRules =>
+      $$PeriodRulesTableTableManager(_db, _db.periodRules);
 }

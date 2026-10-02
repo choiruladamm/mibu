@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/models/finance.dart';
+import '../../domain/period.dart';
 import '../database/app_database.dart';
 
 /// Balance-related sums; everything derived from `transactions`.
@@ -49,6 +50,29 @@ class FinanceRepository {
                         ? const []
                         : r.recentSearches.split('\n'),
                   ),
+          );
+
+  /// Budget periods in force: calendar months, then each saved rule from
+  /// its date on (v1 saves none).
+  Stream<PeriodResolver> watchPeriods() =>
+      (_db.select(_db.periodRules)..where((r) => r.deletedAt.isNull()))
+          .watch()
+          .map(
+            (rows) => SegmentedResolver([
+              (
+                effectiveFrom: DateTime(1970),
+                mode: PeriodMode.calendar,
+                paydayDay: 0,
+                shift: PaydayShift.none,
+              ),
+              for (final r in rows)
+                (
+                  effectiveFrom: r.effectiveFrom,
+                  mode: r.mode,
+                  paydayDay: r.paydayDay,
+                  shift: r.shift,
+                ),
+            ]),
           );
 
   /// 01.4 / 01.4b: writes the profile and the starter categories — every

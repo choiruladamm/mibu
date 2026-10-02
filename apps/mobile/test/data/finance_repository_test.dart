@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mibu/data/database/app_database.dart';
 import 'package:mibu/data/repositories/finance_repository.dart';
 import 'package:mibu/domain/models/finance.dart';
+import 'package:mibu/domain/period.dart';
 
 void main() {
   final now = DateTime(2026, 10, 14, 14, 50);
@@ -21,6 +22,24 @@ void main() {
     repo = FinanceRepository(db);
   });
   tearDown(() => db.close());
+
+  test('periods: calendar months until a rule says otherwise', () async {
+    final none = await repo.watchPeriods().first;
+    expect(none.periodOf(now).start, DateTime(2026, 10));
+
+    await db
+        .into(db.periodRules)
+        .insert(
+          PeriodRulesCompanion.insert(
+            effectiveFrom: DateTime(2026, 11),
+            mode: PeriodMode.payday,
+            paydayDay: 25,
+          ),
+        );
+    final r = await repo.watchPeriods().first;
+    expect(r.periodOf(now).start, DateTime(2026, 10)); // before the rule
+    expect(r.periodOf(DateTime(2026, 12, 1)).start, DateTime(2026, 11, 25));
+  });
 
   test(
     'seed: balance, nets and pockets are derived from transactions',

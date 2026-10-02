@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../domain/models/finance.dart';
+import '../../domain/period.dart';
 import 'seed.dart';
 
 part 'app_database.g.dart';
@@ -58,7 +59,19 @@ class Transactions extends Table with SyncColumns {
   DateTimeColumn get at => dateTime()();
 }
 
-@DriftDatabase(tables: [Profiles, Categories, Transactions])
+/// Budget period settings, append-only: a change is a new row from the end
+/// of the running period, so past periods keep their rules. Empty = calendar
+/// months (v1). See [SegmentedResolver].
+@DataClassName('PeriodRuleRow')
+class PeriodRules extends Table with SyncColumns {
+  DateTimeColumn get effectiveFrom => dateTime()(); // date-only
+  TextColumn get mode => textEnum<PeriodMode>()();
+  IntColumn get paydayDay => integer()(); // 1–28, 0 = last day of month
+  TextColumn get shift =>
+      textEnum<PaydayShift>().withDefault(Constant(PaydayShift.none.name))();
+}
+
+@DriftDatabase(tables: [Profiles, Categories, Transactions, PeriodRules])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([
     QueryExecutor? executor,
@@ -108,6 +121,7 @@ class AppDatabase extends _$AppDatabase {
           await delete(transactions).go(); // FK order: entries first
           await delete(categories).go();
           await delete(profiles).go();
+          await delete(periodRules).go();
         });
       }
       await _seed(this, _now());
