@@ -29,7 +29,7 @@ class NavHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
     return SizedBox(
-      height: 52,
+      height: 64, // 44 disc + 10 above and below, so it clears the safe area and the list
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Row(
