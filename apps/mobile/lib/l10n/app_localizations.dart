@@ -145,7 +145,7 @@ abstract class AppLocalizations {
   /// No description provided for @uncategorized.
   ///
   /// In id, this message translates to:
-  /// **'lain-lain'**
+  /// **'apaan nih'**
   String get uncategorized;
 
   /// No description provided for @onboardingSkip.
