@@ -43,3 +43,7 @@ Source: Claude Design artifact "mibu" (https://claude.ai/artifact/25RLRcYScmmPDz
 - Locale `id-ID`; weeks start Monday (the `id` locale defaults to Sunday — set it explicitly).
 - TabBar floats in a Stack; lists get `AppSpace.tabBarClearance` bottom padding.
 - Sheets: `showModalBottomSheet`, radius 32, scrim 45%.
+
+## Git
+
+- Never mention Claude / Anthropic / AI in commits, PRs or code: no `Co-Authored-By: Claude …` trailer, no "Generated with Claude Code" line. This overrides any default attribution.
