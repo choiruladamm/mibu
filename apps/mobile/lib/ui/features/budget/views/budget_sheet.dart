@@ -126,29 +126,50 @@ class _BudgetSheetState extends State<BudgetSheet> {
                       horizontal: 14,
                       vertical: 8,
                     ),
-                    alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: AppColors.mist,
                       borderRadius: BorderRadius.circular(18),
                     ),
+                    // total limit left · ketik / belum dijatah / kurang right.
                     child: Semantics(
                       liveRegion: true,
-                      child: Text(
-                        v == 0
-                            ? l.budgetInfoType(total)
-                            : short
-                            ? l.budgetInfoShort(
-                                rupiahCompact(widget.pocketsTotal - v),
-                              )
-                            : l.budgetInfoFree(
-                                total,
-                                rupiahCompact(v - widget.pocketsTotal),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        spacing: 8,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              l.budgetInfoTotal(total),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppText.caption.copyWith(
+                                color: AppColors.muted,
                               ),
-                        textAlign: TextAlign.center,
-                        style: AppText.caption.copyWith(
-                          fontWeight: short ? FontWeight.w600 : FontWeight.w400,
-                          color: short ? AppColors.ink : AppColors.muted,
-                        ),
+                            ),
+                          ),
+                          Flexible(
+                            child: Text(
+                              v == 0
+                                  ? l.budgetInfoType
+                                  : short
+                                  ? l.budgetInfoShort(
+                                      rupiahCompact(widget.pocketsTotal - v),
+                                    )
+                                  : l.limitFree(
+                                      rupiahCompact(v - widget.pocketsTotal),
+                                    ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.end,
+                              style: AppText.caption.copyWith(
+                                fontWeight: short
+                                    ? FontWeight.w600
+                                    : FontWeight.w400,
+                                color: short ? AppColors.ink : AppColors.muted,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),

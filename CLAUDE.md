@@ -30,6 +30,7 @@ Riverpod providers are written by hand (no `riverpod_generator`), declared next 
 - `routing/router.dart` — go_router `routerProvider`, `Routes` paths
 - `ui/core/` — `tokens.dart` (design tokens + `AppIcons` for custom-drawn icons), `theme.dart`, `money.dart` (`rupiah`, `rupiahCompact`), `dates.dart` (`dayLabel`, `relativeDay`, Monday weeks), `clock.dart`, `dashed.dart`, shared `widgets/`
   - sheets: `showAppSheet` + `SheetFrame` (`widgets/sheet.dart`); reuse `PrimaryButton` / `CircleButton` from there
+  - separators: `MetaLine` (`widgets/meta_line.dart`, 00.19) for 1-line metadata, never a literal "·" in UI copy; section titles = title left + info right, no dot
 - `ui/features/<feature>/{views,view_models}/`
 
 ## Design

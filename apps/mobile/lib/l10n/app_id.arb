@@ -329,10 +329,6 @@
     }
   },
   "pocketsFreeMore": "liat yang lain belum ada limit",
-  "categoryChipPocket": "dari: pasang limit ke…",
-  "categoryChipCatat": "abis dibikin, langsung kepake di catatan ini",
-  "categoryChipAtur": "nambah ke buat apa aja",
-  "categoryChipEdit": "dari: buat apa aja",
   "pocketJarLabel": "{name}, {pct}% kepake",
   "@pocketJarLabel": {
     "placeholders": {
@@ -481,26 +477,16 @@
   "budgetLabelNow": "budget sekarang",
   "budgetLabelSuggest": "saran dari total limit",
   "budgetAutoFilled": "diisi otomatis",
-  "budgetInfoType": "total limit kamu {total} · ketik budget kamu",
-  "@budgetInfoType": {
+  "budgetInfoType": "ketik budget kamu",
+  "budgetInfoTotal": "total limit {total}",
+  "@budgetInfoTotal": {
     "placeholders": {
       "total": {
         "type": "String"
       }
     }
   },
-  "budgetInfoFree": "total limit kamu {total} · sisa bebas {free}",
-  "@budgetInfoFree": {
-    "placeholders": {
-      "total": {
-        "type": "String"
-      },
-      "free": {
-        "type": "String"
-      }
-    }
-  },
-  "budgetInfoShort": "kurang {amount} buat nutup semua limit",
+  "budgetInfoShort": "kurang {amount}",
   "@budgetInfoShort": {
     "placeholders": {
       "amount": {

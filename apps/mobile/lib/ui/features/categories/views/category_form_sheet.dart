@@ -193,20 +193,7 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const SizedBox(height: 2),
-                      Center(
-                        child: _ContextChip(
-                          _edit != null
-                              ? l.categoryChipEdit
-                              : switch (widget.origin) {
-                                  CategoryOrigin.catat => l.categoryChipCatat,
-                                  CategoryOrigin.kantong =>
-                                    l.categoryChipPocket,
-                                  CategoryOrigin.atur => l.categoryChipAtur,
-                                },
-                        ),
-                      ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 10),
                       Center(child: _EmojiDisc(_emoji)),
                       if (_edit != null) ...[
                         const SizedBox(height: 10),
@@ -505,30 +492,6 @@ class _EmojiDisc extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Where the sheet was opened from (12px, muted).
-class _ContextChip extends StatelessWidget {
-  const _ContextChip(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 26,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: AppColors.mist,
-        borderRadius: BorderRadius.circular(13),
-      ),
-      child: Text(
-        text,
-        style: AppText.caption.copyWith(fontSize: 12, color: AppColors.muted),
       ),
     );
   }

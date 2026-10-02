@@ -103,7 +103,8 @@ Tanda: **[diupdate]** = aturan/perilaku berubah dari design, **[perlu design]** 
 | 00.13 | NoteSheet | maks 80 karakter, maks 3 tag, catatan terakhir |
 | 00.14 | SearchSummary | insight + tick harian yang bisa di-drag |
 | 00.15 | PocketLimit | input limit ("limit per bulan"): ketik, slider (garis sisa budget), preset chip. Dipakai 03.4/03.5, nanti 01.4b. **[perlu design]** budget kosong → garis diganti link "pasang budget bulanan" → 00.16 |
-| 00.16 | BudgetSheet | **[perlu design]** sheet "budget bulanan": AmountField + keypad (maks 12 digit), info live "total limit kamu Rp… · sisa bebas" / "kurang Rp… buat nutup semua limit", prefill Σlimit dibulatin ke atas per 500K kalau kosong, `simpan` / `hapus budget`. Dibuka dari 00.15, 02.2, 02.3, 02.4 |
+| 00.16 | BudgetSheet | **[perlu design]** sheet "budget bulanan": AmountField + keypad (maks 12 digit), info live kiri "total limit Rp…", kanan "ketik budget kamu" / "belum dijatah Rp…" / "kurang Rp…" (tebal), prefill Σlimit dibulatin ke atas per 500K kalau kosong, `simpan` / `hapus budget`. Dibuka dari 00.15, 02.2, 02.3, 02.4 |
+| 00.19 | MetaLine | metadata 1 baris dipisah titik bulat 3px (#BDBDBD, di ink #737373), bukan karakter "·". Judul section nggak pakai titik: judul 15/600 kiri, info 13 muted kanan (+ › kalau bisa di-tap) |
 
 ## Entitas
 

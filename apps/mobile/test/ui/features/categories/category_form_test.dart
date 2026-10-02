@@ -61,7 +61,6 @@ void main() {
     await settle(tester);
     // 03.4b: always has a limit, no kind / switch rows.
     expect(find.text('bikin baru'), findsOneWidget);
-    expect(find.text('dari: pasang limit ke…'), findsOneWidget);
     expect(find.text('jenis'), findsNothing);
     expect(find.text('limit bulanan'), findsNothing);
 
@@ -118,7 +117,6 @@ void main() {
     await tester.tap(find.text('atur limit'));
     await settle(tester);
     expect(find.text('edit'), findsOneWidget);
-    expect(find.text('dari: buat apa aja'), findsOneWidget);
     expect(findMeta(['2 catatan', 'Rp900K tahun ini']), findsOneWidget);
     expect(find.text('1.000.000'), findsOneWidget); // anabul's limit
 
@@ -170,7 +168,6 @@ void main() {
     await settle(tester);
 
     // From catat: no limit by default.
-    expect(find.text('abis dibikin, langsung kepake di catatan ini'), findsOne);
     expect(find.text('limit bulanan'), findsOneWidget);
     expect(find.text('opsional, bisa nanti'), findsOneWidget);
     expect(find.text('maks Rp100jt per limit'), findsNothing);

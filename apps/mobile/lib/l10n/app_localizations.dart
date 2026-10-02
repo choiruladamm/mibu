@@ -784,30 +784,6 @@ abstract class AppLocalizations {
   /// **'liat yang lain belum ada limit'**
   String get pocketsFreeMore;
 
-  /// No description provided for @categoryChipPocket.
-  ///
-  /// In id, this message translates to:
-  /// **'dari: pasang limit ke…'**
-  String get categoryChipPocket;
-
-  /// No description provided for @categoryChipCatat.
-  ///
-  /// In id, this message translates to:
-  /// **'abis dibikin, langsung kepake di catatan ini'**
-  String get categoryChipCatat;
-
-  /// No description provided for @categoryChipAtur.
-  ///
-  /// In id, this message translates to:
-  /// **'nambah ke buat apa aja'**
-  String get categoryChipAtur;
-
-  /// No description provided for @categoryChipEdit.
-  ///
-  /// In id, this message translates to:
-  /// **'dari: buat apa aja'**
-  String get categoryChipEdit;
-
   /// No description provided for @pocketJarLabel.
   ///
   /// In id, this message translates to:
@@ -1057,19 +1033,19 @@ abstract class AppLocalizations {
   /// No description provided for @budgetInfoType.
   ///
   /// In id, this message translates to:
-  /// **'total limit kamu {total} · ketik budget kamu'**
-  String budgetInfoType(String total);
+  /// **'ketik budget kamu'**
+  String get budgetInfoType;
 
-  /// No description provided for @budgetInfoFree.
+  /// No description provided for @budgetInfoTotal.
   ///
   /// In id, this message translates to:
-  /// **'total limit kamu {total} · sisa bebas {free}'**
-  String budgetInfoFree(String total, String free);
+  /// **'total limit {total}'**
+  String budgetInfoTotal(String total);
 
   /// No description provided for @budgetInfoShort.
   ///
   /// In id, this message translates to:
-  /// **'kurang {amount} buat nutup semua limit'**
+  /// **'kurang {amount}'**
   String budgetInfoShort(String amount);
 
   /// No description provided for @budgetFillFirst.

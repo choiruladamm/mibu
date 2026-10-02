@@ -415,19 +415,6 @@ class AppLocalizationsId extends AppLocalizations {
   String get pocketsFreeMore => 'liat yang lain belum ada limit';
 
   @override
-  String get categoryChipPocket => 'dari: pasang limit ke…';
-
-  @override
-  String get categoryChipCatat =>
-      'abis dibikin, langsung kepake di catatan ini';
-
-  @override
-  String get categoryChipAtur => 'nambah ke buat apa aja';
-
-  @override
-  String get categoryChipEdit => 'dari: buat apa aja';
-
-  @override
   String pocketJarLabel(String name, int pct) {
     return '$name, $pct% kepake';
   }
@@ -597,18 +584,16 @@ class AppLocalizationsId extends AppLocalizations {
   String get budgetAutoFilled => 'diisi otomatis';
 
   @override
-  String budgetInfoType(String total) {
-    return 'total limit kamu $total · ketik budget kamu';
-  }
+  String get budgetInfoType => 'ketik budget kamu';
 
   @override
-  String budgetInfoFree(String total, String free) {
-    return 'total limit kamu $total · sisa bebas $free';
+  String budgetInfoTotal(String total) {
+    return 'total limit $total';
   }
 
   @override
   String budgetInfoShort(String amount) {
-    return 'kurang $amount buat nutup semua limit';
+    return 'kurang $amount';
   }
 
   @override

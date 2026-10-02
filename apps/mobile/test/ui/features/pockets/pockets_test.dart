@@ -119,10 +119,8 @@ void main() {
       await tester.pump();
     }
     expect(find.text('5.000.000'), findsOneWidget);
-    expect(
-      find.text('total limit kamu Rp3,3jt · sisa bebas Rp1,7jt'),
-      findsOneWidget,
-    );
+    expect(find.text('belum dijatah Rp1,7jt'), findsOneWidget);
+    expect(find.text('total limit Rp3,3jt'), findsOneWidget);
     await tester.tap(find.bySemanticsLabel('simpan Rp5jt / bln'));
     await settle();
     expect(await budget(), 5000000);
@@ -153,15 +151,12 @@ void main() {
     expect(find.text('hapus budget'), findsNothing);
     await tester.tap(find.bySemanticsLabel('kosongin semua'));
     await tester.pump();
-    expect(
-      find.text('total limit kamu Rp3,3jt · ketik budget kamu'),
-      findsOneWidget,
-    );
+    expect(find.text('ketik budget kamu'), findsOneWidget);
     await tester.tap(find.bySemanticsLabel('1'));
     await tester.tap(find.bySemanticsLabel('tambah tiga nol'));
     await tester.tap(find.bySemanticsLabel('tambah tiga nol'));
     await tester.pump();
-    expect(find.text('kurang Rp2,3jt buat nutup semua limit'), findsOneWidget);
+    expect(find.text('kurang Rp2,3jt'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox());
     await db.close();
