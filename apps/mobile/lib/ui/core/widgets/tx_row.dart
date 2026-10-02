@@ -10,12 +10,14 @@ import 'meta_line.dart';
 
 /// 00.4 TxRow — 64 tall; tap opens 04.3 detail.
 class TxRow extends StatelessWidget {
-  const TxRow({super.key, required this.tx, this.onTap});
+  const TxRow({super.key, required this.tx, this.onTap, this.withDate = false});
 
   final Transaction tx;
   final VoidCallback? onTap;
+  final bool withDate; // search results span days: "warteg • 13 okt • 12:40"
 
   static final _time = DateFormat.Hm('id');
+  static final _date = DateFormat('d MMM', 'id');
   static final _text = AppText.body.copyWith(letterSpacing: -0.18);
 
   @override
@@ -62,7 +64,11 @@ class TxRow extends StatelessWidget {
                         ),
                       Expanded(
                         child: MetaLine(
-                          [tx.place, _time.format(tx.at)],
+                          [
+                            tx.place,
+                            if (withDate) _date.format(tx.at).toLowerCase(),
+                            _time.format(tx.at),
+                          ],
                           style: AppText.caption.copyWith(
                             color: AppColors.muted,
                           ),

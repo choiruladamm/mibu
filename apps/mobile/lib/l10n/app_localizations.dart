@@ -1953,6 +1953,60 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'versi {v}'**
   String settingsVersion(String v);
+
+  /// No description provided for @searchSub.
+  ///
+  /// In id, this message translates to:
+  /// **'di {month}'**
+  String searchSub(String month);
+
+  /// No description provided for @searchClear.
+  ///
+  /// In id, this message translates to:
+  /// **'hapus pencarian'**
+  String get searchClear;
+
+  /// No description provided for @searchHint.
+  ///
+  /// In id, this message translates to:
+  /// **'apa aja…'**
+  String get searchHint;
+
+  /// No description provided for @searchResults.
+  ///
+  /// In id, this message translates to:
+  /// **'{n} hasil'**
+  String searchResults(int n);
+
+  /// No description provided for @searchDays.
+  ///
+  /// In id, this message translates to:
+  /// **'{n} hari'**
+  String searchDays(int n);
+
+  /// No description provided for @searchAvg.
+  ///
+  /// In id, this message translates to:
+  /// **'rata² {amount}'**
+  String searchAvg(String amount);
+
+  /// No description provided for @searchMore.
+  ///
+  /// In id, this message translates to:
+  /// **'liat {n} lagi'**
+  String searchMore(int n);
+
+  /// No description provided for @searchNone.
+  ///
+  /// In id, this message translates to:
+  /// **'“{q}” nggak ketemu di {month}'**
+  String searchNone(String q, String month);
+
+  /// No description provided for @searchTry.
+  ///
+  /// In id, this message translates to:
+  /// **'coba cari'**
+  String get searchTry;
 }
 
 class _AppLocalizationsDelegate

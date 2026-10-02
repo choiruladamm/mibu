@@ -1153,4 +1153,43 @@ class AppLocalizationsId extends AppLocalizations {
   String settingsVersion(String v) {
     return 'versi $v';
   }
+
+  @override
+  String searchSub(String month) {
+    return 'di $month';
+  }
+
+  @override
+  String get searchClear => 'hapus pencarian';
+
+  @override
+  String get searchHint => 'apa aja…';
+
+  @override
+  String searchResults(int n) {
+    return '$n hasil';
+  }
+
+  @override
+  String searchDays(int n) {
+    return '$n hari';
+  }
+
+  @override
+  String searchAvg(String amount) {
+    return 'rata² $amount';
+  }
+
+  @override
+  String searchMore(int n) {
+    return 'liat $n lagi';
+  }
+
+  @override
+  String searchNone(String q, String month) {
+    return '“$q” nggak ketemu di $month';
+  }
+
+  @override
+  String get searchTry => 'coba cari';
 }

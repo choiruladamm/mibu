@@ -25,10 +25,13 @@ String _short(DateTime m) => _monthShort.format(m).toLowerCase();
 
 /// 04.1 semua transaksi.
 class TransactionsView extends ConsumerStatefulWidget {
-  const TransactionsView({super.key, this.onOpen});
+  const TransactionsView({super.key, this.onOpen, this.onSearch});
 
   /// Row tap → 04.3 struk.
   final ValueChanged<Transaction>? onOpen;
+
+  /// Search button → 04.2 cari in the month being viewed.
+  final ValueChanged<DateTime>? onSearch;
 
   @override
   ConsumerState<TransactionsView> createState() => _TransactionsViewState();
@@ -65,7 +68,9 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
                   backLabel: l.home,
                   actionIcon: HugeIcons.strokeRoundedSearch01,
                   actionLabel: l.search,
-                  onAction: null, // → 04.2 cari (M6)
+                  onAction: s == null || widget.onSearch == null
+                      ? null
+                      : () => widget.onSearch!(s.month),
                 ),
                 Expanded(
                   child: s == null

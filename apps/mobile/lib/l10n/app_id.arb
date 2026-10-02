@@ -1059,5 +1059,59 @@
         "type": "String"
       }
     }
-  }
+  },
+  "searchSub": "di {month}",
+  "@searchSub": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "searchClear": "hapus pencarian",
+  "searchHint": "apa aja…",
+  "searchResults": "{n} hasil",
+  "@searchResults": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "searchDays": "{n} hari",
+  "@searchDays": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "searchAvg": "rata² {amount}",
+  "@searchAvg": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "searchMore": "liat {n} lagi",
+  "@searchMore": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "searchNone": "“{q}” nggak ketemu di {month}",
+  "@searchNone": {
+    "placeholders": {
+      "q": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "searchTry": "coba cari"
 }

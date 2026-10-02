@@ -10,6 +10,7 @@ import '../ui/features/home/views/home_view.dart';
 import '../ui/features/onboarding/views/onboarding_view.dart';
 import '../ui/features/pockets/views/pockets_view.dart';
 import '../ui/features/settings/views/settings_view.dart';
+import '../ui/features/search/views/search_view.dart';
 import '../ui/features/setup/views/setup_view.dart';
 import '../domain/models/finance.dart';
 import '../ui/features/transactions/view_models/transactions_view_model.dart';
@@ -24,6 +25,9 @@ abstract final class Routes {
   static const pockets = '/kantong';
   static String pocketsAt(String id) => '$pockets?pocket=$id';
   static const settings = '/pengaturan';
+  static const search = '/cari';
+  static String searchIn(DateTime month) =>
+      '$search?month=${month.year}-${month.month.toString().padLeft(2, '0')}';
   static const addEntry = '/catat';
   static const transactions = '/transaksi';
   static String transactionsIn(DateTime month) =>
@@ -99,6 +103,12 @@ final routerProvider = Provider<GoRouter>((ref) {
             NoTransitionPage(key: state.pageKey, child: const SettingsView()),
       ),
       GoRoute(
+        path: Routes.search,
+        // ?month=2026-09 from 04.1: search the month being viewed.
+        builder: (_, state) =>
+            SearchView(month: _monthParam(state.uri.queryParameters['month'])),
+      ),
+      GoRoute(
         path: Routes.addEntry,
         // extra: an entry to "catat lagi" from (04.3).
         builder: (_, state) => AddEntryView(again: state.extra as Transaction?),
@@ -114,6 +124,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           ],
           child: TransactionsView(
             onOpen: (t) => context.push(Routes.transaction(t.id)),
+            onSearch: (m) => context.push(Routes.searchIn(m)),
           ),
         ),
         routes: [

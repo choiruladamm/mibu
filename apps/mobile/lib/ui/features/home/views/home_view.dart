@@ -364,7 +364,7 @@ class _SearchButton extends StatelessWidget {
       button: true,
       label: label,
       child: GestureDetector(
-        onTap: () {}, // → 04.2 cari
+        onTap: () => context.push(Routes.search),
         child: Container(
           alignment: Alignment.center,
           width: size,
