@@ -38,6 +38,7 @@ class Profile {
     required this.payday,
     this.monthlyBudget,
     this.hideAmounts = false,
+    this.onboarded = false,
   });
 
   /// Before 01.4 atur awal has run.
@@ -52,7 +53,20 @@ class Profile {
   final int payday; // 1–28, 0 = last day of month
   final int? monthlyBudget; // budget bulanan, set by the user; null = not set
   final bool hideAmounts;
+  final bool onboarded; // 01.4 atur awal done (or skipped with "nanti aja")
 }
+
+/// 01.4b kantong pertama: presets with the board's monthly limits.
+const setupPockets = [
+  ('🍜', 'makan', 1500000),
+  ('☕', 'ngopi', 300000),
+  ('🛵', 'ojol', 500000),
+  ('💡', 'tagihan', 600000),
+  ('🎉', 'hiburan', 400000),
+  ('🛒', 'belanja', 800000),
+  ('🐶', 'anabul', 300000),
+  ('✈️', 'liburan', 500000),
+];
 
 /// A category with a monthly limit, plus what's spent this month.
 class Pocket {

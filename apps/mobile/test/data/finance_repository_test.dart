@@ -226,4 +226,53 @@ void main() {
     expect((await repo.watchTransaction(warteg.id).first)!.deleted, isFalse);
     expect(await repo.watchMonth(DateTime(2026, 10)).first, hasLength(7));
   });
+
+  test(
+    '01.4 completeSetup: profile, presets, pockets; seeded db keeps its own',
+    () async {
+      final fresh = AppDatabase(
+        DatabaseConnection(
+          NativeDatabase.memory(),
+          closeStreamsSynchronously: true,
+        ),
+        () => now,
+        (_, _) async {},
+      );
+      addTearDown(fresh.close);
+      final r = FinanceRepository(fresh);
+      expect((await r.watchProfile().first).onboarded, isFalse);
+
+      await r.completeSetup(
+        openingBalance: 2500000,
+        payday: 0,
+        pockets: {'makan', 'ngopi'},
+        now: now,
+      );
+      final p = await r.watchProfile().first;
+      expect(
+        (p.onboarded, p.openingBalance, p.payday, p.monthlyBudget),
+        (true, 2500000, 0, null),
+      );
+      final cats = await r.watchCategories().first;
+      expect(cats.map((c) => c.name), [
+        ...setupPockets.map((p) => p.$2),
+        'gajian',
+      ]);
+      expect(cats.last.kind, CategoryKind.income);
+      expect(
+        (await r.watchPockets(now).first).map((p) => '${p.name}${p.budget}'),
+        ['makan1500000', 'ngopi300000'],
+      );
+
+      // Already has categories (seeded): only the profile changes.
+      await repo.completeSetup(
+        openingBalance: 1,
+        payday: 10,
+        pockets: {'makan'},
+        now: now,
+      );
+      expect((await repo.watchProfile().first).openingBalance, 1);
+      expect(await repo.watchCategories().first, hasLength(6));
+    },
+  );
 }

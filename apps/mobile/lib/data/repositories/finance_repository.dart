@@ -40,8 +40,58 @@ class FinanceRepository {
                     payday: r.payday,
                     monthlyBudget: r.monthlyBudget,
                     hideAmounts: r.hideAmounts,
+                    onboarded: r.onboardedAt != null,
                   ),
           );
+
+  /// 01.4 / 01.4b: writes the profile and the starter categories — every
+  /// preset (picked ones become kantong with their limit) plus 💰 gajian.
+  /// Categories are only added to an empty table.
+  Future<void> completeSetup({
+    required int openingBalance,
+    required int payday,
+    required Set<String> pockets,
+    required DateTime now,
+  }) => _db.transaction(() async {
+    final p = _db.profiles;
+    final row = ProfilesCompanion(
+      openingBalance: Value(openingBalance),
+      openingAt: Value(now),
+      payday: Value(payday),
+      onboardedAt: Value(now),
+      updatedAt: Value(now),
+    );
+    final updated = await (_db.update(
+      p,
+    )..where((r) => r.deletedAt.isNull())).write(row);
+    if (updated == 0) await _db.into(p).insert(row);
+
+    final c = _db.categories;
+    if (await (_db.selectOnly(c)..addColumns([c.id.count()]))
+            .map((r) => r.read(c.id.count()))
+            .getSingle() !=
+        0) {
+      return;
+    }
+    await _db.batch(
+      (b) => b.insertAll(c, [
+        for (final (i, (emoji, name, limit)) in setupPockets.indexed)
+          CategoriesCompanion.insert(
+            emoji: emoji,
+            name: name,
+            kind: CategoryKind.expense,
+            monthlyLimit: Value(pockets.contains(name) ? limit : null),
+            sortOrder: Value(i),
+          ),
+        CategoriesCompanion.insert(
+          emoji: '💰',
+          name: 'gajian',
+          kind: CategoryKind.income,
+          sortOrder: Value(setupPockets.length),
+        ),
+      ]),
+    );
+  });
 
   /// Balance, per-month nets / spending and today's spending.
   // ponytail: reads every entry since opening and sums in Dart (local-time

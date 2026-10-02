@@ -83,8 +83,16 @@ class AppDatabase extends _$AppDatabase {
   );
 }
 
+/// Debug sample data: `--dart-define=MIBU_SEED=demo|fixture|none`
+/// (none = a real first run through 01.1 → 01.4).
+const _seedMode = String.fromEnvironment('MIBU_SEED', defaultValue: 'demo');
+
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
-  final db = AppDatabase(null, DateTime.now, seedDemo);
+  final db = AppDatabase(null, DateTime.now, switch (_seedMode) {
+    'fixture' => seedFixture,
+    'none' => (_, _) async {},
+    _ => seedDemo,
+  });
   ref.onDispose(db.close);
   return db;
 });
