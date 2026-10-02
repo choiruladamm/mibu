@@ -98,7 +98,7 @@ void main() {
     await settle();
     expect((await tester.runAsync(anabul))!.deletedAt, isNull);
     expect(await tester.runAsync(makanEntries), 1);
-    expect(find.text('edit kategori'), findsOneWidget);
+    expect(find.text('edit'), findsOneWidget);
 
     // Again, then beres closes the form too.
     await tester.tap(find.bySemanticsLabel('hapus kategori'));
@@ -107,7 +107,7 @@ void main() {
     await settle();
     await tester.tap(find.text('beres'));
     await settle();
-    expect(find.text('edit kategori'), findsNothing);
+    expect(find.text('edit'), findsNothing);
     expect(find.text('anabul'), findsNothing);
     expect(find.text('ngopi'), findsOneWidget); // next pocket selected
 

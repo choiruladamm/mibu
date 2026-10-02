@@ -13,14 +13,16 @@ import '../../../core/widgets/sheet.dart';
 import '../../budget/views/budget_sheet.dart';
 import '../../../core/finance_providers.dart';
 import '../view_models/categories_view_model.dart';
+import '../../pockets/views/set_limit_sheet.dart';
 import 'category_delete_sheet.dart';
 
 /// Where a new category is made from (03.4 / 03.4b / 03.4c / 03.4d).
 enum CategoryOrigin { catat, kantong, atur }
 
-/// 03.4 kategori baru (no [category]) / 03.5 edit. Saves and pops the
-/// saved category, or null on batal. [origin] picks the 03.4 variant;
-/// [CategoryOrigin.kantong] is always an expense pocket (03.4b).
+/// 03.4 bikin baru (no [category]) / 03.5 edit. Saves and pops the
+/// saved category, or null on batal / lepas limit. [origin] picks the 03.4
+/// variant; [CategoryOrigin.kantong] always has a limit (03.4b), the others
+/// start without one.
 Future<Category?> showCategoryForm(
   BuildContext context, {
   Category? category,
@@ -67,7 +69,7 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
   late CategoryKind _kind = _fromPocket
       ? CategoryKind.expense
       : _edit?.kind ?? widget.kind;
-  late bool _pocket = _edit == null || _edit!.monthlyLimit != null;
+  late bool _pocket = _edit == null ? _fromPocket : _edit!.monthlyLimit != null;
   late int _limit = _edit?.monthlyLimit ?? _defaultLimit;
   bool _saving = false;
 
@@ -174,8 +176,6 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
                       child: Text(
                         _edit != null
                             ? l.categoryEditTitle
-                            : _fromPocket
-                            ? l.categoryNewPocketTitle
                             : l.categoryNewTitle,
                         textAlign: TextAlign.center,
                         style: AppText.label.copyWith(
@@ -192,16 +192,19 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      if (_edit == null) ...[
-                        const SizedBox(height: 2),
-                        Center(
-                          child: _UsageChip(switch (widget.origin) {
-                            CategoryOrigin.catat => l.categoryChipCatat,
-                            CategoryOrigin.kantong => l.categoryChipPocket,
-                            CategoryOrigin.atur => l.categoryChipAtur,
-                          }),
+                      const SizedBox(height: 2),
+                      Center(
+                        child: _ContextChip(
+                          _edit != null
+                              ? l.categoryChipEdit
+                              : switch (widget.origin) {
+                                  CategoryOrigin.catat => l.categoryChipCatat,
+                                  CategoryOrigin.kantong =>
+                                    l.categoryChipPocket,
+                                  CategoryOrigin.atur => l.categoryChipAtur,
+                                },
                         ),
-                      ],
+                      ),
                       const SizedBox(height: 14),
                       Center(child: _EmojiDisc(_emoji)),
                       if (_edit != null) ...[
@@ -347,6 +350,39 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
                             onChanged: (v) => setState(() => _limit = v),
                             onSetBudget: () => editBudget(context, ref),
                           ),
+                          if (_edit case Category(
+                            :final id,
+                            :final name,
+                            monthlyLimit: final limit?,
+                          ))
+                            Center(
+                              child: TextButton(
+                                onPressed: () async {
+                                  await releaseLimit(
+                                    context,
+                                    ref,
+                                    id: id,
+                                    name: name,
+                                    limit: limit,
+                                  );
+                                  if (context.mounted) {
+                                    Navigator.of(context).pop();
+                                  }
+                                },
+                                style: TextButton.styleFrom(
+                                  foregroundColor: AppColors.ink,
+                                ),
+                                child: Text(
+                                  l.pocketRelease,
+                                  style: AppText.label.copyWith(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    decoration: TextDecoration.underline,
+                                    decorationColor: AppColors.ink,
+                                  ),
+                                ),
+                              ),
+                            ),
                         ],
                       ],
                     ],
@@ -372,8 +408,8 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
                       label:
                           (_edit != null
                           ? l.categorySave
-                          : _fromPocket
-                          ? l.categoryCreatePocket
+                          : widget.origin == CategoryOrigin.catat
+                          ? l.categoryCreateUse
                           : l.categoryCreate)(
                             _emoji,
                             name.isEmpty ? l.categoryFallbackName : name,
@@ -466,6 +502,30 @@ class _EmojiDisc extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Where the sheet was opened from (12px, muted).
+class _ContextChip extends StatelessWidget {
+  const _ContextChip(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 26,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: AppColors.mist,
+        borderRadius: BorderRadius.circular(13),
+      ),
+      child: Text(
+        text,
+        style: AppText.caption.copyWith(fontSize: 12, color: AppColors.muted),
       ),
     );
   }

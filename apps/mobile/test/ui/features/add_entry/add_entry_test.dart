@@ -83,7 +83,7 @@ void main() {
     expect(find.text('lima puluh dua ribu rupiah'), findsOneWidget);
 
     // Pick makan in the sheet.
-    await tester.tap(find.text('pilih kategori'));
+    await tester.tap(find.text('buat apa?'));
     await settle();
     await tester.tap(find.bySemanticsLabel('makan'));
     await tester.pump();
@@ -98,7 +98,7 @@ void main() {
     await settle();
 
     // makan pocket: 1,5jt − 390K − 52K left.
-    expect(find.text('🍜 kantong makan abis ini'), findsOneWidget);
+    expect(find.text('🍜 jatah makan abis ini'), findsOneWidget);
     expect(find.text('sisa Rp1,06jt'), findsOneWidget);
 
     expect(tester.getSemantics(save), isSemantics(isEnabled: true));
@@ -216,11 +216,11 @@ void main() {
 
     await settle();
     // Recent chip (newest: ojol + gojek) fills both in one tap.
-    await tester.tap(find.text('pilih kategori'));
+    await tester.tap(find.text('buat apa?'));
     await settle();
     await tester.tap(find.text('gojek'));
     await settle();
-    expect(find.text('ini buat apa?'), findsNothing); // sheet closed
+    expect(find.text('cari atau bikin…'), findsNothing); // sheet closed
     expect(find.text('gojek'), findsOneWidget); // chip on 03.1
 
     // Reopen: gojek is prefilled; picking ngopi drops it.

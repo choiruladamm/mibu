@@ -49,17 +49,20 @@ void main() {
     }
 
     await settle();
-    await tester.tap(find.text('pilih kategori'));
+    await tester.tap(find.text('buat apa?'));
     await settle();
     await tester.tap(find.text('atur'));
     await settle();
 
-    expect(find.text('kategori kamu'), findsOneWidget);
-    expect(find.text('4 catatan'), findsOneWidget); // belanja
+    expect(find.text('buat apa aja'), findsOneWidget);
+    expect(find.text('4 catatan'), findsOneWidget); // belanja, no limit
+    expect(find.text('limit Rp1jt'), findsOneWidget); // anabul
     expect(find.text('3 catatan'), findsOneWidget); // gajian
     expect(
       find.text(
-        'gajian itu buat pemasukan, jadi cuma muncul pas kamu catat pemasukan.',
+        'yang ada limit jadi toples di tab kantong. '
+        'gajian itu pemasukan, nggak pernah dikasih limit.',
+        findRichText: true,
       ),
       findsOneWidget,
     );

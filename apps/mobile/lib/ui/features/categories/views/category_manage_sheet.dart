@@ -7,6 +7,7 @@ import 'package:hugeicons/hugeicons.dart';
 import '../../../../data/repositories/finance_repository.dart';
 import '../../../../domain/models/finance.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../core/money.dart';
 import '../../../core/tokens.dart';
 import '../../../core/widgets/new_tile.dart';
 import '../../../core/widgets/sheet.dart';
@@ -14,7 +15,7 @@ import '../view_models/categories_view_model.dart';
 import 'category_delete_sheet.dart';
 import 'category_form_sheet.dart';
 
-/// 03.3 atur kategori — from 03.2 "atur" and (M6) 02.4.
+/// 03.3 buat apa aja — from 03.2 "atur" and (M6) 02.4.
 Future<void> showCategoryManage(BuildContext context) =>
     showAppSheet(context, const CategoryManageSheet());
 
@@ -88,7 +89,7 @@ class _CategoryManageSheetState extends ConsumerState<CategoryManageSheet>
               crossAxisCount: 4,
               mainAxisSpacing: 10,
               crossAxisSpacing: 8,
-              mainAxisExtent: 110,
+              mainAxisExtent: 114,
               children: [
                 for (final (i, c) in shown.indexed)
                   _DraggableTile(
@@ -121,26 +122,7 @@ class _CategoryManageSheetState extends ConsumerState<CategoryManageSheet>
               ],
             ),
           ),
-          if (income.isNotEmpty)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              decoration: BoxDecoration(
-                color: AppColors.mist,
-                borderRadius: BorderRadius.circular(AppRadius.statTile),
-              ),
-              child: Row(
-                spacing: 12,
-                children: [
-                  const Text('🗂️', style: TextStyle(fontSize: 22)),
-                  Expanded(
-                    child: Text(
-                      l.manageIncomeNote(income.first.name),
-                      style: AppText.label.copyWith(fontSize: 14, height: 1.4),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          _JarNote(income: income.firstOrNull?.name),
         ],
       ),
     );
@@ -210,6 +192,10 @@ class _DraggableTile extends StatelessWidget {
     final tile = _Tile(
       category: category,
       uses: uses == 0 ? l.categoryUnused : l.manageUses(uses),
+      limit: switch (category.monthlyLimit) {
+        final v? => l.manageLimit(rupiahCompact(v)),
+        null => null,
+      },
     );
     final wiggle = this.wiggle;
 
@@ -294,10 +280,11 @@ class _DraggableTile extends StatelessWidget {
 }
 
 class _Tile extends StatelessWidget {
-  const _Tile({required this.category, required this.uses});
+  const _Tile({required this.category, required this.uses, this.limit});
 
   final Category category;
   final String uses;
+  final String? limit; // "limit Rp…" ink chip, replaces [uses]
 
   @override
   Widget build(BuildContext context) {
@@ -320,13 +307,77 @@ class _Tile extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style: AppText.caption,
         ),
-        Text(
-          uses,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: AppText.micro.copyWith(color: AppColors.muted),
-        ),
+        if (limit case final text?)
+          Container(
+            height: 20,
+            padding: const EdgeInsets.symmetric(horizontal: 7),
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: AppColors.ink,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              text,
+              maxLines: 1,
+              style: AppText.micro.copyWith(
+                fontSize: 10.5,
+                fontWeight: FontWeight.w600,
+                color: AppColors.onInk,
+              ),
+            ),
+          )
+        else
+          Text(
+            uses,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppText.micro.copyWith(color: AppColors.muted),
+          ),
       ],
+    );
+  }
+}
+
+/// 🫙 "yang ada limit jadi toples di tab kantong." + the income note.
+class _JarNote extends StatelessWidget {
+  const _JarNote({required this.income});
+
+  final String? income; // first income category's name
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    final bold = l.manageJarNoteLimit;
+    final [before, after] = l.manageJarNote(bold).split(bold).take(2).toList();
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: AppColors.mist,
+        borderRadius: BorderRadius.circular(AppRadius.statTile),
+      ),
+      child: Row(
+        spacing: 12,
+        children: [
+          const Text('🫙', style: TextStyle(fontSize: 22)),
+          Expanded(
+            child: Text.rich(
+              TextSpan(
+                text: before,
+                children: [
+                  TextSpan(
+                    text: bold,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  TextSpan(text: after),
+                  if (income != null)
+                    TextSpan(text: ' ${l.manageIncomeNote(income!)}'),
+                ],
+              ),
+              style: AppText.label.copyWith(fontSize: 14, height: 1.4),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

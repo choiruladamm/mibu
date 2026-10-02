@@ -5,13 +5,15 @@ import 'package:hugeicons/hugeicons.dart';
 import '../../../../data/repositories/finance_repository.dart';
 import '../../../../domain/models/finance.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../core/finance_providers.dart';
+import '../../../core/money.dart';
 import '../../../core/tokens.dart';
 import '../../../core/widgets/new_tile.dart';
 import '../../../core/widgets/sheet.dart';
 import '../../categories/views/category_form_sheet.dart';
 import '../../categories/views/category_manage_sheet.dart';
 
-/// 03.2 pilih kategori — resolves to the category + place, or null.
+/// 03.2 buat apa? — resolves to the category + place, or null.
 Future<RecentPick?> showCategoryPicker(
   BuildContext context, {
   required CategoryKind kind,
@@ -80,6 +82,10 @@ class _CategoryPickerState extends ConsumerState<_CategoryPicker> {
           in ref.watch(recentPicksProvider).value ?? const <RecentPick>[])
         if (r.category.kind == widget.kind) r,
     ].take(3);
+    final pockets = {
+      for (final p in ref.watch(pocketsProvider).value ?? const <Pocket>[])
+        p.id: p,
+    };
     // Fresh copy, in case 03.3 renamed it.
     final picked = [...?ref.watch(categoriesProvider).value]
         .where((c) => c.id == _picked?.id)
@@ -179,11 +185,12 @@ class _CategoryPickerState extends ConsumerState<_CategoryPicker> {
               crossAxisCount: 4,
               mainAxisSpacing: 10,
               crossAxisSpacing: 8,
-              mainAxisExtent: 88,
+              mainAxisExtent: 104,
               children: [
                 for (final c in cats)
                   _CategoryTile(
                     category: c,
+                    pocket: pockets[c.id],
                     on: c.id == picked?.id,
                     // Tap the picked one again to unpick.
                     onTap: () => setState(() {
@@ -283,11 +290,13 @@ class _RecentChip extends StatelessWidget {
 class _CategoryTile extends StatelessWidget {
   const _CategoryTile({
     required this.category,
+    required this.pocket,
     required this.on,
     required this.onTap,
   });
 
   final Category category;
+  final Pocket? pocket; // has a limit → "sisa Rp…"
   final bool on;
   final VoidCallback onTap;
 
@@ -301,7 +310,7 @@ class _CategoryTile extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Column(
-        spacing: 6,
+        spacing: 4,
         children: [
           SizedBox(
             width: 60,
@@ -354,6 +363,21 @@ class _CategoryTile extends StatelessWidget {
             ),
             overflow: TextOverflow.ellipsis,
           ),
+          if (pocket case final p?)
+            Text(
+              AppLocalizations.of(context)!
+                  .leftAmount(rupiahCompact(p.left < 0 ? 0 : p.left)),
+              maxLines: 1,
+              style: AppText.micro.copyWith(
+                // ≥ 85% kepake: bold ink.
+                fontWeight: p.status == PocketStatus.almostOut
+                    ? FontWeight.w600
+                    : FontWeight.w400,
+                color: p.status == PocketStatus.almostOut
+                    ? AppColors.ink
+                    : AppColors.subtle,
+              ),
+            ),
         ],
       ),
     ),

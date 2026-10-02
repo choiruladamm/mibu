@@ -404,7 +404,7 @@ class _Receipt extends StatelessWidget {
                       spacing: 12,
                       children: [
                         Text(
-                          l.receiptPocket(p.name),
+                          l.receiptPocket(p.emoji, p.name),
                           style: AppText.label.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
@@ -428,7 +428,10 @@ class _Receipt extends StatelessWidget {
                     ),
                     _PocketBar(pct: p.usedPct),
                     Text(
-                      l.receiptShare((-t.amount * 100 / p.budget).round()),
+                      l.receiptShare(
+                        (-t.amount * 100 / p.budget).round(),
+                        p.name,
+                      ),
                       style: AppText.caption.copyWith(color: AppColors.muted),
                     ),
                   ],

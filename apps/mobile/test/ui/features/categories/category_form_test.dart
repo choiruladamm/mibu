@@ -57,19 +57,16 @@ void main() {
     await tester.tap(find.text('bikin kategori baru')); // bottom of the sheet
     await settle(tester);
     await settle(tester);
-    // 03.4b: always a pocket, no kind / switch rows.
-    expect(find.text('kantong baru'), findsOneWidget);
-    expect(
-      find.text('kantong = pengeluaran dengan batas bulanan'),
-      findsOneWidget,
-    );
+    // 03.4b: always has a limit, no kind / switch rows.
+    expect(find.text('bikin baru'), findsOneWidget);
+    expect(find.text('dari: pasang limit ke…'), findsOneWidget);
     expect(find.text('masuk ke'), findsNothing);
-    expect(find.text('kantong bulanan'), findsNothing);
+    expect(find.text('limit bulanan'), findsNothing);
 
     await tester.enterText(nameField, 'Kopi Susu');
     await tester.pump();
     expect(find.text('buat “kopi susu”'), findsOneWidget);
-    expect(find.text('bikin kantong ☕ kopi susu'), findsOneWidget);
+    expect(find.text('bikin ☕ kopi susu'), findsOneWidget);
 
     // budget 8jt − other pockets 3,3jt = 4,7jt free; 300K ÷ 31 days.
     expect(find.text('sisa budget Rp4,7jt'), findsOneWidget);
@@ -83,7 +80,7 @@ void main() {
     final limitField = find.byType(TextField).last;
     await tester.enterText(limitField, '250000000');
     await tester.pump();
-    expect(find.text('maks Rp100jt per kantong'), findsOneWidget);
+    expect(find.text('maks Rp100jt per limit'), findsOneWidget);
     expect(find.text('100.000.000'), findsOneWidget);
     await tester.enterText(limitField, '');
     await tester.pump();
@@ -98,9 +95,9 @@ void main() {
     await tester.tap(find.bySemanticsLabel('pakai 🎧'));
     await tester.enterText(nameField, 'kopi');
     await tester.pump();
-    expect(find.text('bikin kantong 🎧 kopi'), findsOneWidget);
+    expect(find.text('bikin 🎧 kopi'), findsOneWidget);
 
-    await tester.tap(find.text('bikin kantong 🎧 kopi'));
+    await tester.tap(find.text('bikin 🎧 kopi'));
     await settle(tester);
     final c = await row(db, 'kopi');
     expect((c.emoji, c.monthlyLimit), ('🎧', 1000000));
@@ -118,13 +115,14 @@ void main() {
     await tester.ensureVisible(find.text('atur limit'));
     await tester.tap(find.text('atur limit'));
     await settle(tester);
-    expect(find.text('edit kategori'), findsOneWidget);
+    expect(find.text('edit'), findsOneWidget);
+    expect(find.text('dari: buat apa aja'), findsOneWidget);
     expect(find.text('2 catatan · Rp900K tahun ini'), findsOneWidget);
     expect(find.text('1.000.000'), findsOneWidget); // anabul's limit
 
     await tester.tap(find.text('pemasukan'));
     await tester.pump();
-    expect(find.text('kantong bulanan'), findsNothing);
+    expect(find.text('limit bulanan'), findsNothing);
     await tester.tap(find.text('simpan 🐶 anabul'));
     await settle(tester);
 
@@ -135,19 +133,49 @@ void main() {
     await db.close();
   });
 
+  testWidgets('03.5 lepas limit: saved at once, closes, batalin', (
+    tester,
+  ) async {
+    final db = await pump(tester, const PocketsView());
+    await tester.ensureVisible(find.text('atur limit'));
+    await tester.tap(find.text('atur limit'));
+    await settle(tester);
+    await tester.ensureVisible(find.text('lepas limit').last);
+    await tester.tap(find.text('lepas limit').last);
+    await settle(tester);
+    await settle(tester);
+
+    expect(find.text('edit'), findsNothing);
+    expect((await row(db, 'anabul')).monthlyLimit, isNull);
+    expect(find.text('limit anabul dilepas'), findsOneWidget);
+    await tester.tap(find.text('batalin'));
+    await settle(tester);
+    expect((await row(db, 'anabul')).monthlyLimit, 1000000);
+
+    await tester.pumpWidget(const SizedBox());
+    await db.close();
+  });
+
   testWidgets('03.2 bikin "gym" comes back picked', (tester) async {
     final db = await pump(tester, const AddEntryView());
-    await tester.tap(find.text('pilih kategori'));
+    await tester.tap(find.text('buat apa?'));
     await settle(tester);
+    // Limits show as "sisa Rp…" under the name; anabul is ≥ 85%.
+    expect(find.text('sisa Rp100K'), findsOneWidget);
     await tester.enterText(find.byType(TextField).first, 'gym');
     await tester.pump();
     await tester.tap(find.bySemanticsLabel('bikin “gym”'));
     await settle(tester);
 
-    expect(find.text('bikin 🏋️ gym'), findsOneWidget);
-    await tester.tap(find.text('bikin 🏋️ gym'));
+    // From catat: no limit by default.
+    expect(find.text('abis dibikin, langsung kepake di catatan ini'), findsOne);
+    expect(find.text('limit bulanan'), findsOneWidget);
+    expect(find.text('nggak wajib, bisa dipasang nanti'), findsOneWidget);
+    expect(find.text('maks Rp100jt per limit'), findsNothing);
+    await tester.tap(find.text('bikin & pakai 🏋️ gym'));
     await settle(tester);
     expect(find.text('pakai 🏋️ gym'), findsOneWidget);
+    expect((await row(db, 'gym')).monthlyLimit, isNull);
 
     await tester.pumpWidget(const SizedBox());
     await db.close();

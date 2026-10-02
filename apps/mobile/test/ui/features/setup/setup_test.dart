@@ -77,15 +77,15 @@ void main() {
     await tester.ensureVisible(find.text('lanjut'));
     await tester.tap(find.text('lanjut'));
     await settle(tester);
-    expect(find.text('mau mulai dari kantong apa?'), findsOneWidget);
+    expect(find.text('mau mulai pasang limit ke apa?'), findsOneWidget);
     // Default 4: 1,5jt + 300K + 500K + 600K = 2,9jt.
-    expect(find.text('4 kantong'), findsOneWidget);
+    expect(find.text('4 dikasih limit'), findsOneWidget);
     expect(find.text('Rp2,9jt/bln'), findsOneWidget);
     expect(find.text('sisa bebas Rp100K dari saldo Rp3jt'), findsOneWidget);
 
     await tester.tap(find.text('hiburan'));
     await tester.pump();
-    expect(find.text('5 kantong'), findsOneWidget);
+    expect(find.text('5 dikasih limit'), findsOneWidget);
     expect(
       find.text('lebih Rp300K dari saldo — santai, nanti gajian nambah'),
       findsOneWidget,

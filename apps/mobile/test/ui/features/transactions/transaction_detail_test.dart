@@ -65,10 +65,10 @@ void main() {
     expect(find.text('sel 13 okt'), findsOneWidget);
     expect(find.text('dibayar sel, 13 okt · 14.32'), findsOneWidget);
     expect(find.text('tambahin catatan'), findsOneWidget);
-    expect(find.text('kantong anabul'), findsOneWidget);
-    expect(find.text('sisa Rp100K dari Rp1jt'), findsOneWidget);
+    expect(find.text('🐶 anabul'), findsOneWidget);
+    expect(find.text('jatah sisa Rp100K dari limit Rp1jt'), findsOneWidget);
     expect(
-      find.text('transaksi ini aja udah makan 45% kantong.'),
+      find.text('transaksi ini aja udah makan 45% jatah anabul.'),
       findsOneWidget,
     );
 
@@ -97,7 +97,7 @@ void main() {
     expect(find.text('dihapus'), findsOneWidget);
     expect(find.text('balik ke transaksi'), findsOneWidget);
     expect(find.text('catatan dihapus'), findsOneWidget);
-    expect(find.text('kantong anabul balik jadi sisa Rp550K'), findsOneWidget);
+    expect(find.text('jatah anabul balik jadi sisa Rp550K'), findsOneWidget);
 
     await tester.tap(find.text('batalin'));
     await settle();
