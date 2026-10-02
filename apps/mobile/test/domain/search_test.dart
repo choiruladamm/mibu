@@ -52,11 +52,40 @@ void main() {
       tx('a', amount: -30000, day: 1),
       tx('b', amount: -20000, day: 1),
       tx('c', amount: -10000, day: 4),
-    ]);
+    ], today: 16);
     expect(
       (s.count, s.days, s.total, s.average, s.mixed),
       (3, 2, -60000, -20000, false),
     );
-    expect(SearchSummary([tx('a'), tx('b', amount: 100)]).mixed, isTrue);
+    expect(
+      SearchSummary([tx('a'), tx('b', amount: 100)], today: 16).mixed,
+      isTrue,
+    );
+  });
+
+  test('insight: mixed, single, busiest day, biggest day, daily + streak', () {
+    SearchSummary of(List<Transaction> h, [int today = 16]) =>
+        SearchSummary(h, today: today);
+
+    expect(of([tx('a'), tx('b', amount: 500)]).insight, SearchInsight.mixed);
+    expect(of([tx('a')]).insight, SearchInsight.single);
+
+    final busy = of([tx('a', day: 2), tx('b', day: 9), tx('c', day: 9)]);
+    expect((busy.insight, busy.busiestDay), (SearchInsight.busiest, 9));
+
+    final big = of([
+      tx('a', day: 2, amount: -10000),
+      tx('b', day: 9, amount: -50000),
+    ]);
+    expect((big.insight, big.biggestDay), (SearchInsight.biggest, 9));
+
+    final daily = of([
+      for (var d = 1; d <= 16; d++)
+        if (d != 4) tx('t$d', day: d),
+    ]);
+    expect(
+      (daily.insight, daily.days, daily.streak),
+      (SearchInsight.daily, 15, 12),
+    );
   });
 }

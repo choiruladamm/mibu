@@ -1113,5 +1113,56 @@
       }
     }
   },
-  "searchTry": "coba cari"
+  "searchTry": "coba cari",
+  "searchBadgeMixed": "campur",
+  "searchBadgeDaily": "hampir tiap hari",
+  "searchBadgeBusiest": "paling sering",
+  "searchBadgeBiggest": "paling gede",
+  "searchInsExpense": "pengeluaran {amount}",
+  "@searchInsExpense": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "searchInsIncome": "pemasukan {amount}",
+  "@searchInsIncome": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "searchInsDays": "{days} dari {today} hari",
+  "@searchInsDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "today": {
+        "type": "int"
+      }
+    }
+  },
+  "searchInsStreak": "beruntun {n} hari",
+  "@searchInsStreak": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "searchInsTimes": "{n}×",
+  "@searchInsTimes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "searchInsOnly": "satu-satunya bulan ini",
+  "searchTickHeight": "tinggi = nominal",
+  "searchTickWidth": "tebal = jumlah",
+  "searchTickWhen": "kapan kejadiannya"
 }

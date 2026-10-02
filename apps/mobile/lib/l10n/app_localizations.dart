@@ -2007,6 +2007,84 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'coba cari'**
   String get searchTry;
+
+  /// No description provided for @searchBadgeMixed.
+  ///
+  /// In id, this message translates to:
+  /// **'campur'**
+  String get searchBadgeMixed;
+
+  /// No description provided for @searchBadgeDaily.
+  ///
+  /// In id, this message translates to:
+  /// **'hampir tiap hari'**
+  String get searchBadgeDaily;
+
+  /// No description provided for @searchBadgeBusiest.
+  ///
+  /// In id, this message translates to:
+  /// **'paling sering'**
+  String get searchBadgeBusiest;
+
+  /// No description provided for @searchBadgeBiggest.
+  ///
+  /// In id, this message translates to:
+  /// **'paling gede'**
+  String get searchBadgeBiggest;
+
+  /// No description provided for @searchInsExpense.
+  ///
+  /// In id, this message translates to:
+  /// **'pengeluaran {amount}'**
+  String searchInsExpense(String amount);
+
+  /// No description provided for @searchInsIncome.
+  ///
+  /// In id, this message translates to:
+  /// **'pemasukan {amount}'**
+  String searchInsIncome(String amount);
+
+  /// No description provided for @searchInsDays.
+  ///
+  /// In id, this message translates to:
+  /// **'{days} dari {today} hari'**
+  String searchInsDays(int days, int today);
+
+  /// No description provided for @searchInsStreak.
+  ///
+  /// In id, this message translates to:
+  /// **'beruntun {n} hari'**
+  String searchInsStreak(int n);
+
+  /// No description provided for @searchInsTimes.
+  ///
+  /// In id, this message translates to:
+  /// **'{n}×'**
+  String searchInsTimes(int n);
+
+  /// No description provided for @searchInsOnly.
+  ///
+  /// In id, this message translates to:
+  /// **'satu-satunya bulan ini'**
+  String get searchInsOnly;
+
+  /// No description provided for @searchTickHeight.
+  ///
+  /// In id, this message translates to:
+  /// **'tinggi = nominal'**
+  String get searchTickHeight;
+
+  /// No description provided for @searchTickWidth.
+  ///
+  /// In id, this message translates to:
+  /// **'tebal = jumlah'**
+  String get searchTickWidth;
+
+  /// No description provided for @searchTickWhen.
+  ///
+  /// In id, this message translates to:
+  /// **'kapan kejadiannya'**
+  String get searchTickWhen;
 }
 
 class _AppLocalizationsDelegate

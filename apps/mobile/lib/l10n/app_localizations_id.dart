@@ -1192,4 +1192,53 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get searchTry => 'coba cari';
+
+  @override
+  String get searchBadgeMixed => 'campur';
+
+  @override
+  String get searchBadgeDaily => 'hampir tiap hari';
+
+  @override
+  String get searchBadgeBusiest => 'paling sering';
+
+  @override
+  String get searchBadgeBiggest => 'paling gede';
+
+  @override
+  String searchInsExpense(String amount) {
+    return 'pengeluaran $amount';
+  }
+
+  @override
+  String searchInsIncome(String amount) {
+    return 'pemasukan $amount';
+  }
+
+  @override
+  String searchInsDays(int days, int today) {
+    return '$days dari $today hari';
+  }
+
+  @override
+  String searchInsStreak(int n) {
+    return 'beruntun $n hari';
+  }
+
+  @override
+  String searchInsTimes(int n) {
+    return '$n×';
+  }
+
+  @override
+  String get searchInsOnly => 'satu-satunya bulan ini';
+
+  @override
+  String get searchTickHeight => 'tinggi = nominal';
+
+  @override
+  String get searchTickWidth => 'tebal = jumlah';
+
+  @override
+  String get searchTickWhen => 'kapan kejadiannya';
 }
