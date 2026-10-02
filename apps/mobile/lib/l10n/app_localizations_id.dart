@@ -330,4 +330,27 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get pocketManage => 'atur kantong';
+
+  @override
+  String get keyPlus => 'tambah nominal lain';
+
+  @override
+  String get keyTwoZeros => 'tambah dua nol';
+
+  @override
+  String get keyClear => 'kosongin semua';
+
+  @override
+  String get keyClearShort => 'kosongin';
+
+  @override
+  String get keySave => 'simpan';
+
+  @override
+  String get amountTypeHint => 'ketik nominal';
+
+  @override
+  String amountInWords(String words) {
+    return '$words rupiah';
+  }
 }

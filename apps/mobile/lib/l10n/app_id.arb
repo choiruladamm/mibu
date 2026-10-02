@@ -256,5 +256,19 @@
       }
     }
   },
-  "pocketManage": "atur kantong"
+  "pocketManage": "atur kantong",
+  "keyPlus": "tambah nominal lain",
+  "keyTwoZeros": "tambah dua nol",
+  "keyClear": "kosongin semua",
+  "keyClearShort": "kosongin",
+  "keySave": "simpan",
+  "amountTypeHint": "ketik nominal",
+  "amountInWords": "{words} rupiah",
+  "@amountInWords": {
+    "placeholders": {
+      "words": {
+        "type": "String"
+      }
+    }
+  }
 }

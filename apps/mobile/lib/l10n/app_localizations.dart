@@ -645,6 +645,48 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'atur kantong'**
   String get pocketManage;
+
+  /// No description provided for @keyPlus.
+  ///
+  /// In id, this message translates to:
+  /// **'tambah nominal lain'**
+  String get keyPlus;
+
+  /// No description provided for @keyTwoZeros.
+  ///
+  /// In id, this message translates to:
+  /// **'tambah dua nol'**
+  String get keyTwoZeros;
+
+  /// No description provided for @keyClear.
+  ///
+  /// In id, this message translates to:
+  /// **'kosongin semua'**
+  String get keyClear;
+
+  /// No description provided for @keyClearShort.
+  ///
+  /// In id, this message translates to:
+  /// **'kosongin'**
+  String get keyClearShort;
+
+  /// No description provided for @keySave.
+  ///
+  /// In id, this message translates to:
+  /// **'simpan'**
+  String get keySave;
+
+  /// No description provided for @amountTypeHint.
+  ///
+  /// In id, this message translates to:
+  /// **'ketik nominal'**
+  String get amountTypeHint;
+
+  /// No description provided for @amountInWords.
+  ///
+  /// In id, this message translates to:
+  /// **'{words} rupiah'**
+  String amountInWords(String words);
 }
 
 class _AppLocalizationsDelegate

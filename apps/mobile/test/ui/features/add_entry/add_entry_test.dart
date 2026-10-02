@@ -7,20 +7,9 @@ import 'package:mibu/data/database/app_database.dart';
 import 'package:mibu/l10n/app_localizations.dart';
 import 'package:mibu/ui/core/clock.dart';
 import 'package:mibu/ui/core/theme.dart';
-import 'package:mibu/ui/features/add_entry/view_models/add_entry_view_model.dart';
 import 'package:mibu/ui/features/add_entry/views/add_entry_view.dart';
 
 void main() {
-  test('pressKey: no leading zeros, 000, max 10 digits', () {
-    expect(pressKey('', '0'), '');
-    expect(pressKey('', '000'), '');
-    expect(pressKey('5', '000'), '5000');
-    expect(pressKey('12', '3'), '123');
-    expect(pressKey('123456789', '0'), '1234567890');
-    expect(pressKey('1234567890', '1'), '1234567890'); // full
-    expect(pressKey('12345678', '000'), '12345678'); // would be 11
-  });
-
   testWidgets('catat: type amount, pick a category, save → db', (tester) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
@@ -60,8 +49,9 @@ void main() {
     await settle();
 
     // Nothing typed: save is disabled.
-    final save = find.widgetWithText(FilledButton, 'simpan pengeluaran');
-    expect(tester.widget<FilledButton>(save).onPressed, isNull);
+    final save = find.bySemanticsLabel('simpan pengeluaran');
+    expect(tester.getSemantics(save), isSemantics(isEnabled: false));
+    expect(find.text('ketik nominal'), findsOneWidget);
 
     for (final k in ['5', '000']) {
       await tester.tap(
@@ -73,6 +63,21 @@ void main() {
     await tester.tap(find.bySemanticsLabel('0'));
     await tester.pump();
     expect(find.text('50.000'), findsOneWidget);
+    expect(find.text('lima puluh ribu rupiah'), findsOneWidget);
+
+    // "+" adds another amount: 50.000 + 2.000.
+    await tester.tap(find.bySemanticsLabel('tambah nominal lain'));
+    await tester.pump();
+    expect(find.text('50.000 + …'), findsOneWidget);
+    for (final k in ['2', '000']) {
+      await tester.tap(
+        find.bySemanticsLabel(k == '000' ? 'tambah tiga nol' : k),
+      );
+      await tester.pump();
+    }
+    expect(find.text('50.000 + 2.000'), findsOneWidget);
+    expect(find.text('52.000'), findsOneWidget);
+    expect(find.text('lima puluh dua ribu rupiah'), findsOneWidget);
 
     // Pick makan in the sheet.
     await tester.tap(find.text('pilih kategori'));
@@ -89,16 +94,17 @@ void main() {
     await tester.tap(find.text('pakai 🍜 makan'));
     await settle();
 
-    // makan pocket: 1,5jt − 390K − 50K left.
+    // makan pocket: 1,5jt − 390K − 52K left.
     expect(find.text('🍜 kantong makan abis ini'), findsOneWidget);
     expect(find.text('sisa Rp1,06jt'), findsOneWidget);
 
+    expect(tester.getSemantics(save), isSemantics(isEnabled: true));
     await tester.tap(save);
     await settle();
 
     final rows = await (db.select(
       db.transactions,
-    )..where((t) => t.amount.equals(-50000))).get();
+    )..where((t) => t.amount.equals(-52000))).get();
     expect(rows, hasLength(1));
     expect(rows.single.at, now);
 

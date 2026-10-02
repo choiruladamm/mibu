@@ -3,12 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 
 import '../../../../data/repositories/finance_repository.dart';
+import '../../../../domain/amount.dart';
 import '../../../../domain/models/finance.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../core/clock.dart';
 import '../../../core/dates.dart';
 import '../../../core/money.dart';
 import '../../../core/tokens.dart';
+import '../../../core/widgets/amount_keypad.dart';
 import '../../../core/widgets/date_sheet.dart';
 import '../../../core/widgets/day_strip.dart';
 import '../../../core/widgets/note_sheet.dart';
@@ -128,9 +130,18 @@ class _AddEntryViewState extends ConsumerState<AddEntryView> {
                       onPick: _vm.pickDay,
                     ),
                   ),
-                  const SizedBox(height: 18),
-                  _Amount(digits: s.digits, sign: income ? '+' : '-'),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 10),
+                  _AmountLine(_expression(s.draft)),
+                  const SizedBox(height: 2),
+                  _Amount(total: s.amount, sign: income ? '+' : '-'),
+                  const SizedBox(height: 6),
+                  _AmountLine(
+                    s.amount == 0
+                        ? l.amountTypeHint
+                        : l.amountInWords(terbilang(s.amount)),
+                    size: 13,
+                  ),
+                  const SizedBox(height: 12),
                   _Impact(state: s),
                   const SizedBox(height: 16),
                   Padding(
@@ -152,16 +163,16 @@ class _AddEntryViewState extends ConsumerState<AddEntryView> {
                   ),
                   const Spacer(),
                   const SizedBox(height: 16),
-                  _Keypad(onKey: _vm.press, onBackspace: _vm.backspace),
-                  const SizedBox(height: 14),
                   Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpace.gutter,
-                    ),
-                    child: PrimaryButton(
-                      label: l.saveEntry(income ? l.income : l.expense),
-                      icon: HugeIcons.strokeRoundedTick02,
-                      onPressed: s.canSave ? _save : null,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: AmountKeypad(
+                      onKey: _vm.press,
+                      onBackspace: _vm.backspace,
+                      onClear: _vm.clear,
+                      onSave: _save,
+                      saveLabel: income ? l.income : l.expense,
+                      canClear: !draftIsEmpty(s.draft),
+                      canSave: s.canSave,
                     ),
                   ),
                 ],
@@ -230,11 +241,42 @@ class _KindToggle extends StatelessWidget {
   }
 }
 
+/// "50.000 + 20.000 + …" while adding up with "+"; empty otherwise.
+String _expression(AmountDraft d) {
+  if (d.parts.isEmpty) return '';
+  String dots(int v) => rupiah(v).replaceFirst('Rp', '');
+  final cur = int.tryParse(d.digits) ?? 0;
+  return [...d.parts.map(dots), cur == 0 ? '…' : dots(cur)].join(' + ');
+}
+
+/// Muted one-liner above / below the amount; keeps its height when empty.
+class _AmountLine extends StatelessWidget {
+  const _AmountLine(this.text, {this.size = 14});
+
+  final String text;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: size + 4,
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: AppText.caption.copyWith(fontSize: size, color: AppColors.muted),
+      ),
+    );
+  }
+}
+
 /// Big amount with a blinking caret; shrinks 68 → 54 → 44 as it grows.
 class _Amount extends StatefulWidget {
-  const _Amount({required this.digits, required this.sign});
+  const _Amount({required this.total, required this.sign});
 
-  final String digits, sign;
+  final int total;
+  final String sign;
 
   @override
   State<_Amount> createState() => _AmountState();
@@ -254,8 +296,7 @@ class _AmountState extends State<_Amount> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final shown = rupiah(int.tryParse(widget.digits) ?? 0)
-        .replaceFirst('Rp', '');
+    final shown = rupiah(widget.total).replaceFirst('Rp', '');
     final size = shown.length > 9
         ? 44.0
         : shown.length > 7
@@ -559,87 +600,6 @@ class _NoteChip extends StatelessWidget {
             iconSize: 14,
             color: AppColors.paper,
             onTap: onClear,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Keypad extends StatelessWidget {
-  const _Keypad({required this.onKey, required this.onBackspace});
-
-  final ValueChanged<String> onKey;
-  final VoidCallback onBackspace;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context)!;
-    Widget key(String k) => Semantics(
-      button: true,
-      label: k == '000' ? l.keyThreeZeros : k,
-      excludeSemantics: true,
-      child: Material(
-        color: AppColors.mist,
-        shape: const CircleBorder(),
-        child: InkWell(
-          customBorder: const CircleBorder(),
-          onTap: () => onKey(k),
-          child: SizedBox(
-            width: 72,
-            height: 72,
-            child: Center(
-              child: Text(
-                k,
-                style: AppText.label.copyWith(fontSize: k == '000' ? 24 : 30),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-    final rows = [
-      ['1', '2', '3'],
-      ['4', '5', '6'],
-      ['7', '8', '9'],
-    ];
-    return SizedBox(
-      width: 300,
-      child: Column(
-        spacing: 10,
-        children: [
-          for (final r in rows)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [for (final k in r) key(k)],
-            ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              key('000'),
-              key('0'),
-              Semantics(
-                button: true,
-                label: l.keyBackspace,
-                excludeSemantics: true,
-                child: InkWell(
-                  customBorder: const CircleBorder(),
-                  onTap: onBackspace,
-                  child: const SizedBox(
-                    width: 72,
-                    height: 72,
-                    child: Center(
-                      child: HugeIcon(
-                        icon: AppIcons.backspace,
-                        size: 28,
-                        strokeWidth: AppStroke.icon,
-                        color: AppColors.ink,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
           ),
         ],
       ),
