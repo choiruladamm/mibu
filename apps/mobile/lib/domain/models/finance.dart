@@ -191,27 +191,71 @@ int safeToSpendToday({
   return (balance + spentToday) ~/ days - spentToday;
 }
 
-/// "saldo per bulan": 3 past months, this month, 2 predicted.
-/// [nets] = net change of months now-3 … now (4 values).
-/// Prediction = balance + average net of the 3 full months.
-List<MonthBalance> balanceSeries({
+int _monthIndex(DateTime m) => m.year * 12 + m.month;
+
+/// Balance at the end of [month] (first-of-month key, not after [now]'s).
+/// Walks back from [balance] (= now) by [nets] (month → net change).
+int monthEndBalance({
   required DateTime now,
   required int balance,
-  required List<int> nets,
+  required Map<DateTime, int> nets,
+  required DateTime month,
 }) {
-  assert(nets.length == 4);
-  DateTime month(int offset) => DateTime(now.year, now.month + offset);
-  final ends = List<int>.filled(4, 0);
-  ends[3] = balance;
-  for (var i = 2; i >= 0; i--) {
-    ends[i] = ends[i + 1] - nets[i + 1];
+  var b = balance;
+  for (
+    var m = DateTime(now.year, now.month);
+    _monthIndex(m) > _monthIndex(month);
+    m = DateTime(m.year, m.month - 1)
+  ) {
+    b -= nets[m] ?? 0;
   }
+  return b;
+}
+
+/// "saldo per bulan": 6 months from [start] (default window = 3 past, now,
+/// 2 predicted). Up to [now]'s month: balance at month end. After it:
+/// prediction = balance + k × average net of the 3 months before now.
+List<MonthBalance> balanceSeries({
+  required DateTime now,
+  required DateTime start,
+  required int balance,
+  required Map<DateTime, int> nets,
+}) {
+  final cur = DateTime(now.year, now.month);
+  int net(int back) => nets[DateTime(cur.year, cur.month - back)] ?? 0;
   // ponytail: flat average; swap for something smarter once there's history.
-  final avg = (nets[0] + nets[1] + nets[2]) ~/ 3;
+  final avg = (net(3) + net(2) + net(1)) ~/ 3;
   return [
-    for (var i = 0; i < 4; i++)
-      MonthBalance(month: month(i - 3), amount: ends[i]),
-    for (var k = 1; k <= 2; k++)
-      MonthBalance(month: month(k), amount: balance + avg * k),
+    for (var i = 0; i < 6; i++)
+      () {
+        final month = DateTime(start.year, start.month + i);
+        final ahead = _monthIndex(month) - _monthIndex(cur);
+        return MonthBalance(
+          month: month,
+          amount: ahead > 0
+              ? balance + avg * ahead
+              : monthEndBalance(
+                  now: now,
+                  balance: balance,
+                  nets: nets,
+                  month: month,
+                ),
+        );
+      }(),
   ];
+}
+
+/// First month of the chart window after [picked]. Stays put while [picked]
+/// is inside it; otherwise [picked] lands 4th, but the window never runs
+/// past now + 2 months.
+DateTime chartStart({
+  required DateTime now,
+  required DateTime start,
+  required DateTime picked,
+}) {
+  final at = _monthIndex(picked) - _monthIndex(start);
+  if (at >= 0 && at <= 5) return start;
+  final latest = DateTime(now.year, now.month - 3);
+  final want = DateTime(picked.year, picked.month - 3);
+  return want.isAfter(latest) ? latest : want;
 }

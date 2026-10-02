@@ -9,11 +9,13 @@ class Totals {
   const Totals({
     required this.balance,
     required this.nets,
+    required this.spent,
     required this.spentToday,
   });
 
   final int balance;
-  final List<int> nets; // net change of months now-3 … now
+  final Map<DateTime, int> nets; // first of month → net change
+  final Map<DateTime, int> spent; // first of month → expenses, positive
   final int spentToday; // positive
 }
 
@@ -41,36 +43,37 @@ class FinanceRepository {
                   ),
           );
 
-  /// One query: balance, the 4 monthly nets and today's spending.
+  /// Balance, per-month nets / spending and today's spending.
+  // ponytail: reads every entry since opening and sums in Dart (local-time
+  // months; SQL strftime is UTC). Fine for years of daily use; move to a
+  // cached monthly table if it ever shows.
   Stream<Totals> watchTotals(Profile profile, DateTime now) {
-    DateTime month(int offset) => DateTime(now.year, now.month + offset);
     final today = DateTime(now.year, now.month, now.day);
-
-    Expression<bool> between(DateTime from, DateTime to) =>
-        _tx.at.isBiggerOrEqualValue(from) & _tx.at.isSmallerThanValue(to);
-
-    final balance = _tx.amount.sum();
-    final nets = [
-      for (var i = -3; i <= 0; i++)
-        _tx.amount.sum(filter: between(month(i), month(i + 1))),
-    ];
-    final spentToday = _tx.amount.sum(
-      filter:
-          _tx.at.isBiggerOrEqualValue(today) & _tx.amount.isSmallerThanValue(0),
-    );
-
     final q = _db.selectOnly(_tx)
-      ..addColumns([balance, ...nets, spentToday])
+      ..addColumns([_tx.at, _tx.amount])
       ..where(
         _tx.deletedAt.isNull() & _tx.at.isBiggerOrEqualValue(profile.openingAt),
       );
-    return q.watchSingle().map(
-      (r) => Totals(
-        balance: profile.openingBalance + (r.read(balance) ?? 0),
-        nets: [for (final n in nets) r.read(n) ?? 0],
-        spentToday: -(r.read(spentToday) ?? 0),
-      ),
-    );
+    return q.watch().map((rows) {
+      var balance = profile.openingBalance, spentToday = 0;
+      final nets = <DateTime, int>{}, spent = <DateTime, int>{};
+      for (final r in rows) {
+        final at = r.read(_tx.at)!, v = r.read(_tx.amount)!;
+        final month = DateTime(at.year, at.month);
+        balance += v;
+        nets[month] = (nets[month] ?? 0) + v;
+        if (v < 0) {
+          spent[month] = (spent[month] ?? 0) - v;
+          if (!at.isBefore(today)) spentToday -= v;
+        }
+      }
+      return Totals(
+        balance: balance,
+        nets: nets,
+        spent: spent,
+        spentToday: spentToday,
+      );
+    });
   }
 
   /// Categories with a monthly limit, plus this month's spending.

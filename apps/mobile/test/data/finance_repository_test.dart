@@ -31,7 +31,13 @@ void main() {
 
       final totals = await repo.watchTotals(profile, now).first;
       expect(totals.balance, 4530000);
-      expect(totals.nets, [546000, -844500, 5887500, -4059000]);
+      expect(totals.nets, {
+        DateTime(2026, 7): 546000,
+        DateTime(2026, 8): -844500,
+        DateTime(2026, 9): 5887500,
+        DateTime(2026, 10): -4059000,
+      });
+      expect(totals.spent[DateTime(2026, 10)], greaterThan(0));
       expect(totals.spentToday, 27000);
 
       final pockets = await repo.watchPockets(now).first;

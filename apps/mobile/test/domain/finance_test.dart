@@ -25,11 +25,20 @@ void main() {
     expect(s(-5000, 0), 0);
   });
 
+  final nets = {
+    DateTime(2026, 7): 546000,
+    DateTime(2026, 8): -844500,
+    DateTime(2026, 9): 5887500,
+    DateTime(2026, 10): -4059000,
+  };
+  final now = DateTime(2026, 10, 14);
+
   test('balanceSeries walks back from balance and predicts flat avg', () {
     final series = balanceSeries(
-      now: DateTime(2026, 10, 14),
+      now: now,
+      start: DateTime(2026, 7),
       balance: 4530000,
-      nets: [546000, -844500, 5887500, -4059000],
+      nets: nets,
     );
     expect(series.map((m) => m.month.month), [7, 8, 9, 10, 11, 12]);
     expect(series.map((m) => m.amount), [
@@ -40,6 +49,37 @@ void main() {
       6393000,
       8256000,
     ]);
+  });
+
+  test('balanceSeries window can start earlier; months without entries', () {
+    final series = balanceSeries(
+      now: now,
+      start: DateTime(2026, 5),
+      balance: 4530000,
+      nets: nets,
+    );
+    expect(series.map((m) => m.month.month), [5, 6, 7, 8, 9, 10]);
+    expect(series[0].amount, 3000000); // 3.546.000 − 546.000, nothing before
+    expect(series[1].amount, 3000000);
+  });
+
+  test('monthEndBalance: now is the balance, older walks back', () {
+    int at(DateTime m) =>
+        monthEndBalance(now: now, balance: 4530000, nets: nets, month: m);
+    expect(at(DateTime(2026, 10)), 4530000);
+    expect(at(DateTime(2026, 9)), 8589000);
+    expect(at(DateTime(2025, 12)), 3000000);
+  });
+
+  test('chartStart stays while picked is inside, else lands 4th', () {
+    DateTime start(DateTime from, DateTime picked) =>
+        chartStart(now: now, start: from, picked: picked);
+    final def = DateTime(2026, 7);
+    expect(start(def, DateTime(2026, 12)), def); // inside (a prediction)
+    expect(start(def, DateTime(2026, 8)), def);
+    expect(start(def, DateTime(2026, 3)), DateTime(2025, 12)); // 4th: mar
+    expect(start(DateTime(2025, 12), DateTime(2026, 10)), DateTime(2026, 7));
+    expect(start(DateTime(2025, 12), DateTime(2026, 12)), DateTime(2026, 7));
   });
 
   test('pocket status: unused, safe, almost out at 85%', () {
