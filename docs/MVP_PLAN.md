@@ -151,6 +151,8 @@ Satu konsep aja: **buat apa** (= baris `categories`). Kantong bukan benda sendir
 
 ### Budget & kantong
 
+> Periode budget lewat `Period` + resolver (fase 0 siklus gajian), lihat [PAYDAY_CYCLE_PLAN.md](PAYDAY_CYCLE_PLAN.md). v1 tetap bulan kalender.
+
 - Periode budget = bulan kalender, mulai tanggal 1. Tanggal gajian cuma dipakai buat aman jajan.
 - Budget bulanan = `profile.monthlyBudget`, diisi user, bukan turunan. Boleh beda dari Σ `monthlyLimit`. **[diupdate]**
   - Diisi lewat BudgetSheet 00.16 **[perlu design]**, dibuka dari PocketLimit 00.15 + hero 02.2 (M3), kartu 02.4 + ritme budget 02.3 (M6).
