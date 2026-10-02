@@ -122,6 +122,21 @@ void main() {
     );
   });
 
+  testWidgets('paling boros emoji sits 27px from the card corner', (
+    tester,
+  ) async {
+    await pump(tester);
+    final card = tester.getRect(
+      find.bySemanticsLabel(RegExp('^paling boros ')),
+    );
+    // the decorative circle's emoji (the bar badge is a different widget)
+    final emoji = tester.getCenter(
+      find.byWidgetPredicate((w) => w is Text && w.style?.fontSize == 30),
+    );
+    expect(card.right - emoji.dx, closeTo(27, 0.5));
+    expect(emoji.dy - card.top, closeTo(27, 0.5));
+  });
+
   testWidgets('02.3d no budget: pasang budget card', (tester) async {
     final db = await pump(tester);
     await tester.runAsync(

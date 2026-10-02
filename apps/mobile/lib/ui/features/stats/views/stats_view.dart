@@ -764,7 +764,10 @@ class _PeakCard extends StatelessWidget {
                 child: Container(
                   width: 72,
                   height: 72,
-                  padding: const EdgeInsets.only(right: 10, bottom: 10),
+                  // Board: padding 10px 10px 0 0 → the glyph sits 27px from the
+                  // card's top and right edges, centred in what the card
+                  // clips of the circle (it pokes 14px out of both).
+                  padding: const EdgeInsets.only(top: 10, right: 10),
                   alignment: Alignment.center,
                   decoration: const BoxDecoration(
                     color: AppColors.onInk12,
