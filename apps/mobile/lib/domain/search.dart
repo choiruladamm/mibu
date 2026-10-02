@@ -23,6 +23,91 @@ List<Transaction> searchEntries(
   ]..sort((a, b) => b.at.compareTo(a.at));
 }
 
+/// 04.2b "terakhir dicari": [q] moved to the front, at most 5.
+List<String> rememberSearch(List<String> recent, String q) {
+  final t = q.trim();
+  if (t.isEmpty) return recent;
+  return [t, ...recent.where((r) => r != t)].take(5).toList();
+}
+
+/// 04.2b "coba cari": the 3 most-used places (one per category), then the
+/// 3 most-used categories not already covered. Expenses in [month] only.
+List<({String emoji, String label})> searchIdeas(List<Transaction> month) {
+  final places = <String, ({int n, String emoji, String? cat})>{};
+  final cats = <String, ({int n, String emoji})>{};
+  for (final t in month) {
+    if (t.deleted || t.amount >= 0) continue;
+    if (t.place.isNotEmpty) {
+      final p = places[t.place];
+      places[t.place] = (n: (p?.n ?? 0) + 1, emoji: t.emoji, cat: t.category);
+    }
+    if (t.category case final c?) {
+      cats[c] = (n: (cats[c]?.n ?? 0) + 1, emoji: t.emoji);
+    }
+  }
+  // Most used first; ties keep first appearance (input is newest first).
+  List<String> ranked(Map<String, int> n) {
+    final keys = n.keys.toList();
+    return [...keys]..sort(
+      (a, b) => n[b] != n[a]
+          ? n[b]!.compareTo(n[a]!)
+          : keys.indexOf(a).compareTo(keys.indexOf(b)),
+    );
+  }
+
+  final seen = <String?>{};
+  final topPlaces = [
+    for (final k in ranked({for (final e in places.entries) e.key: e.value.n}))
+      if (seen.add(places[k]!.cat)) k,
+  ].take(3).toList();
+  final covered = {for (final k in topPlaces) places[k]!.cat};
+  final topCats = [
+    for (final k in ranked({for (final e in cats.entries) e.key: e.value.n}))
+      if (!covered.contains(k)) k,
+  ].take(3);
+  return [
+    for (final k in topPlaces) (emoji: places[k]!.emoji, label: k),
+    for (final k in topCats) (emoji: cats[k]!.emoji, label: k),
+  ];
+}
+
+/// 04.2c "maksud kamu …?": the closest category name or place word in
+/// [entries] within 2 edits of [term] (3+ letters), or null.
+String? didYouMean(List<Transaction> entries, String term) {
+  final q = term.trim().toLowerCase();
+  if (q.length < 3) return null;
+  final vocab = {
+    for (final t in entries) ...[
+      ?t.category?.toLowerCase(),
+      ...t.place.toLowerCase().split(' '),
+    ],
+  }..remove('');
+  if (vocab.contains(q)) return null; // spelled right, just not here
+  String? best;
+  var bestD = 3;
+  for (final w in vocab) {
+    if ((w.length - q.length).abs() > 2) continue;
+    final d = _edits(w, q);
+    if (d < bestD) (best, bestD) = (w, d);
+  }
+  return best;
+}
+
+/// Levenshtein distance.
+int _edits(String a, String b) {
+  var prev = List.generate(b.length + 1, (j) => j);
+  for (var i = 1; i <= a.length; i++) {
+    final cur = [i, ...List.filled(b.length, 0)];
+    for (var j = 1; j <= b.length; j++) {
+      final sub = prev[j - 1] + (a[i - 1] == b[j - 1] ? 0 : 1);
+      final del = prev[j] + 1, ins = cur[j - 1] + 1;
+      cur[j] = sub < del ? (sub < ins ? sub : ins) : (del < ins ? del : ins);
+    }
+    prev = cur;
+  }
+  return prev[b.length];
+}
+
 /// One day's hits in the summary ticks.
 typedef SearchDay = ({int count, int sum, int income, int expense});
 
@@ -66,6 +151,13 @@ class SearchSummary {
 
   /// Day with the largest |sum| (first wins a tie).
   int get biggestDay => _best((d) => d.sum.abs());
+
+  /// Day with a hit closest to [d] (earlier wins a tie): picking a tick
+  /// snaps to it.
+  int nearestDay(int d) {
+    final keys = byDay.keys.toList()..sort();
+    return keys.reduce((a, b) => (b - d).abs() < (a - d).abs() ? b : a);
+  }
 
   SearchInsight get insight {
     if (mixed) return SearchInsight.mixed;

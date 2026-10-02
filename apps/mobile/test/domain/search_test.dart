@@ -88,4 +88,58 @@ void main() {
       (SearchInsight.daily, 15, 12),
     );
   });
+
+  test('nearest day with a hit; ties go earlier', () {
+    final s = SearchSummary([
+      tx('a', day: 2),
+      tx('b', day: 9),
+      tx('c', day: 13),
+    ], today: 16);
+    expect([1, 5, 6, 11, 30].map(s.nearestDay), [2, 2, 9, 9, 13]);
+  });
+
+  test('rememberSearch: newest first, no dupes, at most 5', () {
+    expect(rememberSearch(['a', 'b'], ' b '), ['b', 'a']);
+    expect(rememberSearch(['a'], '  '), ['a']);
+    expect(rememberSearch(['1', '2', '3', '4', '5'], '6'), [
+      '6',
+      '1',
+      '2',
+      '3',
+      '4',
+    ]);
+  });
+
+  test('ideas: top 3 places one per category, then other categories', () {
+    final month = [
+      for (var i = 0; i < 4; i++) tx('k$i', place: 'kopi kenangan'),
+      for (var i = 0; i < 3; i++) tx('f$i', place: 'fore'), // ngopi again
+      for (var i = 0; i < 2; i++) tx('g$i', category: 'ojol', place: 'gojek'),
+      tx('w', category: 'makan', place: 'warteg'),
+      tx('a', category: 'anabul'),
+      tx('b', category: 'belanja'),
+      tx('h', category: 'hiburan'),
+      tx('s', category: 'gajian', place: 'kantor', amount: 8500000),
+    ];
+    expect(searchIdeas(month).map((i) => i.label), [
+      'kopi kenangan',
+      'gojek',
+      'warteg',
+      'anabul',
+      'belanja',
+      'hiburan',
+    ]);
+  });
+
+  test('didYouMean: within 2 edits, 3+ letters', () {
+    final e = [
+      tx('a', place: 'Kopi Kenangan'),
+      tx('b', category: 'ojol', place: 'gojek'),
+    ];
+    expect(didYouMean(e, 'kopii'), 'kopi');
+    expect(didYouMean(e, 'gojke'), 'gojek');
+    expect(didYouMean(e, 'kopi'), isNull); // exact = no fix
+    expect(didYouMean(e, 'ko'), isNull);
+    expect(didYouMean(e, 'bioskop'), isNull);
+  });
 }
