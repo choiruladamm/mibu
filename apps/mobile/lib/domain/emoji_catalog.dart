@@ -554,7 +554,7 @@ const emojiCatalog = <CatalogEmoji>[
 
 /// Shown for a stored emoji the catalog doesn't have (data from before the
 /// catalog): never the phone's own emoji font.
-const fallbackEmoji = '🧾';
+const fallbackEmoji = '🫙';
 
 String _norm(String e) => e.replaceAll('\u{FE0F}', '');
 
