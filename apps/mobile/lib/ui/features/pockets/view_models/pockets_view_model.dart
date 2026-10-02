@@ -23,12 +23,14 @@ class PocketsState {
     required this.pockets,
     required this.selected,
     required this.daysLeft,
+    required this.budget,
   });
 
   final DateTime month;
   final List<Pocket> pockets;
   final Pocket? selected; // null = no pockets yet
   final int daysLeft; // in this month, today included
+  final int? budget; // budget bulanan; null = not set
 
   int get limit => pockets.fold(0, (sum, p) => sum + p.budget);
   int get spent => pockets.fold(0, (sum, p) => sum + p.spent);
@@ -38,6 +40,7 @@ class PocketsState {
 /// 02.2 kantong state.
 final pocketsScreenProvider = Provider<AsyncValue<PocketsState>>((ref) {
   final now = ref.watch(nowProvider);
+  final budget = ref.watch(profileProvider).value?.monthlyBudget;
   return switch (ref.watch(pocketsProvider)) {
     AsyncData(:final value) => AsyncData(
       PocketsState(
@@ -49,6 +52,7 @@ final pocketsScreenProvider = Provider<AsyncValue<PocketsState>>((ref) {
                 .firstOrNull ??
             value.firstOrNull,
         daysLeft: daysLeftInMonth(now),
+        budget: budget,
       ),
     ),
     AsyncError(:final error, :final stackTrace) => () {

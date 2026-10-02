@@ -79,6 +79,10 @@ class Pocket {
 
 enum PocketStatus { safe, almostOut, unused }
 
+/// BudgetSheet prefill: Σ pocket limits rounded up to Rp500K.
+int budgetPrefill(int pocketsTotal) =>
+    (pocketsTotal + 499999) ~/ 500000 * 500000;
+
 /// Days left in [now]'s month, today included (never 0).
 int daysLeftInMonth(DateTime now) =>
     DateTime(now.year, now.month + 1, 0).day - now.day + 1;

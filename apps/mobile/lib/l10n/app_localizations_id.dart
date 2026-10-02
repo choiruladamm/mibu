@@ -288,8 +288,8 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
-  String pocketsSpentOf(String spent, String limit, int days) {
-    return '$spent dari $limit kepake · $days hari lagi';
+  String pocketsSpentOf(String spent, String limit) {
+    return '$spent dari $limit kepake · ';
   }
 
   @override
@@ -352,5 +352,76 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String amountInWords(String words) {
     return '$words rupiah';
+  }
+
+  @override
+  String get undo => 'batalin';
+
+  @override
+  String get budgetTitle => 'budget bulanan';
+
+  @override
+  String get budgetSub => 'berapa yang boleh kepake sebulan?';
+
+  @override
+  String get budgetLabelNow => 'budget sekarang';
+
+  @override
+  String get budgetLabelSuggest => 'saran dari total kantong';
+
+  @override
+  String get budgetAutoFilled => 'diisi otomatis';
+
+  @override
+  String budgetInfoType(String total) {
+    return 'kantong kamu total $total · ketik budget kamu';
+  }
+
+  @override
+  String budgetInfoFree(String total, String free) {
+    return 'kantong kamu total $total · sisa bebas $free';
+  }
+
+  @override
+  String budgetInfoShort(String amount) {
+    return 'kurang $amount buat nutup semua kantong';
+  }
+
+  @override
+  String get budgetFillFirst => 'isi dulu';
+
+  @override
+  String budgetPerMonth(String amount) {
+    return '$amount / bln';
+  }
+
+  @override
+  String get budgetDelete => 'hapus budget';
+
+  @override
+  String budgetSavedTitle(String amount) {
+    return 'budget $amount kesimpen';
+  }
+
+  @override
+  String get budgetSavedSub => 'ritme budget dihitung ulang';
+
+  @override
+  String get budgetDeletedTitle => 'budget dihapus';
+
+  @override
+  String get budgetDeletedSub => 'ritme budget libur dulu';
+
+  @override
+  String pocketsBudget(String amount) {
+    return 'budget $amount';
+  }
+
+  @override
+  String get pocketsSetBudget => 'pasang budget';
+
+  @override
+  String pocketsDaysLeft(int days) {
+    return '$days hari lagi';
   }
 }

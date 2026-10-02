@@ -10,6 +10,7 @@ import '../../../../routing/router.dart';
 import '../../../core/money.dart';
 import '../../../core/tokens.dart';
 import '../../../core/widgets/tab_bar.dart';
+import '../../budget/views/budget_sheet.dart';
 import '../view_models/pockets_view_model.dart';
 
 /// 02.2 kantong. Isi ulang and impian are post-MVP.
@@ -69,22 +70,28 @@ class PocketsView extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 22),
-                  Text(
-                    l.pocketsLeftTitle(
-                      _monthFull.format(s.month).toLowerCase(),
-                    ),
-                    style: muted,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          l.pocketsLeftTitle(
+                            _monthFull.format(s.month).toLowerCase(),
+                          ),
+                          style: muted,
+                        ),
+                      ),
+                      _DaysChip(l.pocketsDaysLeft(s.daysLeft)),
+                    ],
                   ),
                   const SizedBox(height: 4),
                   _Amount(s.left),
                   const SizedBox(height: 4),
-                  Text(
-                    l.pocketsSpentOf(
-                      rupiahCompact(s.spent),
-                      rupiahCompact(s.limit),
-                      s.daysLeft,
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: _BudgetLine(
+                      state: s,
+                      onTap: () => editBudget(context, ref),
                     ),
-                    style: muted,
                   ),
                   const SizedBox(height: 22),
                   if (selected == null)
@@ -113,6 +120,103 @@ class PocketsView extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _DaysChip extends StatelessWidget {
+  const _DaysChip(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 26,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: AppColors.mist,
+        borderRadius: BorderRadius.circular(13),
+      ),
+      child: Text(
+        text,
+        style: AppText.caption.copyWith(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
+}
+
+/// "Rp2,34jt dari Rp7,4jt kepake · budget Rp8jt ›" — opens 00.16.
+class _BudgetLine extends StatelessWidget {
+  const _BudgetLine({required this.state, required this.onTap});
+
+  final PocketsState state;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    final budget = state.budget;
+    final muted = AppText.label.copyWith(fontSize: 14, color: AppColors.muted);
+    return Transform.translate(
+      offset: const Offset(-8, 0),
+      child: Semantics(
+        button: true,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            height: 32,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 4,
+              children: [
+                Flexible(
+                  child: Text.rich(
+                    TextSpan(
+                      text: l.pocketsSpentOf(
+                        rupiahCompact(state.spent),
+                        rupiahCompact(state.limit),
+                      ),
+                      children: [
+                        TextSpan(
+                          text: budget == null
+                              ? l.pocketsSetBudget
+                              : l.pocketsBudget(rupiahCompact(budget)),
+                          style: TextStyle(
+                            color: AppColors.ink,
+                            fontWeight: budget == null
+                                ? FontWeight.w600
+                                : FontWeight.w400,
+                            decoration: budget == null
+                                ? TextDecoration.underline
+                                : null,
+                            decorationColor: AppColors.ink,
+                          ),
+                        ),
+                      ],
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: muted,
+                  ),
+                ),
+                const HugeIcon(
+                  icon: HugeIcons.strokeRoundedArrowRight01,
+                  size: 14,
+                  strokeWidth: AppStroke.iconOnInkSmall,
+                  color: AppColors.muted,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -583,8 +583,8 @@ abstract class AppLocalizations {
   /// No description provided for @pocketsSpentOf.
   ///
   /// In id, this message translates to:
-  /// **'{spent} dari {limit} kepake · {days} hari lagi'**
-  String pocketsSpentOf(String spent, String limit, int days);
+  /// **'{spent} dari {limit} kepake · '**
+  String pocketsSpentOf(String spent, String limit);
 
   /// No description provided for @pocketsEmpty.
   ///
@@ -687,6 +687,120 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'{words} rupiah'**
   String amountInWords(String words);
+
+  /// No description provided for @undo.
+  ///
+  /// In id, this message translates to:
+  /// **'batalin'**
+  String get undo;
+
+  /// No description provided for @budgetTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'budget bulanan'**
+  String get budgetTitle;
+
+  /// No description provided for @budgetSub.
+  ///
+  /// In id, this message translates to:
+  /// **'berapa yang boleh kepake sebulan?'**
+  String get budgetSub;
+
+  /// No description provided for @budgetLabelNow.
+  ///
+  /// In id, this message translates to:
+  /// **'budget sekarang'**
+  String get budgetLabelNow;
+
+  /// No description provided for @budgetLabelSuggest.
+  ///
+  /// In id, this message translates to:
+  /// **'saran dari total kantong'**
+  String get budgetLabelSuggest;
+
+  /// No description provided for @budgetAutoFilled.
+  ///
+  /// In id, this message translates to:
+  /// **'diisi otomatis'**
+  String get budgetAutoFilled;
+
+  /// No description provided for @budgetInfoType.
+  ///
+  /// In id, this message translates to:
+  /// **'kantong kamu total {total} · ketik budget kamu'**
+  String budgetInfoType(String total);
+
+  /// No description provided for @budgetInfoFree.
+  ///
+  /// In id, this message translates to:
+  /// **'kantong kamu total {total} · sisa bebas {free}'**
+  String budgetInfoFree(String total, String free);
+
+  /// No description provided for @budgetInfoShort.
+  ///
+  /// In id, this message translates to:
+  /// **'kurang {amount} buat nutup semua kantong'**
+  String budgetInfoShort(String amount);
+
+  /// No description provided for @budgetFillFirst.
+  ///
+  /// In id, this message translates to:
+  /// **'isi dulu'**
+  String get budgetFillFirst;
+
+  /// No description provided for @budgetPerMonth.
+  ///
+  /// In id, this message translates to:
+  /// **'{amount} / bln'**
+  String budgetPerMonth(String amount);
+
+  /// No description provided for @budgetDelete.
+  ///
+  /// In id, this message translates to:
+  /// **'hapus budget'**
+  String get budgetDelete;
+
+  /// No description provided for @budgetSavedTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'budget {amount} kesimpen'**
+  String budgetSavedTitle(String amount);
+
+  /// No description provided for @budgetSavedSub.
+  ///
+  /// In id, this message translates to:
+  /// **'ritme budget dihitung ulang'**
+  String get budgetSavedSub;
+
+  /// No description provided for @budgetDeletedTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'budget dihapus'**
+  String get budgetDeletedTitle;
+
+  /// No description provided for @budgetDeletedSub.
+  ///
+  /// In id, this message translates to:
+  /// **'ritme budget libur dulu'**
+  String get budgetDeletedSub;
+
+  /// No description provided for @pocketsBudget.
+  ///
+  /// In id, this message translates to:
+  /// **'budget {amount}'**
+  String pocketsBudget(String amount);
+
+  /// No description provided for @pocketsSetBudget.
+  ///
+  /// In id, this message translates to:
+  /// **'pasang budget'**
+  String get pocketsSetBudget;
+
+  /// No description provided for @pocketsDaysLeft.
+  ///
+  /// In id, this message translates to:
+  /// **'{days} hari lagi'**
+  String pocketsDaysLeft(int days);
 }
 
 class _AppLocalizationsDelegate

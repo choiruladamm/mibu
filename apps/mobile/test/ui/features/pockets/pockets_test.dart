@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mibu/data/database/app_database.dart';
+import 'package:mibu/data/repositories/finance_repository.dart';
 import 'package:mibu/l10n/app_localizations.dart';
 import 'package:mibu/ui/core/clock.dart';
 import 'package:mibu/ui/core/theme.dart';
@@ -53,7 +54,14 @@ void main() {
     // Σ limit 3,3jt − Σ kepake 1,66jt; 14 okt → 18 days incl. today
     expect(find.text('sisa jajan oktober'), findsOneWidget);
     expect(find.text('1.640.000'), findsOneWidget);
-    expect(find.text('Rp1,66jt dari Rp3,3jt kepake · 18 hari lagi'), findsOne);
+    expect(find.text('18 hari lagi'), findsOneWidget);
+    expect(
+      find.text(
+        'Rp1,66jt dari Rp3,3jt kepake · budget Rp8jt',
+        findRichText: true,
+      ),
+      findsOneWidget,
+    );
 
     // anabul 90% → hampir abis
     expect(find.text('anabul'), findsOneWidget);
@@ -70,6 +78,86 @@ void main() {
     expect(find.text('ngopi'), findsOneWidget);
     expect(find.text('aman'), findsOneWidget);
     expect(find.text('Rp120K'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox());
+    await db.close();
+  });
+
+  testWidgets('budget: edit, hapus + batalin, prefill when empty', (
+    tester,
+  ) async {
+    final db = await pump(tester, const Size(390, 844));
+    Future<int?> budget() async =>
+        (await db.select(db.profiles).getSingle()).monthlyBudget;
+    Future<void> settle() async {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 50)),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    Future<void> openSheet() async {
+      await tester.tap(find.textContaining('kepake ·', findRichText: true));
+      await tester.pumpAndSettle();
+    }
+
+    // Edit: first key replaces the current Rp8jt.
+    await openSheet();
+    expect(find.text('budget sekarang'), findsOneWidget);
+    expect(find.text('8.000.000'), findsOneWidget);
+    for (final k in ['5', '000', '000']) {
+      await tester.tap(
+        find.bySemanticsLabel(k == '000' ? 'tambah tiga nol' : k),
+      );
+      await tester.pump();
+    }
+    expect(find.text('5.000.000'), findsOneWidget);
+    expect(
+      find.text('kantong kamu total Rp3,3jt · sisa bebas Rp1,7jt'),
+      findsOneWidget,
+    );
+    await tester.tap(find.bySemanticsLabel('simpan Rp5jt / bln'));
+    await settle();
+    expect(await budget(), 5000000);
+    expect(find.text('budget Rp5jt kesimpen'), findsOneWidget);
+    expect(
+      find.textContaining('budget Rp5jt', findRichText: true),
+      findsWidgets,
+    );
+
+    // Hapus → toast with batalin.
+    await openSheet();
+    await tester.tap(find.text('hapus budget'));
+    await settle();
+    expect(await budget(), isNull);
+    expect(find.text('budget dihapus'), findsOneWidget);
+    expect(find.textContaining('pasang budget', findRichText: true), findsOne);
+    await tester.tap(find.text('batalin'));
+    await settle();
+    expect(await budget(), 5000000);
+
+    // Empty: prefill Σ limits 3,3jt → 3,5jt; short of the pockets is bold.
+    await tester.runAsync(() => FinanceRepository(db).setMonthlyBudget(null));
+    await settle();
+    await openSheet();
+    expect(find.text('saran dari total kantong'), findsOneWidget);
+    expect(find.text('diisi otomatis'), findsOneWidget);
+    expect(find.text('3.500.000'), findsOneWidget);
+    expect(find.text('hapus budget'), findsNothing);
+    await tester.tap(find.bySemanticsLabel('kosongin semua'));
+    await tester.pump();
+    expect(
+      find.text('kantong kamu total Rp3,3jt · ketik budget kamu'),
+      findsOneWidget,
+    );
+    await tester.tap(find.bySemanticsLabel('1'));
+    await tester.tap(find.bySemanticsLabel('tambah tiga nol'));
+    await tester.tap(find.bySemanticsLabel('tambah tiga nol'));
+    await tester.pump();
+    expect(
+      find.text('kurang Rp2,3jt buat nutup semua kantong'),
+      findsOneWidget,
+    );
 
     await tester.pumpWidget(const SizedBox());
     await db.close();

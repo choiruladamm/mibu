@@ -89,4 +89,11 @@ void main() {
     expect(emojiIdeas('makan siang').first, '🍜');
     expect(emojiIdeas('zakat'), ['✨', '🧾', '📦']);
   });
+
+  test('budgetPrefill rounds Σ limits up to Rp500K', () {
+    expect(budgetPrefill(7400000), 7500000);
+    expect(budgetPrefill(7500000), 7500000);
+    expect(budgetPrefill(1), 500000);
+    expect(budgetPrefill(0), 0);
+  });
 }

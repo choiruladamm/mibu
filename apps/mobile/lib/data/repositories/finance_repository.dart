@@ -234,6 +234,16 @@ class FinanceRepository {
         ),
       );
 
+  /// Budget bulanan (00.16); null = hapus budget.
+  // ponytail: no-op before 01.4 atur awal creates the profile row (M5).
+  Future<void> setMonthlyBudget(int? budget) =>
+      (_db.update(_db.profiles)..where((p) => p.deletedAt.isNull())).write(
+        ProfilesCompanion(
+          monthlyBudget: Value(budget),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+
   /// Per category: entries (all time) and expense this year, positive.
   /// "12 catatan · Rp840K tahun ini" in 03.3 / 03.5 / 03.6.
   Stream<Map<String, ({int count, int spentThisYear})>> watchCategoryUsage(

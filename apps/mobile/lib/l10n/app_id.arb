@@ -199,7 +199,7 @@
       }
     }
   },
-  "pocketsSpentOf": "{spent} dari {limit} kepake · {days} hari lagi",
+  "pocketsSpentOf": "{spent} dari {limit} kepake · ",
   "@pocketsSpentOf": {
     "placeholders": {
       "spent": {
@@ -207,9 +207,6 @@
       },
       "limit": {
         "type": "String"
-      },
-      "days": {
-        "type": "int"
       }
     }
   },
@@ -268,6 +265,77 @@
     "placeholders": {
       "words": {
         "type": "String"
+      }
+    }
+  },
+  "undo": "batalin",
+  "budgetTitle": "budget bulanan",
+  "budgetSub": "berapa yang boleh kepake sebulan?",
+  "budgetLabelNow": "budget sekarang",
+  "budgetLabelSuggest": "saran dari total kantong",
+  "budgetAutoFilled": "diisi otomatis",
+  "budgetInfoType": "kantong kamu total {total} · ketik budget kamu",
+  "@budgetInfoType": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetInfoFree": "kantong kamu total {total} · sisa bebas {free}",
+  "@budgetInfoFree": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      },
+      "free": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetInfoShort": "kurang {amount} buat nutup semua kantong",
+  "@budgetInfoShort": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetFillFirst": "isi dulu",
+  "budgetPerMonth": "{amount} / bln",
+  "@budgetPerMonth": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetDelete": "hapus budget",
+  "budgetSavedTitle": "budget {amount} kesimpen",
+  "@budgetSavedTitle": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetSavedSub": "ritme budget dihitung ulang",
+  "budgetDeletedTitle": "budget dihapus",
+  "budgetDeletedSub": "ritme budget libur dulu",
+  "pocketsBudget": "budget {amount}",
+  "@pocketsBudget": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "pocketsSetBudget": "pasang budget",
+  "pocketsDaysLeft": "{days} hari lagi",
+  "@pocketsDaysLeft": {
+    "placeholders": {
+      "days": {
+        "type": "int"
       }
     }
   }
