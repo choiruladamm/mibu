@@ -121,4 +121,4 @@ Tanda: **[diupdate]** = aturan/perilaku berubah dari design, **[perlu design]** 
 - Recurring: engine auto-create, edit satu vs semua. Catat (03.1) belum ada kontrol berulang.
 - Durasi undo, layar mana aja yang di-mask "sembunyiin nominal", Face ID versi Android, palet dark mode.
 - State loading/error/empty pertama kali (beranda/statistik/kantong tanpa data).
-- Inkonsisten kecil: "jajan" di daftar pindah kategori nggak ada di set kategori; "gajian" muncul di picker mode pengeluaran; 04.4 nggak pakai DayStrip.
+- Inkonsisten kecil: "jajan" di daftar pindah kategori nggak ada di set kategori; "gajian" muncul di picker mode pengeluaran; 04.4 nggak pakai DayStrip (build pakai DayStrip 00.11); tombol 04.4 "simpan perubahan" + pill "2 perubahan · batalin" nggak muat di 390 (build: "simpan"); ConfirmModal 00.6 masih copy inggris "now 90% used / after 45%" (build: "sekarang 90% kepake / abis ini 45%"); struk 04.3 "#0413" belum ada kolom no. struk (build: tanggal aja).

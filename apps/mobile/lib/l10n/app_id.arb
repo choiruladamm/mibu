@@ -718,5 +718,21 @@
         "type": "String"
       }
     }
-  }
+  },
+  "editAmount": "nominal",
+  "editCategory": "kategori",
+  "editPlace": "di mana",
+  "editDay": "kapan",
+  "editChanged": "diubah",
+  "editNoChanges": "belum ada perubahan",
+  "editChanges": "{count} perubahan · batalin",
+  "@editChanges": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "editSave": "simpan",
+  "editDelete": "hapus catatan ini"
 }

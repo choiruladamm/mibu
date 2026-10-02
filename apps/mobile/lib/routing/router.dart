@@ -8,6 +8,7 @@ import '../ui/features/home/views/home_view.dart';
 import '../ui/features/onboarding/views/onboarding_view.dart';
 import '../ui/features/pockets/views/pockets_view.dart';
 import '../domain/models/finance.dart';
+import '../ui/features/transactions/views/edit_entry_view.dart';
 import '../ui/features/transactions/views/transaction_detail_view.dart';
 import '../ui/features/transactions/views/transactions_view.dart';
 
@@ -18,6 +19,7 @@ abstract final class Routes {
   static const addEntry = '/catat';
   static const transactions = '/transaksi';
   static String transaction(String id) => '$transactions/$id';
+  static String editEntry(String id) => '$transactions/$id/edit';
 }
 
 /// Tab bar → tab route. Stats / settings land in M6.
@@ -66,6 +68,13 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: ':id',
             builder: (_, state) =>
                 TransactionDetailView(id: state.pathParameters['id']!),
+            routes: [
+              GoRoute(
+                path: 'edit',
+                builder: (_, state) =>
+                    EditEntryView(id: state.pathParameters['id']!),
+              ),
+            ],
           ),
         ],
       ),

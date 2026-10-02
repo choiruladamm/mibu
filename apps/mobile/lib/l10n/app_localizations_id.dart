@@ -754,4 +754,33 @@ class AppLocalizationsId extends AppLocalizations {
   String entryDeletedPocket(String name, String amount) {
     return 'kantong $name balik jadi sisa $amount';
   }
+
+  @override
+  String get editAmount => 'nominal';
+
+  @override
+  String get editCategory => 'kategori';
+
+  @override
+  String get editPlace => 'di mana';
+
+  @override
+  String get editDay => 'kapan';
+
+  @override
+  String get editChanged => 'diubah';
+
+  @override
+  String get editNoChanges => 'belum ada perubahan';
+
+  @override
+  String editChanges(int count) {
+    return '$count perubahan · batalin';
+  }
+
+  @override
+  String get editSave => 'simpan';
+
+  @override
+  String get editDelete => 'hapus catatan ini';
 }

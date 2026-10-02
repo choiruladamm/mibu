@@ -5,6 +5,7 @@ import 'package:hugeicons/hugeicons.dart';
 import '../../../domain/models/finance.dart';
 import '../../../l10n/app_localizations.dart';
 import '../dashed.dart';
+import '../measure.dart';
 import '../money.dart';
 import '../tokens.dart';
 
@@ -72,17 +73,6 @@ class _PocketLimitState extends State<PocketLimit> {
   }
 
   /// Field width = the typed digits, so "/ bulan" sits right after them.
-  static double _measure(String text, TextStyle style) {
-    final tp = TextPainter(
-      text: TextSpan(text: text.isEmpty ? '0' : text, style: style),
-      textDirection: TextDirection.ltr,
-      maxLines: 1,
-    )..layout();
-    final w = tp.width;
-    tp.dispose();
-    return w;
-  }
-
   void _set(int v, {bool capped = false}) {
     setState(() => _capped = capped);
     widget.onChanged(v);
@@ -200,7 +190,7 @@ class _PocketLimitState extends State<PocketLimit> {
                           const SizedBox(width: 4),
                           Flexible(
                             child: SizedBox(
-                              width: (_measure(_text.text, style) + 4).clamp(
+                              width: (textWidth(_text.text, style) + 4).clamp(
                                 18,
                                 240,
                               ),

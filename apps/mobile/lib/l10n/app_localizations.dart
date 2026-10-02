@@ -1311,6 +1311,60 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'kantong {name} balik jadi sisa {amount}'**
   String entryDeletedPocket(String name, String amount);
+
+  /// No description provided for @editAmount.
+  ///
+  /// In id, this message translates to:
+  /// **'nominal'**
+  String get editAmount;
+
+  /// No description provided for @editCategory.
+  ///
+  /// In id, this message translates to:
+  /// **'kategori'**
+  String get editCategory;
+
+  /// No description provided for @editPlace.
+  ///
+  /// In id, this message translates to:
+  /// **'di mana'**
+  String get editPlace;
+
+  /// No description provided for @editDay.
+  ///
+  /// In id, this message translates to:
+  /// **'kapan'**
+  String get editDay;
+
+  /// No description provided for @editChanged.
+  ///
+  /// In id, this message translates to:
+  /// **'diubah'**
+  String get editChanged;
+
+  /// No description provided for @editNoChanges.
+  ///
+  /// In id, this message translates to:
+  /// **'belum ada perubahan'**
+  String get editNoChanges;
+
+  /// No description provided for @editChanges.
+  ///
+  /// In id, this message translates to:
+  /// **'{count} perubahan · batalin'**
+  String editChanges(int count);
+
+  /// No description provided for @editSave.
+  ///
+  /// In id, this message translates to:
+  /// **'simpan'**
+  String get editSave;
+
+  /// No description provided for @editDelete.
+  ///
+  /// In id, this message translates to:
+  /// **'hapus catatan ini'**
+  String get editDelete;
 }
 
 class _AppLocalizationsDelegate

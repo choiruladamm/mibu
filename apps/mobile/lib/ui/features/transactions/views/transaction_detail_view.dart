@@ -60,7 +60,9 @@ class TransactionDetailView extends ConsumerWidget {
               backLabel: l.txTitle,
               actionIcon: HugeIcons.strokeRoundedPencilEdit02,
               actionLabel: l.receiptEdit,
-              onAction: null, // → 04.4 edit catatan
+              onAction: t.deleted
+                  ? null
+                  : () => context.push(Routes.editEntry(id)),
               onMist: true,
             ),
             Expanded(
