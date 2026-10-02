@@ -1191,12 +1191,82 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
-  String searchNone(String q, String month) {
-    return '“$q” nggak ketemu di $month';
+  String get searchTry => 'coba cari';
+
+  @override
+  String get searchAllMonths => 'di semua bulan';
+
+  @override
+  String searchSubKind(String kind, String month) {
+    return 'di $kind $month';
   }
 
   @override
-  String get searchTry => 'coba cari';
+  String searchNotFound(String q) {
+    return '“$q” nggak ketemu';
+  }
+
+  @override
+  String get searchFixPre => 'maksud kamu “';
+
+  @override
+  String get searchFixPost => '”?';
+
+  @override
+  String get searchWayPre => 'ada ';
+
+  @override
+  String searchWayIn(int n, String where) {
+    return '$n di $where';
+  }
+
+  @override
+  String get searchOtherMonths => 'bulan lain';
+
+  @override
+  String searchAllCount(int n) {
+    return '$n hasil di semua bulan';
+  }
+
+  @override
+  String searchBackTo(String month) {
+    return 'balik ke $month';
+  }
+
+  @override
+  String get searchRecent => 'terakhir dicari';
+
+  @override
+  String get searchRecentClear => 'hapus semua';
+
+  @override
+  String searchRecentDel(String q) {
+    return 'hapus $q dari riwayat';
+  }
+
+  @override
+  String get searchTryHint => 'paling sering bulan ini';
+
+  @override
+  String get searchEmptyTitle => 'belum ada yang bisa dicari';
+
+  @override
+  String get searchEmptySub =>
+      'catat dulu yuk, nanti semua bisa dicari di sini';
+
+  @override
+  String get searchAllDays => 'semua hari';
+
+  @override
+  String get searchTickDrag => 'geser buat ganti hari';
+
+  @override
+  String get searchTicksLabel => 'hasil per tanggal, geser buat liat per hari';
+
+  @override
+  String searchMoreDay(int n) {
+    return 'liat $n lagi di hari ini';
+  }
 
   @override
   String get searchBadgeMixed => 'campur';

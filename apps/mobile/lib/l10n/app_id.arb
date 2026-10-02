@@ -1110,10 +1110,12 @@
       }
     }
   },
-  "searchNone": "“{q}” nggak ketemu di {month}",
-  "@searchNone": {
+  "searchTry": "coba cari",
+  "searchAllMonths": "di semua bulan",
+  "searchSubKind": "di {kind} {month}",
+  "@searchSubKind": {
     "placeholders": {
-      "q": {
+      "kind": {
         "type": "String"
       },
       "month": {
@@ -1121,7 +1123,69 @@
       }
     }
   },
-  "searchTry": "coba cari",
+  "searchNotFound": "“{q}” nggak ketemu",
+  "@searchNotFound": {
+    "placeholders": {
+      "q": {
+        "type": "String"
+      }
+    }
+  },
+  "searchFixPre": "maksud kamu “",
+  "searchFixPost": "”?",
+  "searchWayPre": "ada ",
+  "searchWayIn": "{n} di {where}",
+  "@searchWayIn": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "where": {
+        "type": "String"
+      }
+    }
+  },
+  "searchOtherMonths": "bulan lain",
+  "searchAllCount": "{n} hasil di semua bulan",
+  "@searchAllCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "searchBackTo": "balik ke {month}",
+  "@searchBackTo": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "searchRecent": "terakhir dicari",
+  "searchRecentClear": "hapus semua",
+  "searchRecentDel": "hapus {q} dari riwayat",
+  "@searchRecentDel": {
+    "placeholders": {
+      "q": {
+        "type": "String"
+      }
+    }
+  },
+  "searchTryHint": "paling sering bulan ini",
+  "searchEmptyTitle": "belum ada yang bisa dicari",
+  "searchEmptySub": "catat dulu yuk, nanti semua bisa dicari di sini",
+  "searchAllDays": "semua hari",
+  "searchTickDrag": "geser buat ganti hari",
+  "searchTicksLabel": "hasil per tanggal, geser buat liat per hari",
+  "searchMoreDay": "liat {n} lagi di hari ini",
+  "@searchMoreDay": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "searchBadgeMixed": "campur",
   "searchBadgeDaily": "hampir tiap hari",
   "searchBadgeBusiest": "paling sering",

@@ -2002,17 +2002,131 @@ abstract class AppLocalizations {
   /// **'liat {n} lagi'**
   String searchMore(int n);
 
-  /// No description provided for @searchNone.
-  ///
-  /// In id, this message translates to:
-  /// **'“{q}” nggak ketemu di {month}'**
-  String searchNone(String q, String month);
-
   /// No description provided for @searchTry.
   ///
   /// In id, this message translates to:
   /// **'coba cari'**
   String get searchTry;
+
+  /// No description provided for @searchAllMonths.
+  ///
+  /// In id, this message translates to:
+  /// **'di semua bulan'**
+  String get searchAllMonths;
+
+  /// No description provided for @searchSubKind.
+  ///
+  /// In id, this message translates to:
+  /// **'di {kind} {month}'**
+  String searchSubKind(String kind, String month);
+
+  /// No description provided for @searchNotFound.
+  ///
+  /// In id, this message translates to:
+  /// **'“{q}” nggak ketemu'**
+  String searchNotFound(String q);
+
+  /// No description provided for @searchFixPre.
+  ///
+  /// In id, this message translates to:
+  /// **'maksud kamu “'**
+  String get searchFixPre;
+
+  /// No description provided for @searchFixPost.
+  ///
+  /// In id, this message translates to:
+  /// **'”?'**
+  String get searchFixPost;
+
+  /// No description provided for @searchWayPre.
+  ///
+  /// In id, this message translates to:
+  /// **'ada '**
+  String get searchWayPre;
+
+  /// No description provided for @searchWayIn.
+  ///
+  /// In id, this message translates to:
+  /// **'{n} di {where}'**
+  String searchWayIn(int n, String where);
+
+  /// No description provided for @searchOtherMonths.
+  ///
+  /// In id, this message translates to:
+  /// **'bulan lain'**
+  String get searchOtherMonths;
+
+  /// No description provided for @searchAllCount.
+  ///
+  /// In id, this message translates to:
+  /// **'{n} hasil di semua bulan'**
+  String searchAllCount(int n);
+
+  /// No description provided for @searchBackTo.
+  ///
+  /// In id, this message translates to:
+  /// **'balik ke {month}'**
+  String searchBackTo(String month);
+
+  /// No description provided for @searchRecent.
+  ///
+  /// In id, this message translates to:
+  /// **'terakhir dicari'**
+  String get searchRecent;
+
+  /// No description provided for @searchRecentClear.
+  ///
+  /// In id, this message translates to:
+  /// **'hapus semua'**
+  String get searchRecentClear;
+
+  /// No description provided for @searchRecentDel.
+  ///
+  /// In id, this message translates to:
+  /// **'hapus {q} dari riwayat'**
+  String searchRecentDel(String q);
+
+  /// No description provided for @searchTryHint.
+  ///
+  /// In id, this message translates to:
+  /// **'paling sering bulan ini'**
+  String get searchTryHint;
+
+  /// No description provided for @searchEmptyTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'belum ada yang bisa dicari'**
+  String get searchEmptyTitle;
+
+  /// No description provided for @searchEmptySub.
+  ///
+  /// In id, this message translates to:
+  /// **'catat dulu yuk, nanti semua bisa dicari di sini'**
+  String get searchEmptySub;
+
+  /// No description provided for @searchAllDays.
+  ///
+  /// In id, this message translates to:
+  /// **'semua hari'**
+  String get searchAllDays;
+
+  /// No description provided for @searchTickDrag.
+  ///
+  /// In id, this message translates to:
+  /// **'geser buat ganti hari'**
+  String get searchTickDrag;
+
+  /// No description provided for @searchTicksLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'hasil per tanggal, geser buat liat per hari'**
+  String get searchTicksLabel;
+
+  /// No description provided for @searchMoreDay.
+  ///
+  /// In id, this message translates to:
+  /// **'liat {n} lagi di hari ini'**
+  String searchMoreDay(int n);
 
   /// No description provided for @searchBadgeMixed.
   ///

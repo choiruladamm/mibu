@@ -137,16 +137,17 @@ final transactionsProvider =
         final filter = ref.watch(txFilterProvider);
         final search = ref.watch(txSearchProvider);
         final shown = [
-          for (final t in search == null
-              ? rows.value!
-              : searchEntries(rows.value!, search.q))
+          for (final t
+              in search == null
+                  ? rows.value!
+                  : searchEntries(rows.value!, search.q))
             if (search?.day == null || t.at.day == search!.day)
-            if (switch (filter) {
-              TxFilter.all => true,
-              TxFilter.expenses => t.amount < 0,
-              TxFilter.income => t.amount > 0,
-            })
-              t,
+              if (switch (filter) {
+                TxFilter.all => true,
+                TxFilter.expenses => t.amount < 0,
+                TxFilter.income => t.amount > 0,
+              })
+                t,
         ];
         int sum(bool Function(int) test) => rows.value!
             .map((t) => t.amount)

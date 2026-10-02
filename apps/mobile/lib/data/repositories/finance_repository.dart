@@ -249,9 +249,10 @@ class FinanceRepository {
   ).watch().map((rows) => rows.map(_transaction).toList());
 
   /// 04.2 cari di semua bulan: every live entry, newest first.
-  Stream<List<Transaction>> watchAll() => _joined(
-    _tx.deletedAt.isNull(),
-  ).watch().map((rows) => rows.map(_transaction).toList());
+  Stream<List<Transaction>> watchAll() =>
+      _joined(_tx.deletedAt.isNull())
+          .watch()
+          .map((rows) => rows.map(_transaction).toList());
 
   /// Ekspor CSV: every live entry, newest first.
   Future<List<Transaction>> allTransactions() async =>

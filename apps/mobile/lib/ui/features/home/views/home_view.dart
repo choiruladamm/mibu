@@ -850,7 +850,7 @@ class _NoEntries extends StatelessWidget {
         0,
       ),
       child: CustomPaint(
-        painter: _DashedCard(),
+        painter: const DashedCardPainter(AppRadius.groupCard),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
           child: Column(
@@ -902,26 +902,6 @@ class _NoEntries extends StatelessWidget {
       ),
     );
   }
-}
-
-class _DashedCard extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final r = RRect.fromRectAndRadius(
-      (Offset.zero & size).deflate(AppStroke.outline / 2),
-      const Radius.circular(AppRadius.groupCard),
-    );
-    canvas.drawPath(
-      dashPath(Path()..addRRect(r)),
-      Paint()
-        ..color = AppColors.ink
-        ..strokeWidth = AppStroke.outline
-        ..style = PaintingStyle.stroke,
-    );
-  }
-
-  @override
-  bool shouldRepaint(_DashedCard old) => false;
 }
 
 /// One animated state of the chart: curve heights, the marker's (fractional)
