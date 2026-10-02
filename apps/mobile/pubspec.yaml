@@ -37,6 +37,7 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/emoji/ # Fluent Emoji 3D subset, tool/emoji/fetch.py
 
   fonts:
     - family: Instrument Sans

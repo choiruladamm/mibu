@@ -9,10 +9,12 @@ import 'ui/core/finance_providers.dart';
 import 'ui/core/money.dart';
 import 'ui/features/home/view_models/home_view_model.dart';
 import 'ui/core/theme.dart';
+import 'ui/core/widgets/app_emoji.dart';
 import 'ui/core/widgets/tap_outside_unfocus.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  registerEmojiLicense();
   final container = await bootstrap();
   runApp(
     UncontrolledProviderScope(container: container, child: const MibuApp()),
