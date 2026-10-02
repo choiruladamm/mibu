@@ -110,6 +110,40 @@ class FinanceRepository {
     );
   }
 
+  /// "tanpa kantong" (02.2): expense categories without a limit plus this
+  /// month's spending, most spent first. Income never shows up here.
+  Stream<List<({Category category, int spent})>> watchFreeCategories(
+    DateTime now,
+  ) {
+    final c = _db.categories;
+    final spent = _tx.amount.sum();
+    final q =
+        _db.select(c).join([
+            leftOuterJoin(
+              _tx,
+              _tx.categoryId.equalsExp(c.id) &
+                  _tx.deletedAt.isNull() &
+                  _tx.amount.isSmallerThanValue(0) &
+                  _tx.at.isBiggerOrEqualValue(DateTime(now.year, now.month)) &
+                  _tx.at.isSmallerThanValue(DateTime(now.year, now.month + 1)),
+            ),
+          ])
+          ..addColumns([spent])
+          ..where(
+            c.deletedAt.isNull() &
+                c.monthlyLimit.isNull() &
+                c.kind.equalsValue(CategoryKind.expense),
+          )
+          ..groupBy([c.id])
+          ..orderBy([OrderingTerm.asc(c.sortOrder)]);
+    return q.watch().map(
+      (rows) => [
+        for (final r in rows)
+          (category: _category(r.readTable(c)), spent: -(r.read(spent) ?? 0)),
+      ]..sort((a, b) => b.spent.compareTo(a.spent)), // stable: ties keep order
+    );
+  }
+
   /// Entries joined with their category, newest first.
   JoinedSelectStatement<HasResultSet, dynamic> _joined(Expression<bool> where) {
     final c = _db.categories;
@@ -452,6 +486,13 @@ final daysProvider =
       (ref, month) => ref
           .watch(financeRepositoryProvider)
           .watchDays(month, DateTime(month.year, month.month + 1)),
+    );
+
+/// Expense categories without a limit, with spending in [month]'s month.
+final freeCategoriesProvider =
+    StreamProvider.family<List<({Category category, int spent})>, DateTime>(
+      (ref, month) =>
+          ref.watch(financeRepositoryProvider).watchFreeCategories(month),
     );
 
 /// Pockets with spending in the month containing [month].
