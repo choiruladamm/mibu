@@ -298,7 +298,9 @@ class FinanceRepository {
     });
   });
 
-  /// Balance, per-month nets / spending and today's spending.
+  /// Balance, per-period nets / spending and today's spending. [Totals.spent]
+  /// counts every live expense; balance, nets and today's spending only those
+  /// from the opening date on.
   // ponytail: reads every entry since opening and sums in Dart (local-time
   // months; SQL strftime is UTC). Fine for years of daily use; move to a
   // cached monthly table if it ever shows.
@@ -310,9 +312,7 @@ class FinanceRepository {
     final today = DateTime(now.year, now.month, now.day);
     final q = _db.selectOnly(_tx)
       ..addColumns([_tx.at, _tx.amount])
-      ..where(
-        _tx.deletedAt.isNull() & _tx.at.isBiggerOrEqualValue(profile.openingAt),
-      );
+      ..where(_tx.deletedAt.isNull());
     return q.watch().map((rows) {
       var balance = profile.openingBalance, spentToday = 0;
       final nets = <DateTime, int>{}, spent = <DateTime, int>{};
@@ -320,12 +320,16 @@ class FinanceRepository {
         final at = r.read(_tx.at)!, v = r.read(_tx.amount)!;
         // Keyed by the period's month label ("oktober" = 25 sep – 24 okt).
         final month = periods.periodOf(at).key;
+        // What was spent counts whenever it was logged for: a rent paid
+        // before the app was set up still came out of this period's budget
+        // (the kantong count it too).
+        if (v < 0) spent[month] = (spent[month] ?? 0) - v;
+        // The saldo only follows entries from the opening date on: the
+        // balance typed in at 01.4 already has the earlier ones in it.
+        if (at.isBefore(profile.openingAt)) continue;
         balance += v;
         nets[month] = (nets[month] ?? 0) + v;
-        if (v < 0) {
-          spent[month] = (spent[month] ?? 0) - v;
-          if (!at.isBefore(today)) spentToday -= v;
-        }
+        if (v < 0 && !at.isBefore(today)) spentToday -= v;
       }
       return Totals(
         balance: balance,

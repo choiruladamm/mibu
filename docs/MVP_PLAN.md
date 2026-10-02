@@ -136,6 +136,7 @@ periodRules                         -- append-only, v1 kosong (kalender)
 ### Turunan (query `watch()`, bukan kolom)
 
 - **Saldo** = `openingBalance` + Σ`amount` transaksi dengan `at ≥ openingAt` dan `deletedAt` null.
+- **Kepake** (sisa budget, kantong, statistik) = semua pengeluaran di periode itu yang `deletedAt`-nya null, **nggak peduli** `openingAt`. Pengeluaran bertanggal sebelum saldo awal diisi (mis. kos tgl 25 yang dicatat belakangan) tetap ngurangin budget, tapi nggak ngubah saldo karena saldo awal udah termasuk itu.
 - **Kepake per kantong** = Σ pengeluaran kategori itu di bulan berjalan.
 - **Saldo per bulan** = saldo kumulatif di akhir tiap bulan.
 - **Prediksi bulan depan** = saldo sekarang + rata-rata net 3 bulan terakhir, ditampilkan dengan `±`.

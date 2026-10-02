@@ -196,13 +196,15 @@ void main() {
       // Both count against the kantong and the budget...
       final pocket = (await r.watchPockets(oct).first).single;
       expect(pocket.spent, 50000);
-      // ...while saldo only counts what's logged from the install on: the
-      // opening balance already had yesterday's spending in it.
+      // ...and so does sisa budget, while saldo only follows what's logged
+      // from the install on: the opening balance already has yesterday in it.
       final profile = await r.watchProfile(oct).first;
       final totals = await r
           .watchTotals(profile, today, periods: periods)
           .first;
-      expect(totals.spent[DateTime(2026, 10)], 25000);
+      expect(totals.spent[DateTime(2026, 10)], 50000);
+      expect(totals.balance, 1000000 - 25000); // only today's lunch
+      expect(totals.spentToday, 25000);
     },
   );
 
