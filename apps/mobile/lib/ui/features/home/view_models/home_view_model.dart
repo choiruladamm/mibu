@@ -71,6 +71,7 @@ class HomeState {
     required this.groups,
     required this.count,
     required this.today,
+    required this.payday,
     required this.safeToSpendToday,
     required this.monthLeft,
     required this.noEntries,
@@ -89,6 +90,7 @@ class HomeState {
   final List<DayGroup> groups; // newest day first, ≤ 5 rows; empty "today" ok
   final int count; // entries in [month]
   final DateTime today;
+  final PaydayInfo payday; // today, telat, or how long until gajian
   final int safeToSpendToday; // negative = overspent today
   final int? monthLeft; // past months: budget − spent; null = no budget
   final bool noEntries; // nothing ever logged
@@ -143,6 +145,11 @@ final homeProvider = Provider<AsyncValue<HomeState>>((ref) {
     if (!first.hasValue) return const AsyncLoading();
     final rows = [...own, ...?spill?.value];
     final today = dateOnly(now);
+    final payday = paydayInfo(
+      now: now,
+      payday: profile.payday,
+      salaries: ref.watch(salaryDatesProvider).value ?? const [],
+    );
     final noEntries = first.value == null;
 
     var left = homeRecentLimit;
@@ -177,11 +184,15 @@ final homeProvider = Provider<AsyncValue<HomeState>>((ref) {
         groups: groups,
         count: own.length,
         today: today,
+        payday: payday,
         safeToSpendToday: safeToSpendToday(
           balance: totals.balance,
           spentToday: totals.spentToday,
-          payday: profile.payday,
-          now: now,
+          // ponytail: on payday / telat the hero swaps the chip for "catat
+          // gajian" (02.1p o–q); until then, keep counting to the next one.
+          days: payday.daysLeft > 0
+              ? payday.daysLeft
+              : daysBetween(today, payday.next),
         ),
         monthLeft: profile.monthlyBudget == null
             ? null

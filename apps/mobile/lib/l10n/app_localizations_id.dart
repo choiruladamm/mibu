@@ -1138,6 +1138,9 @@ class AppLocalizationsId extends AppLocalizations {
       'biar jatah harian dihitung sampai gajian berikutnya';
 
   @override
+  String get paydayCommon => 'umum';
+
+  @override
   String get setupPaydayEnd => 'akhir';
 
   @override

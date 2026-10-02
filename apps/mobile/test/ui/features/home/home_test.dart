@@ -75,7 +75,8 @@ void main() {
     expect(find.text('saldo kamu'), findsOneWidget);
     expect(find.text('oktober'), findsOneWidget);
     // (4.530.000 + 27.000) ÷ 11 days to payday − 27.000
-    expect(find.textContaining('Rp387K', findRichText: true), findsOneWidget);
+    // 25 okt is a Sunday → gajian Fri 23: (4.530.000 + 27.000) ÷ 9 − 27.000
+    expect(find.textContaining('Rp479K', findRichText: true), findsOneWidget);
 
     expect(find.text('kantong'), findsOneWidget);
     expect(find.text('liat semua'), findsOneWidget);

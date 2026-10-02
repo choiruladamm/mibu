@@ -28,7 +28,8 @@ mixin SyncColumns on Table {
 class Profiles extends Table with SyncColumns {
   IntColumn get openingBalance => integer()();
   DateTimeColumn get openingAt => dateTime()();
-  IntColumn get payday => integer()(); // 1–28, 0 = last day of month
+  IntColumn get payday =>
+      integer()(); // 1–31, 31 = akhir; past month end = last day
   BoolColumn get hideAmounts => boolean().withDefault(const Constant(false))();
   DateTimeColumn get onboardedAt => dateTime().nullable()();
   TextColumn get recentSearches =>
@@ -88,7 +89,7 @@ class Limits extends Table with SyncColumns {
 class PeriodRules extends Table with SyncColumns {
   DateTimeColumn get effectiveFrom => dateTime()(); // date-only
   TextColumn get mode => textEnum<PeriodMode>()();
-  IntColumn get paydayDay => integer()(); // 1–28, 0 = last day of month
+  IntColumn get paydayDay => integer()(); // as Profiles.payday
   TextColumn get shift =>
       textEnum<PaydayShift>().withDefault(Constant(PaydayShift.none.name))();
 }

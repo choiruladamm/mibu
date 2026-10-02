@@ -39,7 +39,7 @@ erDiagram
         text id PK
         int openingBalance
         datetime openingAt
-        int payday "1-28, 0 = akhir"
+        int payday "1-31, 31 = akhir"
         bool hideAmounts
         datetime onboardedAt "nullable"
     }
@@ -92,7 +92,7 @@ profile
   id              text  pk          -- satu baris
   openingBalance  int               -- saldo saat atur awal (rupiah)
   openingAt       datetime          -- sejak kapan transaksi dihitung ke saldo
-  payday          int               -- 1–28, 0 = akhir bulan
+  payday          int               -- 1–31, 31 = akhir; lewat panjang bulan = hari terakhir
   hideAmounts     bool
   onboardedAt     datetime?
 
@@ -129,7 +129,7 @@ limits                              -- limit kantong (00.15)
 periodRules                         -- append-only, v1 kosong (kalender)
   effectiveFrom   datetime
   mode            text              -- calendar | payday
-  paydayDay       int               -- 1–28, 0 = akhir bulan
+  paydayDay       int               -- sama kayak profile.payday
   shift           text              -- none | previousWorkday
 ```
 
@@ -160,19 +160,21 @@ Id nggak perlu diubah.
 ### Aman jajan hari ini
 
 ```
-hariSisa = hari sampai gajian, termasuk hari ini
-         = gajian > hariIni ? gajian − hariIni
-                            : panjangBulan − hariIni + gajian
-           (payday 0 / "akhir" = tanggal terakhir bulan itu)
+gajian   = tanggal gajian terdekat berikutnya
+           · tgl > panjang bulan (atau 31 / "akhir") → hari terakhir bulan itu
+           · jatuh sabtu / minggu → jumat sebelumnya (cair duluan; tanggal merah belum, fase 2)
+hariSisa = hari dari hari ini sampai gajian (nggak termasuk gajian), hari ini ikut
 
 aman = floor((saldo + pengeluaranHariIni) / hariSisa) − pengeluaranHariIni
 ```
 
+- Gaji (kategori `gajian`) yang dicatat ≤ 3 hari sebelum gajian dianggap gajian itu udah masuk: hariSisa dihitung sampai gajian berikutnya lagi (`paydayInfo`, `paydayEarlyDays`).
+- Hari gajian, gaji belum dicatat → status "hari ini"; lewat gajian dan pernah nyatet gaji → "telat N hari" (maks 7). Di dua state ini hariSisa = 0, jadi beranda ganti chip aman jajan dengan ajakan catat gajian (02.1p o–q), nggak ada pembagian nol.
 - Pengeluaran hari ini langsung mengurangi jatah hari ini.
 - Pemasukan hari ini langsung menambah jatah, karena udah masuk ke saldo.
 - `aman ≤ 0` → chip "kebablasan Rp X hari ini".
 - `saldo ≤ 0` → tampil Rp0.
-- Contoh: saldo Rp4.530.000, hari ini 16 okt, gajian tanggal 25 → hariSisa = 9 → kira-kira Rp503K.
+- Contoh: saldo Rp4.530.000, hari ini 16 nov 2026, gajian tanggal 25 (rabu) → hariSisa = 9 → kira-kira Rp503K. Okt 2026: 25 jatuh hari minggu → jumat 23 → hariSisa = 7.
 
 ### Buat apa, limit, kantong **[v2]**
 

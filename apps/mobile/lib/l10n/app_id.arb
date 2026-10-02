@@ -1004,6 +1004,7 @@
   "setupBalanceLabel": "saldo awal",
   "setupPaydayTitle": "gajian tiap tanggal berapa?",
   "setupPaydayBody": "biar jatah harian dihitung sampai gajian berikutnya",
+  "paydayCommon": "umum",
   "setupPaydayEnd": "akhir",
   "setupPaydayEndLabel": "akhir bulan",
   "setupPaydayLabel": "tanggal {day}",

@@ -1,3 +1,5 @@
+import '../period.dart';
+
 // Amounts are whole rupiah (IDR has no decimals).
 
 enum CategoryKind { expense, income }
@@ -166,27 +168,88 @@ class Transaction {
       amount < 0 ? CategoryKind.expense : CategoryKind.income;
 }
 
-/// Days left until payday, today included. [payday] 0 = last day of month.
-int daysUntilPayday(DateTime now, int payday) {
-  int monthLen(int y, int m) => DateTime(y, m + 1, 0).day;
-  final len = monthLen(now.year, now.month);
-  final pay = payday == 0 ? len : payday;
-  if (pay > now.day) return pay - now.day;
-  // Payday passed (or is today): count to next month's payday.
-  final nextPay = payday == 0 ? monthLen(now.year, now.month + 1) : payday;
-  return len - now.day + nextPay;
+/// Salary paid this many days before the scheduled payday still counts as
+/// that payday's (cair duluan). Same window starts a cycle early in fase 2.
+const paydayEarlyDays = 3;
+
+/// "gajian telat" shows this many days at most, then quietly rolls on.
+const paydayLateMaxDays = 7;
+
+enum PaydayStatus { upcoming, today, late }
+
+/// Where [now] stands against payday. [next] = the payday the money has to
+/// last until (exclusive); [daysLeft] = days from today to it, today
+/// included; [lateDays] > 0 only when [status] is late.
+typedef PaydayInfo = ({
+  PaydayStatus status,
+  DateTime next,
+  int daysLeft,
+  int lateDays,
+});
+
+/// [payday] 1–31 (31 = akhir; a day past the month's end = its last day).
+/// A payday on Saturday / Sunday is paid the Friday before. [salaries] =
+/// dates of live gajian income (any order). Salary logged up to
+/// [paydayEarlyDays] before a payday counts as that payday's, so the money
+/// lasts until the one after. On payday or after it with no salary logged
+/// yet: today / late; late needs a salary logged before (people who never
+/// log it don't get nagged) and ends after [paydayLateMaxDays].
+PaydayInfo paydayInfo({
+  required DateTime now,
+  required int payday,
+  Iterable<DateTime> salaries = const [],
+}) {
+  final today = DateTime(now.year, now.month, now.day);
+  final r = PaydayCycleResolver(payday, shift: PaydayShift.previousWorkday);
+  final cycle = r.periodOf(today); // [last payday, next payday)
+  final last = cycle.start, next = cycle.end;
+  final paid = [for (final d in salaries) DateTime(d.year, d.month, d.day)];
+  bool paidSince(DateTime from) =>
+      paid.any((d) => !d.isBefore(from) && !d.isAfter(today));
+  int days(DateTime from, DateTime to) => DateTime.utc(
+    to.year,
+    to.month,
+    to.day,
+  ).difference(DateTime.utc(from.year, from.month, from.day)).inDays;
+  DateTime early(DateTime d) =>
+      DateTime(d.year, d.month, d.day - paydayEarlyDays);
+
+  // Next payday's salary already in (cair duluan): last until the one after.
+  if (!today.isBefore(early(next)) && paidSince(early(next))) {
+    final after = r.next(cycle).end;
+    return (
+      status: PaydayStatus.upcoming,
+      next: after,
+      daysLeft: days(today, after),
+      lateDays: 0,
+    );
+  }
+  final upcoming = (
+    status: PaydayStatus.upcoming,
+    next: next,
+    daysLeft: days(today, next),
+    lateDays: 0,
+  );
+  if (paidSince(early(last))) return upcoming;
+  final late = days(last, today);
+  if (late == 0) {
+    return (status: PaydayStatus.today, next: next, daysLeft: 0, lateDays: 0);
+  }
+  if (paid.isNotEmpty && late <= paydayLateMaxDays) {
+    return (status: PaydayStatus.late, next: next, daysLeft: 0, lateDays: late);
+  }
+  return upcoming;
 }
 
-/// "aman jajan hari ini": today's share of the balance until payday, minus
-/// what's already spent today. Negative = overspent today. See MVP_PLAN.md.
+/// "aman jajan hari ini": today's share of the balance over [days] (from
+/// [paydayInfo]), minus what's already spent today. Negative = overspent
+/// today. See MVP_PLAN.md.
 int safeToSpendToday({
   required int balance,
   required int spentToday,
-  required int payday,
-  required DateTime now,
+  required int days,
 }) {
-  if (balance <= 0) return 0;
-  final days = daysUntilPayday(now, payday);
+  if (balance <= 0 || days <= 0) return 0;
   return (balance + spentToday) ~/ days - spentToday;
 }
 

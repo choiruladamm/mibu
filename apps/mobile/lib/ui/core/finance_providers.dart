@@ -41,6 +41,11 @@ final currentPeriodProvider = Provider<Period>(
   (ref) => ref.watch(periodsProvider).periodOf(ref.watch(nowProvider)),
 );
 
+/// Dates of logged gajian, for [paydayInfo] (cair duluan, telat).
+final salaryDatesProvider = StreamProvider<List<DateTime>>(
+  (ref) => ref.watch(financeRepositoryProvider).watchSalaryDates(),
+);
+
 final totalsProvider = StreamProvider<Totals>((ref) {
   final profile = ref.watch(profileProvider).value;
   if (profile == null) return const Stream.empty();

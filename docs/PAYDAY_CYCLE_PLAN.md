@@ -121,7 +121,7 @@ Screen yang perlu disentuh pas fase 2. Kalau fase 0 rapi, sebagian besar cuma ga
 
 Testing matrix (unit test resolver, jalan di CI):
 
-- [x] paydayDay 1, 15, 25, 28, akhir × tiap bulan 2026–2028 (termasuk feb kabisat 2028); 29–31 nggak dipakai, lihat penyesuaian 6
+- [x] paydayDay 1, 15, 25, 28, akhir × tiap bulan 2026–2028 (termasuk feb kabisat 2028)
 - [x] shift `previousWorkday` waktu anchor jatuh sabtu, minggu, dan tanggal merah berturut-turut
 - [x] anchor yang mundur ke bulan sebelumnya (gajian tgl 1 jatuh minggu)
 - [x] `next(prev(p)) == p` dan nggak ada tanggal yang masuk dua periode atau nggak masuk sama sekali, di range 3 tahun
@@ -164,11 +164,13 @@ Fase 0 dikerjain dengan penyesuaian ini, biar cocok sama aturan repo (CLAUDE.md,
 3. **Copot limit / hapus budget** = baris periode ini dengan `amount` null. Periode lama utuh.
 4. **Nggak ada `userId`**: app full lokal, belum ada login. Index cukup di `transactions.at` (udah ada).
 5. **Nggak ada kolom `date` terpisah**: `transactions.at` udah waktu lokal, periode dihitung dari tanggal lokalnya. Aturan "dari tanggal lokal, bukan UTC" tetap kepenuhi.
-6. **`paydayDay` tetap 1–28 + `0` = akhir bulan**, ngikut chip 01.4 (1, 10, 15, 25, 28, akhir). Resolver nerjemahin `0` ke hari terakhir; 29–31 baru dibuka kalau 01.4 diubah. `PaydayCycleResolver` nerima `paydayDay` wajib (nggak ada default sendiri); default 25 cuma di 01.4.
+6. **`paydayDay` 1–31, 31 = akhir** (design 00.24: chip 1 · 10 · 15 · 25 · 28 · akhir + grid 1–31). Tanggal lewat panjang bulan dipotong ke hari terakhir; nilai lama `0` tetap dibaca sebagai akhir. `PaydayCycleResolver` nerima `paydayDay` wajib (nggak ada default sendiri); default 25 cuma di 01.4.
 7. **Tanda "gajian"**: kolom `categories.isPayday` (bool); seed gajian = true. Belum ada UI.
 8. **`periodRules` kosong = kalender**: repository selalu naruh aturan dasar kalender paling awal, jadi v1 nggak nulis baris apa-apa.
 9. **"CI grep" = test** yang nolak literal "bulan ini" di `lib/ui` (copy tinggal di `app_id.arb`, jadi arb dikecualiin).
 10. **Jendela yang tetap kalender**: DateSheet, DayStrip, grid MonthMenu, grafik saldo per bulan + prediksi (saldo nggak punya periode), minggu & tahun di statistik, "Rp… tahun ini" di 03.5.
+
+Di v1 (di luar fase 0) tanggal gajian udah dipakai buat aman jajan: weekend digeser ke jumat sebelumnya otomatis (`previousWorkday`, tanpa tanggal merah), gaji dicatat ≤ 3 hari sebelum gajian = udah gajian, state hari-H / telat lihat MVP_PLAN › Aman jajan. Toggle "cair duluan kalau libur" + tanggal merah tetap fase 2.
 
 Status fase 0:
 

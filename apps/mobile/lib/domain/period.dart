@@ -67,7 +67,8 @@ class CalendarMonthResolver extends PeriodResolver {
 
 enum PaydayShift { none, previousWorkday }
 
-/// [paydayDay] 1–28, 0 = last day of the month (01.4 chips). Each cycle runs
+/// [paydayDay] 1–31 (31 = akhir; a day past the month's end, and legacy 0,
+/// = its last day). Each cycle runs
 /// from one payday to the next and is named after its payday's month.
 class PaydayCycleResolver extends PeriodResolver {
   const PaydayCycleResolver(

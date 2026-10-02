@@ -1888,6 +1888,12 @@ abstract class AppLocalizations {
   /// **'biar jatah harian dihitung sampai gajian berikutnya'**
   String get setupPaydayBody;
 
+  /// No description provided for @paydayCommon.
+  ///
+  /// In id, this message translates to:
+  /// **'umum'**
+  String get paydayCommon;
+
   /// No description provided for @setupPaydayEnd.
   ///
   /// In id, this message translates to:

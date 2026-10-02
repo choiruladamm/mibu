@@ -14,11 +14,11 @@ import '../../../core/tokens.dart';
 import '../../../core/widgets/meta_line.dart';
 import '../../../core/widgets/app_emoji.dart';
 import '../../../core/finance_providers.dart';
+import '../../../core/widgets/payday_chip.dart';
 
 final _dots = NumberFormat('#,##0', 'id_ID');
 
 const _quick = [500000, 1000000, 2500000, 5000000];
-const _paydays = [1, 10, 15, 25, 28, 0]; // 0 = akhir bulan
 const _maxDigits = 12;
 
 /// 01.4 atur awal (saldo + gajian) → 01.4b kantong pertama.
@@ -249,7 +249,10 @@ class _SetupViewState extends ConsumerState<SetupView> {
       fontSize: size,
       letterSpacing: -0.04 * size,
     );
-    final left = daysUntilPayday(ref.read(clockProvider)(), _payday);
+    final left = paydayInfo(
+      now: ref.read(clockProvider)(),
+      payday: _payday,
+    ).daysLeft;
     final muted = AppText.caption.copyWith(color: AppColors.muted);
 
     Widget chip({
@@ -370,17 +373,13 @@ class _SetupViewState extends ConsumerState<SetupView> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            for (final d in _paydays)
-              chip(
-                label: d == 0 ? l.setupPaydayEnd : '$d',
-                semantics: d == 0
-                    ? l.setupPaydayEndLabel
-                    : l.setupPaydayLabel(d),
-                on: _payday == d,
-                width: d == 0 ? 72 : 48,
-                height: 48,
-                textStyle: AppText.label.copyWith(fontWeight: FontWeight.w500),
-                onTap: () => setState(() => _payday = d),
+            for (final d in paydayChoices)
+              Flexible(
+                child: PaydayChip(
+                  day: d,
+                  on: _payday == d,
+                  onTap: () => setState(() => _payday = d),
+                ),
               ),
           ],
         ),

@@ -473,6 +473,21 @@ class FinanceRepository {
     );
   }
 
+  /// Dates of live gajian income (payday categories), newest first.
+  Stream<List<DateTime>> watchSalaryDates() {
+    final c = _db.categories;
+    final q =
+        _db.selectOnly(_tx).join([innerJoin(c, c.id.equalsExp(_tx.categoryId))])
+          ..addColumns([_tx.at])
+          ..where(
+            _tx.deletedAt.isNull() &
+                _tx.amount.isBiggerThanValue(0) &
+                c.isPayday.equals(true),
+          )
+          ..orderBy([OrderingTerm.desc(_tx.at)]);
+    return q.watch().map((rows) => [for (final r in rows) r.read(_tx.at)!]);
+  }
+
   /// Latest distinct category + place combos ("terakhir" in 03.2).
   Stream<List<RecentPick>> watchRecentPicks(Period period, {int limit = 6}) {
     final c = _db.categories;

@@ -2,12 +2,68 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mibu/domain/models/finance.dart';
 
 void main() {
-  test('daysUntilPayday counts today, rolls over, handles akhir', () {
-    expect(daysUntilPayday(DateTime(2026, 10, 16), 25), 9); // 16…24
-    expect(daysUntilPayday(DateTime(2026, 10, 25), 25), 31); // payday today
-    expect(daysUntilPayday(DateTime(2026, 10, 26), 25), 30);
-    expect(daysUntilPayday(DateTime(2026, 2, 10), 0), 18); // akhir = 28 feb
-    expect(daysUntilPayday(DateTime(2026, 1, 31), 0), 28); // → 28 feb
+  // 25 nov 2026 is a Wednesday; 25 okt 2026 a Sunday; 28 feb 2026 a Saturday.
+  group('paydayInfo', () {
+    PaydayInfo at(
+      DateTime now, {
+      int payday = 25,
+      List<DateTime> paid = const [],
+    }) => paydayInfo(now: now, payday: payday, salaries: paid);
+
+    test('counts today up to payday (exclusive)', () {
+      final p = at(DateTime(2026, 11, 16, 14, 50));
+      expect(
+        (p.status, p.next, p.daysLeft),
+        (
+          PaydayStatus.upcoming,
+          DateTime(2026, 11, 25),
+          9, // 16…24
+        ),
+      );
+    });
+
+    test('weekend payday is paid the Friday before', () {
+      final p = at(DateTime(2026, 10, 16));
+      expect((p.next, p.daysLeft), (DateTime(2026, 10, 23), 7));
+      // akhir (31) in feb 2026 → 28 feb, a Saturday → Fri 27.
+      expect(at(DateTime(2026, 2, 10), payday: 31).next, DateTime(2026, 2, 27));
+      expect(at(DateTime(2026, 4, 10), payday: 31).next, DateTime(2026, 4, 30));
+    });
+
+    test('payday with no salary yet → today; logged → lasts to the next', () {
+      expect(at(DateTime(2026, 11, 25)).status, PaydayStatus.today);
+      final p = at(
+        DateTime(2026, 11, 25, 20),
+        paid: [DateTime(2026, 11, 25, 9)],
+      );
+      expect(
+        (p.status, p.next, p.daysLeft),
+        (PaydayStatus.upcoming, DateTime(2026, 12, 25), 30),
+      );
+    });
+
+    test('cair duluan: up to 3 days early counts as this payday', () {
+      final p = at(DateTime(2026, 11, 23), paid: [DateTime(2026, 11, 23)]);
+      expect((p.next, p.daysLeft), (DateTime(2026, 12, 25), 32));
+      // 5 days early is just income: still counting to 25 nov.
+      expect(
+        at(DateTime(2026, 11, 21), paid: [DateTime(2026, 11, 20)]).next,
+        DateTime(2026, 11, 25),
+      );
+    });
+
+    test('telat only for people who log salary, at most 7 days', () {
+      final before = [DateTime(2026, 10, 23)];
+      final late = at(DateTime(2026, 11, 27), paid: before);
+      expect((late.status, late.lateDays), (PaydayStatus.late, 2));
+      final over = at(DateTime(2026, 12, 3), paid: before); // 8 days
+      expect(
+        (over.status, over.next),
+        (PaydayStatus.upcoming, DateTime(2026, 12, 25)),
+      );
+      // Never logged salary: no nagging.
+      expect(at(DateTime(2026, 11, 27)).status, PaydayStatus.upcoming);
+    });
   });
 
   test('suggestedLimit: 1,4× up to Rp100K, min Rp300K', () {
@@ -19,13 +75,8 @@ void main() {
   });
 
   test('safeToSpendToday: spending today eats today\'s share', () {
-    final now = DateTime(2026, 10, 16);
-    int s(int balance, int spent) => safeToSpendToday(
-      balance: balance,
-      spentToday: spent,
-      payday: 25,
-      now: now,
-    );
+    int s(int balance, int spent) =>
+        safeToSpendToday(balance: balance, spentToday: spent, days: 9);
     expect(s(4530000, 0), 503333); // plan example
     expect(s(4530000 - 100000, 100000), 403333);
     expect(s(900000, 600000), -433334); // kebablasan

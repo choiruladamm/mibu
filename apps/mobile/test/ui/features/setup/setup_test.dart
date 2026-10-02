@@ -66,18 +66,21 @@ void main() {
     await tester.tap(find.text('Rp2,5jt'));
     await tester.pump();
     expect(find.text('2.500.000'), findsOneWidget);
-    // 25th: 11 days incl. today → 2.500.000 ÷ 11
-    expect(find.text('Rp227K'), findsOneWidget);
-    expect(findMeta(['sampai gajian', '11 hari lagi']), findsOneWidget);
+    // 25 okt is a Sunday → paid Fri 23: 9 days incl. today → 2.500.000 ÷ 9
+    expect(find.text('Rp278K'), findsOneWidget);
+    expect(findMeta(['sampai gajian', '9 hari lagi']), findsOneWidget);
 
     await tester.tap(find.bySemanticsLabel('akhir bulan'));
     await tester.pump();
-    expect(findMeta(['sampai gajian', '17 hari lagi']), findsOneWidget);
+    expect(
+      findMeta(['sampai gajian', '16 hari lagi']),
+      findsOneWidget,
+    ); // sat 31 → fri 30
 
     await tester.enterText(find.byType(TextField), '3000000');
     await tester.pump();
     expect(find.text('3.000.000'), findsOneWidget);
-    expect(find.text('Rp176K'), findsOneWidget); // 3.000.000 ÷ 17
+    expect(find.text('Rp188K'), findsOneWidget); // 3.000.000 ÷ 16
 
     await tester.ensureVisible(find.text('lanjut'));
     await tester.tap(find.text('lanjut'));
@@ -101,7 +104,10 @@ void main() {
     await settle(tester);
     expect(done, [1]);
     final p = (await tester.runAsync(() => repo.watchProfile(cal(now)).first))!;
-    expect((p.onboarded, p.openingBalance, p.payday), (true, 3000000, 0));
+    expect(
+      (p.onboarded, p.openingBalance, p.payday),
+      (true, 3000000, 31),
+    ); // akhir = 31
     final pockets = (await tester.runAsync(
       () => repo.watchPockets(cal(now)).first,
     ))!;
