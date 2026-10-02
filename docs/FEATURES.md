@@ -25,7 +25,7 @@ Tanda: **[diupdate]** = aturan/perilaku berubah dari design, **[perlu design]** 
 ## 01.4 · Atur awal
 
 - [ ] **01.4 saldo + gajian** — input saldo (maks 12 digit, font mengecil), chip cepat 500K/1jt/2,5jt/5jt, tanggal gajian (1, 10, 15, 25, 28, akhir). Preview live "aman jajan per hari" = saldo ÷ hari sampai gajian. `nanti aja` → beranda.
-- [ ] **01.4b kantong pertama** — multi-select preset kantong (makan, ngopi, ojol, tagihan, hiburan, belanja, anabul, liburan) dengan limit bulanan. Ringkasan total vs saldo ("sisa bebas …" / "lebih … dari saldo").
+- [ ] **01.4b kantong pertama** — "mau mulai pasang limit ke apa?": multi-select preset (makan, ngopi, ojol, tagihan, hiburan, belanja, anabul, liburan) dengan limit bulanan, "N dikasih limit", "ringkasan limit". Ringkasan total vs saldo ("sisa bebas …" / "lebih … dari saldo").
 
 ## 02 · Tab utama
 
@@ -38,8 +38,11 @@ Tanda: **[diupdate]** = aturan/perilaku berubah dari design, **[perlu design]** 
 - [ ] **02.2 kantong**
   - Hero `sisa jajan {bulan}` = Σlimit − Σkepake.
   - **[perlu design]** Sub-baris hero bisa di-tap: "Rp2,34jt dari Rp7,4jt kepake · budget Rp6,9jt" → BudgetSheet 00.16. Budget kosong → "pasang budget".
-  - Toples per kantong (isi = % kepake, animasi 300ms), pilih satu → kartu detail: status `aman` / `hampir abis` (≥85%) / `belum kepake`, sisa dari limit, "kira-kira Rp… sehari".
-  - Tombol `isi ulang`, `atur kantong` → 03.5, `baru` → 03.4.
+  - **[v2]** Toples per buat apa yang pakai limit (isi = % kepake, animasi 300ms), "N pakai limit · urut dari yang paling kepake", toples putus-putus `limit` → sheet pasang limit. Pilih satu → kartu detail: status `aman` / `hampir abis` (≥85%) / `belum kepake`, "jatah sisa dari Rp…", "kira-kira Rp… sehari".
+  - **[v2]** Kartu detail: `atur limit` → 03.5, `lepas limit` → langsung + toast "limit X dilepas · X & N catatannya tetap ada · batalin".
+  - **[v2]** Header `+ pasang limit` → sheet "pasang limit ke…": buat apa pengeluaran yang belum pakai limit, urut paling kepake bulan ini ("N catatan · Rp… udah kepake bulan ini"), pilih → PocketLimit + "toples langsung keisi X% · sisa jatah Rp…" → `pasang limit Rp…` + toast "limit X Rp… kepasang · N catatan bulan ini langsung keitung · batalin". Kosong: "semua buat apa udah pakai limit". Bawah: `bikin kategori baru` → 03.4, "pemasukan (gajian dkk) nggak bisa dikasih limit".
+  - **[v2]** "belum ada limit · Rp… bulan ini" + `semua` → 03.3: 2 chip teratas → langsung ke step limit, `+N` → sheet. Belum ada sama sekali → kartu "pasang limit pertama".
+  - `isi ulang` ditunda.
   - `impian` (goals): kartu kosong `pasang target` — flow belum didesain.
 - [ ] **02.3 statistik** — toggle minggu / bulan / tahun (02.3a/b/c).
   - Navigasi periode ‹ ›, total + delta vs periode lalu.
@@ -51,27 +54,28 @@ Tanda: **[diupdate]** = aturan/perilaku berubah dari design, **[perlu design]** 
   - `larinya ke mana`: 4 kategori teratas (stacked bar + list).
 - [ ] **02.4 pengaturan**
   - Kartu setup: `budget bulanan` → BudgetSheet 00.16, `mulai tgl 1`, `N kantong` → 02.2.
-  - duit: `kategori` → 03.3, `kantong` → 02.2.
+  - duit: `buat apa aja` → 03.3, `limit bulanan` → 02.2.
   - kebiasaan: `pengingat harian` (21.00, switch), `rekap mingguan` (switch).
   - privasi: `kunci pakai face id`, `sembunyiin nominal` (tampil ••• sampai di-tap).
   - tampilan: `mode` terang / gelap / auto.
   - data: `ekspor ke csv`, `backup & pulihin` (iCloud).
   - Footer versi.
 
-## 03 · Catat & kategori
+## 03 · Catat & buat apa
 
 - [ ] **03.1 catat** (dari tombol + di semua tab)
   - Segmented pengeluaran / pemasukan, tombol kalender → DateSheet, DayStrip buat pilih tanggal cepat.
   - Keypad rupiah: 1–9, `000`, 0, backspace. Maks 10 digit, titik ribuan otomatis, font 68 → 54 → 44.
-  - Bar dampak kantong: "sisa X" / "kelebihan X". Pemasukan: "saldo abis ini".
-  - Chip kategori → 03.2, `+ catatan` → NoteSheet.
+  - Bar dampak: "🍜 jatah makan abis ini · sisa X" / "kelebihan X". Pemasukan: "saldo abis ini".
+  - Chip buat apa → 03.2, `+ catatan` → NoteSheet.
   - `simpan pengeluaran` / `simpan pemasukan` → 02.1.
-- [ ] **03.2 pilih kategori** (sheet) — "ini buat apa?", cari atau bikin kategori, `terakhir` (kategori + tempat sekali tap), grid kategori, field `di mana`, `atur` → 03.3.
-- [ ] **03.3 atur kategori** — grid "kategori kamu" + jumlah pemakaian, tap = edit, `−` = hapus, tahan & geser = urutin (tile goyang di mode edit).
-- [ ] **03.4 kategori baru / 03.5 edit** (satu widget, `mode=new|edit`)
+- [ ] **03.2 buat apa?** (sheet) — **[v2]** judul "buat apa?", "cari atau bikin…", chip yang pakai limit dapet "sisa Rp…" (tebal kalau ≥85%), boleh dilewati (tanpa kategori), `terakhir` (kategori + tempat sekali tap), grid kategori, field `di mana`, `atur` → 03.3.
+- [ ] **03.3 buat apa aja** — **[v2]** grid; yang pakai limit dapet chip ink "limit Rp…", sisanya "N catatan" / "belum dipakai"; footer 🫙 "yang ada limit jadi toples di tab kantong…"; tap = edit, `−` = hapus, tahan & geser = urutin (tile goyang di mode edit).
+- [ ] **03.4 bikin baru / 03.5 edit** (satu widget, `mode=new|edit`)
   - Nama + emoji otomatis dari kata kunci (makan, kopi, kucing, bensin, …) sampai user pilih manual. Saran 3 emoji + palet 16.
   - `masuk ke`: pengeluaran / pemasukan.
-  - Switch `kantong bulanan` + PocketLimit 00.15 (ketik / geser / preset Rp100K · 300K · 600K · 1jt). **[diupdate]** Switch cuma buat kategori pengeluaran. Kategori pemasukan (gajian) cuma muncul pas catat pemasukan.
+  - **[v2]** Switch `limit bulanan` (hint "nggak wajib, bisa dipasang nanti" / "jadi toples · mibu ngingetin kalau mau abis"), default mati kecuali dari 02.2. Edit + limit nyala → link `lepas limit` (langsung kesimpan + toast batalin).
+  - PocketLimit 00.15 (ketik / geser / preset Rp100K · 300K · 600K · 1jt). **[diupdate]** Switch cuma buat kategori pengeluaran. Kategori pemasukan (gajian) cuma muncul pas catat pemasukan.
   - Edit: info pemakaian ("12 catatan · Rp840K tahun ini") + tombol hapus → 03.6.
 - [ ] **03.6 hapus kategori** — wajib pindahin catatan ke kategori lain / tanpa kategori, tombol **tahan buat hapus** (1 detik), state sukses + `batalin`.
 
@@ -81,7 +85,7 @@ Tanda: **[diupdate]** = aturan/perilaku berubah dari design, **[perlu design]** 
 - [ ] **04.2 cari** — cari kategori/tempat di bulan ini, filter tipe, SearchSummary (total, rata², insight, tick per hari yang bisa di-drag buat filter hari), 3 hasil pertama + `liat N lagi`, saran pencarian, empty state.
 - [ ] **04.3 struk (detail)** — kartu struk: tempat, kategori, nominal, waktu, jenis, berulang, catatan, foto struk. Dampak ke kantong. Aksi: hapus, `patungan`, `catat lagi`, edit → 04.4.
 - [ ] **04.3b/c hapus** — ConfirmModal (dampak kantong sebelum → sesudah), lalu kartu stempel `dihapus` + toast `batalin`.
-- [ ] **04.4 edit catatan** — nominal, kategori, di mana, kapan, catatan, berulang (nggak / mingguan / bulanan). Badge `diubah` per field, "N perubahan · batalin", `simpan perubahan` nonaktif kalau belum ada perubahan.
+- [ ] **04.4 edit catatan** — nominal, buat apa (bisa diganti / dikosongin), di mana, kapan, catatan, berulang (nggak / mingguan / bulanan). Badge `diubah` per field, "N perubahan · batalin", `simpan perubahan` nonaktif kalau belum ada perubahan.
 
 ## 00 · Komponen bersama
 
@@ -98,14 +102,14 @@ Tanda: **[diupdate]** = aturan/perilaku berubah dari design, **[perlu design]** 
 | 00.12 | DateSheet | kalender bulan, titik jumlah catatan, peringatan dobel |
 | 00.13 | NoteSheet | maks 80 karakter, maks 3 tag, catatan terakhir |
 | 00.14 | SearchSummary | insight + tick harian yang bisa di-drag |
-| 00.15 | PocketLimit | input batas kantong: ketik, slider (garis sisa budget), preset chip. Dipakai 03.4/03.5, nanti 01.4b. **[perlu design]** budget kosong → garis diganti link "pasang budget bulanan" → 00.16 |
-| 00.16 | BudgetSheet | **[perlu design]** sheet "budget bulanan": AmountField + keypad (maks 12 digit), info live "kantong kamu total Rp… · sisa bebas / kurang Rp…", prefill Σlimit dibulatin ke atas per 500K kalau kosong, `simpan` / `hapus budget`. Dibuka dari 00.15, 02.2, 02.3, 02.4 |
+| 00.15 | PocketLimit | input limit ("limit per bulan"): ketik, slider (garis sisa budget), preset chip. Dipakai 03.4/03.5, nanti 01.4b. **[perlu design]** budget kosong → garis diganti link "pasang budget bulanan" → 00.16 |
+| 00.16 | BudgetSheet | **[perlu design]** sheet "budget bulanan": AmountField + keypad (maks 12 digit), info live "total limit kamu Rp… · sisa bebas" / "kurang Rp… buat nutup semua limit", prefill Σlimit dibulatin ke atas per 500K kalau kosong, `simpan` / `hapus budget`. Dibuka dari 00.15, 02.2, 02.3, 02.4 |
 
 ## Entitas
 
 - **User** — uid, nama, email (bisa relay Apple), provider google/apple.
 - **Profil budget** — saldo, tanggal gajian, budget bulanan, awal siklus.
-- **Category** — emoji, nama, jenis (pengeluaran/pemasukan), `monthlyLimit` (null = cuma dicatat, bukan kantong), urutan. Kantong = kategori yang punya limit.
+- **Category** — emoji, nama, jenis (pengeluaran/pemasukan), `monthlyLimit` (null = cuma dicatat), urutan. Di UI namanya "buat apa"; yang pakai limit = toples di tab kantong. Lihat MVP_PLAN › Buat apa, limit, kantong.
 - **Transaction** — tipe, nominal (int IDR), kategori, tempat, tanggal + jam, catatan (≤80), tag (≤3), berulang, foto struk, no. struk. Perlu soft delete buat undo.
 - **Goal (impian)** — field belum jelas.
 - **Settings** — pengingat + jam, rekap mingguan, kunci biometrik, sembunyiin nominal, tema.

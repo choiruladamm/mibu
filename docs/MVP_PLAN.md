@@ -136,6 +136,19 @@ aman = floor((saldo + pengeluaranHariIni) / hariSisa) − pengeluaranHariIni
 - `saldo ≤ 0` → tampil Rp0.
 - Contoh: saldo Rp4.530.000, hari ini 16 okt, gajian tanggal 25 → hariSisa = 9 → kira-kira Rp503K.
 
+### Buat apa, limit, kantong **[v2]**
+
+Satu konsep aja: **buat apa** (= baris `categories`). Kantong bukan benda sendiri.
+
+- Pas catat user cuma milih "buat apa?" (03.2). Boleh dilewati: transaksi tanpa kategori tetap sah, kehitung di total kepake/budget, nggak masuk kantong mana pun. Benerinnya lewat 04.4.
+- **Limit bulanan** = atribut opsional (`monthlyLimit`), cuma buat pengeluaran. Yang pakai limit jadi toples di tab "kantong".
+- "kantong" cuma nama tab + visual toples. Copy pakai "limit": `pasang limit` · `atur limit` · `lepas limit`. Sisa per buat apa = "jatah X".
+- `+ pasang limit` (02.2) nggak bikin kategori baru: pilih buat apa yang belum pakai limit, urut paling kepake bulan ini → PocketLimit → simpan. Catatan bulan ini langsung keitung karena kepake dihitung dari transaksi. `bikin kategori baru` ada di bawah sheet.
+- Default limit di sheet = maks(Rp300K, ceil(kepake bulan ini × 1,4 ÷ 100K) × 100K).
+- `lepas limit` = `monthlyLimit` null, langsung kesimpan + toast `batalin`. Buat apa + catatannya utuh. Beda dari hapus (03.6).
+- Gabungin duplikat = 03.6 hapus + pindahin catatan. Nggak ada fitur gabung terpisah.
+- Buat apa baru dari 03.2 / 03.3 default tanpa limit; dari 02.2 selalu pakai limit.
+
 ### Budget & kantong
 
 - Periode budget = bulan kalender, mulai tanggal 1. Tanggal gajian cuma dipakai buat aman jajan.
@@ -151,7 +164,7 @@ aman = floor((saldo + pengeluaranHariIni) / hariSisa) − pengeluaranHariIni
   - selain itu `aman`
 - "kira-kira Rp… sehari" = sisa ÷ sisa hari di bulan ini.
 
-### Batas kantong (PocketLimit 00.15, di 03.4 / 03.5)
+### Limit kantong (PocketLimit 00.15, di 02.2 sheet / 03.4 / 03.5)
 
 ```
 free = budget − Σ limit kantong lain   (pas edit, kantong ini nggak ikut)
