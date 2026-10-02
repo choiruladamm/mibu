@@ -134,7 +134,14 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
   );
   // Peeking at hidden amounts ends on any navigation.
-  void endPeek() => ref.read(peekProvider.notifier).reset();
+  // The delegate also notifies while the first frame builds, where a provider
+  // can't change: only act when peeking, and after the build.
+  void endPeek() {
+    if (ref.read(peekProvider)) {
+      Future.microtask(ref.read(peekProvider.notifier).reset);
+    }
+  }
+
   router.routerDelegate.addListener(endPeek);
   ref.onDispose(() {
     router.routerDelegate.removeListener(endPeek);
