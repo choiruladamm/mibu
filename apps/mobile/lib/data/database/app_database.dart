@@ -78,10 +78,28 @@ class AppDatabase extends _$AppDatabase {
   @override
   int get schemaVersion => 1;
 
+  /// Soft-deleted rows older than a day are gone for good (undo is over).
+  /// A category stays while any entry still points at it.
+  Future<void> purgeDeleted() async {
+    final cutoff = _now().subtract(const Duration(days: 1));
+    await (delete(
+      transactions,
+    )..where((t) => t.deletedAt.isSmallerThanValue(cutoff))).go();
+    final used = selectOnly(transactions)
+      ..addColumns([transactions.categoryId])
+      ..where(transactions.categoryId.isNotNull());
+    await (delete(categories)..where(
+          (c) =>
+              c.deletedAt.isSmallerThanValue(cutoff) & c.id.isNotInQuery(used),
+        ))
+        .go();
+  }
+
   @override
   MigrationStrategy get migration => MigrationStrategy(
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
+      if (!details.wasCreated) await purgeDeleted();
       if (!kDebugMode || !(details.wasCreated || _reset)) return;
       if (!details.wasCreated) {
         await transaction(() async {
