@@ -2002,6 +2002,330 @@ abstract class AppLocalizations {
   /// **'liat {n} lagi'**
   String searchMore(int n);
 
+  /// No description provided for @statsWeek.
+  ///
+  /// In id, this message translates to:
+  /// **'minggu'**
+  String get statsWeek;
+
+  /// No description provided for @statsMonth.
+  ///
+  /// In id, this message translates to:
+  /// **'bulan'**
+  String get statsMonth;
+
+  /// No description provided for @statsYear.
+  ///
+  /// In id, this message translates to:
+  /// **'tahun'**
+  String get statsYear;
+
+  /// No description provided for @statsPrev.
+  ///
+  /// In id, this message translates to:
+  /// **'periode sebelumnya'**
+  String get statsPrev;
+
+  /// No description provided for @statsNext.
+  ///
+  /// In id, this message translates to:
+  /// **'periode berikutnya'**
+  String get statsNext;
+
+  /// No description provided for @statsOut.
+  ///
+  /// In id, this message translates to:
+  /// **'keluar'**
+  String get statsOut;
+
+  /// No description provided for @statsOutWeek.
+  ///
+  /// In id, this message translates to:
+  /// **'keluar minggu ini'**
+  String get statsOutWeek;
+
+  /// No description provided for @statsOutMonth.
+  ///
+  /// In id, this message translates to:
+  /// **'keluar bulan ini'**
+  String get statsOutMonth;
+
+  /// No description provided for @statsOutYear.
+  ///
+  /// In id, this message translates to:
+  /// **'keluar tahun ini'**
+  String get statsOutYear;
+
+  /// No description provided for @statsUp.
+  ///
+  /// In id, this message translates to:
+  /// **'↑ {amount} vs {than}'**
+  String statsUp(String amount, String than);
+
+  /// No description provided for @statsDown.
+  ///
+  /// In id, this message translates to:
+  /// **'↓ {amount} vs {than}'**
+  String statsDown(String amount, String than);
+
+  /// No description provided for @statsLastWeek.
+  ///
+  /// In id, this message translates to:
+  /// **'minggu lalu'**
+  String get statsLastWeek;
+
+  /// No description provided for @statsWeekBefore.
+  ///
+  /// In id, this message translates to:
+  /// **'minggu sebelumnya'**
+  String get statsWeekBefore;
+
+  /// No description provided for @statsPerMonth.
+  ///
+  /// In id, this message translates to:
+  /// **'rata² {amount} / bulan'**
+  String statsPerMonth(String amount);
+
+  /// No description provided for @statsNowWeek.
+  ///
+  /// In id, this message translates to:
+  /// **'hari ini'**
+  String get statsNowWeek;
+
+  /// No description provided for @statsNowMonth.
+  ///
+  /// In id, this message translates to:
+  /// **'minggu ini'**
+  String get statsNowMonth;
+
+  /// No description provided for @statsNowYear.
+  ///
+  /// In id, this message translates to:
+  /// **'bulan ini'**
+  String get statsNowYear;
+
+  /// No description provided for @statsBefore.
+  ///
+  /// In id, this message translates to:
+  /// **'sebelumnya'**
+  String get statsBefore;
+
+  /// No description provided for @statsAvgLegend.
+  ///
+  /// In id, this message translates to:
+  /// **'rata-rata'**
+  String get statsAvgLegend;
+
+  /// No description provided for @statsAvgShort.
+  ///
+  /// In id, this message translates to:
+  /// **'rata²'**
+  String get statsAvgShort;
+
+  /// No description provided for @statsNotYet.
+  ///
+  /// In id, this message translates to:
+  /// **'belum'**
+  String get statsNotYet;
+
+  /// No description provided for @statsGlance.
+  ///
+  /// In id, this message translates to:
+  /// **'sekilas'**
+  String get statsGlance;
+
+  /// No description provided for @statsPeak.
+  ///
+  /// In id, this message translates to:
+  /// **'paling boros'**
+  String get statsPeak;
+
+  /// No description provided for @statsLow.
+  ///
+  /// In id, this message translates to:
+  /// **'paling hemat'**
+  String get statsLow;
+
+  /// No description provided for @statsAvgDay.
+  ///
+  /// In id, this message translates to:
+  /// **'rata² harian'**
+  String get statsAvgDay;
+
+  /// No description provided for @statsAvgWeek.
+  ///
+  /// In id, this message translates to:
+  /// **'rata² mingguan'**
+  String get statsAvgWeek;
+
+  /// No description provided for @statsAvgMonth.
+  ///
+  /// In id, this message translates to:
+  /// **'rata² bulanan'**
+  String get statsAvgMonth;
+
+  /// No description provided for @statsFromDays.
+  ///
+  /// In id, this message translates to:
+  /// **'dari {n} hari'**
+  String statsFromDays(int n);
+
+  /// No description provided for @statsFromWeeks.
+  ///
+  /// In id, this message translates to:
+  /// **'dari {n} minggu'**
+  String statsFromWeeks(int n);
+
+  /// No description provided for @statsFromMonths.
+  ///
+  /// In id, this message translates to:
+  /// **'dari {n} bulan'**
+  String statsFromMonths(int n);
+
+  /// No description provided for @statsTrack.
+  ///
+  /// In id, this message translates to:
+  /// **'on track nggak?'**
+  String get statsTrack;
+
+  /// No description provided for @statsBudget.
+  ///
+  /// In id, this message translates to:
+  /// **'budget {amount}'**
+  String statsBudget(String amount);
+
+  /// No description provided for @statsLimitWeek.
+  ///
+  /// In id, this message translates to:
+  /// **'jatah seminggu'**
+  String get statsLimitWeek;
+
+  /// No description provided for @statsLimitMonth.
+  ///
+  /// In id, this message translates to:
+  /// **'jatah sebulan'**
+  String get statsLimitMonth;
+
+  /// No description provided for @statsLimitYear.
+  ///
+  /// In id, this message translates to:
+  /// **'jatah setahun'**
+  String get statsLimitYear;
+
+  /// No description provided for @statsPaceOver.
+  ///
+  /// In id, this message translates to:
+  /// **'lewat budget'**
+  String get statsPaceOver;
+
+  /// No description provided for @statsPaceNear.
+  ///
+  /// In id, this message translates to:
+  /// **'hampir abis'**
+  String get statsPaceNear;
+
+  /// No description provided for @statsPaceUnder.
+  ///
+  /// In id, this message translates to:
+  /// **'di bawah budget'**
+  String get statsPaceUnder;
+
+  /// No description provided for @statsPaceFine.
+  ///
+  /// In id, this message translates to:
+  /// **'aman'**
+  String get statsPaceFine;
+
+  /// No description provided for @statsScopeWeek.
+  ///
+  /// In id, this message translates to:
+  /// **'minggu ini'**
+  String get statsScopeWeek;
+
+  /// No description provided for @statsScopeMonth.
+  ///
+  /// In id, this message translates to:
+  /// **'bulan ini'**
+  String get statsScopeMonth;
+
+  /// No description provided for @statsOverBy.
+  ///
+  /// In id, this message translates to:
+  /// **'kebablasan {amount} dari budget {scope}'**
+  String statsOverBy(String amount, String scope);
+
+  /// No description provided for @statsNearLeft.
+  ///
+  /// In id, this message translates to:
+  /// **'tinggal {amount} buat {days} hari lagi, rem dikit ya'**
+  String statsNearLeft(String amount, int days);
+
+  /// No description provided for @statsLeft.
+  ///
+  /// In id, this message translates to:
+  /// **'masih ada {amount} buat {days} hari lagi'**
+  String statsLeft(String amount, int days);
+
+  /// No description provided for @statsYearLeft.
+  ///
+  /// In id, this message translates to:
+  /// **'sisa {amount} buat sisa {year}'**
+  String statsYearLeft(String amount, String year);
+
+  /// No description provided for @statsPastLeft.
+  ///
+  /// In id, this message translates to:
+  /// **'sisa {amount} dari budget {scope}'**
+  String statsPastLeft(String amount, String scope);
+
+  /// No description provided for @statsUsed.
+  ///
+  /// In id, this message translates to:
+  /// **'duit kepake'**
+  String get statsUsed;
+
+  /// No description provided for @statsTime.
+  ///
+  /// In id, this message translates to:
+  /// **'waktu jalan'**
+  String get statsTime;
+
+  /// No description provided for @statsNoBudget.
+  ///
+  /// In id, this message translates to:
+  /// **'pasang budget biar ketauan kamu on track nggak'**
+  String get statsNoBudget;
+
+  /// No description provided for @statsSetBudget.
+  ///
+  /// In id, this message translates to:
+  /// **'pasang budget'**
+  String get statsSetBudget;
+
+  /// No description provided for @statsWhere.
+  ///
+  /// In id, this message translates to:
+  /// **'larinya ke mana'**
+  String get statsWhere;
+
+  /// No description provided for @statsTop.
+  ///
+  /// In id, this message translates to:
+  /// **'top {n}'**
+  String statsTop(int n);
+
+  /// No description provided for @statsMoreOne.
+  ///
+  /// In id, this message translates to:
+  /// **'+ {name} {pct}%'**
+  String statsMoreOne(String name, int pct);
+
+  /// No description provided for @statsMoreN.
+  ///
+  /// In id, this message translates to:
+  /// **'+ {n} lainnya'**
+  String statsMoreN(int n);
+
   /// No description provided for @searchTry.
   ///
   /// In id, this message translates to:

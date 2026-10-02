@@ -12,6 +12,7 @@ import '../ui/features/pockets/views/pockets_view.dart';
 import '../ui/features/settings/views/settings_view.dart';
 import '../ui/features/search/views/search_view.dart';
 import '../ui/features/setup/views/setup_view.dart';
+import '../ui/features/stats/views/stats_view.dart';
 import '../domain/models/finance.dart';
 import '../ui/features/transactions/view_models/transactions_view_model.dart';
 import '../ui/features/transactions/views/edit_entry_view.dart';
@@ -24,6 +25,7 @@ abstract final class Routes {
   static const home = '/';
   static const pockets = '/kantong';
   static String pocketsAt(String id) => '$pockets?pocket=$id';
+  static const stats = '/statistik';
   static const settings = '/pengaturan';
   static const search = '/cari';
   static String searchIn(DateTime month) =>
@@ -52,16 +54,16 @@ abstract final class Routes {
   static String editEntry(String id) => '$transactions/$id/edit';
 }
 
-/// Tab bar → tab route. Stats lands in M6.
+/// Tab bar → tab route.
 // ponytail: plain go() between tabs (state resets); StatefulShellRoute in M5.
 void goTab(BuildContext context, AppTab tab) {
   final path = switch (tab) {
     AppTab.home => Routes.home,
     AppTab.pockets => Routes.pockets,
     AppTab.settings => Routes.settings,
-    AppTab.stats => null,
+    AppTab.stats => Routes.stats,
   };
-  if (path != null) context.go(path);
+  context.go(path);
 }
 
 /// `extra` for [Routes.home] when arriving from onboarding: fade in.
@@ -112,6 +114,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           // ?pocket=<id> from 02.1 pills; unknown id falls back to default.
           child: PocketsView(initial: state.uri.queryParameters['pocket']),
         ),
+      ),
+      GoRoute(
+        path: Routes.stats,
+        pageBuilder: (_, state) =>
+            NoTransitionPage(key: state.pageKey, child: const StatsView()),
       ),
       GoRoute(
         path: Routes.settings,

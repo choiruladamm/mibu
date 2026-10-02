@@ -1191,6 +1191,198 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
+  String get statsWeek => 'minggu';
+
+  @override
+  String get statsMonth => 'bulan';
+
+  @override
+  String get statsYear => 'tahun';
+
+  @override
+  String get statsPrev => 'periode sebelumnya';
+
+  @override
+  String get statsNext => 'periode berikutnya';
+
+  @override
+  String get statsOut => 'keluar';
+
+  @override
+  String get statsOutWeek => 'keluar minggu ini';
+
+  @override
+  String get statsOutMonth => 'keluar bulan ini';
+
+  @override
+  String get statsOutYear => 'keluar tahun ini';
+
+  @override
+  String statsUp(String amount, String than) {
+    return '↑ $amount vs $than';
+  }
+
+  @override
+  String statsDown(String amount, String than) {
+    return '↓ $amount vs $than';
+  }
+
+  @override
+  String get statsLastWeek => 'minggu lalu';
+
+  @override
+  String get statsWeekBefore => 'minggu sebelumnya';
+
+  @override
+  String statsPerMonth(String amount) {
+    return 'rata² $amount / bulan';
+  }
+
+  @override
+  String get statsNowWeek => 'hari ini';
+
+  @override
+  String get statsNowMonth => 'minggu ini';
+
+  @override
+  String get statsNowYear => 'bulan ini';
+
+  @override
+  String get statsBefore => 'sebelumnya';
+
+  @override
+  String get statsAvgLegend => 'rata-rata';
+
+  @override
+  String get statsAvgShort => 'rata²';
+
+  @override
+  String get statsNotYet => 'belum';
+
+  @override
+  String get statsGlance => 'sekilas';
+
+  @override
+  String get statsPeak => 'paling boros';
+
+  @override
+  String get statsLow => 'paling hemat';
+
+  @override
+  String get statsAvgDay => 'rata² harian';
+
+  @override
+  String get statsAvgWeek => 'rata² mingguan';
+
+  @override
+  String get statsAvgMonth => 'rata² bulanan';
+
+  @override
+  String statsFromDays(int n) {
+    return 'dari $n hari';
+  }
+
+  @override
+  String statsFromWeeks(int n) {
+    return 'dari $n minggu';
+  }
+
+  @override
+  String statsFromMonths(int n) {
+    return 'dari $n bulan';
+  }
+
+  @override
+  String get statsTrack => 'on track nggak?';
+
+  @override
+  String statsBudget(String amount) {
+    return 'budget $amount';
+  }
+
+  @override
+  String get statsLimitWeek => 'jatah seminggu';
+
+  @override
+  String get statsLimitMonth => 'jatah sebulan';
+
+  @override
+  String get statsLimitYear => 'jatah setahun';
+
+  @override
+  String get statsPaceOver => 'lewat budget';
+
+  @override
+  String get statsPaceNear => 'hampir abis';
+
+  @override
+  String get statsPaceUnder => 'di bawah budget';
+
+  @override
+  String get statsPaceFine => 'aman';
+
+  @override
+  String get statsScopeWeek => 'minggu ini';
+
+  @override
+  String get statsScopeMonth => 'bulan ini';
+
+  @override
+  String statsOverBy(String amount, String scope) {
+    return 'kebablasan $amount dari budget $scope';
+  }
+
+  @override
+  String statsNearLeft(String amount, int days) {
+    return 'tinggal $amount buat $days hari lagi, rem dikit ya';
+  }
+
+  @override
+  String statsLeft(String amount, int days) {
+    return 'masih ada $amount buat $days hari lagi';
+  }
+
+  @override
+  String statsYearLeft(String amount, String year) {
+    return 'sisa $amount buat sisa $year';
+  }
+
+  @override
+  String statsPastLeft(String amount, String scope) {
+    return 'sisa $amount dari budget $scope';
+  }
+
+  @override
+  String get statsUsed => 'duit kepake';
+
+  @override
+  String get statsTime => 'waktu jalan';
+
+  @override
+  String get statsNoBudget => 'pasang budget biar ketauan kamu on track nggak';
+
+  @override
+  String get statsSetBudget => 'pasang budget';
+
+  @override
+  String get statsWhere => 'larinya ke mana';
+
+  @override
+  String statsTop(int n) {
+    return 'top $n';
+  }
+
+  @override
+  String statsMoreOne(String name, int pct) {
+    return '+ $name $pct%';
+  }
+
+  @override
+  String statsMoreN(int n) {
+    return '+ $n lainnya';
+  }
+
+  @override
   String get searchTry => 'coba cari';
 
   @override

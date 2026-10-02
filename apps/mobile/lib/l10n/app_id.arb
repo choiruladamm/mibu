@@ -1110,6 +1110,189 @@
       }
     }
   },
+  "statsWeek": "minggu",
+  "statsMonth": "bulan",
+  "statsYear": "tahun",
+  "statsPrev": "periode sebelumnya",
+  "statsNext": "periode berikutnya",
+  "statsOut": "keluar",
+  "statsOutWeek": "keluar minggu ini",
+  "statsOutMonth": "keluar bulan ini",
+  "statsOutYear": "keluar tahun ini",
+  "statsUp": "↑ {amount} vs {than}",
+  "@statsUp": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "than": {
+        "type": "String"
+      }
+    }
+  },
+  "statsDown": "↓ {amount} vs {than}",
+  "@statsDown": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "than": {
+        "type": "String"
+      }
+    }
+  },
+  "statsLastWeek": "minggu lalu",
+  "statsWeekBefore": "minggu sebelumnya",
+  "statsPerMonth": "rata² {amount} / bulan",
+  "@statsPerMonth": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "statsNowWeek": "hari ini",
+  "statsNowMonth": "minggu ini",
+  "statsNowYear": "bulan ini",
+  "statsBefore": "sebelumnya",
+  "statsAvgLegend": "rata-rata",
+  "statsAvgShort": "rata²",
+  "statsNotYet": "belum",
+  "statsGlance": "sekilas",
+  "statsPeak": "paling boros",
+  "statsLow": "paling hemat",
+  "statsAvgDay": "rata² harian",
+  "statsAvgWeek": "rata² mingguan",
+  "statsAvgMonth": "rata² bulanan",
+  "statsFromDays": "dari {n} hari",
+  "@statsFromDays": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "statsFromWeeks": "dari {n} minggu",
+  "@statsFromWeeks": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "statsFromMonths": "dari {n} bulan",
+  "@statsFromMonths": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "statsTrack": "on track nggak?",
+  "statsBudget": "budget {amount}",
+  "@statsBudget": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "statsLimitWeek": "jatah seminggu",
+  "statsLimitMonth": "jatah sebulan",
+  "statsLimitYear": "jatah setahun",
+  "statsPaceOver": "lewat budget",
+  "statsPaceNear": "hampir abis",
+  "statsPaceUnder": "di bawah budget",
+  "statsPaceFine": "aman",
+  "statsScopeWeek": "minggu ini",
+  "statsScopeMonth": "bulan ini",
+  "statsOverBy": "kebablasan {amount} dari budget {scope}",
+  "@statsOverBy": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "statsNearLeft": "tinggal {amount} buat {days} hari lagi, rem dikit ya",
+  "@statsNearLeft": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "statsLeft": "masih ada {amount} buat {days} hari lagi",
+  "@statsLeft": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "statsYearLeft": "sisa {amount} buat sisa {year}",
+  "@statsYearLeft": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "statsPastLeft": "sisa {amount} dari budget {scope}",
+  "@statsPastLeft": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "statsUsed": "duit kepake",
+  "statsTime": "waktu jalan",
+  "statsNoBudget": "pasang budget biar ketauan kamu on track nggak",
+  "statsSetBudget": "pasang budget",
+  "statsWhere": "larinya ke mana",
+  "statsTop": "top {n}",
+  "@statsTop": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "statsMoreOne": "+ {name} {pct}%",
+  "@statsMoreOne": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "statsMoreN": "+ {n} lainnya",
+  "@statsMoreN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "searchTry": "coba cari",
   "searchAllMonths": "di semua bulan",
   "searchSubKind": "di {kind} {month}",
