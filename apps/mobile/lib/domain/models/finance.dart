@@ -150,12 +150,21 @@ class Transaction {
     required this.place,
     required this.at,
     required this.amount,
+    this.categoryId,
+    this.note = '',
+    this.tags = const [],
+    this.deleted = false,
   });
 
-  final String id, emoji, place;
-  final String? category; // null = tanpa kategori
+  final String id, emoji, place, note;
+  final String? category, categoryId; // null = tanpa kategori
   final DateTime at;
   final int amount; // negative = pengeluaran
+  final List<String> tags;
+  final bool deleted; // soft-deleted, still shown stamped on 04.3
+
+  CategoryKind get kind =>
+      amount < 0 ? CategoryKind.expense : CategoryKind.income;
 }
 
 /// Days left until payday, today included. [payday] 0 = last day of month.

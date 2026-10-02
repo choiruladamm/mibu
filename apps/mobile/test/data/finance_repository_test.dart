@@ -182,4 +182,42 @@ void main() {
       isNull,
     );
   });
+
+  test('month list, first month, edit, delete + restore', () async {
+    expect(await repo.watchFirstMonth().first, DateTime(2026, 7));
+    var oct = await repo.watchMonth(DateTime(2026, 10, 20)).first;
+    expect(oct, hasLength(7));
+    expect(oct.first.place, 'gojek'); // newest first
+    expect((await repo.watchMonth(DateTime(2026, 9)).first), hasLength(2));
+
+    final warteg = oct.firstWhere((t) => t.place == 'warteg');
+    expect(warteg.note, 'makan siang bareng tim');
+    expect(warteg.kind, CategoryKind.expense);
+
+    final ngopi = await idOf('ngopi');
+    await repo.updateTransaction(
+      warteg.id,
+      amount: -30000,
+      categoryId: ngopi,
+      place: ' kopken ',
+      note: '',
+      at: DateTime(2026, 10, 2, 8),
+    );
+    var t = (await repo.watchTransaction(warteg.id).first)!;
+    expect(
+      (t.amount, t.category, t.place, t.note),
+      (-30000, 'ngopi', 'kopken', ''),
+    );
+    expect(t.at, DateTime(2026, 10, 2, 8));
+
+    await repo.deleteTransaction(warteg.id);
+    t = (await repo.watchTransaction(warteg.id).first)!;
+    expect(t.deleted, isTrue); // still readable for the 04.3c stamp
+    oct = await repo.watchMonth(DateTime(2026, 10)).first;
+    expect(oct, hasLength(6));
+
+    await repo.restoreTransaction(warteg.id);
+    expect((await repo.watchTransaction(warteg.id).first)!.deleted, isFalse);
+    expect(await repo.watchMonth(DateTime(2026, 10)).first, hasLength(7));
+  });
 }

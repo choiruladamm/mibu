@@ -107,29 +107,61 @@ class FinanceRepository {
     );
   }
 
-  Stream<List<Transaction>> watchRecent({int limit = 2}) {
+  /// Entries joined with their category, newest first.
+  JoinedSelectStatement<HasResultSet, dynamic> _joined(Expression<bool> where) {
     final c = _db.categories;
-    final q =
-        _db.select(_tx).join([leftOuterJoin(c, c.id.equalsExp(_tx.categoryId))])
-          ..where(_tx.deletedAt.isNull())
-          ..orderBy([OrderingTerm.desc(_tx.at)])
-          ..limit(limit);
-    return q.watch().map(
-      (rows) => [
-        for (final r in rows)
-          if ((r.readTable(_tx), r.readTableOrNull(c)) case (
-            final t,
-            final cat,
-          ))
-            Transaction(
-              id: t.id,
-              emoji: cat?.emoji ?? '🧾',
-              category: cat?.name,
-              place: t.place,
-              at: t.at,
-              amount: t.amount,
-            ),
-      ],
+    return _db.select(_tx).join([
+        leftOuterJoin(c, c.id.equalsExp(_tx.categoryId)),
+      ])
+      ..where(where)
+      ..orderBy([OrderingTerm.desc(_tx.at)]);
+  }
+
+  Transaction _transaction(TypedResult r) {
+    final t = r.readTable(_tx);
+    final cat = r.readTableOrNull(_db.categories);
+    return Transaction(
+      id: t.id,
+      emoji: cat?.emoji ?? '🧾',
+      category: cat?.name,
+      categoryId: t.categoryId,
+      place: t.place,
+      note: t.note,
+      tags: t.tags.isEmpty ? const [] : t.tags.split(','),
+      at: t.at,
+      amount: t.amount,
+      deleted: t.deletedAt != null,
+    );
+  }
+
+  Stream<List<Transaction>> watchRecent({int limit = 2}) => (_joined(
+    _tx.deletedAt.isNull(),
+  )..limit(limit)).watch().map((rows) => rows.map(_transaction).toList());
+
+  /// 04.1: every entry in the month containing [month].
+  Stream<List<Transaction>> watchMonth(DateTime month) => _joined(
+    _tx.deletedAt.isNull() &
+        _tx.at.isBiggerOrEqualValue(DateTime(month.year, month.month)) &
+        _tx.at.isSmallerThanValue(DateTime(month.year, month.month + 1)),
+  ).watch().map((rows) => rows.map(_transaction).toList());
+
+  /// 04.3: one entry, soft-deleted included (stamped "dihapus" + batalin).
+  Stream<Transaction?> watchTransaction(String id) =>
+      _joined(_tx.id.equals(id))
+          .watchSingleOrNull()
+          .map((r) => r == null ? null : _transaction(r));
+
+  /// First month with an entry (04.1 carousel start); null = none yet.
+  Stream<DateTime?> watchFirstMonth() {
+    final first = _tx.at.min();
+    final q = _db.selectOnly(_tx)
+      ..addColumns([first])
+      ..where(_tx.deletedAt.isNull());
+    return q.watchSingle().map(
+      (r) => switch (r.read(first)) {
+        final at? => DateTime(at.year, at.month),
+        null => null,
+      },
     );
   }
 
@@ -231,6 +263,38 @@ class FinanceRepository {
           note: Value(note.trim()),
           tags: Value(tags.join(',')),
           at: at,
+        ),
+      );
+
+  /// 04.4: kind stays; [amount] is signed.
+  Future<void> updateTransaction(
+    String id, {
+    required int amount,
+    required String? categoryId,
+    required String place,
+    required String note,
+    required DateTime at,
+  }) => (_db.update(_tx)..where((t) => t.id.equals(id))).write(
+    TransactionsCompanion(
+      amount: Value(amount),
+      categoryId: Value(categoryId),
+      place: Value(place.trim()),
+      note: Value(note.trim()),
+      at: Value(at),
+      updatedAt: Value(DateTime.now()),
+    ),
+  );
+
+  /// 04.3b soft delete; [restoreTransaction] is its batalin.
+  Future<void> deleteTransaction(String id) => _setDeleted(id, DateTime.now());
+
+  Future<void> restoreTransaction(String id) => _setDeleted(id, null);
+
+  Future<void> _setDeleted(String id, DateTime? at) =>
+      (_db.update(_tx)..where((t) => t.id.equals(id))).write(
+        TransactionsCompanion(
+          deletedAt: Value(at),
+          updatedAt: Value(DateTime.now()),
         ),
       );
 
