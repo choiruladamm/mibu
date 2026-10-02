@@ -321,7 +321,7 @@ class _Chart extends StatelessWidget {
       StatsPeriod.year => 14.0,
     };
     final avgY = s.average / max * _barH;
-    final peak = s.peak, emoji = s.peakEmoji;
+    final peak = s.peak, emoji = s.peakTop?.emoji;
 
     String label(Span b) => switch (s.period) {
       StatsPeriod.week => _lower(_weekday, b.start),
@@ -644,7 +644,8 @@ String _barName(Stats s, int i) {
   };
 }
 
-/// sekilas: paling boros · paling hemat · rata² per bar.
+/// sekilas: ink card for paling boros (+ gara-gara), mist cards for paling
+/// hemat and rata² per bar.
 class _Glance extends StatelessWidget {
   const _Glance({required this.stats});
 
@@ -654,40 +655,69 @@ class _Glance extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
     final s = stats;
-    final peak = s.peak, low = s.low;
+    final peak = s.peak, low = s.low, top = s.peakTop;
     final (avgName, avgSub) = switch (s.period) {
       StatsPeriod.week => (l.statsAvgDay, l.statsFromDays(s.counted)),
       StatsPeriod.month => (l.statsAvgWeek, l.statsFromWeeks(s.counted)),
       StatsPeriod.year => (l.statsAvgMonth, l.statsFromMonths(s.counted)),
     };
+    final why = top == null ? null : top.category ?? l.uncategorized;
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: 14,
         children: [
-          _Title(l.statsGlance),
-          Row(
-            spacing: 10,
-            children: [
-              _Tile(
-                label: l.statsPeak,
-                title: peak == null ? '–' : _barName(s, peak),
-                sub: peak == null ? '' : context.rpCompact(s.spent[peak]!),
-                outline: true,
-              ),
-              _Tile(
-                label: l.statsLow,
-                title: low == null ? '–' : _barName(s, low),
-                sub: low == null ? '' : context.rpCompact(s.spent[low]!),
-              ),
-              _Tile(
-                label: avgName,
-                title: context.rpCompact(s.average),
-                sub: avgSub,
-                mutedSub: true,
-              ),
-            ],
+          Text(
+            l.statsGlance,
+            style: AppText.label.copyWith(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          SizedBox(
+            height: 184,
+            child: Row(
+              spacing: 10,
+              children: [
+                _PeakCard(
+                  label: l.statsPeak,
+                  amount: peak == null
+                      ? '–'
+                      : context.rpCompact(s.spent[peak]!),
+                  name: peak == null ? '' : _barName(s, peak),
+                  because: l.statsBecause,
+                  why: why,
+                  emoji: top?.emoji,
+                  semantics: peak == null
+                      ? l.statsPeak
+                      : l.statsPeakLabel(
+                          _barName(s, peak),
+                          context.rpCompact(s.spent[peak]!),
+                          why!,
+                        ),
+                ),
+                Expanded(
+                  child: Column(
+                    spacing: 10,
+                    children: [
+                      _MiniTile(
+                        label: l.statsLow,
+                        value: low == null
+                            ? '–'
+                            : context.rpCompact(s.spent[low]!),
+                        sub: low == null ? '' : _barName(s, low),
+                      ),
+                      _MiniTile(
+                        label: avgName,
+                        value: context.rpCompact(s.average),
+                        sub: avgSub,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -695,53 +725,160 @@ class _Glance extends StatelessWidget {
   }
 }
 
-class _Tile extends StatelessWidget {
-  const _Tile({
+class _PeakCard extends StatelessWidget {
+  const _PeakCard({
     required this.label,
-    required this.title,
-    required this.sub,
-    this.outline = false,
-    this.mutedSub = false,
+    required this.amount,
+    required this.name,
+    required this.because,
+    required this.why,
+    required this.emoji,
+    required this.semantics,
   });
 
-  final String label, title, sub;
-  final bool outline, mutedSub;
+  final String label, amount, name, because, semantics;
+  final String? why, emoji; // null = nothing spent
 
   @override
   Widget build(BuildContext context) {
+    final onInk = AppText.caption.copyWith(color: AppColors.onInkMuted);
+    return Semantics(
+      container: true,
+      label: semantics,
+      excludeSemantics: true,
+      child: Container(
+        width: 158,
+        clipBehavior: Clip.antiAlias,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.ink,
+          borderRadius: BorderRadius.circular(AppRadius.groupCard),
+        ),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            if (emoji != null)
+              Positioned(
+                right: -30,
+                top: -30,
+                child: Container(
+                  width: 72,
+                  height: 72,
+                  padding: const EdgeInsets.only(right: 10, bottom: 10),
+                  alignment: Alignment.center,
+                  decoration: const BoxDecoration(
+                    color: AppColors.onInk12,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    emoji!,
+                    style: const TextStyle(fontSize: 30, height: 1),
+                  ),
+                ),
+              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(label, style: onInk.copyWith(fontSize: 12)),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        amount,
+                        style: AppText.headline.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.onInk,
+                        ),
+                      ),
+                    ),
+                    if (name.isNotEmpty) Text(name, style: onInk),
+                    if (why != null) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        because,
+                        style: onInk.copyWith(
+                          fontSize: 11,
+                          color: AppColors.grey400,
+                        ),
+                      ),
+                      const SizedBox(height: 1),
+                      Text(
+                        why!,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppText.label.copyWith(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          height: 1.3,
+                          color: AppColors.onInk,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MiniTile extends StatelessWidget {
+  const _MiniTile({
+    required this.label,
+    required this.value,
+    required this.sub,
+  });
+
+  final String label, value, sub;
+
+  @override
+  Widget build(BuildContext context) {
+    final muted = AppText.caption.copyWith(
+      fontSize: 12,
+      color: AppColors.muted,
+    );
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.all(14),
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: outline ? null : AppColors.mist,
+          color: AppColors.mist,
           borderRadius: BorderRadius.circular(AppRadius.statTile),
-          border: outline
-              ? Border.all(color: AppColors.ink, width: AppStroke.outline)
-              : null,
         ),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 6,
+          spacing: 1,
           children: [
             Text(
               label,
-              style: AppText.caption.copyWith(
-                fontSize: 12,
-                color: AppColors.muted,
-              ),
-            ),
-            Text(
-              title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: AppText.label.copyWith(fontWeight: FontWeight.w600),
+              style: muted,
+            ),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                value,
+                style: AppText.label.copyWith(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
             Text(
               sub,
               maxLines: 1,
-              style: AppText.caption.copyWith(
-                color: mutedSub ? AppColors.muted : AppColors.ink,
-              ),
+              overflow: TextOverflow.ellipsis,
+              style: muted,
             ),
           ],
         ),

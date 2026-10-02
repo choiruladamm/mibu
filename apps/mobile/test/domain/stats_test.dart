@@ -78,7 +78,8 @@ void main() {
     expect(s.spent, [12000, 209000, 15000, 0, 9000, null, null]);
     expect((s.total, s.current, s.counted), (245000, 4, 5));
     expect(s.average, 49000);
-    expect((s.peak, s.low, s.peakEmoji), (1, 3, '🐶'));
+    expect((s.peak, s.low), (1, 3));
+    expect((s.peakTop!.category, s.peakTop!.emoji), ('anabul', '🐶'));
     expect((s.elapsed, s.left), (5, 2));
     expect(s.categories.map((c) => (c.category, c.spent)), [
       ('anabul', 200000),

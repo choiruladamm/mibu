@@ -1160,10 +1160,13 @@
   "statsNotYet": "belum",
   "statsGlance": "sekilas",
   "statsPeak": "paling boros",
+"statsBecause": "gara-gara",
+"statsPeakLabel": "paling boros {name}, {amount}, gara-gara {why}",
+"@statsPeakLabel": {"placeholders": {"name": {"type": "String"}, "amount": {"type": "String"}, "why": {"type": "String"}}},
   "statsLow": "paling hemat",
-  "statsAvgDay": "rata² harian",
-  "statsAvgWeek": "rata² mingguan",
-  "statsAvgMonth": "rata² bulanan",
+  "statsAvgDay": "rata²/hari",
+  "statsAvgWeek": "rata²/minggu",
+  "statsAvgMonth": "rata²/bulan",
   "statsFromDays": "dari {n} hari",
   "@statsFromDays": {
     "placeholders": {

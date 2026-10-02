@@ -16,8 +16,8 @@ void main() {
   // Fixture, rab 14 okt 2026, budget Rp8jt: okt Rp4,06jt (tokopedia 2,4jt +
   // gojek 163K on the 11th, dokter hewan 450K 12th, warteg + kopi + petshop
   // 1,02jt 13th, gojek 27K today); september Rp2,61jt.
-  Future<AppDatabase> pump(WidgetTester tester) async {
-    tester.view.physicalSize = const Size(900, 2400);
+  Future<AppDatabase> pump(WidgetTester tester, {double width = 900}) async {
+    tester.view.physicalSize = Size(width, 2400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     final now = DateTime(2026, 10, 14, 14, 50);
@@ -59,7 +59,11 @@ void main() {
     expect(find.text('masih ada Rp3,94jt buat 17 hari lagi'), findsOneWidget);
     expect(findMeta(['budget Rp8jt', 'jatah sebulan']), findsOneWidget);
     expect(find.text('dari 3 minggu'), findsOneWidget);
-    expect(find.text('belanja'), findsOneWidget); // top category
+    // sekilas: the biggest bar (5–11 okt: tokopedia) and why
+    expect(find.text('paling boros'), findsOneWidget);
+    expect(find.text('gara-gara'), findsOneWidget);
+    expect(find.text('belanja'), findsNWidgets(2)); // gara-gara + larinya
+    expect(find.text('rata²/minggu'), findsOneWidget);
     expect(find.text('+ ngopi 4%'), findsOneWidget); // 5th of 5
   });
 
@@ -70,6 +74,7 @@ void main() {
     expect(findMeta(['keluar minggu ini', '12 – 18 okt']), findsOneWidget);
     expect(find.text('Rp1,5jt'), findsOneWidget);
     expect(find.text('selasa'), findsOneWidget); // paling boros
+    expect(find.text('rata²/hari'), findsOneWidget);
     expect(find.text('senin'), findsOneWidget); // paling hemat (rab runs)
     expect(find.text('dari 3 hari'), findsOneWidget);
 
@@ -95,6 +100,26 @@ void main() {
     expect(chip.width, greaterThan(column.width)); // not clipped to 1/12
     expect(chip.left, greaterThan(16)); // still inside the card
     expect(chip.right, lessThan(900 - 16));
+  });
+
+  testWidgets('sekilas fits a 390 wide phone in every period', (tester) async {
+    // Ahem (tests) is 1em per glyph, so the chart legend overflows here:
+    // only the sekilas widgets are held to fit.
+    final errors = <String>[];
+    final onError = FlutterError.onError;
+    FlutterError.onError = (d) => errors.add(d.toString());
+    addTearDown(() => FlutterError.onError = onError);
+
+    await pump(tester, width: 390);
+    for (final p in ['minggu', 'tahun', 'bulan']) {
+      await tester.tap(find.text(p));
+      await settle(tester);
+      expect(find.text('gara-gara'), findsOneWidget);
+    }
+    expect(
+      errors.where((e) => e.contains('_MiniTile') || e.contains('_PeakCard')),
+      isEmpty,
+    );
   });
 
   testWidgets('02.3d no budget: pasang budget card', (tester) async {

@@ -170,15 +170,22 @@ class Stats {
     return best ?? (current >= 0 ? current : null);
   }
 
-  /// Emoji of the biggest category in the [peak] bar (its badge).
-  String? get peakEmoji {
+  /// "gara-gara": the biggest category in the [peak] bar; its emoji is the
+  /// badge on that bar.
+  StatsCategory? get peakTop {
     final i = peak;
     if (i == null) return null;
-    final m = <String, int>{};
+    final m = <String?, StatsCategory>{};
     for (final t in _expenses) {
-      if (_inside(t.at, bars[i])) m[t.emoji] = (m[t.emoji] ?? 0) - t.amount;
+      if (!_inside(t.at, bars[i])) continue;
+      final c = m[t.category];
+      m[t.category] = (
+        category: t.category,
+        emoji: t.emoji,
+        spent: (c?.spent ?? 0) - t.amount,
+      );
     }
-    return m.entries.reduce((a, b) => b.value > a.value ? b : a).key;
+    return m.values.reduce((a, b) => b.spent > a.spent ? b : a);
   }
 
   double get usedPct => limit == null ? 0 : total / limit! * 100;

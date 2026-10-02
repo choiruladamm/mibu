@@ -1266,16 +1266,24 @@ class AppLocalizationsId extends AppLocalizations {
   String get statsPeak => 'paling boros';
 
   @override
+  String get statsBecause => 'gara-gara';
+
+  @override
+  String statsPeakLabel(String name, String amount, String why) {
+    return 'paling boros $name, $amount, gara-gara $why';
+  }
+
+  @override
   String get statsLow => 'paling hemat';
 
   @override
-  String get statsAvgDay => 'rata² harian';
+  String get statsAvgDay => 'rata²/hari';
 
   @override
-  String get statsAvgWeek => 'rata² mingguan';
+  String get statsAvgWeek => 'rata²/minggu';
 
   @override
-  String get statsAvgMonth => 'rata² bulanan';
+  String get statsAvgMonth => 'rata²/bulan';
 
   @override
   String statsFromDays(int n) {

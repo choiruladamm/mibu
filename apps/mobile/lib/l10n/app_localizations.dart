@@ -2140,6 +2140,18 @@ abstract class AppLocalizations {
   /// **'paling boros'**
   String get statsPeak;
 
+  /// No description provided for @statsBecause.
+  ///
+  /// In id, this message translates to:
+  /// **'gara-gara'**
+  String get statsBecause;
+
+  /// No description provided for @statsPeakLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'paling boros {name}, {amount}, gara-gara {why}'**
+  String statsPeakLabel(String name, String amount, String why);
+
   /// No description provided for @statsLow.
   ///
   /// In id, this message translates to:
@@ -2149,19 +2161,19 @@ abstract class AppLocalizations {
   /// No description provided for @statsAvgDay.
   ///
   /// In id, this message translates to:
-  /// **'rata² harian'**
+  /// **'rata²/hari'**
   String get statsAvgDay;
 
   /// No description provided for @statsAvgWeek.
   ///
   /// In id, this message translates to:
-  /// **'rata² mingguan'**
+  /// **'rata²/minggu'**
   String get statsAvgWeek;
 
   /// No description provided for @statsAvgMonth.
   ///
   /// In id, this message translates to:
-  /// **'rata² bulanan'**
+  /// **'rata²/bulan'**
   String get statsAvgMonth;
 
   /// No description provided for @statsFromDays.
