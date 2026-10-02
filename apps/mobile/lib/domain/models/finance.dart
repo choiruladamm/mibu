@@ -178,10 +178,6 @@ class Transaction {
       amount < 0 ? CategoryKind.expense : CategoryKind.income;
 }
 
-/// Salary paid this many days before the scheduled payday still counts as
-/// that payday's (cair duluan). Same window starts a cycle early in fase 2.
-const paydayEarlyDays = 3;
-
 /// "gajian telat" shows this many days at most, then quietly rolls on.
 const paydayLateMaxDays = 7;
 
@@ -200,59 +196,52 @@ typedef PaydayInfo = ({
   int lateDays,
 });
 
-/// [payday] 1–31 (31 = akhir; a day past the month's end = its last day).
-/// A payday on Saturday / Sunday is paid the Friday before. [salaries] =
-/// dates of live gajian income (any order). Salary logged up to
-/// [paydayEarlyDays] before a payday counts as that payday's, so the money
-/// lasts until the one after. On payday or after it with no salary logged
-/// yet: today / late; late needs a salary logged before (people who never
-/// log it don't get nagged) and ends after [paydayLateMaxDays].
+/// [payday] 1–31 (31 = akhir; a day past the month's end = its last day). A
+/// payday on Saturday / Sunday is paid the Friday before. [salaries] = dates
+/// of live gajian income (any order): one logged up to [paydayEarlyDays]
+/// early starts the cycle that day, so the money lasts until the next one.
+/// On the scheduled day or after it with no salary logged yet: today / late;
+/// late needs a salary logged before (people who never log it don't get
+/// nagged) and ends after [paydayLateMaxDays]. Same cycles as the period
+/// resolver, so budget and saldo count to the same day.
 PaydayInfo paydayInfo({
   required DateTime now,
   required int payday,
   Iterable<DateTime> salaries = const [],
 }) {
   final today = DateTime(now.year, now.month, now.day);
-  final r = PaydayCycleResolver(payday, shift: PaydayShift.previousWorkday);
-  final cycle = r.periodOf(today); // [last payday, next payday)
-  final last = cycle.start, next = cycle.end;
   final paid = [for (final d in salaries) DateTime(d.year, d.month, d.day)];
-  bool paidSince(DateTime from) =>
-      paid.any((d) => !d.isBefore(from) && !d.isAfter(today));
+  final r = PaydayCycleResolver(
+    payday,
+    shift: PaydayShift.previousWorkday,
+    salaries: paid,
+  );
+  final cycle = r.cycleOf(today);
+  final period = r.periodOf(today);
   int days(DateTime from, DateTime to) => DateTime.utc(
     to.year,
     to.month,
     to.day,
   ).difference(DateTime.utc(from.year, from.month, from.day)).inDays;
-  DateTime early(DateTime d) =>
-      DateTime(d.year, d.month, d.day - paydayEarlyDays);
 
-  // Next payday's salary already in (cair duluan): last until the one after.
-  if (!today.isBefore(early(next)) && paidSince(early(next))) {
-    final after = r.next(cycle).end;
-    final n = days(today, after);
-    return (
-      status: PaydayStatus.upcoming,
-      next: after,
-      daysToNext: n,
-      daysLeft: n,
-      lateDays: 0,
-    );
-  }
-  final toNext = days(today, next);
+  final toNext = days(today, period.end);
   final upcoming = (
     status: PaydayStatus.upcoming,
-    next: next,
+    next: period.end,
     daysToNext: toNext,
     daysLeft: toNext,
     lateDays: 0,
   );
-  if (paidSince(early(last))) return upcoming;
-  final late = days(last, today);
+  // Scheduled payday of this cycle, and whether its salary is in already.
+  final due = r.anchor(cycle.y, cycle.m);
+  final from = DateTime(due.year, due.month, due.day - paydayEarlyDays);
+  final logged = paid.any((d) => !d.isBefore(from) && !d.isAfter(today));
+  if (logged || today.isBefore(due)) return upcoming;
+  final late = days(due, today);
   if (late == 0) {
     return (
       status: PaydayStatus.today,
-      next: next,
+      next: period.end,
       daysToNext: toNext,
       daysLeft: 0,
       lateDays: 0,
@@ -261,7 +250,7 @@ PaydayInfo paydayInfo({
   if (paid.isNotEmpty && late <= paydayLateMaxDays) {
     return (
       status: PaydayStatus.late,
-      next: next,
+      next: period.end,
       daysToNext: toNext,
       daysLeft: 0,
       lateDays: late,

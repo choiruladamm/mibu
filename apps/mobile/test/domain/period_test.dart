@@ -50,14 +50,18 @@ void main() {
     );
   });
 
-  test('payday 25: 16 okt is the sep cycle, 25 okt starts okt', () {
+  test('payday 25: 16 okt is in "oktober" (25 sep – 24 okt)', () {
     const r = PaydayCycleResolver(25);
     final p = r.periodOf(DateTime(2026, 10, 16, 14, 50));
     expect(
       (p.id, p.start, p.end),
-      ('2026-09', DateTime(2026, 9, 25), DateTime(2026, 10, 25)),
+      (
+        '2026-10',
+        DateTime(2026, 9, 25),
+        DateTime(2026, 10, 25),
+      ), // named by most days
     );
-    expect(r.periodOf(DateTime(2026, 10, 25)).id, '2026-10');
+    expect(r.periodOf(DateTime(2026, 10, 25)).id, '2026-11');
     expect(p.daysLeft(DateTime(2026, 10, 16, 23, 30)), 9); // today counts
   });
 
@@ -65,8 +69,8 @@ void main() {
     // 25 okt 2026 is a Sunday → paid Fri 23 okt.
     const r = PaydayCycleResolver(25, shift: PaydayShift.previousWorkday);
     expect(r.anchor(2026, 10), DateTime(2026, 10, 23));
-    expect(r.periodOf(DateTime(2026, 10, 23)).id, '2026-10');
-    expect(r.periodOf(DateTime(2026, 10, 22)).id, '2026-09');
+    expect(r.periodOf(DateTime(2026, 10, 23)).id, '2026-11');
+    expect(r.periodOf(DateTime(2026, 10, 22)).id, '2026-10');
     tiles(r);
 
     // 1 nov 2026 is a Sunday → paid Fri 30 okt, cycle still "2026-11".
@@ -128,5 +132,53 @@ void main() {
     final p = changed.periodOf(DateTime(2026, 11, 1));
     expect((p.start, p.end), (DateTime(2026, 10, 25), DateTime(2026, 11, 10)));
     tiles(changed);
+  });
+
+  test('named after the month most of its days fall in', () {
+    String name(int day, DateTime d) => PaydayCycleResolver(day).periodOf(d).id;
+    expect(name(25, DateTime(2026, 10, 3)), '2026-10'); // 25 sep – 24 okt
+    expect(name(5, DateTime(2026, 10, 20)), '2026-10'); // 5 okt – 4 nov
+    expect(name(15, DateTime(2026, 10, 20)), '2026-10'); // 15 okt – 14 nov
+    expect(name(15, DateTime(2026, 10, 3)), '2026-09'); // 15 sep – 14 okt
+    expect(name(1, DateTime(2026, 10, 20)), '2026-10'); // = calendar month
+  });
+
+  test('periodForMonth: the period a month label points at', () {
+    for (final day in [1, 5, 15, 16, 25, 28, 0]) {
+      final r = PaydayCycleResolver(day);
+      var seen = <String>{};
+      for (var m = 1; m <= 12; m++) {
+        final p = r.periodForMonth(DateTime(2026, m, 1));
+        expect(p.key, DateTime(2026, m), reason: 'day $day month $m');
+        expect(seen.add(p.id), isTrue, reason: 'two months, one period');
+      }
+    }
+    final r = PaydayCycleResolver(25);
+    final oct = r.periodForMonth(DateTime(2026, 10));
+    expect(
+      (oct.start, oct.end),
+      (DateTime(2026, 9, 25), DateTime(2026, 10, 25)),
+    );
+  });
+
+  test('cair duluan: a salary ≤ 3 days early starts the cycle that day', () {
+    // 25 nov 2026 is a Wednesday.
+    final plain = PaydayCycleResolver(25).periodOf(DateTime(2026, 11, 24));
+    expect(plain.end, DateTime(2026, 11, 25));
+
+    final r = PaydayCycleResolver(25, salaries: [DateTime(2026, 11, 23, 9)]);
+    expect(r.periodOf(DateTime(2026, 11, 22)).end, DateTime(2026, 11, 23));
+    expect(r.periodOf(DateTime(2026, 11, 24)).start, DateTime(2026, 11, 23));
+    // 5 days early is just income.
+    final far = PaydayCycleResolver(25, salaries: [DateTime(2026, 11, 20)]);
+    expect(far.periodOf(DateTime(2026, 11, 24)).end, DateTime(2026, 11, 25));
+    // The earliest one in the window wins.
+    final two = PaydayCycleResolver(
+      25,
+      salaries: [DateTime(2026, 11, 24), DateTime(2026, 11, 22)],
+    );
+    expect(two.periodOf(DateTime(2026, 11, 22)).start, DateTime(2026, 11, 22));
+    tiles(r);
+    tiles(two);
   });
 }
