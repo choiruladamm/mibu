@@ -16,6 +16,7 @@ class MetaLine extends StatelessWidget {
     this.onInk = false,
     this.tight = false,
     this.textAlign,
+    this.maxLines = 1,
   }) : spans = [
          for (final p in parts)
            if (p.isNotEmpty) TextSpan(text: p),
@@ -29,6 +30,7 @@ class MetaLine extends StatelessWidget {
     this.onInk = false,
     this.tight = false,
     this.textAlign,
+    this.maxLines = 1,
   });
 
   final List<InlineSpan> spans;
@@ -36,6 +38,7 @@ class MetaLine extends StatelessWidget {
   final bool onInk; // dot #737373 instead of #BDBDBD
   final bool tight; // 5 around the dot instead of 7
   final TextAlign? textAlign;
+  final int? maxLines; // null = wraps (a toast's sub); 1 line + … otherwise
 
   /// [parts] with dots between, for a caller's own Text.rich.
   static List<InlineSpan> join(
@@ -90,8 +93,8 @@ class MetaLine extends StatelessWidget {
       ),
       style: style,
       textAlign: textAlign,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
+      maxLines: maxLines,
+      overflow: maxLines == null ? null : TextOverflow.ellipsis,
       semanticsLabel: spans.map((s) => s.toPlainText()).join(', '),
     );
   }

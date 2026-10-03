@@ -139,9 +139,11 @@ class _Toast extends StatelessWidget {
                         ),
                       ),
                       // " · " in [sub] marks MetaLine parts (dots on ink).
+                      // Wraps: a sub is a sentence, never cut off.
                       MetaLine(
                         sub.split(' · '),
                         onInk: true,
+                        maxLines: null,
                         style: AppText.caption.copyWith(
                           color: AppColors.onInkMuted,
                         ),
