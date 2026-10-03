@@ -1133,12 +1133,14 @@
   },
   "setupTapHint": "tap di atas buat mulai",
   "setupDone": "beres, ke beranda",
-  "settingsBudget": "budget bulanan",
-  "settingsBudgetUnit": "/ bulan",
+  "settingsBudget": "budget per periode",
+  "settingsBudgetUnit": "/ periode",
   "settingsBudgetEmpty": "belum diisi",
   "settingsBudgetEdit": "atur budget",
-  "settingsBudgetSet": "pasang budget bulanan",
-  "settingsLimits": "{n} limit",
+  "settingsBudgetSet": "pasang budget per periode",
+  "settingsPeriod": "periode {range}",
+  "@settingsPeriod": {"placeholders": {"range": {"type": "String"}}},
+  "settingsLimits": "{n} kantong",
   "@settingsLimits": {
     "placeholders": {
       "n": {

@@ -6,8 +6,11 @@ import 'package:intl/intl.dart';
 
 import '../../../../data/repositories/finance_repository.dart';
 import '../../../../domain/models/finance.dart';
+import '../../../../domain/period.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../routing/router.dart';
+import '../../../core/dates.dart';
+import '../../../core/finance_providers.dart';
 import '../../../core/money.dart';
 import '../../../core/tokens.dart';
 import '../../../core/widgets/app_emoji.dart';
@@ -99,6 +102,8 @@ class SettingsView extends ConsumerWidget {
                   _BudgetCard(
                     budget: s.budget,
                     limits: s.limits,
+                    period: ref.watch(currentPeriodProvider),
+                    onPeriod: () => editPayday(context, ref),
                     onEdit: () => editBudget(context, ref),
                     onLimits: () => context.go(Routes.pockets),
                   ),
@@ -224,18 +229,22 @@ class SettingsView extends ConsumerWidget {
   }
 }
 
-/// Ink card: budget bulanan + pencil → 00.16, chip → 02.2.
+/// Ink card: budget per periode + pencil → 00.16; chips: the running
+/// period → tanggal gajian 00.24 (it sets the period), n kantong → 02.2.
 class _BudgetCard extends StatelessWidget {
   const _BudgetCard({
     required this.budget,
     required this.limits,
+    required this.period,
+    required this.onPeriod,
     required this.onEdit,
     required this.onLimits,
   });
 
   final int? budget;
   final int limits;
-  final VoidCallback onEdit, onLimits;
+  final Period period;
+  final VoidCallback onPeriod, onEdit, onLimits;
 
   @override
   Widget build(BuildContext context) {
@@ -325,30 +334,43 @@ class _BudgetCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 18),
-          Semantics(
-            button: true,
-            child: GestureDetector(
-              onTap: onLimits,
-              child: Container(
-                height: 34,
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: AppColors.onInk12,
-                  borderRadius: BorderRadius.circular(AppRadius.pill),
-                ),
-                child: Text(
-                  l.settingsLimits(limits),
-                  style: AppText.caption.copyWith(color: AppColors.onInk),
-                ),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _chip(
+                l.settingsPeriod(periodRange(period.start, period.end)),
+                onPeriod,
               ),
-            ),
+              _chip(l.settingsLimits(limits), onLimits),
+            ],
           ),
         ],
       ),
     );
   }
 }
+
+/// A translucent pill on the budget card.
+Widget _chip(String label, VoidCallback onTap) => Semantics(
+  button: true,
+  child: GestureDetector(
+    onTap: onTap,
+    child: Container(
+      height: 34,
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: AppColors.onInk12,
+        borderRadius: BorderRadius.circular(AppRadius.pill),
+      ),
+      child: Text(
+        label,
+        style: AppText.caption.copyWith(color: AppColors.onInk),
+      ),
+    ),
+  ),
+);
 
 /// A 60px row in a group card: icon disc, title (+ hint), then a trailing
 /// value, chevron or switch ([switchOn] non-null).

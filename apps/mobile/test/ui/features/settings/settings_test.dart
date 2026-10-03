@@ -74,7 +74,7 @@ void main() {
     await pump(tester);
 
     expect(find.text('pengaturan'), findsWidgets); // title + tab
-    expect(find.text('budget bulanan'), findsOneWidget);
+    expect(find.text('budget per periode'), findsOneWidget);
     // buat apa aja: hint + the 3 most used icons stacked, then the rest.
     expect(find.text('nama, ikon & limit'), findsOneWidget);
     expect(find.text('+3'), findsOneWidget); // fixture: 6 buat apa
@@ -87,7 +87,10 @@ void main() {
       findsNWidgets(3),
     );
     expect(find.text('Rp8jt'), findsOneWidget);
-    expect(find.text('/ bulan'), findsOneWidget);
+    expect(find.text('/ periode'), findsOneWidget);
+    // Chips: the running period (fixture: calendar months) and the kantong.
+    expect(find.text('periode 1 okt – 31 okt'), findsOneWidget);
+    expect(find.text('4 kantong'), findsOneWidget);
     expect(find.text('buat apa aja'), findsOneWidget);
     expect(find.text('limit bulanan'), findsOneWidget);
     expect(find.text('sembunyiin nominal'), findsOneWidget);
@@ -149,6 +152,13 @@ void main() {
     // names the date, so "tiap tgl 25" doesn't look miscounted.
     expect(find.text('tiap tgl 25'), findsOneWidget);
     expect(findMeta(['jum 23 okt', '9 hari lagi']), findsOneWidget);
+
+    // The period chip on the budget card opens the same sheet.
+    await tester.tap(find.text('periode 1 okt – 31 okt'));
+    await settle();
+    expect(find.text('gajian tiap tanggal berapa?'), findsOneWidget);
+    await tester.tap(find.text('nggak jadi'));
+    await settle();
 
     await tester.tap(find.text('tanggal gajian'));
     await settle();

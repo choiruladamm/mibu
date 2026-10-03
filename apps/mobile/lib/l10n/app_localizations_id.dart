@@ -1423,10 +1423,10 @@ class AppLocalizationsId extends AppLocalizations {
   String get setupDone => 'beres, ke beranda';
 
   @override
-  String get settingsBudget => 'budget bulanan';
+  String get settingsBudget => 'budget per periode';
 
   @override
-  String get settingsBudgetUnit => '/ bulan';
+  String get settingsBudgetUnit => '/ periode';
 
   @override
   String get settingsBudgetEmpty => 'belum diisi';
@@ -1435,11 +1435,16 @@ class AppLocalizationsId extends AppLocalizations {
   String get settingsBudgetEdit => 'atur budget';
 
   @override
-  String get settingsBudgetSet => 'pasang budget bulanan';
+  String get settingsBudgetSet => 'pasang budget per periode';
+
+  @override
+  String settingsPeriod(String range) {
+    return 'periode $range';
+  }
 
   @override
   String settingsLimits(int n) {
-    return '$n limit';
+    return '$n kantong';
   }
 
   @override

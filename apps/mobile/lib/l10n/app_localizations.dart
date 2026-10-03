@@ -2347,13 +2347,13 @@ abstract class AppLocalizations {
   /// No description provided for @settingsBudget.
   ///
   /// In id, this message translates to:
-  /// **'budget bulanan'**
+  /// **'budget per periode'**
   String get settingsBudget;
 
   /// No description provided for @settingsBudgetUnit.
   ///
   /// In id, this message translates to:
-  /// **'/ bulan'**
+  /// **'/ periode'**
   String get settingsBudgetUnit;
 
   /// No description provided for @settingsBudgetEmpty.
@@ -2371,13 +2371,19 @@ abstract class AppLocalizations {
   /// No description provided for @settingsBudgetSet.
   ///
   /// In id, this message translates to:
-  /// **'pasang budget bulanan'**
+  /// **'pasang budget per periode'**
   String get settingsBudgetSet;
+
+  /// No description provided for @settingsPeriod.
+  ///
+  /// In id, this message translates to:
+  /// **'periode {range}'**
+  String settingsPeriod(String range);
 
   /// No description provided for @settingsLimits.
   ///
   /// In id, this message translates to:
-  /// **'{n} limit'**
+  /// **'{n} kantong'**
   String settingsLimits(int n);
 
   /// No description provided for @settingsMoney.
