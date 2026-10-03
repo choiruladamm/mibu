@@ -1585,7 +1585,7 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
-  String get settingsLimitMonthly => 'limit bulanan';
+  String get settingsLimitMonthly => 'limit kantong';
 
   @override
   String get settingsPrivacy => 'privasi';
@@ -1600,7 +1600,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get settingsData => 'data';
 
   @override
-  String get settingsExport => 'ekspor ke csv';
+  String get settingsExport => 'export ke csv';
 
   @override
   String get settingsExportHint => 'semua catatan, satu file';

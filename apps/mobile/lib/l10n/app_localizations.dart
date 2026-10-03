@@ -2593,7 +2593,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsLimitMonthly.
   ///
   /// In id, this message translates to:
-  /// **'limit bulanan'**
+  /// **'limit kantong'**
   String get settingsLimitMonthly;
 
   /// No description provided for @settingsPrivacy.
@@ -2623,7 +2623,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsExport.
   ///
   /// In id, this message translates to:
-  /// **'ekspor ke csv'**
+  /// **'export ke csv'**
   String get settingsExport;
 
   /// No description provided for @settingsExportHint.

@@ -92,9 +92,9 @@ void main() {
     expect(find.text('periode 1 okt – 31 okt'), findsOneWidget);
     expect(find.text('4 kantong'), findsOneWidget);
     expect(find.text('buat apa aja'), findsOneWidget);
-    expect(find.text('limit bulanan'), findsOneWidget);
+    expect(find.text('limit kantong'), findsOneWidget);
     expect(find.text('sembunyiin nominal'), findsOneWidget);
-    expect(find.text('ekspor ke csv'), findsOneWidget);
+    expect(find.text('export ke csv'), findsOneWidget);
     expect(findMeta(['versi 0.2.0', 'lisensi']), findsOneWidget);
     // Fluent Emoji (MIT) is credited on the licenses page behind it.
     final footer = findMeta(['versi 0.2.0', 'lisensi']);
