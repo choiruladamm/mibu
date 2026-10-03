@@ -6,9 +6,10 @@ import 'package:intl/intl.dart';
 
 import '../../../../data/repositories/finance_repository.dart';
 import '../../../../domain/models/finance.dart';
+import '../../../../domain/period.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../core/clock.dart';
-import '../../../core/measure.dart';
+import '../../../core/dates.dart';
 import '../../../core/money.dart';
 import '../../../core/tokens.dart';
 import '../../../core/widgets/meta_line.dart';
@@ -17,11 +18,12 @@ import '../../../core/widgets/payday_chip.dart';
 
 final _dots = NumberFormat('#,##0', 'id_ID');
 
-const _quick = [3000000, 5000000, 7000000, 10000000];
+final _monthFull = DateFormat.MMMM('id');
+final _nextDay = DateFormat('EEE d MMM', 'id');
 const _maxDigits = 12;
 
-/// 01.4 atur awal (budget + gajian, nothing required) → 01.4b kantong
-/// pertama.
+/// 01.4 atur awal (tanggal gajian + budget, nothing required) → 01.4b
+/// kantong pertama.
 class SetupView extends ConsumerStatefulWidget {
   const SetupView({super.key, required this.onDone});
 
@@ -238,139 +240,30 @@ class _SetupViewState extends ConsumerState<SetupView> {
 
   Widget _balanceStep(AppLocalizations l) {
     final v = _value;
-    final text = _balance.text;
-    final size = text.length > 11
-        ? 40.0
-        : text.length > 9
-        ? 46.0
-        : 52.0;
-    final style = AppText.display.copyWith(
-      fontSize: size,
-      letterSpacing: -0.04 * size,
-    );
-    final left = paydayInfo(
-      now: ref.read(clockProvider)(),
-      payday: _payday,
-    ).daysLeft;
+    final now = ref.read(clockProvider)();
+    final info = paydayInfo(now: now, payday: _payday);
+    final left = info.daysLeft;
+    final period = PaydayCycleResolver(
+      _payday,
+      shift: PaydayShift.previousWorkday,
+    ).periodOf(now);
     final muted = AppText.caption.copyWith(color: AppColors.muted);
-
-    Widget chip({
-      required String label,
-      required bool on,
-      required VoidCallback onTap,
-      String? semantics,
-      double? width,
-      double height = 40,
-      TextStyle? textStyle,
-    }) => Semantics(
-      button: true,
-      selected: on,
-      label: semantics,
-      excludeSemantics: semantics != null,
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: AppMotion.select,
-          curve: AppMotion.ease,
-          width: width,
-          height: height,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: on ? AppColors.ink : AppColors.paper,
-            borderRadius: BorderRadius.circular(height / 2),
-            border: Border.all(color: AppColors.ink, width: AppStroke.outline),
-          ),
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text(
-              label,
-              style: (textStyle ?? AppText.label.copyWith(fontSize: 14))
-                  .copyWith(color: on ? AppColors.paper : AppColors.ink),
-            ),
-          ),
-        ),
-      ),
+    final style = AppText.display.copyWith(
+      fontSize: 36,
+      letterSpacing: -1.08,
+      height: 1.1,
     );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _title(l.setupBalanceTitle),
-        const SizedBox(height: 6),
-        Text(l.setupBudgetBody, style: muted),
-        const SizedBox(height: 22),
-        Container(
-          padding: const EdgeInsets.only(bottom: 10),
-          decoration: const BoxDecoration(
-            border: Border(
-              bottom: BorderSide(
-                color: AppColors.ink,
-                width: AppStroke.outline,
-              ),
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            spacing: 4,
-            children: [
-              Text(
-                'Rp',
-                style: AppText.inputXl.copyWith(
-                  fontSize: 26,
-                  letterSpacing: -0.52,
-                  color: AppColors.muted,
-                ),
-              ),
-              Flexible(
-                child: SizedBox(
-                  // Hugs the digits so "Rp" sits next to them.
-                  width: (textWidth(text, style) + 4).clamp(40, 270),
-                  child: Semantics(
-                    label: l.setupBalanceLabel,
-                    child: TextField(
-                      controller: _balance,
-                      onChanged: _typed,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp('[0-9.]')),
-                      ],
-                      textAlign: TextAlign.center,
-                      style: style,
-                      decoration: InputDecoration.collapsed(
-                        hintText: '0',
-                        hintStyle: style.copyWith(color: AppColors.grey400),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 14),
-        Row(
-          spacing: 8,
-          children: [
-            for (final q in _quick)
-              Expanded(
-                child: chip(
-                  label: rupiahCompact(q),
-                  on: v == q,
-                  onTap: () => _setBalance(q),
-                ),
-              ),
-          ],
-        ),
-        const SizedBox(height: 28),
+        _title(l.setupPaydayTitle),
+        const SizedBox(height: 8),
         Text(
-          l.setupPaydayTitle,
-          style: AppText.label.copyWith(fontWeight: FontWeight.w600),
+          l.setupPaydayBody,
+          style: muted.copyWith(fontSize: 15, height: 1.4),
         ),
-        const SizedBox(height: 2),
-        Text(l.setupPaydayBody, style: muted),
-        const SizedBox(height: 12),
+        const SizedBox(height: 22),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -384,16 +277,142 @@ class _SetupViewState extends ConsumerState<SetupView> {
               ),
           ],
         ),
+        const SizedBox(height: 14),
+        // Which period mibu counts in right now, for the payday picked.
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: AppColors.mist,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            spacing: 12,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 2,
+                  children: [
+                    Text(l.setupPeriodNow, style: muted),
+                    Text(
+                      _monthFull.format(period.key).toLowerCase(),
+                      style: AppText.label.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Shrinks instead of overflowing on narrow screens.
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    spacing: 2,
+                    children: [
+                      Text(periodRange(period.start, period.end), style: muted),
+                      MetaLine(
+                        [
+                          l.setupNextPayday(
+                            _nextDay.format(info.next).toLowerCase(),
+                          ),
+                          l.pocketsDaysLeft(left),
+                        ],
+                        style: muted.copyWith(
+                          color: AppColors.ink,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 28),
+        Row(
+          spacing: 8,
+          children: [
+            Flexible(
+              child: Text(
+                l.setupBudgetTitle,
+                style: AppText.label.copyWith(fontWeight: FontWeight.w600),
+              ),
+            ),
+            Container(
+              height: 22,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: AppColors.mist,
+                borderRadius: BorderRadius.circular(11),
+              ),
+              child: Text(
+                l.setupOptional,
+                style: AppText.micro.copyWith(color: AppColors.muted),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 2),
+        Text(l.setupBudgetBody, style: muted),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.only(bottom: 8),
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: v > 0 ? AppColors.ink : AppColors.line,
+                width: AppStroke.outline,
+              ),
+            ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            spacing: 4,
+            children: [
+              Text(
+                'Rp',
+                style: AppText.inputXl.copyWith(
+                  fontSize: 22,
+                  color: AppColors.muted,
+                ),
+              ),
+              Expanded(
+                child: Semantics(
+                  label: l.setupBalanceLabel,
+                  child: TextField(
+                    controller: _balance,
+                    onChanged: _typed,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp('[0-9.]')),
+                    ],
+                    style: style,
+                    decoration: InputDecoration.collapsed(
+                      hintText: '0',
+                      hintStyle: style.copyWith(color: AppColors.grey400),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
         // Aman jajan only comes from a budget: nothing to preview without one.
         if (v > 0) ...[
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           Semantics(
             container: true,
             label: l.setupDaily,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
               decoration: BoxDecoration(
-                color: AppColors.mist,
+                color: AppColors.ink,
                 borderRadius: BorderRadius.circular(AppRadius.groupCard),
               ),
               child: Row(
@@ -404,26 +423,31 @@ class _SetupViewState extends ConsumerState<SetupView> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       spacing: 4,
                       children: [
-                        Text(l.setupDaily, style: muted),
+                        Text(
+                          l.setupDaily,
+                          style: muted.copyWith(color: AppColors.onInkMuted),
+                        ),
                         Text(
                           rupiahCompact(v ~/ left),
                           style: AppText.title.copyWith(
                             fontSize: 30,
                             letterSpacing: -0.9,
                             height: 1,
+                            color: AppColors.paper,
                             fontFeatures: const [FontFeature.tabularFigures()],
                           ),
                         ),
-                        MetaLine([
-                          l.setupUntil,
-                          l.pocketsDaysLeft(left),
-                        ], style: muted),
+                        MetaLine(
+                          [l.setupUntil, l.pocketsDaysLeft(left)],
+                          onInk: true,
+                          style: muted.copyWith(color: AppColors.onInkMuted),
+                        ),
                       ],
                     ),
                   ),
                   ExcludeSemantics(
                     child: SizedBox(
-                      width: 84,
+                      width: 88,
                       child: Wrap(
                         spacing: 4,
                         runSpacing: 4,
@@ -435,12 +459,12 @@ class _SetupViewState extends ConsumerState<SetupView> {
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: i < left
-                                    ? AppColors.ink
+                                    ? AppColors.paper
                                     : Colors.transparent,
                                 border: i < left
                                     ? null
                                     : Border.all(
-                                        color: AppColors.line,
+                                        color: AppColors.subtle,
                                         width: AppStroke.hairline,
                                       ),
                               ),
@@ -568,7 +592,7 @@ class _SetupViewState extends ConsumerState<SetupView> {
                   chosen.isEmpty
                       ? l.setupTapHint
                       : budget == 0
-                      ? l.setupLimitTotal(rupiahCompact(total))
+                      ? l.setupLimitTotal
                       : total <= budget
                       ? l.setupFree(
                           rupiahCompact(budget - total),

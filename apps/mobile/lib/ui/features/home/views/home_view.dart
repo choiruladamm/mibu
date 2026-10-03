@@ -134,7 +134,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                   const SizedBox(height: 18),
                   _Hero(
                     data: hero,
-                    onInfo: () => _info(s, l),
+                    onInfo: () => _info(s),
                     onSetBudget: () => editBudget(context, ref),
                   ),
                   const SizedBox(height: 18),
@@ -156,12 +156,12 @@ class _HomeViewState extends ConsumerState<HomeView> {
                   ),
                   const SizedBox(height: 10),
                   if (ref.watch(homeChartProvider) case final chart?)
-                    _BalanceChart(
+                    _SpentChart(
                       chart: chart,
                       onSelect: ref.read(homeMonthProvider.notifier).select,
                     )
                   else
-                    const SizedBox(height: _BalanceChart._height),
+                    const SizedBox(height: _SpentChart._height),
                   const SizedBox(height: 22),
                   _gutter(
                     Row(
@@ -326,34 +326,20 @@ class _HomeViewState extends ConsumerState<HomeView> {
     );
   }
 
-  /// "?" next to the hero's small line: how sisa budget and aman jajan are
-  /// worked out, with this user's numbers.
-  void _info(HomeState s, AppLocalizations l) {
-    final rp = context.rpCompact;
-    final left = s.budgetLeft;
-    showNumbersInfo(
-      context,
-      lines: [
-        (
-          title: l.infoBudgetTitle,
-          body: left == null
-              ? l.infoBudgetNone
-              : left < 0
-              ? l.infoBudgetBodyOver(
-                  rp(s.budget ?? 0),
-                  rp(s.monthSpent),
-                  rp(-left),
-                )
-              : l.infoBudgetBody(rp(s.budget ?? 0), rp(s.monthSpent), rp(left)),
-        ),
-        if (s.isCurrent && s.safe != null)
-          (
-            title: l.infoSafeTitle,
-            body: l.infoSafeBody(s.budgetDaysLeft, rp(s.safe!)),
-          ),
-      ],
-    );
-  }
+  /// "?" next to the hero's label: NumbersSheet 00.25 with this period's
+  /// numbers, the hero's cards in ink.
+  void _info(HomeState s) => showNumbersInfo(
+    context,
+    from: NumbersFrom.hero,
+    period: s.period,
+    budget: s.budget,
+    spent: s.monthSpent,
+    spentToday: s.safe == null ? 0 : s.safe! - s.safeToSpendToday!,
+    share: s.isCurrent ? s.safe : null,
+    days: s.budgetDaysLeft,
+    limits: s.pockets.fold(0, (sum, p) => sum + p.budget),
+    pocketSpent: s.pockets.fold(0, (sum, p) => sum + p.spent),
+  );
 
   /// What the hero shows for [s]: label, amount, the small line under it and
   /// the chip (02.1p, 00.23b). Sisa budget; without a budget, what's been
@@ -378,33 +364,17 @@ class _HomeViewState extends ConsumerState<HomeView> {
       amount = s.monthSpent;
     }
 
-    // small line
-    String sub;
-    var warn = false;
-    if (!s.isCurrent && s.budget != null) {
-      sub = l.heroFromBudget(context.rpCompact(s.budget!));
-    } else if (!s.isCurrent) {
-      // The period's last day (it ends the day before the next payday).
-      final last = DateTime(
-        s.period.end.year,
-        s.period.end.month,
-        s.period.end.day - 1,
-      );
-      sub = l.heroPer(last.day, _monthShort.format(last).toLowerCase());
-    } else if (s.overBudget) {
-      sub = l.heroBudgetOverSub(context.rpCompact(-(left ?? 0)));
-      warn = true;
-    } else {
-      switch (s.payday.status) {
-        case PaydayStatus.today:
-          sub = l.paydayToday;
-        case PaydayStatus.late:
-          sub = l.paydayLate(s.payday.lateDays);
-          warn = true;
-        case PaydayStatus.upcoming:
-          sub = l.paydayIn(s.payday.daysLeft);
-      }
-    }
+    // small line: "dari budget Rp8jt • gajian lagi 7 hari" (past: the range)
+    final range = periodRange(s.period.start, s.period.end);
+    final (payday, late) = switch (s.payday.status) {
+      PaydayStatus.today => (l.paydayToday, false),
+      PaydayStatus.late => (l.paydayLate(s.payday.lateDays), true),
+      PaydayStatus.upcoming => (l.paydayIn(s.payday.daysLeft), false),
+    };
+    final sub = [
+      if (s.budget case final b?) l.heroFromBudget(context.rpCompact(b)),
+      s.isCurrent ? payday : range,
+    ];
 
     // chip: aman jajan, or what to do instead
     _ChipData? chip;
@@ -461,8 +431,14 @@ class _HomeViewState extends ConsumerState<HomeView> {
       label: label,
       amount: amount,
       sub: sub,
-      subWarn: warn,
-      setBudget: s.budget == null && s.isCurrent,
+      subWarn: s.isCurrent && late,
+      // No budget this period: the dashed "atur budget" card instead.
+      empty: s.isCurrent && s.budget == null
+          ? (
+              meta: [month, range, payday],
+              body: l.heroEmptyBody(context.rpCompact(s.monthSpent)),
+            )
+          : null,
       chip: chip,
     );
   }
@@ -519,16 +495,14 @@ typedef _ChipData = ({
 typedef _HeroData = ({
   String label,
   int amount,
-  String sub,
+  List<String> sub, // MetaLine parts
   bool subWarn, // "!" in front, ink
-  bool setBudget, // "• pasang budget" link after the sub
+  ({List<String> meta, String body})? empty, // no budget: the dashed card
   _ChipData? chip,
 });
 
-final _monthShort = DateFormat.MMM('id');
-
-/// 02.1 hero (HeroSaldo 00.23b): label, amount, one small line, and the
-/// chip.
+/// 02.1 hero (HeroBudget 00.23): label + "?", amount, one small line, and
+/// the chip; no budget → the dashed "atur budget periode ini" card.
 class _Hero extends StatelessWidget {
   const _Hero({
     required this.data,
@@ -541,7 +515,6 @@ class _Hero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context)!;
     final label = _Swap(
       id: data.label,
       child: Text(
@@ -551,109 +524,103 @@ class _Hero extends StatelessWidget {
         style: AppText.label.copyWith(fontSize: 14, color: AppColors.muted),
       ),
     );
-    return Column(
-      children: [
-        SizedBox(height: 32, child: Center(child: label)),
-        const SizedBox(height: 8),
-        // Long balances shrink instead of overflowing.
-        _gutterFit(
-          PeekTap(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 4,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 6),
-                  child: Text(
-                    'Rp',
-                    style: AppText.sheetTitle.copyWith(
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 0,
-                      color: AppColors.muted,
-                    ),
-                  ),
-                ),
-                // Counts from the old figure to the new one: after a swipe
-                // between months and after the pill flips.
-                TweenAnimationBuilder(
-                  tween: IntTween(end: data.amount),
-                  duration: AppMotion.fill,
-                  curve: AppMotion.ease,
-                  builder: (context, v, _) => Text(
-                    context.rp(v).replaceFirst('Rp', ''),
-                    style: AppText.display.copyWith(height: 1),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        _Swap(
-          id: (data.sub, data.setBudget),
-          child: SizedBox(
+    final hero = switch (data.empty) {
+      final e? => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpace.gutter),
+        child: _EmptyBudget(meta: e.meta, body: e.body, onSet: onSetBudget),
+      ),
+      null => Column(
+        children: [
+          SizedBox(
             height: 28,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              spacing: 6,
+              mainAxisSize: MainAxisSize.min,
+              spacing: 2,
               children: [
-                if (data.subWarn)
-                  Container(
-                    width: 16,
-                    height: 16,
-                    alignment: Alignment.center,
-                    decoration: const BoxDecoration(
-                      color: AppColors.ink,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const HugeIcon(
-                      icon: HugeIcons.strokeRoundedAlert02,
-                      size: 10,
-                      strokeWidth: 2.4,
-                      color: AppColors.paper,
-                    ),
-                  ),
-                Flexible(
-                  child: Text(
-                    data.sub,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppText.caption.copyWith(
-                      color: data.subWarn ? AppColors.ink : AppColors.muted,
-                    ),
-                  ),
-                ),
+                Flexible(child: label),
                 InfoDisc(onTap: onInfo, target: 28),
-                if (data.setBudget)
-                  GestureDetector(
-                    onTap: onSetBudget,
-                    child: Row(
-                      spacing: 6,
-                      children: [
-                        Container(
-                          width: 3,
-                          height: 3,
-                          decoration: const BoxDecoration(
-                            color: AppColors.onInkMuted,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        Text(
-                          l.heroSetBudget,
-                          style: AppText.caption.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.ink,
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
               ],
             ),
           ),
-        ),
+          const SizedBox(height: 6),
+          // Long figures shrink instead of overflowing.
+          _gutterFit(
+            PeekTap(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 4,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Text(
+                      'Rp',
+                      style: AppText.sheetTitle.copyWith(
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 0,
+                        color: AppColors.muted,
+                      ),
+                    ),
+                  ),
+                  // Counts from the old figure to the new one after a swipe
+                  // between months.
+                  TweenAnimationBuilder(
+                    tween: IntTween(end: data.amount),
+                    duration: AppMotion.fill,
+                    curve: AppMotion.ease,
+                    builder: (context, v, _) => Text(
+                      context.rp(v).replaceFirst('Rp', ''),
+                      style: AppText.display.copyWith(height: 1),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          _Swap(
+            id: data.sub.join(),
+            child: SizedBox(
+              height: 20,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                spacing: 6,
+                children: [
+                  if (data.subWarn)
+                    Container(
+                      width: 16,
+                      height: 16,
+                      alignment: Alignment.center,
+                      decoration: const BoxDecoration(
+                        color: AppColors.ink,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const HugeIcon(
+                        icon: HugeIcons.strokeRoundedAlert02,
+                        size: 10,
+                        strokeWidth: 2.4,
+                        color: AppColors.paper,
+                      ),
+                    ),
+                  Flexible(
+                    child: MetaLine(
+                      data.sub,
+                      style: AppText.caption.copyWith(
+                        color: data.subWarn ? AppColors.ink : AppColors.muted,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    };
+    return Column(
+      children: [
+        _Swap(id: data.empty == null, child: hero),
         _Swap(
           id: data.chip?.text,
           child: switch (data.chip) {
@@ -726,6 +693,81 @@ class _Hero extends StatelessWidget {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// HeroBudget 00.23 with no budget this period (02.1g): what period it
+/// is, why a budget helps, and the button that opens BudgetSheet.
+class _EmptyBudget extends StatelessWidget {
+  const _EmptyBudget({
+    required this.meta,
+    required this.body,
+    required this.onSet,
+  });
+
+  final List<String> meta;
+  final String body;
+  final VoidCallback onSet;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    return CustomPaint(
+      painter: const DashedCardPainter(AppRadius.groupCard),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 6,
+          children: [
+            MetaLine(
+              meta,
+              style: AppText.caption.copyWith(color: AppColors.muted),
+            ),
+            Text(
+              l.heroEmptyTitle,
+              style: AppText.label.copyWith(
+                fontSize: 22,
+                fontWeight: FontWeight.w600,
+                letterSpacing: -0.44,
+              ),
+            ),
+            Text(
+              body,
+              style: AppText.label.copyWith(
+                fontSize: 14,
+                height: 1.4,
+                color: AppColors.muted,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Semantics(
+              button: true,
+              child: GestureDetector(
+                onTap: onSet,
+                child: Container(
+                  height: 44,
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: AppColors.ink,
+                    borderRadius: BorderRadius.circular(22),
+                  ),
+                  child: Text(
+                    l.heroEmptyButton,
+                    style: AppText.label.copyWith(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.paper,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -1137,27 +1179,33 @@ class _NoEntries extends StatelessWidget {
 
 /// One animated state of the chart: curve heights, the marker's (fractional)
 /// month index and height, and where the pill sits.
-typedef _Frame = ({List<double> ys, double sel, double y, double pillTop});
+typedef _Frame = ({
+  List<double> ys,
+  double sel,
+  double y,
+  double pillTop,
+  double? budgetY,
+});
 
-/// "sisa pemasukan per bulan" — curve through each period's income − spending,
-/// tap a month to peek.
+/// PeriodBars 00.26 "kepake per periode": curve through what was spent in
+/// each period, dashed line = the running period's budget, tap to peek.
 /// Curve, marker and pill share one controller so they always move together,
 /// also when the 6-month window slides.
-class _BalanceChart extends StatefulWidget {
-  const _BalanceChart({required this.chart, required this.onSelect});
+class _SpentChart extends StatefulWidget {
+  const _SpentChart({required this.chart, required this.onSelect});
 
   final HomeChart chart;
   final ValueChanged<DateTime> onSelect;
 
   static const _height = 186.0;
   static const _base = 150.0; // stems end here
-  static const _top = 22.0, _bottom = 120.0; // y of max / min balance
+  static const _top = 22.0, _bottom = 130.0; // y of max / min amount
 
   @override
-  State<_BalanceChart> createState() => _BalanceChartState();
+  State<_SpentChart> createState() => _SpentChartState();
 }
 
-class _BalanceChartState extends State<_BalanceChart>
+class _SpentChartState extends State<_SpentChart>
     with SingleTickerProviderStateMixin {
   static final _monthShort = DateFormat.MMM('id');
 
@@ -1172,23 +1220,21 @@ class _BalanceChartState extends State<_BalanceChart>
       c.months.indexWhere((m) => m.month == c.selected);
 
   static _Frame _frameOf(HomeChart c) {
-    final amounts = c.months.map((m) => m.amount);
+    // The budget line shares the scale, so it's always in view.
+    final amounts = [for (final m in c.months) m.amount, ?c.budget];
     final lo = amounts.reduce(math.min), hi = amounts.reduce(math.max);
-    final ys = [
-      for (final m in c.months)
-        hi == lo
-            ? (_BalanceChart._top + _BalanceChart._bottom) / 2
-            : _BalanceChart._bottom -
-                  (m.amount - lo) /
-                      (hi - lo) *
-                      (_BalanceChart._bottom - _BalanceChart._top),
-    ];
+    double yOf(int v) => hi == lo
+        ? (_SpentChart._top + _SpentChart._bottom) / 2
+        : _SpentChart._bottom -
+              (v - lo) / (hi - lo) * (_SpentChart._bottom - _SpentChart._top);
+    final ys = [for (final m in c.months) yOf(m.amount)];
     final sel = math.max(0, _selIndex(c));
     return (
       ys: ys,
       sel: sel.toDouble(),
       y: ys[sel],
       pillTop: ys[sel] < 60 ? ys[sel] + 18 : ys[sel] - 58,
+      budgetY: c.budget == null ? null : yOf(c.budget!),
     );
   }
 
@@ -1202,16 +1248,21 @@ class _BalanceChartState extends State<_BalanceChart>
       sel: _lerp(_from.sel, _to.sel, t),
       y: _lerp(_from.y, _to.y, t),
       pillTop: _lerp(_from.pillTop, _to.pillTop, t),
+      budgetY: _to.budgetY,
     );
   }
 
   static double _lerp(double a, double b, double t) => a + (b - a) * t;
 
   @override
-  void didUpdateWidget(_BalanceChart old) {
+  void didUpdateWidget(_SpentChart old) {
     super.didUpdateWidget(old);
     final next = _frameOf(widget.chart);
-    if (next.sel == _to.sel && listEquals(next.ys, _to.ys)) return;
+    if (next.sel == _to.sel &&
+        next.budgetY == _to.budgetY &&
+        listEquals(next.ys, _to.ys)) {
+      return;
+    }
     _from = _now;
     _to = next;
     _c.forward(from: 0);
@@ -1230,15 +1281,15 @@ class _BalanceChartState extends State<_BalanceChart>
     final now = widget.chart.now;
     final sel = _selIndex(widget.chart);
     if (months.length < 2 || sel < 0) {
-      return const SizedBox(height: _BalanceChart._height);
+      return const SizedBox(height: _SpentChart._height);
     }
+    final budget = widget.chart.budget;
     final pillTop = [
-      if (sel == now) l.today,
-      if (sel > now) l.prediction,
+      if (sel == now) l.chartNow,
       _monthShort.format(months[sel].month).toLowerCase(),
+      if (budget != null && months[sel].amount > budget) l.chartOverBudget,
     ];
-    final pillVal =
-        '${sel > now ? '± ' : ''}${context.rpCompact(months[sel].amount)}';
+    final pillVal = context.rpCompact(months[sel].amount);
 
     return LayoutBuilder(
       builder: (context, c) {
@@ -1248,7 +1299,7 @@ class _BalanceChartState extends State<_BalanceChart>
         final xs = [for (var i = 0; i < months.length; i++) xAt(i.toDouble())];
 
         return SizedBox(
-          height: _BalanceChart._height,
+          height: _SpentChart._height,
           child: Stack(
             clipBehavior: Clip.none,
             children: [
@@ -1262,18 +1313,27 @@ class _BalanceChartState extends State<_BalanceChart>
                         xs: xs,
                         ys: f.ys,
                         marker: Offset(xAt(f.sel), f.y),
-                        now: now,
+                        budgetY: f.budgetY,
                       ),
                     );
                   },
                 ),
               ),
+              if (budget != null && _to.budgetY != null)
+                Positioned(
+                  right: AppSpace.gutter,
+                  top: _to.budgetY! - 15,
+                  child: Text(
+                    l.chartBudget(context.rpCompact(budget)),
+                    style: AppText.micro.copyWith(color: AppColors.subtle),
+                  ),
+                ),
               for (var i = 0; i < months.length; i++)
                 Positioned(
                   left: xs[i] - 28,
                   top: 0,
                   width: 56,
-                  height: _BalanceChart._height,
+                  height: _SpentChart._height,
                   child: Semantics(
                     button: true,
                     selected: i == sel,
@@ -1360,15 +1420,30 @@ class _ChartPainter extends CustomPainter {
     required this.xs,
     required this.ys,
     required this.marker,
-    required this.now,
+    required this.budgetY,
   });
 
   final List<double> xs, ys;
   final Offset marker; // the selected month; glides between points
-  final int now;
+  final double? budgetY; // dashed budget line; null = no budget
 
   @override
   void paint(Canvas canvas, Size size) {
+    if (budgetY case final y?) {
+      canvas.drawPath(
+        dashPath(
+          Path()
+            ..moveTo(0, y)
+            ..lineTo(size.width, y),
+          dash: 3,
+          gap: 3,
+        ),
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..color = AppColors.line
+          ..strokeWidth = AppStroke.hairline,
+      );
+    }
     // Catmull-Rom through the points, flat to both edges.
     final pts = [
       Offset(0, ys.first),
@@ -1399,7 +1474,7 @@ class _ChartPainter extends CustomPainter {
         dashPath(
           Path()
             ..moveTo(p.dx, p.dy)
-            ..lineTo(p.dx, _BalanceChart._base),
+            ..lineTo(p.dx, _SpentChart._base),
           dash: 3,
           gap: 3,
         ),
@@ -1407,28 +1482,14 @@ class _ChartPainter extends CustomPainter {
           ..color = AppColors.line
           ..strokeWidth = AppStroke.hairline,
       );
-      canvas.drawCircle(
-        p,
-        4,
-        fill..color = i > now ? AppColors.paper : AppColors.ink,
-      );
-      if (i > now) {
-        // prediction: hollow dot
-        canvas.drawCircle(
-          p,
-          3.25,
-          stem
-            ..color = AppColors.ink
-            ..strokeWidth = AppStroke.outline,
-        );
-      }
+      canvas.drawCircle(p, 4, fill..color = AppColors.ink);
     }
 
     // Selected month, drawn last so it covers the point it lands on.
     canvas.drawPath(
       Path()
         ..moveTo(marker.dx, marker.dy)
-        ..lineTo(marker.dx, _BalanceChart._base),
+        ..lineTo(marker.dx, _SpentChart._base),
       stem
         ..color = AppColors.ink
         ..strokeWidth = AppStroke.outline,
@@ -1440,7 +1501,7 @@ class _ChartPainter extends CustomPainter {
   @override
   bool shouldRepaint(_ChartPainter old) =>
       old.marker != marker ||
-      old.now != now ||
+      old.budgetY != budgetY ||
       !listEquals(old.xs, xs) ||
       !listEquals(old.ys, ys);
 }

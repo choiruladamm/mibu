@@ -103,51 +103,26 @@ void main() {
     expect(s(-5000, 0), -555); // budget gone
   });
 
-  final nets = {
-    DateTime(2026, 7): 546000,
-    DateTime(2026, 8): -844500,
-    DateTime(2026, 9): 5887500,
-    DateTime(2026, 10): -4059000,
-  };
   final now = DateTime(2026, 10, 14);
 
-  test('balanceSeries: each period on its own, peeks at the 3-period avg', () {
-    final series = balanceSeries(
-      now: now,
-      start: DateTime(2026, 7),
-      nets: nets,
-    );
-    expect(series.map((m) => m.month.month), [7, 8, 9, 10, 11, 12]);
-    // Nothing carries over: each point is that period's income − spending.
-    expect(series.map((m) => m.amount), [
-      546000,
-      -844500,
-      5887500,
-      -4059000,
-      1863000,
-      1863000,
-    ]);
-  });
-
-  test('balanceSeries: periods without entries are 0', () {
-    final series = balanceSeries(
-      now: now,
+  test('spentSeries: kepake per period, 0 where nothing was spent', () {
+    final series = spentSeries(
       start: DateTime(2026, 5),
-      nets: nets,
+      spent: {DateTime(2026, 9): 2612500, DateTime(2026, 10): 4059000},
     );
     expect(series.map((m) => m.month.month), [5, 6, 7, 8, 9, 10]);
-    expect((series[0].amount, series[1].amount), (0, 0));
+    expect(series.map((m) => m.amount), [0, 0, 0, 0, 2612500, 4059000]);
   });
 
   test('chartStart stays while picked is inside, else lands 4th', () {
     DateTime start(DateTime from, DateTime picked) =>
         chartStart(now: now, start: from, picked: picked);
-    final def = DateTime(2026, 7);
-    expect(start(def, DateTime(2026, 12)), def); // inside (a prediction)
+    final def = DateTime(2026, 5); // now (okt) is last: no future periods
+    expect(start(def, DateTime(2026, 10)), def);
     expect(start(def, DateTime(2026, 8)), def);
     expect(start(def, DateTime(2026, 3)), DateTime(2025, 12)); // 4th: mar
-    expect(start(DateTime(2025, 12), DateTime(2026, 10)), DateTime(2026, 7));
-    expect(start(DateTime(2025, 12), DateTime(2026, 12)), DateTime(2026, 7));
+    // Never runs past now: okt stays the last point.
+    expect(start(DateTime(2025, 12), DateTime(2026, 9)), DateTime(2026, 5));
   });
 
   test('pocket status: unused, safe, almost out at 85%, over past 100%', () {

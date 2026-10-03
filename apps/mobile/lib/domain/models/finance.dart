@@ -28,12 +28,12 @@ class RecentPick {
   final String place;
 }
 
-/// One point of the beranda chart: what's left of a period's income.
-class MonthBalance {
-  const MonthBalance({required this.month, required this.amount});
+/// One point of the beranda chart (PeriodBars 00.26).
+class PeriodPoint {
+  const PeriodPoint({required this.month, required this.amount});
 
   final DateTime month; // the period's month label (first of month)
-  final int amount; // sisa pemasukan: income − spending in that period
+  final int amount; // kepake: spent in that period, positive
 }
 
 /// No saldo here: mibu is a ledger per payday period, so nothing carries
@@ -278,36 +278,21 @@ int? safeToSpendToday({
 
 int _monthIndex(DateTime m) => m.year * 12 + m.month;
 
-/// The beranda chart: 6 periods from [start] (default window = 3 past, now,
-/// 2 peeks), each one's sisa pemasukan ([nets], month label → income −
-/// spending). Nothing carries over between periods. After [now]'s month:
-/// a peek at the average of the 3 periods before now.
-List<MonthBalance> balanceSeries({
-  required DateTime now,
+/// The beranda chart (PeriodBars 00.26): what was spent in 6 periods from
+/// [start] ([spent], month label → expenses). Nothing ahead of now: no
+/// prediction, the window ends at the running period at the latest.
+List<PeriodPoint> spentSeries({
   required DateTime start,
-  required Map<DateTime, int> nets,
-}) {
-  final cur = DateTime(now.year, now.month);
-  int net(int back) => nets[DateTime(cur.year, cur.month - back)] ?? 0;
-  // ponytail: flat average; swap for something smarter once there's history.
-  final avg = (net(3) + net(2) + net(1)) ~/ 3;
-  return [
-    for (var i = 0; i < 6; i++)
-      () {
-        final month = DateTime(start.year, start.month + i);
-        return MonthBalance(
-          month: month,
-          amount: _monthIndex(month) > _monthIndex(cur)
-              ? avg
-              : nets[month] ?? 0,
-        );
-      }(),
-  ];
-}
+  required Map<DateTime, int> spent,
+}) => [
+  for (var i = 0; i < 6; i++)
+    if (DateTime(start.year, start.month + i) case final month)
+      PeriodPoint(month: month, amount: spent[month] ?? 0),
+];
 
 /// First month of the chart window after [picked]. Stays put while [picked]
 /// is inside it; otherwise [picked] lands 4th, but the window never runs
-/// past now + 2 months.
+/// past now.
 DateTime chartStart({
   required DateTime now,
   required DateTime start,
@@ -315,7 +300,7 @@ DateTime chartStart({
 }) {
   final at = _monthIndex(picked) - _monthIndex(start);
   if (at >= 0 && at <= 5) return start;
-  final latest = DateTime(now.year, now.month - 3);
+  final latest = DateTime(now.year, now.month - 5);
   final want = DateTime(picked.year, picked.month - 3);
   return want.isAfter(latest) ? latest : want;
 }

@@ -269,34 +269,22 @@ class _DaysChip extends StatelessWidget {
 /// "Rp2,34jt dari Rp7,4jt kepake · budget Rp8jt ›" — opens 00.16.
 /// "?" on the hero: where sisa jajan comes from, and why it can differ from
 /// the sisa budget on the beranda.
-void _info(BuildContext context, PocketsState s) {
-  final l = AppLocalizations.of(context)!;
-  final rp = context.rpCompact;
-  final budget = s.budget;
-  final left = s.budgetLeft;
-  showNumbersInfo(
-    context,
-    lines: [
-      (
-        title: l.infoJarTitle,
-        body: l.infoJarBody(rp(s.limit), rp(s.spent), rp(s.left)),
-      ),
-      if (budget != null && left != null)
-        (
-          title: l.infoBudgetTitle,
-          body: left < 0
-              ? l.infoBudgetBodyOver(rp(budget), rp(s.monthSpent), rp(-left))
-              : l.infoJarBudgetBody(
-                  rp(budget),
-                  rp(s.monthSpent),
-                  rp(left),
-                  rp((s.monthSpent - s.spent).clamp(0, 1 << 40)),
-                ),
-        ),
-    ],
-    note: s.conflict ? l.infoConflict : null,
-  );
-}
+void _info(BuildContext context, PocketsState s) => showNumbersInfo(
+  context,
+  from: NumbersFrom.pockets,
+  period: s.period,
+  budget: s.budget,
+  spent: s.monthSpent,
+  spentToday: s.spentToday,
+  share: safeShare(
+    budgetLeft: s.budgetLeft,
+    spentToday: s.spentToday,
+    days: s.daysLeft,
+  ),
+  days: s.daysLeft,
+  limits: s.limit,
+  pocketSpent: s.spent,
+);
 
 class _BudgetLine extends StatelessWidget {
   const _BudgetLine({required this.state, required this.onTap});

@@ -143,7 +143,7 @@ void main() {
     await openSheet();
     expect(find.text('budget sekarang'), findsOneWidget);
     // A hint from last period's spending (sep: Rp2.612.500), not income.
-    expect(find.text('bulan lalu kepake Rp2,61jt'), findsOneWidget);
+    expect(find.text('periode lalu kepake Rp2,61jt'), findsOneWidget);
     expect(find.text('8.000.000'), findsOneWidget);
     for (final k in ['5', '000', '000']) {
       await tester.tap(
@@ -154,7 +154,7 @@ void main() {
     expect(find.text('5.000.000'), findsOneWidget);
     expect(find.text('belum dijatah Rp1,7jt'), findsOneWidget);
     expect(find.text('total limit Rp3,3jt'), findsOneWidget);
-    await tester.tap(find.bySemanticsLabel('simpan Rp5jt / bln'));
+    await tester.tap(find.bySemanticsLabel('simpan Rp5jt / periode'));
     await settle();
     expect(await budget(), 5000000);
     expect(find.text('budget Rp5jt kesimpen'), findsOneWidget);
@@ -201,17 +201,17 @@ void main() {
     final db = await pump(tester, const Size(390, 844));
     await tester.tap(find.textContaining('kepake', findRichText: true));
     await tester.pumpAndSettle();
-    expect(find.text('budget bulanan'), findsOneWidget);
+    expect(find.text('budget per periode'), findsOneWidget);
 
     await tester.drag(find.bySemanticsLabel('5'), const Offset(0, 400));
     await tester.pumpAndSettle();
-    expect(find.text('budget bulanan'), findsOneWidget);
+    expect(find.text('budget per periode'), findsOneWidget);
 
     final handle =
-        tester.getTopLeft(find.text('budget bulanan')) + const Offset(150, -30);
+        tester.getTopLeft(find.text('budget per periode')) + const Offset(150, -30);
     await tester.dragFrom(handle, const Offset(0, 200));
     await tester.pumpAndSettle();
-    expect(find.text('budget bulanan'), findsNothing);
+    expect(find.text('budget per periode'), findsNothing);
 
     await tester.pumpWidget(const SizedBox());
     await db.close();
@@ -477,15 +477,20 @@ void main() {
     expect(find.text('!'), findsNothing);
     await tester.tap(find.bySemanticsLabel('dari mana angkanya?'));
     await settle(tester);
+    // NumbersSheet 00.25, opened from kantong: its card is the ink one.
+    expect(
+      find.text('total limit Rp3,3jt − kepake di kantong Rp1,66jt'),
+      findsOneWidget,
+    );
+    expect(find.text('Rp1,64jt'), findsOneWidget);
     expect(
       find.text(
-        'total limit kantong Rp3,3jt − kepake di kantong Rp1,66jt = Rp1,64jt.',
+        'bisa beda dari sisa budget, soalnya Rp2,4jt kepake di luar kantong.',
       ),
       findsOneWidget,
     );
-    expect(find.textContaining('ikut ngurangin budget'), findsOneWidget);
-    expect(find.textContaining('sisa jajan lebih gede'), findsNothing);
-    await tester.tap(find.text('ngerti'));
+    expect(find.text('budget Rp8jt − kepake Rp4,06jt'), findsOneWidget);
+    await tester.tap(find.text('oke, ngerti'));
     await settle(tester);
 
     // Budget Rp5jt: Rp0,94jt left < sisa jajan → the "?" turns "!" + a line.
@@ -495,8 +500,8 @@ void main() {
     expect(find.text('sisa budget cuma Rp941K'), findsOneWidget);
     await tester.tap(find.bySemanticsLabel('dari mana angkanya?'));
     await settle(tester);
-    expect(find.textContaining('sisa jajan lebih gede'), findsOneWidget);
-    await tester.tap(find.text('ngerti'));
+    expect(find.text('Rp941K'), findsOneWidget); // sisa budget card
+    await tester.tap(find.text('oke, ngerti'));
     await settle(tester);
 
     // Budget gone: its own wording.

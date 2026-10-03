@@ -78,7 +78,11 @@ void main() {
     expect(find.text('3.941.000'), findsOneWidget); // 8jt − 4.059.000
     expect(find.text('sisa budget'), findsOneWidget);
     expect(find.text('oktober'), findsOneWidget);
-    expect(find.text('gajian lagi 9 hari'), findsOneWidget); // 25 okt = minggu
+    // 25 okt = minggu → paid Fri 23.
+    expect(
+      findMeta(['dari budget Rp8jt', 'gajian lagi 9 hari']),
+      findsOneWidget,
+    );
     // Aman jajan from the budget only:
     // (8jt − 4.059.000 kepake + 27.000 hari ini) ÷ 18 hari − 27.000.
     expect(find.textContaining('Rp193K', findRichText: true), findsOneWidget);
@@ -101,20 +105,18 @@ void main() {
     expect(find.textContaining('tokopedia'), findsNothing);
   });
 
-  testWidgets('beranda: tapping a future month peeks ±, screen stays on now', (
+  testWidgets('beranda: chart = kepake per periode, budget line, no future', (
     tester,
   ) async {
     await pump(tester, memoryDb());
 
-    await tester.tap(find.text('nov'));
-    await tester.pumpAndSettle();
-
-    expect(findMeta(['prediksi', 'nov']), findsOneWidget);
-    // Average sisa pemasukan of jul–sep: (546K − 844,5K + 5,8875jt) ÷ 3.
-    expect(find.text('± Rp1,86jt'), findsOneWidget);
-    expect(find.text('november'), findsOneWidget);
-    expect(find.text('sisa budget'), findsOneWidget);
-    expect(find.text('baru aja'), findsOneWidget);
+    expect(find.text('kepake per periode'), findsOneWidget);
+    expect(find.text('budget Rp8jt'), findsOneWidget);
+    // mei … okt: the running period is the last point, nothing ahead.
+    expect(findMeta(['berjalan', 'okt']), findsOneWidget);
+    expect(find.text('Rp4,06jt'), findsOneWidget);
+    expect(find.text('mei'), findsOneWidget);
+    expect(find.text('nov'), findsNothing);
   });
 
   testWidgets('beranda: a past month swaps hero, pills and entries', (
@@ -125,10 +127,11 @@ void main() {
     await tester.tap(find.text('sep'));
     await settle(tester);
 
-    // Budget Rp8jt − Rp2.612.500 spent.
-    expect(find.text('sisa budget akhir september'), findsOneWidget);
+    // Budget Rp8jt − Rp2.612.500 spent; the period's dates instead of
+    // "gajian lagi" (fixture: calendar months).
+    expect(find.text('sisa budget september'), findsOneWidget);
     expect(find.text('5.387.500'), findsOneWidget);
-    expect(find.text('dari budget Rp8jt'), findsOneWidget);
+    expect(findMeta(['dari budget Rp8jt', '1 sep – 30 sep']), findsOneWidget);
     // Rp2.612.500 spent ÷ 30 days
     expect(findMeta(['rata²/hari', 'Rp87K']), findsOneWidget);
     expect(find.text('terakhir di september'), findsOneWidget);
@@ -159,7 +162,7 @@ void main() {
 
     expect(find.text('pilih bulan'), findsNothing);
     expect(find.text('agustus'), findsOneWidget);
-    expect(find.textContaining('budget akhir agustus'), findsOneWidget);
+    expect(find.textContaining('budget agustus'), findsOneWidget);
     expect(find.text('terakhir di agustus'), findsOneWidget);
 
     // "bulan ini" brings everything back.
@@ -279,7 +282,7 @@ void main() {
     expect(find.textContaining('Rp193K', findRichText: true), findsOneWidget);
   });
 
-  testWidgets('hero: no budget → kepake, pasang budget, no aman jajan', (
+  testWidgets('hero: no budget → dashed card + chip ask for one (02.1g)', (
     tester,
   ) async {
     final db = memoryDb();
@@ -287,15 +290,27 @@ void main() {
     await tester.runAsync(() => setBudgetOf(db, null));
     await settle(tester);
 
-    expect(find.text('kepake bulan ini'), findsOneWidget);
-    expect(find.text('4.059.000'), findsOneWidget);
-    expect(find.text('pasang budget'), findsOneWidget);
-    // Never guessed from income: the chip asks for a budget instead.
-    expect(find.textContaining('aman jajan', findRichText: true), findsNothing);
+    expect(find.text('atur budget periode ini'), findsOneWidget);
     expect(
-      find.textContaining('atur budget dulu', findRichText: true),
+      findMeta(['oktober', '1 okt – 31 okt', 'gajian lagi 9 hari']),
       findsOneWidget,
     );
+    expect(find.textContaining('kepake periode ini Rp4,06jt'), findsOneWidget);
+    // Never guessed from income: no figure, the chip asks for a budget.
+    expect(
+      find.textContaining('aman jajan hari ini', findRichText: true),
+      findsNothing,
+    );
+    expect(
+      find.textContaining(
+        'isi budget biar dapet aman jajan',
+        findRichText: true,
+      ),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('atur budget'));
+    await tester.pumpAndSettle();
+    expect(find.text('budget per periode'), findsOneWidget); // 00.16
   });
 
   testWidgets('hero: budget gone → kelewat, rem dulu chip', (tester) async {
@@ -304,7 +319,6 @@ void main() {
     await tester.runAsync(() => setBudgetOf(db, 1000000));
     await settle(tester);
 
-    expect(find.text('budget bulan ini kelewat Rp3,06jt'), findsOneWidget);
     expect(findMeta(['rem dulu ya', '18 hari lagi']), findsOneWidget);
     expect(find.textContaining('aman jajan', findRichText: true), findsNothing);
     expect(find.text('kelewat budget'), findsOneWidget);
@@ -320,16 +334,23 @@ void main() {
 
     expect(find.text('dari mana angkanya?'), findsOneWidget);
     expect(find.textContaining('saldo'), findsNothing);
+    expect(findMeta(['oktober', '1 okt – 31 okt']), findsOneWidget);
+    expect(find.text('budget Rp8jt − kepake Rp4,06jt'), findsOneWidget);
+    expect(find.text('Rp3,94jt'), findsOneWidget);
+    // The same share the chip is made of: (3.941.000 + 27.000 today) ÷ 18.
     expect(
-      find.text('budget Rp8jt − semua pengeluaran Rp4,06jt = Rp3,94jt.'),
+      find.text('sisa budget Rp3,97jt ÷ 18 hari sampai gajian'),
       findsOneWidget,
     );
-    // The same share the chip is made of.
+    expect(find.text('Rp220K'), findsOneWidget);
     expect(
-      find.textContaining('sisa budget ÷ 18 hari (Rp220K)'),
+      find.text(
+        'udah kepake Rp27K hari ini, jadi aman jajan hari ini tinggal Rp193K.',
+      ),
       findsOneWidget,
     );
-    await tester.tap(find.text('ngerti'));
+    expect(find.text('sisa jajan (kantong)'), findsOneWidget);
+    await tester.tap(find.text('oke, ngerti'));
     await settle(tester);
     expect(find.text('dari mana angkanya?'), findsNothing);
   });
@@ -340,7 +361,10 @@ void main() {
     ) async {
       final at = DateTime(2026, 10, 23, 9);
       await pump(tester, memoryDb(at: at), at: at);
-      expect(find.text('gajian hari ini'), findsOneWidget);
+      expect(
+        find.textContaining('gajian hari ini', findRichText: true),
+        findsOneWidget,
+      );
       expect(find.text('udah gajian? catat'), findsOneWidget);
       expect(
         find.textContaining('aman jajan', findRichText: true),
@@ -351,7 +375,10 @@ void main() {
     testWidgets('lewat, salary not logged: telat n hari', (tester) async {
       final at = DateTime(2026, 10, 24, 9);
       await pump(tester, memoryDb(at: at), at: at);
-      expect(find.text('gajian telat 1 hari'), findsOneWidget);
+      expect(
+        find.textContaining('gajian telat 1 hari', findRichText: true),
+        findsOneWidget,
+      );
       expect(find.text('gajian belum masuk? catat'), findsOneWidget);
     });
 
@@ -361,7 +388,10 @@ void main() {
       final at = DateTime(2026, 10, 27, 9);
       final db = memoryDb(at: at);
       await pump(tester, db, at: at);
-      expect(find.text('gajian telat 4 hari'), findsOneWidget);
+      expect(
+        find.textContaining('gajian telat 4 hari', findRichText: true),
+        findsOneWidget,
+      );
 
       await tester.runAsync(() async {
         final gajian = await (db.select(
@@ -377,7 +407,10 @@ void main() {
         );
       });
       await settle(tester);
-      expect(find.text('gajian lagi 29 hari'), findsOneWidget);
+      expect(
+        find.textContaining('gajian lagi 29 hari', findRichText: true),
+        findsOneWidget,
+      );
       expect(find.text('udah gajian? catat'), findsNothing);
       expect(find.text('gajian belum masuk? catat'), findsNothing);
       expect(

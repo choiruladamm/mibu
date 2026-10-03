@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../domain/models/finance.dart';
@@ -14,6 +15,7 @@ import '../../../core/widgets/nav_header.dart';
 import '../../../core/widgets/tx_row.dart';
 import '../view_models/transactions_view_model.dart';
 import '../../../core/widgets/meta_line.dart';
+import '../../../../routing/router.dart';
 
 final _monthName = DateFormat('MMMM', 'id');
 final _monthShort = DateFormat('MMM', 'id');
@@ -177,19 +179,8 @@ class _Body extends ConsumerWidget {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
-          child: Row(
-            spacing: 8,
-            children: [
-              _Tile(label: l.income, value: context.rpSigned(s.income)),
-              _Tile(label: l.expense, value: context.rpSigned(s.expense)),
-              _Tile(
-                label: l.txNet,
-                value: context.rpSigned(s.income + s.expense),
-                ink: true,
-              ),
-            ],
-          ),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+          child: _PeriodCard(state: s),
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
@@ -324,6 +315,11 @@ class _MonthCarousel extends StatelessWidget {
                   child: Center(
                     child: _Title(
                       month: s.month,
+                      sub:
+                          periodRange(s.period.start, s.period.end) +
+                          (s.month.year == s.today.year
+                              ? ''
+                              : ' ${s.month.year}'),
                       open: menuOpen,
                       onTap: onToggleMenu,
                     ),
@@ -360,11 +356,18 @@ class _MonthCarousel extends StatelessWidget {
   }
 }
 
-/// Month name + year; tap opens 00.8 MonthMenu. The caret goes ink while open.
+/// Month name + the period's dates; tap opens 00.8 MonthMenu. The caret goes ink while open.
 class _Title extends StatelessWidget {
-  const _Title({required this.month, required this.open, required this.onTap});
+  const _Title({
+    required this.month,
+    required this.sub,
+    required this.open,
+    required this.onTap,
+  });
 
   final DateTime month;
+  final String
+  sub; // the period's dates ("25 sep – 22 okt"), + year if not this one
   final bool open;
   final VoidCallback onTap;
 
@@ -423,7 +426,7 @@ class _Title extends StatelessWidget {
                 ],
               ),
               Text(
-                '${month.year}',
+                sub,
                 style: AppText.caption.copyWith(
                   fontSize: 12,
                   color: AppColors.muted,
@@ -483,45 +486,166 @@ class _BackToNow extends StatelessWidget {
   }
 }
 
-class _Tile extends StatelessWidget {
-  const _Tile({required this.label, required this.value, this.ink = false});
+/// 04.1 kartu periode (ink): sisa pemasukan = income − spending, against
+/// the period before; nothing carries over. No income yet → "—" and a nudge
+/// to log the salary (04.1d).
+class _PeriodCard extends StatelessWidget {
+  const _PeriodCard({required this.state});
 
-  final String label, value;
-  final bool ink;
+  final TransactionsState state;
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: ink ? AppColors.ink : AppColors.mist,
-          borderRadius: BorderRadius.circular(AppRadius.statTile),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 4,
-          children: [
-            Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppText.caption.copyWith(
-                fontSize: 12,
-                color: ink ? AppColors.onInkMuted : AppColors.muted,
-              ),
+    final l = AppLocalizations.of(context)!;
+    final s = state;
+    final rp = context.rpCompact;
+    final hasPrev = s.hasPrev;
+    final prev = hasPrev ? _name(s.months[s.selected - 1]) : '';
+    final income = s.income, spent = -s.expense;
+    final net = income - spent;
+    String delta(int now, int before) => now == before
+        ? l.txSameAs(prev)
+        : now > before
+        ? l.txUpFrom(rp(now - before), prev)
+        : l.txDownFrom(rp(before - now), prev);
+    final soft = AppText.caption.copyWith(color: AppColors.onInkMuted);
+    final faint = AppText.caption.copyWith(
+      fontSize: 12,
+      color: AppColors.grey400,
+    );
+    final big = AppText.display.copyWith(
+      fontSize: 40,
+      letterSpacing: -1.6,
+      height: 1.05,
+      color: AppColors.paper,
+    );
+
+    Widget side(String label, String value, String note) => Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 2,
+        children: [
+          Text(label, style: soft.copyWith(fontSize: 12)),
+          Text(
+            value,
+            style: AppText.label.copyWith(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: AppColors.paper,
             ),
+          ),
+          if (note.isNotEmpty) Text(note, style: faint),
+        ],
+      ),
+    );
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+      decoration: BoxDecoration(
+        color: AppColors.ink,
+        borderRadius: BorderRadius.circular(28),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            spacing: 12,
+            children: [
+              Expanded(child: Text(l.txLeftover, style: soft)),
+              Flexible(
+                child: Text(
+                  periodRange(s.period.start, s.period.end),
+                  textAlign: TextAlign.end,
+                  style: soft,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          if (income > 0) ...[
+            Text(rp(net), style: big),
+            const SizedBox(height: 6),
             Text(
-              value,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppText.label.copyWith(
-                fontWeight: FontWeight.w600,
-                color: ink ? AppColors.paper : AppColors.ink,
+              hasPrev
+                  ? delta(net, s.prevIncome - s.prevExpense)
+                  : l.txFirstPeriod,
+              style: soft,
+            ),
+          ] else ...[
+            Text('—', style: big.copyWith(color: AppColors.subtle)),
+            const SizedBox(height: 10),
+            Semantics(
+              button: true,
+              child: GestureDetector(
+                onTap: () =>
+                    context.push(Routes.addEntry, extra: AddEntryStart.salary),
+                child: Container(
+                  height: 38,
+                  padding: const EdgeInsets.only(left: 6, right: 14),
+                  decoration: BoxDecoration(
+                    color: AppColors.paper,
+                    borderRadius: BorderRadius.circular(19),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    spacing: 8,
+                    children: [
+                      Container(
+                        width: 26,
+                        height: 26,
+                        decoration: const BoxDecoration(
+                          color: AppColors.ink,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const HugeIcon(
+                          icon: HugeIcons.strokeRoundedAdd01,
+                          size: 14,
+                          strokeWidth: AppStroke.iconOnInkSmall,
+                          color: AppColors.paper,
+                        ),
+                      ),
+                      Flexible(
+                        child: Text(
+                          l.txLogSalary,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppText.label.copyWith(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ],
-        ),
+          const SizedBox(height: 16),
+          const Divider(height: 1, color: Color(0xFF333333)),
+          const SizedBox(height: 12),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 12,
+            children: [
+              side(
+                l.income,
+                income == 0 ? '—' : rp(income),
+                income == 0
+                    ? l.txNoneYet
+                    : hasPrev
+                    ? delta(income, s.prevIncome)
+                    : '',
+              ),
+              side(
+                l.expense,
+                rp(spent),
+                hasPrev ? delta(spent, s.prevExpense) : '',
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text(hasPrev ? l.txNoCarry(prev) : l.txNoCarryFirst, style: faint),
+        ],
       ),
     );
   }

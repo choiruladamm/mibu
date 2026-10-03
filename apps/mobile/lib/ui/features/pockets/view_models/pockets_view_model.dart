@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../data/repositories/finance_repository.dart';
 import '../../../../domain/models/finance.dart';
+import '../../../../domain/period.dart';
 import '../../../core/clock.dart';
 import '../../../core/finance_providers.dart';
 
@@ -20,22 +21,25 @@ final selectedPocketProvider = NotifierProvider<SelectedPocket, String?>(
 
 class PocketsState {
   const PocketsState({
-    required this.month,
+    required this.period,
     required this.pockets,
     required this.selected,
     required this.daysLeft,
     required this.budget,
     required this.monthSpent,
     required this.free,
+    required this.spentToday,
   });
 
-  final DateTime month;
+  final Period period;
+  DateTime get month => period.key;
   final List<Pocket> pockets;
   final Pocket? selected; // null = no pockets yet
   final int daysLeft; // in this month, today included
   final int? budget; // budget bulanan; null = not set
   final int monthSpent; // every expense this month, pockets or not
   final List<FreeCategory> free; // tanpa kantong
+  final int spentToday; // for aman jajan in "dari mana angkanya?"
 
   int get limit => pockets.fold(0, (sum, p) => sum + p.budget);
   int get spent => pockets.fold(0, (sum, p) => sum + p.spent);
@@ -61,7 +65,7 @@ final pocketsScreenProvider = Provider<AsyncValue<PocketsState>>((ref) {
   return switch (ref.watch(pocketsProvider)) {
     AsyncData(:final value) when free.hasValue => AsyncData(
       PocketsState(
-        month: period.key,
+        period: period,
         pockets: value,
         selected:
             value
@@ -72,6 +76,7 @@ final pocketsScreenProvider = Provider<AsyncValue<PocketsState>>((ref) {
         budget: budget,
         monthSpent: ref.watch(totalsProvider).value?.spent[period.key] ?? 0,
         free: free.value!,
+        spentToday: ref.watch(totalsProvider).value?.spentToday ?? 0,
       ),
     ),
     AsyncError(:final error, :final stackTrace) => () {

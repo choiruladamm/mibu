@@ -33,3 +33,11 @@ String relativeDay(AppLocalizations l, DateTime day, DateTime today) {
     _ => l.weeksAgo((-n / 7).round()),
   };
 }
+
+final _dayMonth = DateFormat('d MMM', 'id');
+
+/// "25 sep – 22 okt": a period's first and last day ([end] is exclusive).
+String periodRange(DateTime start, DateTime end) =>
+    '${_dayMonth.format(start)} – '
+            '${_dayMonth.format(DateTime(end.year, end.month, end.day - 1))}'
+        .toLowerCase();

@@ -63,25 +63,28 @@ void main() {
     final (db, done) = await pump(tester);
     final repo = FinanceRepository(db);
 
+    // Payday first, with the period it puts today in (25 okt is a Sunday →
+    // paid Fri 23: "oktober" = 25 sep – 22 okt).
+    expect(find.text('gajian tiap tanggal berapa?'), findsOneWidget);
+    expect(find.text('periode sekarang'), findsOneWidget);
+    expect(find.text('oktober'), findsOneWidget);
+    expect(find.text('25 sep – 22 okt'), findsOneWidget);
+    expect(findMeta(['gajian jum 23 okt', '9 hari lagi']), findsOneWidget);
+
     // Budget is optional: nothing to preview until one is typed.
+    expect(find.text('opsional'), findsOneWidget);
     expect(find.text('aman jajan per hari'), findsNothing);
-    await tester.tap(find.text('Rp3jt'));
+    await tester.enterText(find.byType(TextField), '3000000');
     await tester.pump();
     expect(find.text('3.000.000'), findsOneWidget);
-    // 25 okt is a Sunday → paid Fri 23: 9 days incl. today → 3.000.000 ÷ 9
+    // 9 days incl. today → 3.000.000 ÷ 9
     expect(find.text('Rp333K'), findsOneWidget);
     expect(findMeta(['sampai gajian', '9 hari lagi']), findsOneWidget);
 
     await tester.tap(find.bySemanticsLabel('akhir bulan'));
     await tester.pump();
-    expect(
-      findMeta(['sampai gajian', '16 hari lagi']),
-      findsOneWidget,
-    ); // sat 31 → fri 30
-
-    await tester.enterText(find.byType(TextField), '3000000');
-    await tester.pump();
-    expect(find.text('3.000.000'), findsOneWidget);
+    // sat 31 → fri 30: 16 days, "oktober" ends 29 okt.
+    expect(findMeta(['sampai gajian', '16 hari lagi']), findsOneWidget);
     expect(find.text('Rp188K'), findsOneWidget); // 3.000.000 ÷ 16
 
     await tester.ensureVisible(find.text('lanjut'));
@@ -90,16 +93,13 @@ void main() {
     expect(find.text('mau mulai pasang limit ke apa?'), findsOneWidget);
     // Default 4: 1,5jt + 300K + 500K + 600K = 2,9jt.
     expect(find.text('4 dikasih limit'), findsOneWidget);
-    expect(find.text('Rp2,9jt/bln'), findsOneWidget);
+    expect(find.text('Rp2,9jt/periode'), findsOneWidget);
     expect(find.text('belum dijatah Rp100K dari budget Rp3jt'), findsOneWidget);
 
     await tester.tap(find.text('hiburan'));
     await tester.pump();
     expect(find.text('5 dikasih limit'), findsOneWidget);
-    expect(
-      find.text('lebih Rp300K dari budget'),
-      findsOneWidget,
-    );
+    expect(find.text('lebih Rp300K dari budget'), findsOneWidget);
 
     await tester.ensureVisible(find.text('beres, ke beranda'));
     await tester.tap(find.text('beres, ke beranda'));

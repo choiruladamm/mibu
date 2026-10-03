@@ -11,8 +11,8 @@ import '../../transactions/view_models/transactions_view_model.dart';
 
 typedef HomeMonthSelection = ({DateTime selected, DateTime start});
 
-/// Month picked in the chart or in 00.8 (first of month, up to now + 2 for a
-/// predicted peek) and the first month of the 6-month chart window.
+/// Month picked in the chart or in 00.8 (first of month, never after now)
+/// and the first month of the 6-period chart window.
 class HomeMonth extends Notifier<HomeMonthSelection> {
   /// The month label of the budget period we're in now.
   DateTime get _now => ref.read(currentMonthProvider);
@@ -20,7 +20,7 @@ class HomeMonth extends Notifier<HomeMonthSelection> {
   @override
   HomeMonthSelection build() {
     final now = _now;
-    return (selected: now, start: DateTime(now.year, now.month - 3));
+    return (selected: now, start: DateTime(now.year, now.month - 5));
   }
 
   void select(DateTime month) => state = (
@@ -33,7 +33,13 @@ final homeMonthProvider = NotifierProvider<HomeMonth, HomeMonthSelection>(
   HomeMonth.new,
 );
 
-typedef HomeChart = ({List<MonthBalance> months, DateTime selected, int now});
+/// [budget] = the running period's, drawn as the dashed line; null = none.
+typedef HomeChart = ({
+  List<PeriodPoint> months,
+  DateTime selected,
+  int now,
+  int? budget,
+});
 
 /// Chart inputs only (totals + pick), so the chart reacts the moment a month
 /// is picked instead of waiting for that month's pockets and rows to load.
@@ -41,9 +47,13 @@ final homeChartProvider = Provider<HomeChart?>((ref) {
   final now = ref.watch(currentMonthProvider);
   final pick = ref.watch(homeMonthProvider);
   final totals = ref.watch(totalsProvider).value;
-  if (totals == null) return null;
+  final budget = ref.watch(
+    budgetInPeriodProvider(ref.watch(currentPeriodProvider)),
+  );
+  if (totals == null || !budget.hasValue) return null;
   return (
-    months: balanceSeries(now: now, start: pick.start, nets: totals.nets),
+    months: spentSeries(start: pick.start, spent: totals.spent),
+    budget: budget.value,
     selected: pick.selected,
     now:
         (now.year * 12 + now.month) - (pick.start.year * 12 + pick.start.month),
@@ -78,10 +88,10 @@ class HomeState {
   /// Month the screen shows (never after the current one).
   final DateTime month;
 
-  /// Month picked in the chart; after [month] = predicted peek only.
+  /// Month picked in the chart or the menu.
   final DateTime selected;
   final bool isCurrent;
-  final List<MonthBalance> months; // the 6-month window
+  final List<PeriodPoint> months; // the 6-period window
   final int nowIndex; // of the current month in [months]; ≥ 6 = past the window
   final List<Pocket> pockets; // that month, most used first
   final List<DayGroup> groups; // newest day first, ≤ 5 rows; empty "today" ok
@@ -104,7 +114,6 @@ class HomeState {
   bool get overBudget => isCurrent && (budgetLeft ?? 0) < 0;
 
   int get selectedIndex => months.indexWhere((m) => m.month == selected);
-  bool get selectedIsPrediction => selected.isAfter(month);
 
   /// Net of today's entries; shown beside "baru aja".
   int get todayNet =>

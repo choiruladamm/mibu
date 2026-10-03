@@ -162,18 +162,18 @@ void main() {
     expect(find.text('oke'), findsOneWidget); // nothing changed yet
     expect(find.text('jum 23 okt'), findsOneWidget);
     expect(find.text('9 hari lagi'), findsOneWidget);
+    // Sunday payday, paid the Friday before: the card says so.
+    expect(
+      find.text('tgl 25 jatuh hari minggu → dihitung jumat'),
+      findsOneWidget,
+    );
 
-    // 28 okt is a Wednesday, 14 days out; aman jajan shrinks to match.
+    // 28 okt is a Wednesday, 14 days out, no shift.
     await tester.tap(find.text('28'));
     await tester.pump();
     expect(find.text('rab 28 okt'), findsOneWidget);
     expect(find.text('14 hari lagi'), findsOneWidget);
-    // Same figure as the beranda chip (Rp193K: the budget share is the
-    // smaller one), and it doesn't move with the date, so nothing is struck.
-    expect(
-      find.textContaining('Rp193K/hari', findRichText: true),
-      findsOneWidget,
-    );
+    expect(find.textContaining('jatuh hari'), findsNothing);
     expect(
       find.text(
         'budget & limit ngikut gajian. ganti tanggal berlaku mulai periode berikutnya.',

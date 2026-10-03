@@ -104,18 +104,26 @@ class AppLocalizationsId extends AppLocalizations {
   String get today => 'hari ini';
 
   @override
-  String get prediction => 'prediksi';
-
-  @override
   String monthPickerLabel(String month) {
     return 'ganti bulan, sekarang $month';
   }
 
   @override
-  String get homeMonthlyBalance => 'sisa pemasukan per bulan';
+  String get homeMonthlyBalance => 'kepake per periode';
 
   @override
-  String get homeTapMonthHint => 'tap bulan buat intip';
+  String get homeTapMonthHint => 'tap periode buat intip';
+
+  @override
+  String get chartNow => 'berjalan';
+
+  @override
+  String get chartOverBudget => 'lewat budget';
+
+  @override
+  String chartBudget(String amount) {
+    return 'budget $amount';
+  }
 
   @override
   String get homeRecent => 'baru aja';
@@ -161,19 +169,34 @@ class AppLocalizationsId extends AppLocalizations {
   String get infoWhere => 'dari mana angkanya?';
 
   @override
-  String get infoOk => 'ngerti';
+  String get infoOk => 'oke, ngerti';
 
   @override
   String get infoBudgetTitle => 'sisa budget';
 
   @override
-  String infoBudgetBody(String budget, String spent, String left) {
-    return 'budget $budget − semua pengeluaran $spent = $left.';
+  String infoBudgetCalc(String budget, String spent) {
+    return 'budget $budget − kepake $spent';
   }
 
   @override
-  String infoBudgetBodyOver(String budget, String spent, String over) {
-    return 'budget $budget − semua pengeluaran $spent = kelewat $over.';
+  String infoSafeCalc(String left, int days) {
+    return 'sisa budget $left ÷ $days hari sampai gajian';
+  }
+
+  @override
+  String infoSafeToday(String spent, String left) {
+    return 'udah kepake $spent hari ini, jadi aman jajan hari ini tinggal $left.';
+  }
+
+  @override
+  String infoJarCalc(String limit, String spent) {
+    return 'total limit $limit − kepake di kantong $spent';
+  }
+
+  @override
+  String infoJarOutside(String amount) {
+    return 'bisa beda dari sisa budget, soalnya $amount kepake di luar kantong.';
   }
 
   @override
@@ -181,34 +204,10 @@ class AppLocalizationsId extends AppLocalizations {
       'belum ada budget. pasang dulu biar aman jajan bisa dihitung.';
 
   @override
-  String get infoSafeTitle => 'aman jajan hari ini';
+  String get infoSafeTitle => 'aman jajan per hari';
 
   @override
-  String infoSafeBody(int days, String share) {
-    return 'jatah hari ini = sisa budget ÷ $days hari ($share), dikurangi yang udah kepake hari ini.';
-  }
-
-  @override
-  String get infoJarTitle => 'sisa jajan';
-
-  @override
-  String infoJarBody(String limit, String spent, String left) {
-    return 'total limit kantong $limit − kepake di kantong $spent = $left.';
-  }
-
-  @override
-  String infoJarBudgetBody(
-    String budget,
-    String spent,
-    String left,
-    String outside,
-  ) {
-    return 'budget $budget − semua pengeluaran $spent = $left. pengeluaran di luar kantong ($outside) ikut ngurangin budget, tapi nggak ngurangin sisa jajan.';
-  }
-
-  @override
-  String get infoConflict =>
-      'sisa jajan lebih gede dari sisa budget. pegang yang lebih kecil biar nggak kelewat budget.';
+  String get infoJarTitle => 'sisa jajan (kantong)';
 
   @override
   String pocketsBudgetOver(String amount) {
@@ -236,12 +235,12 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String heroBudgetLeftEnd(String month) {
-    return 'sisa budget akhir $month';
+    return 'sisa budget $month';
   }
 
   @override
   String heroBudgetOverEnd(String month) {
-    return 'kelewat budget akhir $month';
+    return 'kelewat budget $month';
   }
 
   @override
@@ -250,20 +249,18 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
-  String heroPer(int day, String month) {
-    return 'per $day $month';
+  String get heroSetBudgetChip => 'isi budget biar dapet aman jajan';
+
+  @override
+  String get heroEmptyTitle => 'atur budget periode ini';
+
+  @override
+  String heroEmptyBody(String spent) {
+    return 'biar keliatan sisa budget & aman jajan per hari. kepake periode ini $spent.';
   }
 
   @override
-  String heroBudgetOverSub(String amount) {
-    return 'budget bulan ini kelewat $amount';
-  }
-
-  @override
-  String get heroSetBudget => 'pasang budget';
-
-  @override
-  String get heroSetBudgetChip => 'atur budget dulu';
+  String get heroEmptyButton => 'atur budget';
 
   @override
   String get heroCatatGajian => 'udah gajian? catat';
@@ -353,7 +350,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get balanceAfter => 'sisa budget abis ini';
 
   @override
-  String get incomeAfter => 'pemasukan bulan ini jadi';
+  String get incomeAfter => 'pemasukan periode ini jadi';
 
   @override
   String leftAmount(String amount) {
@@ -756,14 +753,14 @@ class AppLocalizationsId extends AppLocalizations {
   String get undo => 'batalin';
 
   @override
-  String get budgetTitle => 'budget bulanan';
+  String get budgetTitle => 'budget per periode';
 
   @override
-  String get budgetSub => 'berapa yang boleh kepake sebulan?';
+  String get budgetSub => 'berapa yang boleh kepake sampai gajian?';
 
   @override
   String budgetLastSpent(String amount) {
-    return 'bulan lalu kepake $amount';
+    return 'periode lalu kepake $amount';
   }
 
   @override
@@ -793,7 +790,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String budgetPerMonth(String amount) {
-    return '$amount / bln';
+    return '$amount / periode';
   }
 
   @override
@@ -1117,6 +1114,42 @@ class AppLocalizationsId extends AppLocalizations {
   String get txNet => 'selisih';
 
   @override
+  String get txLeftover => 'sisa pemasukan';
+
+  @override
+  String get txFirstPeriod => 'periode pertama kamu';
+
+  @override
+  String txSameAs(String month) {
+    return 'sama kayak $month';
+  }
+
+  @override
+  String txUpFrom(String amount, String month) {
+    return 'naik $amount dari $month';
+  }
+
+  @override
+  String txDownFrom(String amount, String month) {
+    return 'turun $amount dari $month';
+  }
+
+  @override
+  String get txNoneYet => 'belum ada';
+
+  @override
+  String get txLogSalary => 'catat gajian dulu';
+
+  @override
+  String txNoCarry(String month) {
+    return 'dihitung per periode, sisa $month nggak kebawa';
+  }
+
+  @override
+  String get txNoCarryFirst =>
+      'dihitung per periode, sisa periode lalu nggak kebawa';
+
+  @override
   String txEmpty(String month) {
     return 'belum ada catatan di $month';
   }
@@ -1271,27 +1304,37 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
-  String get setupBack => 'balik ke budget';
+  String get setupBack => 'balik ke tanggal gajian';
 
   @override
   String get setupLater => 'nanti aja';
 
   @override
-  String get setupBalanceTitle => 'budget kamu sebulan berapa?';
-
-  @override
   String get setupBudgetBody =>
-      'batas jajan sampai gajian berikutnya. boleh dikosongin, bisa diatur nanti.';
+      'batas yang kamu pasang sendiri, bukan gaji. boleh kosong dulu.';
 
   @override
-  String get setupBalanceLabel => 'budget per bulan';
+  String get setupBudgetTitle => 'budget per periode';
+
+  @override
+  String get setupOptional => 'opsional';
+
+  @override
+  String get setupPeriodNow => 'periode sekarang';
+
+  @override
+  String setupNextPayday(String date) {
+    return 'gajian $date';
+  }
+
+  @override
+  String get setupBalanceLabel => 'budget per periode';
 
   @override
   String get setupPaydayTitle => 'gajian tiap tanggal berapa?';
 
   @override
-  String get setupPaydayBody =>
-      'biar jatah harian dihitung sampai gajian berikutnya';
+  String get setupPaydayBody => 'mibu nyatet semuanya per periode gajian.';
 
   @override
   String get paydayCommon => 'umum';
@@ -1324,7 +1367,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String setupPerMonth(String amount) {
-    return '$amount/bln';
+    return '$amount/periode';
   }
 
   @override
@@ -1349,9 +1392,7 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
-  String setupLimitTotal(String total) {
-    return 'total limit $total';
-  }
+  String get setupLimitTotal => 'total limit per periode';
 
   @override
   String get setupTapHint => 'tap di atas buat mulai';
@@ -1422,7 +1463,18 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get paydaySheetBody =>
-      'buat ngitung aman jajan sampai gajian berikutnya.';
+      'semua angka di mibu dihitung dari gajian ke gajian.';
+
+  @override
+  String paydayShiftNote(String day, String weekday) {
+    return '$day jatuh hari $weekday → dihitung jumat';
+  }
+
+  @override
+  String get paydaySaturday => 'sabtu';
+
+  @override
+  String get paydaySunday => 'minggu';
 
   @override
   String get paydayOther => 'lain…';
@@ -1449,14 +1501,6 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String paydayNextIn(int n) {
     return '$n hari lagi';
-  }
-
-  @override
-  String get paydayJajanBecomes => 'aman jajan jadi';
-
-  @override
-  String paydayPerDay(String amount) {
-    return '$amount/hari';
   }
 
   @override

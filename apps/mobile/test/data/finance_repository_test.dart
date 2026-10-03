@@ -225,36 +225,33 @@ void main() {
     expect(r.periodOf(DateTime(2026, 12, 1)).start, DateTime(2026, 11, 25));
   });
 
-  test(
-    'seed: nets and pockets are derived from transactions',
-    () async {
-      final profile = await repo.watchProfile(cal(now)).first;
-      expect(profile.payday, 25);
-      expect(profile.monthlyBudget, 8000000);
+  test('seed: nets and pockets are derived from transactions', () async {
+    final profile = await repo.watchProfile(cal(now)).first;
+    expect(profile.payday, 25);
+    expect(profile.monthlyBudget, 8000000);
 
-      final totals = await repo.watchTotals(now).first;
-      expect(totals.nets, {
-        DateTime(2026, 7): 546000,
-        DateTime(2026, 8): -844500,
-        DateTime(2026, 9): 5887500,
-        DateTime(2026, 10): -4059000,
-      });
-      expect(totals.spent[DateTime(2026, 10)], greaterThan(0));
-      expect(totals.spentToday, 27000);
+    final totals = await repo.watchTotals(now).first;
+    expect(totals.nets, {
+      DateTime(2026, 7): 546000,
+      DateTime(2026, 8): -844500,
+      DateTime(2026, 9): 5887500,
+      DateTime(2026, 10): -4059000,
+    });
+    expect(totals.spent[DateTime(2026, 10)], greaterThan(0));
+    expect(totals.spentToday, 27000);
 
-      final pockets = await repo.watchPockets(cal(now)).first;
-      expect(pockets.map((p) => '${p.emoji}${p.usedPct}'), [
-        '🐶90',
-        '☕60',
-        '🛵38',
-        '🍜26',
-      ]);
+    final pockets = await repo.watchPockets(cal(now)).first;
+    expect(pockets.map((p) => '${p.emoji}${p.usedPct}'), [
+      '🐶90',
+      '☕60',
+      '🛵38',
+      '🍜26',
+    ]);
 
-      final recent = await repo.watchRecent().first;
-      expect(recent.map((t) => t.place), ['gojek', 'petshop']); // newest first
-      expect(recent.first.id, hasLength(36)); // uuid
-    },
-  );
+    final recent = await repo.watchRecent().first;
+    expect(recent.map((t) => t.place), ['gojek', 'petshop']); // newest first
+    expect(recent.first.id, hasLength(36)); // uuid
+  });
 
   test('soft-deleted and uncategorized transactions', () async {
     final petshop = await (db.select(
@@ -569,16 +566,9 @@ void main() {
       final r = FinanceRepository(fresh);
       expect((await r.watchProfile(cal(now)).first).onboarded, isFalse);
 
-      await r.completeSetup(
-        payday: 0,
-        pockets: {'makan', 'ngopi'},
-        now: now,
-      );
+      await r.completeSetup(payday: 0, pockets: {'makan', 'ngopi'}, now: now);
       final p = await r.watchProfile(cal(now)).first;
-      expect(
-        (p.onboarded, p.payday, p.monthlyBudget),
-        (true, 0, null),
-      );
+      expect((p.onboarded, p.payday, p.monthlyBudget), (true, 0, null));
       final cats = await r.watchCategories(cal(now)).first;
       expect(cats.map((c) => c.name), [
         ...setupPockets.map((p) => p.$2),

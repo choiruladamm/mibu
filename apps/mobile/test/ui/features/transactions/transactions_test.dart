@@ -14,7 +14,7 @@ import 'package:mibu/ui/features/transactions/views/transactions_view.dart';
 import '../../../meta.dart';
 
 void main() {
-  testWidgets('04.1: month tiles, day groups, filter, month switch', (
+  testWidgets('04.1: period card, day groups, filter, month switch', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(390, 844);
@@ -54,8 +54,16 @@ void main() {
     await settle();
     expect(find.text('oktober'), findsOneWidget);
     expect(find.text('7 catatan'), findsNWidgets(2)); // header + filter row
-    expect(find.text('Rp0'), findsOneWidget); // no income yet
-    expect(find.text('-Rp4,06jt'), findsNWidgets(2)); // pengeluaran, selisih
+    expect(find.text('1 okt – 31 okt'), findsWidgets); // title + card
+    // No income yet: "—" + a nudge to log the salary, not a negative figure.
+    expect(find.text('catat gajian dulu'), findsOneWidget);
+    expect(find.text('belum ada'), findsOneWidget);
+    expect(find.text('Rp4,06jt'), findsOneWidget); // pengeluaran
+    expect(find.text('naik Rp1,45jt dari september'), findsOneWidget);
+    expect(
+      find.text('dihitung per periode, sisa september nggak kebawa'),
+      findsOneWidget,
+    );
     expect(findMeta(['hari ini', 'rab 14 okt']), findsOneWidget);
     expect(findMeta(['kemarin', 'sel 13 okt']), findsOneWidget);
     expect(find.text('-Rp1,02jt'), findsOneWidget); // 13 okt total
@@ -69,8 +77,11 @@ void main() {
     await tester.tap(find.text('sep'));
     await settle();
     expect(find.text('september'), findsOneWidget);
-    // filter stays on pemasukan: tile, day total, row
-    expect(find.text('+Rp8,5jt'), findsNWidgets(3));
+    // sisa pemasukan = 8,5jt − 2.612.500
+    expect(find.text('Rp5,89jt'), findsOneWidget);
+    expect(find.text('Rp8,5jt'), findsOneWidget); // pemasukan in the card
+    // filter stays on pemasukan: day total, row
+    expect(find.text('+Rp8,5jt'), findsNWidgets(2));
     await tester.scrollUntilVisible(find.text('liat agu'), 200);
     expect(find.text('udah semua di september'), findsOneWidget);
 

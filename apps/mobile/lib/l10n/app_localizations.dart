@@ -268,12 +268,6 @@ abstract class AppLocalizations {
   /// **'hari ini'**
   String get today;
 
-  /// No description provided for @prediction.
-  ///
-  /// In id, this message translates to:
-  /// **'prediksi'**
-  String get prediction;
-
   /// No description provided for @monthPickerLabel.
   ///
   /// In id, this message translates to:
@@ -283,14 +277,32 @@ abstract class AppLocalizations {
   /// No description provided for @homeMonthlyBalance.
   ///
   /// In id, this message translates to:
-  /// **'sisa pemasukan per bulan'**
+  /// **'kepake per periode'**
   String get homeMonthlyBalance;
 
   /// No description provided for @homeTapMonthHint.
   ///
   /// In id, this message translates to:
-  /// **'tap bulan buat intip'**
+  /// **'tap periode buat intip'**
   String get homeTapMonthHint;
+
+  /// No description provided for @chartNow.
+  ///
+  /// In id, this message translates to:
+  /// **'berjalan'**
+  String get chartNow;
+
+  /// No description provided for @chartOverBudget.
+  ///
+  /// In id, this message translates to:
+  /// **'lewat budget'**
+  String get chartOverBudget;
+
+  /// No description provided for @chartBudget.
+  ///
+  /// In id, this message translates to:
+  /// **'budget {amount}'**
+  String chartBudget(String amount);
 
   /// No description provided for @homeRecent.
   ///
@@ -361,7 +373,7 @@ abstract class AppLocalizations {
   /// No description provided for @infoOk.
   ///
   /// In id, this message translates to:
-  /// **'ngerti'**
+  /// **'oke, ngerti'**
   String get infoOk;
 
   /// No description provided for @infoBudgetTitle.
@@ -370,17 +382,35 @@ abstract class AppLocalizations {
   /// **'sisa budget'**
   String get infoBudgetTitle;
 
-  /// No description provided for @infoBudgetBody.
+  /// No description provided for @infoBudgetCalc.
   ///
   /// In id, this message translates to:
-  /// **'budget {budget} − semua pengeluaran {spent} = {left}.'**
-  String infoBudgetBody(String budget, String spent, String left);
+  /// **'budget {budget} − kepake {spent}'**
+  String infoBudgetCalc(String budget, String spent);
 
-  /// No description provided for @infoBudgetBodyOver.
+  /// No description provided for @infoSafeCalc.
   ///
   /// In id, this message translates to:
-  /// **'budget {budget} − semua pengeluaran {spent} = kelewat {over}.'**
-  String infoBudgetBodyOver(String budget, String spent, String over);
+  /// **'sisa budget {left} ÷ {days} hari sampai gajian'**
+  String infoSafeCalc(String left, int days);
+
+  /// No description provided for @infoSafeToday.
+  ///
+  /// In id, this message translates to:
+  /// **'udah kepake {spent} hari ini, jadi aman jajan hari ini tinggal {left}.'**
+  String infoSafeToday(String spent, String left);
+
+  /// No description provided for @infoJarCalc.
+  ///
+  /// In id, this message translates to:
+  /// **'total limit {limit} − kepake di kantong {spent}'**
+  String infoJarCalc(String limit, String spent);
+
+  /// No description provided for @infoJarOutside.
+  ///
+  /// In id, this message translates to:
+  /// **'bisa beda dari sisa budget, soalnya {amount} kepake di luar kantong.'**
+  String infoJarOutside(String amount);
 
   /// No description provided for @infoBudgetNone.
   ///
@@ -391,43 +421,14 @@ abstract class AppLocalizations {
   /// No description provided for @infoSafeTitle.
   ///
   /// In id, this message translates to:
-  /// **'aman jajan hari ini'**
+  /// **'aman jajan per hari'**
   String get infoSafeTitle;
-
-  /// No description provided for @infoSafeBody.
-  ///
-  /// In id, this message translates to:
-  /// **'jatah hari ini = sisa budget ÷ {days} hari ({share}), dikurangi yang udah kepake hari ini.'**
-  String infoSafeBody(int days, String share);
 
   /// No description provided for @infoJarTitle.
   ///
   /// In id, this message translates to:
-  /// **'sisa jajan'**
+  /// **'sisa jajan (kantong)'**
   String get infoJarTitle;
-
-  /// No description provided for @infoJarBody.
-  ///
-  /// In id, this message translates to:
-  /// **'total limit kantong {limit} − kepake di kantong {spent} = {left}.'**
-  String infoJarBody(String limit, String spent, String left);
-
-  /// No description provided for @infoJarBudgetBody.
-  ///
-  /// In id, this message translates to:
-  /// **'budget {budget} − semua pengeluaran {spent} = {left}. pengeluaran di luar kantong ({outside}) ikut ngurangin budget, tapi nggak ngurangin sisa jajan.'**
-  String infoJarBudgetBody(
-    String budget,
-    String spent,
-    String left,
-    String outside,
-  );
-
-  /// No description provided for @infoConflict.
-  ///
-  /// In id, this message translates to:
-  /// **'sisa jajan lebih gede dari sisa budget. pegang yang lebih kecil biar nggak kelewat budget.'**
-  String get infoConflict;
 
   /// No description provided for @pocketsBudgetOver.
   ///
@@ -468,13 +469,13 @@ abstract class AppLocalizations {
   /// No description provided for @heroBudgetLeftEnd.
   ///
   /// In id, this message translates to:
-  /// **'sisa budget akhir {month}'**
+  /// **'sisa budget {month}'**
   String heroBudgetLeftEnd(String month);
 
   /// No description provided for @heroBudgetOverEnd.
   ///
   /// In id, this message translates to:
-  /// **'kelewat budget akhir {month}'**
+  /// **'kelewat budget {month}'**
   String heroBudgetOverEnd(String month);
 
   /// No description provided for @heroFromBudget.
@@ -483,29 +484,29 @@ abstract class AppLocalizations {
   /// **'dari budget {amount}'**
   String heroFromBudget(String amount);
 
-  /// No description provided for @heroPer.
-  ///
-  /// In id, this message translates to:
-  /// **'per {day} {month}'**
-  String heroPer(int day, String month);
-
-  /// No description provided for @heroBudgetOverSub.
-  ///
-  /// In id, this message translates to:
-  /// **'budget bulan ini kelewat {amount}'**
-  String heroBudgetOverSub(String amount);
-
-  /// No description provided for @heroSetBudget.
-  ///
-  /// In id, this message translates to:
-  /// **'pasang budget'**
-  String get heroSetBudget;
-
   /// No description provided for @heroSetBudgetChip.
   ///
   /// In id, this message translates to:
-  /// **'atur budget dulu'**
+  /// **'isi budget biar dapet aman jajan'**
   String get heroSetBudgetChip;
+
+  /// No description provided for @heroEmptyTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'atur budget periode ini'**
+  String get heroEmptyTitle;
+
+  /// No description provided for @heroEmptyBody.
+  ///
+  /// In id, this message translates to:
+  /// **'biar keliatan sisa budget & aman jajan per hari. kepake periode ini {spent}.'**
+  String heroEmptyBody(String spent);
+
+  /// No description provided for @heroEmptyButton.
+  ///
+  /// In id, this message translates to:
+  /// **'atur budget'**
+  String get heroEmptyButton;
 
   /// No description provided for @heroCatatGajian.
   ///
@@ -660,7 +661,7 @@ abstract class AppLocalizations {
   /// No description provided for @incomeAfter.
   ///
   /// In id, this message translates to:
-  /// **'pemasukan bulan ini jadi'**
+  /// **'pemasukan periode ini jadi'**
   String get incomeAfter;
 
   /// No description provided for @leftAmount.
@@ -1260,19 +1261,19 @@ abstract class AppLocalizations {
   /// No description provided for @budgetTitle.
   ///
   /// In id, this message translates to:
-  /// **'budget bulanan'**
+  /// **'budget per periode'**
   String get budgetTitle;
 
   /// No description provided for @budgetSub.
   ///
   /// In id, this message translates to:
-  /// **'berapa yang boleh kepake sebulan?'**
+  /// **'berapa yang boleh kepake sampai gajian?'**
   String get budgetSub;
 
   /// No description provided for @budgetLastSpent.
   ///
   /// In id, this message translates to:
-  /// **'bulan lalu kepake {amount}'**
+  /// **'periode lalu kepake {amount}'**
   String budgetLastSpent(String amount);
 
   /// No description provided for @budgetLabelNow.
@@ -1320,7 +1321,7 @@ abstract class AppLocalizations {
   /// No description provided for @budgetPerMonth.
   ///
   /// In id, this message translates to:
-  /// **'{amount} / bln'**
+  /// **'{amount} / periode'**
   String budgetPerMonth(String amount);
 
   /// No description provided for @budgetDelete.
@@ -1845,6 +1846,60 @@ abstract class AppLocalizations {
   /// **'selisih'**
   String get txNet;
 
+  /// No description provided for @txLeftover.
+  ///
+  /// In id, this message translates to:
+  /// **'sisa pemasukan'**
+  String get txLeftover;
+
+  /// No description provided for @txFirstPeriod.
+  ///
+  /// In id, this message translates to:
+  /// **'periode pertama kamu'**
+  String get txFirstPeriod;
+
+  /// No description provided for @txSameAs.
+  ///
+  /// In id, this message translates to:
+  /// **'sama kayak {month}'**
+  String txSameAs(String month);
+
+  /// No description provided for @txUpFrom.
+  ///
+  /// In id, this message translates to:
+  /// **'naik {amount} dari {month}'**
+  String txUpFrom(String amount, String month);
+
+  /// No description provided for @txDownFrom.
+  ///
+  /// In id, this message translates to:
+  /// **'turun {amount} dari {month}'**
+  String txDownFrom(String amount, String month);
+
+  /// No description provided for @txNoneYet.
+  ///
+  /// In id, this message translates to:
+  /// **'belum ada'**
+  String get txNoneYet;
+
+  /// No description provided for @txLogSalary.
+  ///
+  /// In id, this message translates to:
+  /// **'catat gajian dulu'**
+  String get txLogSalary;
+
+  /// No description provided for @txNoCarry.
+  ///
+  /// In id, this message translates to:
+  /// **'dihitung per periode, sisa {month} nggak kebawa'**
+  String txNoCarry(String month);
+
+  /// No description provided for @txNoCarryFirst.
+  ///
+  /// In id, this message translates to:
+  /// **'dihitung per periode, sisa periode lalu nggak kebawa'**
+  String get txNoCarryFirst;
+
   /// No description provided for @txEmpty.
   ///
   /// In id, this message translates to:
@@ -2088,7 +2143,7 @@ abstract class AppLocalizations {
   /// No description provided for @setupBack.
   ///
   /// In id, this message translates to:
-  /// **'balik ke budget'**
+  /// **'balik ke tanggal gajian'**
   String get setupBack;
 
   /// No description provided for @setupLater.
@@ -2097,22 +2152,40 @@ abstract class AppLocalizations {
   /// **'nanti aja'**
   String get setupLater;
 
-  /// No description provided for @setupBalanceTitle.
-  ///
-  /// In id, this message translates to:
-  /// **'budget kamu sebulan berapa?'**
-  String get setupBalanceTitle;
-
   /// No description provided for @setupBudgetBody.
   ///
   /// In id, this message translates to:
-  /// **'batas jajan sampai gajian berikutnya. boleh dikosongin, bisa diatur nanti.'**
+  /// **'batas yang kamu pasang sendiri, bukan gaji. boleh kosong dulu.'**
   String get setupBudgetBody;
+
+  /// No description provided for @setupBudgetTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'budget per periode'**
+  String get setupBudgetTitle;
+
+  /// No description provided for @setupOptional.
+  ///
+  /// In id, this message translates to:
+  /// **'opsional'**
+  String get setupOptional;
+
+  /// No description provided for @setupPeriodNow.
+  ///
+  /// In id, this message translates to:
+  /// **'periode sekarang'**
+  String get setupPeriodNow;
+
+  /// No description provided for @setupNextPayday.
+  ///
+  /// In id, this message translates to:
+  /// **'gajian {date}'**
+  String setupNextPayday(String date);
 
   /// No description provided for @setupBalanceLabel.
   ///
   /// In id, this message translates to:
-  /// **'budget per bulan'**
+  /// **'budget per periode'**
   String get setupBalanceLabel;
 
   /// No description provided for @setupPaydayTitle.
@@ -2124,7 +2197,7 @@ abstract class AppLocalizations {
   /// No description provided for @setupPaydayBody.
   ///
   /// In id, this message translates to:
-  /// **'biar jatah harian dihitung sampai gajian berikutnya'**
+  /// **'mibu nyatet semuanya per periode gajian.'**
   String get setupPaydayBody;
 
   /// No description provided for @paydayCommon.
@@ -2184,7 +2257,7 @@ abstract class AppLocalizations {
   /// No description provided for @setupPerMonth.
   ///
   /// In id, this message translates to:
-  /// **'{amount}/bln'**
+  /// **'{amount}/periode'**
   String setupPerMonth(String amount);
 
   /// No description provided for @setupPocketCount.
@@ -2220,8 +2293,8 @@ abstract class AppLocalizations {
   /// No description provided for @setupLimitTotal.
   ///
   /// In id, this message translates to:
-  /// **'total limit {total}'**
-  String setupLimitTotal(String total);
+  /// **'total limit per periode'**
+  String get setupLimitTotal;
 
   /// No description provided for @setupTapHint.
   ///
@@ -2340,8 +2413,26 @@ abstract class AppLocalizations {
   /// No description provided for @paydaySheetBody.
   ///
   /// In id, this message translates to:
-  /// **'buat ngitung aman jajan sampai gajian berikutnya.'**
+  /// **'semua angka di mibu dihitung dari gajian ke gajian.'**
   String get paydaySheetBody;
+
+  /// No description provided for @paydayShiftNote.
+  ///
+  /// In id, this message translates to:
+  /// **'{day} jatuh hari {weekday} → dihitung jumat'**
+  String paydayShiftNote(String day, String weekday);
+
+  /// No description provided for @paydaySaturday.
+  ///
+  /// In id, this message translates to:
+  /// **'sabtu'**
+  String get paydaySaturday;
+
+  /// No description provided for @paydaySunday.
+  ///
+  /// In id, this message translates to:
+  /// **'minggu'**
+  String get paydaySunday;
 
   /// No description provided for @paydayOther.
   ///
@@ -2384,18 +2475,6 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'{n} hari lagi'**
   String paydayNextIn(int n);
-
-  /// No description provided for @paydayJajanBecomes.
-  ///
-  /// In id, this message translates to:
-  /// **'aman jajan jadi'**
-  String get paydayJajanBecomes;
-
-  /// No description provided for @paydayPerDay.
-  ///
-  /// In id, this message translates to:
-  /// **'{amount}/hari'**
-  String paydayPerDay(String amount);
 
   /// No description provided for @paydayBudgetNote.
   ///

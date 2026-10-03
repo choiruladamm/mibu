@@ -4,10 +4,10 @@ import 'package:intl/intl.dart';
 
 import '../../../../data/repositories/finance_repository.dart';
 import '../../../../domain/models/finance.dart';
+import '../../../../domain/period.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../core/clock.dart';
 import '../../../core/finance_providers.dart';
-import '../../../core/money.dart';
 import '../../../core/tokens.dart';
 import '../../../core/widgets/payday_chip.dart';
 import '../../../core/widgets/sheet.dart';
@@ -76,22 +76,7 @@ class _PaydaySheetState extends ConsumerState<_PaydaySheet> {
     final l = AppLocalizations.of(context)!;
     final now = ref.watch(nowProvider);
     final salaries = ref.watch(salaryDatesProvider).value ?? const [];
-    final totals = ref.watch(totalsProvider).value;
-    PaydayInfo infoFor(int d) =>
-        paydayInfo(now: now, payday: d, salaries: salaries);
-    // Same figure as the beranda chip: sisa budget ÷ days left in the
-    // running period. A new date never changes it (it applies from the next
-    // period). Null without a budget (the row hides).
-    final period = ref.watch(currentPeriodProvider);
-    final budget = ref.watch(budgetInPeriodProvider(period)).value;
-    final monthSpent = totals?.spent[period.key] ?? 0;
-    final jajan = safeToSpendToday(
-      budgetLeft: budget == null ? null : budget - monthSpent,
-      spentToday: totals?.spentToday ?? 0,
-      days: period.daysLeft(now),
-    );
-
-    final info = infoFor(_sel);
+    final info = paydayInfo(now: now, payday: _sel, salaries: salaries);
     final today = info.status == PaydayStatus.today;
     final nextDate = today ? DateTime(now.year, now.month, now.day) : info.next;
     final changed = _sel != widget.saved;
@@ -202,9 +187,7 @@ class _PaydaySheetState extends ConsumerState<_PaydaySheet> {
           _NextCard(
             date: _nextDay.format(nextDate).toLowerCase(),
             inText: today ? l.paydayNextToday : l.paydayNextIn(info.daysToNext),
-            // Struck through only when the figure really moves (a binding
-            // budget keeps it the same).
-            jajan: jajan == null ? null : rupiahCompact(jajan),
+            shift: _shiftNote(l, _sel, info.next),
           ),
           const SizedBox(height: 12),
           Padding(
@@ -243,16 +226,34 @@ class _PaydaySheetState extends ConsumerState<_PaydaySheet> {
   }
 }
 
-/// Ink card: the payday it'll count to, and today's aman jajan.
+/// "tgl 25 jatuh hari minggu → dihitung jumat" when [next] is a weekend
+/// payday paid early; null otherwise.
+String? _shiftNote(AppLocalizations l, int day, DateTime next) {
+  final r = PaydayCycleResolver(day, shift: PaydayShift.previousWorkday);
+  // Shifting only moves a payday back, at most into the month before.
+  for (final m in [next.month, next.month + 1]) {
+    if (r.anchor(next.year, m) != next) continue;
+    final last = DateTime(next.year, m + 1, 0).day;
+    final raw = DateTime(next.year, m, day > last ? last : day);
+    if (raw == next) return null;
+    return l.paydayShiftNote(
+      _label(l, day),
+      raw.weekday == DateTime.sunday ? l.paydaySunday : l.paydaySaturday,
+    );
+  }
+  return null;
+}
+
+/// Ink card: the payday it'll count to, and why it moved off a weekend.
 class _NextCard extends StatelessWidget {
   const _NextCard({
     required this.date,
     required this.inText,
-    required this.jajan,
+    required this.shift,
   });
 
   final String date, inText;
-  final String? jajan; // null = no budget, no aman jajan row
+  final String? shift; // "… jatuh hari minggu → dihitung jumat"
 
   @override
   Widget build(BuildContext context) {
@@ -286,24 +287,7 @@ class _NextCard extends StatelessWidget {
               color: AppColors.paper,
             ),
           ),
-          if (jajan case final jajan?) ...[
-            const Divider(height: 1, color: Color(0xFF333333)),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(l.paydayJajanBecomes, style: soft.copyWith(fontSize: 14)),
-                Text(
-                  l.paydayPerDay(jajan),
-                  style: AppText.label.copyWith(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.paper,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
-                ),
-              ],
-            ),
-          ],
+          if (shift case final note?) Text(note, style: soft),
         ],
       ),
     );

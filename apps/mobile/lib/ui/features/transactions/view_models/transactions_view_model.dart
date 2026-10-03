@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../data/repositories/finance_repository.dart';
 import '../../../../domain/models/finance.dart';
+import '../../../../domain/period.dart';
 import '../../../../domain/search.dart';
 import '../../../core/clock.dart';
 import '../../../core/dates.dart';
@@ -76,8 +77,11 @@ class TransactionsState {
     required this.months,
     required this.selected,
     required this.today,
+    required this.period,
     required this.income,
     required this.expense,
+    required this.prevIncome,
+    required this.prevExpense,
     required this.groups,
     required this.count,
   });
@@ -86,7 +90,9 @@ class TransactionsState {
   final List<DateTime> months;
   final int selected;
   final DateTime today;
-  final int income, expense; // whole month, filter ignored; expense ≤ 0
+  final Period period; // the budget period [month] is named after
+  final int income, expense; // whole period, filter ignored; expense ≤ 0
+  final int prevIncome, prevExpense; // the period before; expense ≥ 0
   final List<DayGroup> groups; // newest day first, filter applied
   final int count;
 
@@ -160,6 +166,8 @@ final transactionsProvider =
               })
                 t,
         ];
+        final totals = ref.watch(totalsProvider).value;
+        final prev = DateTime(month.year, month.month - 1);
         int sum(bool Function(int) test) => rows.value!
             .map((t) => t.amount)
             .where(test)
@@ -169,8 +177,11 @@ final transactionsProvider =
             months: months,
             selected: months.indexOf(month),
             today: dateOnly(now),
+            period: period,
             income: sum((v) => v > 0),
             expense: sum((v) => v < 0),
+            prevIncome: totals?.income[prev] ?? 0,
+            prevExpense: totals?.spent[prev] ?? 0,
             groups: groupByDay(shown),
             count: shown.length,
           ),

@@ -10,22 +10,23 @@ User-nya orang kantoran, atau kantoran + freelance, yang tau kapan gajiannya. Ta
 
 ## Status
 
-| Langkah | Status | Catatan |
-|---|---|---|
-| 1. Domain + test | ✅ | `safeShare` / `safeToSpendToday` budget aja (null tanpa budget). `balanceSeries` = sisa pemasukan per periode, intip = rata² 3 periode. `monthEndBalance` dibuang. |
-| 2. Skema + seed | ✅ | `openingBalance`, `openingAt`, `heroMode`, `heroHintSeen` di-drop. Fixture `onboardedAt` = awal data contoh (app yang udah lama dipakai). |
-| 3. Repository | ✅ | `Totals` = `income` + `spent` per periode, `nets` turunan, tanpa `openingAt`. `completeSetup(budget?)`. `setPayday` pakai `onboardedAt` buat "periode setup". |
-| 4. Hero + chip + info | ✅ sementara | Sisa budget, tanpa toggle/hint. Tanpa budget: "kepake bulan ini" + "pasang budget" + chip "atur budget dulu". Dialog: sisa budget + aman jajan. |
-| 5. Setup 01.4 | ✅ sementara | Kolom saldo jadi budget opsional (chip 3/5/7/10jt), preview aman jajan cuma kalau diisi. 01.4b dibandingin ke budget, tanpa budget "total limit Rp…". |
-| 6. Sheet budget | ✅ | "bulan lalu kepake Rp…" (pengeluaran periode lalu). |
-| 7. Kantong | ✅ | Nggak ada copy saldo yang perlu diubah. |
-| 8. Sheet gajian | ✅ sementara | Kartu ink: aman jajan hari ini aja, tanpa coret sebelum → sesudah (ganti tanggal berlaku periode depan, jadi angkanya nggak gerak). |
-| 3.1 bar dampak | ✅ | Pengeluaran non-kantong → "sisa budget abis ini" (disembunyiin tanpa budget), pemasukan → "pemasukan bulan ini jadi". |
-| Grafik beranda | ✅ sementara | Tetap di beranda, isinya "sisa pemasukan per bulan". Posisi final nunggu desain. |
-| 9. Statistik | ⏳ | Kartu sisa pemasukan + banding, nunggu board 04.1. |
-| 11. Docs | ⏳ | MVP_PLAN (Turunan, Aman jajan) & FEATURES masih nunjuk ke doc ini, belum ditulis ulang. |
+Logic + desain final (canvas 2026-10-03) udah masuk:
 
-"Sementara" = jalan dan dites, tapi copy/layout nunggu board desain.
+| Bagian | Board | Isi |
+|---|---|---|
+| Domain + skema + repository | — | saldo, saldo awal, hero toggle dibuang; `Totals` = `income` + `spent` per periode; aman jajan budget aja |
+| Hero | HeroBudget 00.23 / 00.23b | sisa budget + "?" di samping label · "dari budget Rp… • gajian lagi N hari" (periode lalu: range tanggal) · budget kosong → kartu putus-putus "atur budget periode ini" + chip "isi budget biar dapet aman jajan" |
+| Grafik beranda | PeriodBars 00.26 (opsi a) | kepake per periode, garis putus-putus = budget periode berjalan, 6 periode sampai yang berjalan, pill "berjalan • okt" / "lewat budget", nggak ada prediksi |
+| Dari mana angkanya | NumbersSheet 00.25 | 3 kartu (sisa budget · aman jajan per hari · sisa jajan kantong), kartu dari layar pembuka di-ink, dipakai beranda & kantong |
+| Setup | 01.4 / 01.4c / 01.4d | tanggal gajian dulu + kartu "periode sekarang", budget opsional tanpa chip cepat, preview aman jajan cuma kalau diisi; 01.4b "/periode", tanpa budget "total limit per periode" |
+| Sheet budget | 00.16 | "budget per periode", "periode lalu kepake Rp…", "Rp… / periode" |
+| Sheet gajian | 00.24 | tanpa baris aman jajan, catatan "tgl 25 jatuh hari minggu → dihitung jumat" |
+| Catat | 03.1b–d | "sisa budget abis ini" / "pemasukan periode ini jadi" / bar ilang tanpa budget |
+| 04.1 | 04.1 / 04.1d | range di bawah judul, kartu ink sisa pemasukan + naik/turun, pemasukan & pengeluaran vs periode lalu, "—" + "catat gajian dulu" |
+
+Belum: nama user di judul 01.4 (app belum punya nama), toast budget versi beranda ("budget Rp… kepasang"), dan MVP_PLAN / FEATURES ditulis ulang (masih nunjuk ke sini).
+
+Ganti tanggal gajian tetap berlaku **mulai periode berikutnya** (kecuali masih di periode setup), diputusin 2026-10-03 dan catatan di sheet 00.24 udah disamain. Alasannya: kalau langsung, periode yang lagi jalan ganti panjang di tengah jalan, catatan pindah periode, dan budget periode itu bisa kepake dobel (25 → 10 tgl 16 okt: periode lama tutup 9 okt, periode baru dapet budget penuh lagi).
 
 ## Kenapa ganti
 
