@@ -1725,6 +1725,82 @@ class AppLocalizationsId extends AppLocalizations {
   String get settingsExportHint => 'semua catatan, satu file';
 
   @override
+  String get settingsImport => 'import dari csv';
+
+  @override
+  String get settingsImportHint => 'balikin catatan dari file export mibu';
+
+  @override
+  String get importNew => 'catatan baru';
+
+  @override
+  String importExpenses(int n) {
+    return '$n pengeluaran';
+  }
+
+  @override
+  String importIncomes(int n) {
+    return '$n pemasukan';
+  }
+
+  @override
+  String get importAdded => 'ikut ditambahin';
+
+  @override
+  String get importAddedInfo => 'belum ada di mibu, tanpa limit';
+
+  @override
+  String importCount(int n) {
+    return '$n catatan';
+  }
+
+  @override
+  String importDupes(int n) {
+    return '$n udah ada, dilewatin';
+  }
+
+  @override
+  String importBad(int n) {
+    return '$n baris nggak kebaca';
+  }
+
+  @override
+  String importButton(int n) {
+    return 'import $n catatan';
+  }
+
+  @override
+  String get importSameTitle => 'semua udah ada';
+
+  @override
+  String importSameSub(int n) {
+    return '$n catatan di file ini udah kecatat di mibu, nggak ada yang baru';
+  }
+
+  @override
+  String get importOk => 'oke';
+
+  @override
+  String get importWrongTitle => 'file-nya bukan dari mibu';
+
+  @override
+  String get importWrongSub =>
+      'import cuma bisa dari file hasil export mibu. buka mibu di hp lama, pengaturan › export ke csv, terus pilih file itu di sini';
+
+  @override
+  String get importPickAgain => 'pilih file lain';
+
+  @override
+  String importToast(int n) {
+    return '$n catatan masuk';
+  }
+
+  @override
+  String importToastSub(String names) {
+    return '$names ikut ditambahin';
+  }
+
+  @override
   String get settingsLicenses => 'lisensi';
 
   @override

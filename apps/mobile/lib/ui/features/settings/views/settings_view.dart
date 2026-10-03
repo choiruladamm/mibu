@@ -19,6 +19,7 @@ import '../../budget/views/budget_sheet.dart';
 import '../../categories/views/category_manage_sheet.dart';
 import '../view_models/settings_view_model.dart';
 import 'hide_sheet.dart';
+import 'import_sheet.dart';
 import 'payday_sheet.dart';
 
 final _payDay = DateFormat('EEE d MMM', 'id');
@@ -173,6 +174,13 @@ class SettingsView extends ConsumerWidget {
                       hint: l.settingsExportHint,
                       chevron: true,
                       onTap: () => exportCsv(ref),
+                    ),
+                    _Row(
+                      icon: HugeIcons.strokeRoundedUpload04,
+                      title: l.settingsImport,
+                      hint: l.settingsImportHint,
+                      isNew: true,
+                      onTap: () => importCsv(context, ref),
                     ),
                   ]),
                   const SizedBox(height: AppSpace.section),
@@ -435,6 +443,7 @@ class _Row extends StatelessWidget {
     this.hintParts,
     this.trailing,
     this.chevron = true,
+    this.isNew = false,
   });
 
   final List<List<dynamic>> icon;
@@ -443,6 +452,7 @@ class _Row extends StatelessWidget {
   final List<String>? hintParts; // hint as a MetaLine (dot-separated)
   final Widget? trailing;
   final bool chevron;
+  final bool isNew; // ink "baru" pill after the title
   final VoidCallback onTap;
 
   @override
@@ -483,7 +493,31 @@ class _Row extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: 1,
                     children: [
-                      Text(title, style: AppText.label),
+                      Row(
+                        spacing: 6,
+                        children: [
+                          Text(title, style: AppText.label),
+                          if (isNew)
+                            Container(
+                              height: 18,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                              ),
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: AppColors.ink,
+                                borderRadius: BorderRadius.circular(9),
+                              ),
+                              child: Text(
+                                AppLocalizations.of(context)!.hideNew,
+                                style: AppText.micro.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.paper,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
                       if (hintParts case final parts?)
                         MetaLine(
                           parts,

@@ -2842,6 +2842,120 @@ abstract class AppLocalizations {
   /// **'semua catatan, satu file'**
   String get settingsExportHint;
 
+  /// No description provided for @settingsImport.
+  ///
+  /// In id, this message translates to:
+  /// **'import dari csv'**
+  String get settingsImport;
+
+  /// No description provided for @settingsImportHint.
+  ///
+  /// In id, this message translates to:
+  /// **'balikin catatan dari file export mibu'**
+  String get settingsImportHint;
+
+  /// No description provided for @importNew.
+  ///
+  /// In id, this message translates to:
+  /// **'catatan baru'**
+  String get importNew;
+
+  /// No description provided for @importExpenses.
+  ///
+  /// In id, this message translates to:
+  /// **'{n} pengeluaran'**
+  String importExpenses(int n);
+
+  /// No description provided for @importIncomes.
+  ///
+  /// In id, this message translates to:
+  /// **'{n} pemasukan'**
+  String importIncomes(int n);
+
+  /// No description provided for @importAdded.
+  ///
+  /// In id, this message translates to:
+  /// **'ikut ditambahin'**
+  String get importAdded;
+
+  /// No description provided for @importAddedInfo.
+  ///
+  /// In id, this message translates to:
+  /// **'belum ada di mibu, tanpa limit'**
+  String get importAddedInfo;
+
+  /// No description provided for @importCount.
+  ///
+  /// In id, this message translates to:
+  /// **'{n} catatan'**
+  String importCount(int n);
+
+  /// No description provided for @importDupes.
+  ///
+  /// In id, this message translates to:
+  /// **'{n} udah ada, dilewatin'**
+  String importDupes(int n);
+
+  /// No description provided for @importBad.
+  ///
+  /// In id, this message translates to:
+  /// **'{n} baris nggak kebaca'**
+  String importBad(int n);
+
+  /// No description provided for @importButton.
+  ///
+  /// In id, this message translates to:
+  /// **'import {n} catatan'**
+  String importButton(int n);
+
+  /// No description provided for @importSameTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'semua udah ada'**
+  String get importSameTitle;
+
+  /// No description provided for @importSameSub.
+  ///
+  /// In id, this message translates to:
+  /// **'{n} catatan di file ini udah kecatat di mibu, nggak ada yang baru'**
+  String importSameSub(int n);
+
+  /// No description provided for @importOk.
+  ///
+  /// In id, this message translates to:
+  /// **'oke'**
+  String get importOk;
+
+  /// No description provided for @importWrongTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'file-nya bukan dari mibu'**
+  String get importWrongTitle;
+
+  /// No description provided for @importWrongSub.
+  ///
+  /// In id, this message translates to:
+  /// **'import cuma bisa dari file hasil export mibu. buka mibu di hp lama, pengaturan › export ke csv, terus pilih file itu di sini'**
+  String get importWrongSub;
+
+  /// No description provided for @importPickAgain.
+  ///
+  /// In id, this message translates to:
+  /// **'pilih file lain'**
+  String get importPickAgain;
+
+  /// No description provided for @importToast.
+  ///
+  /// In id, this message translates to:
+  /// **'{n} catatan masuk'**
+  String importToast(int n);
+
+  /// No description provided for @importToastSub.
+  ///
+  /// In id, this message translates to:
+  /// **'{names} ikut ditambahin'**
+  String importToastSub(String names);
+
   /// No description provided for @settingsLicenses.
   ///
   /// In id, this message translates to:

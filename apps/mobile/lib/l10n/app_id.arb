@@ -1246,6 +1246,88 @@
   "settingsData": "data",
   "settingsExport": "export ke csv",
   "settingsExportHint": "semua catatan, satu file",
+  "settingsImport": "import dari csv",
+  "settingsImportHint": "balikin catatan dari file export mibu",
+  "importNew": "catatan baru",
+  "importExpenses": "{n} pengeluaran",
+  "@importExpenses": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "importIncomes": "{n} pemasukan",
+  "@importIncomes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "importAdded": "ikut ditambahin",
+  "importAddedInfo": "belum ada di mibu, tanpa limit",
+  "importCount": "{n} catatan",
+  "@importCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "importDupes": "{n} udah ada, dilewatin",
+  "@importDupes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "importBad": "{n} baris nggak kebaca",
+  "@importBad": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "importButton": "import {n} catatan",
+  "@importButton": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "importSameTitle": "semua udah ada",
+  "importSameSub": "{n} catatan di file ini udah kecatat di mibu, nggak ada yang baru",
+  "@importSameSub": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "importOk": "oke",
+  "importWrongTitle": "file-nya bukan dari mibu",
+  "importWrongSub": "import cuma bisa dari file hasil export mibu. buka mibu di hp lama, pengaturan › export ke csv, terus pilih file itu di sini",
+  "importPickAgain": "pilih file lain",
+  "importToast": "{n} catatan masuk",
+  "@importToast": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "importToastSub": "{names} ikut ditambahin",
+  "@importToastSub": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
   "settingsLicenses": "lisensi",
   "settingsVersion": "versi {v}",
   "@settingsVersion": {

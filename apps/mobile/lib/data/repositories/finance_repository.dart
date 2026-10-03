@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../domain/csv.dart';
 import '../../domain/models/finance.dart';
 import '../../domain/period.dart';
 import '../database/app_database.dart';
@@ -673,6 +674,78 @@ class FinanceRepository {
           updatedAt: Value(DateTime.now()),
         ),
       );
+
+  /// 02.4l import dari csv: makes [plan]'s new buat apa (no limit, at the
+  /// end of the list), then adds its entries, in one go. Returns what it
+  /// wrote, for [undoImport].
+  Future<({List<String> txIds, List<String> categoryIds})> importCsv(
+    CsvImport plan,
+  ) => _db.transaction(() async {
+    final c = _db.categories;
+    final ids = {
+      for (final r in await (_db.select(
+        c,
+      )..where((r) => r.deletedAt.isNull())).get())
+        '${r.kind.name}|${r.name}': r.id,
+    };
+    final last = c.sortOrder.max();
+    var order =
+        (await (_db.selectOnly(
+          c,
+        )..addColumns([last])).getSingle()).read(last) ??
+        -1;
+    final made = <String>[];
+    for (final n in plan.newCategories) {
+      final id = _uuid.v4();
+      made.add(id);
+      ids['${n.kind.name}|${n.name}'] = id;
+      await _db
+          .into(c)
+          .insert(
+            CategoriesCompanion.insert(
+              id: Value(id),
+              emoji: n.emoji,
+              name: n.name,
+              kind: n.kind,
+              sortOrder: Value(++order),
+            ),
+          );
+    }
+    final txIds = [for (final _ in plan.entries) _uuid.v4()];
+    await _db.batch(
+      (b) => b.insertAll(_tx, [
+        for (final (i, e) in plan.entries.indexed)
+          TransactionsCompanion.insert(
+            id: Value(txIds[i]),
+            amount: e.amount,
+            categoryId: Value(
+              e.category.isEmpty
+                  ? null
+                  : ids['${csvKind(e).name}|${e.category}'],
+            ),
+            place: Value(e.place),
+            note: Value(e.note),
+            tags: Value(e.tags.join(',')),
+            at: e.at,
+          ),
+      ]),
+    );
+    return (txIds: txIds, categoryIds: made);
+  });
+
+  /// "batalin" on the import toast: soft-deletes what [importCsv] wrote.
+  Future<void> undoImport(List<String> txIds, List<String> categoryIds) =>
+      _db.transaction(() async {
+        final now = DateTime.now();
+        await (_db.update(_tx)..where((t) => t.id.isIn(txIds))).write(
+          TransactionsCompanion(deletedAt: Value(now), updatedAt: Value(now)),
+        );
+        await (_db.update(
+          _db.categories,
+        )..where((c) => c.id.isIn(categoryIds))).write(
+          CategoriesCompanion(deletedAt: Value(now), updatedAt: Value(now)),
+        );
+      });
 
   /// Budget bulanan (00.16) from [period] on; null = hapus budget.
   Future<void> setMonthlyBudget(int? budget, Period period) =>

@@ -1,6 +1,6 @@
 # mibu — impor data
 
-**Draft ide, belum fix.** Belum masuk [MVP_PLAN.md](MVP_PLAN.md). Kalau udah fix mau dieksekusi, baru di-mention di sana (ganti baris "Belum ada impor" di Risiko).
+**Udah dieksekusi 3 okt 2026** (02.4l–o, ImportSheet 00.30). Masuk [MVP_PLAN.md](MVP_PLAN.md#import-csv).
 
 ## Prinsip
 
@@ -71,16 +71,26 @@ Fungsi murni `parseTransactionsCsv` di `domain/csv.dart`.
 
 Simpen ID transaksi + kategori baru di memori. `batalin` = soft delete ID itu. Pola toast undo yang udah ada, nggak perlu kolom `importId`.
 
-## Kerjaan (kalau jadi)
+## Kode
 
-- Dep: `file_selector` (first-party) atau `file_picker`.
-- `domain/csv.dart`: parser + test round-trip `parse(transactionsCsv(x)) == x`.
-- Repo: `importTransactions(rows)` → `{inserted, skipped, newCategories, ids}`.
-- UI: tile 02.4 + sheet ringkasan + string di `app_id.arb`.
-- Docs: section "Impor CSV" di MVP_PLAN, update baris Risiko "Belum ada impor".
+- `domain/csv.dart`: `parseTransactionsCsv` (null = header beda) + `planImport` (dobel, buat apa baru).
+- Repo: `importCsv(plan)` → ID yang ditulis; `undoImport` = soft delete.
+- UI: `settings/views/import_sheet.dart` (`importCsv`, ImportSheet 00.30), baris di 02.4.
+- Dep: `file_picker` (`FilePicker.pickFile`, filter `.csv`).
 
-## Pertanyaan terbuka
+## Design brief: 99.7 import dari csv
 
-- Design board buat sheet ringkasan belum ada. Perlu dibikin di artifact "mibu" dulu?
-- Impor transaksi tanggal di masa depan: tolak atau terima?
-- Batas ukuran file / jumlah baris?
+Draft di artifact "mibu", baris 99 proposal: 99.7a alur, 99.7b–d state sheet, 99.7e `ImportSheet` (calon komponen 00.30). Copy ngikut app: "import dari csv" (pasangan "export ke csv"). Kalau acc: pindah ke baris 02.4 (02.4l–o), hapus [DRAFT]. Gaya sheet 02.4h (sembunyiin nominal). Pakai komponen yang ada: `SheetFrame`, `PrimaryButton`, `AppEmoji`, `MetaLine` 00.19, toast 00.18. Tile `impor dari csv` di section data, di bawah ekspor (ikon upload). Copy di bawah cuma draft.
+
+| state | isi | tombol |
+|---|---|---|
+| j1 normal | judul `impor dari csv`, angka besar `142 transaksi`, rentang `1 jan – 3 okt 2026`, list buat apa baru (emoji + nama), `MetaLine`: `5 udah ada` · `2 nggak kebaca` | `impor 142` |
+| j2 semua udah ada | `semua udah ada di mibu`, sub `nggak ada yang baru dari file ini` | `oke` |
+| j3 file salah | `file-nya bukan dari mibu`, sub `ekspor dulu dari mibu, terus impor file itu` | `oke` |
+
+Setelah impor: toast `142 transaksi masuk` + `batalin`.
+
+## Pertanyaan terbuka (usul default)
+
+- Tanggal masa depan: **terima** (back-fill udah didukung).
+- Batas ukuran file: **skip**, tambah kalau kerasa lambat.

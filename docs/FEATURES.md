@@ -68,7 +68,7 @@ Tanda: **[diupdate]** = aturan/perilaku berubah dari design, **[perlu design]** 
   - kebiasaan: `pengingat harian` (21.00, switch), `rekap mingguan` (switch). **[ditunda]**
   - privasi: `sembunyiin nominal` (tampil ••• sampai di-tap). `kunci pakai face id` **[ditunda]**.
   - tampilan: `mode` terang / gelap / auto. **[ditunda]** (light only)
-  - data: `ekspor ke csv` (board nulis "export"). `backup & pulihin` (iCloud) **[ditunda]**.
+  - data: `ekspor ke csv` (board nulis "export"), `import dari csv` (02.4l–o, [IMPORT_PLAN.md](IMPORT_PLAN.md)). `backup & pulihin` (iCloud) **[ditunda]**.
   - Footer versi.
 
 ## 03 · Catat & buat apa

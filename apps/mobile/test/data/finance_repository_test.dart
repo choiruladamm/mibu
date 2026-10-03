@@ -3,6 +3,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mibu/data/database/app_database.dart';
 import 'package:mibu/data/repositories/finance_repository.dart';
+import 'package:mibu/domain/csv.dart';
 import 'package:mibu/domain/models/finance.dart';
 import 'package:mibu/domain/period.dart';
 
@@ -614,6 +615,55 @@ void main() {
       await repo.completeSetup(payday: 10, pockets: {'makan'}, now: now);
       expect((await repo.watchProfile(cal(now)).first).payday, 10);
       expect(await repo.watchCategories(cal(now)).first, hasLength(6));
+    },
+  );
+
+  test(
+    'import csv: own export adds nothing; new rows + buat apa, undo',
+    () async {
+      final before = await repo.allTransactions();
+      final cats = await repo.watchCategories(cal(now)).first;
+      final again = planImport(
+        parseTransactionsCsv(transactionsCsv(before))!,
+        existing: before,
+        categories: cats,
+      );
+      expect(again.entries, isEmpty);
+      expect(again.dupes, before.length);
+
+      final plan = planImport(
+        parseTransactionsCsv(
+          '$csvHeader\r\n'
+          '2026-10-03,08:00,pengeluaran,30000,boba,🧋,kopken,,manis\r\n'
+          '2026-10-03,12:00,pengeluaran,25000,makan,🍜,,,\r\n'
+          '2026-10-03,13:00,pengeluaran,5000,,,,,\r\n',
+        )!,
+        existing: before,
+        categories: cats,
+      );
+      final wrote = await repo.importCsv(plan);
+      expect(wrote.categoryIds, hasLength(1));
+      final after = await repo.allTransactions();
+      expect(after, hasLength(before.length + 3));
+      final boba = after.firstWhere((t) => t.category == 'boba');
+      expect((boba.emoji, boba.place), ('🧋', 'kopken'));
+      expect(boba.tags, ['manis']);
+      expect(
+        after.firstWhere((t) => t.amount == -25000 && t.at.day == 3).categoryId,
+        cats.firstWhere((c) => c.name == 'makan').id,
+      );
+      expect(after.firstWhere((t) => t.amount == -5000).categoryId, isNull);
+      final made = (await repo.watchCategories(cal(now)).first).firstWhere(
+        (c) => c.name == 'boba',
+      );
+      expect(made.monthlyLimit, isNull);
+
+      await repo.undoImport(wrote.txIds, wrote.categoryIds);
+      expect(await repo.allTransactions(), hasLength(before.length));
+      expect(
+        (await repo.watchCategories(cal(now)).first).map((c) => c.name),
+        isNot(contains('boba')),
+      );
     },
   );
 }

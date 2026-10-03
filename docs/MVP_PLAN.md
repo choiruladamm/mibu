@@ -23,7 +23,7 @@ Status: disepakati 2026-10-01. Daftar fitur lengkap ada di [FEATURES.md](FEATURE
 | edit catatan 04.4, tanpa field berulang | |
 | statistik 02.3 | |
 | cari 04.2, versi simpel | |
-| pengaturan 02.4: kartu budget → 00.16, buat apa aja, limit bulanan, sembunyiin nominal, **ekspor csv**, versi | reminder harian, rekap mingguan, kunci face id, mode terang/gelap, backup & pulihin, chip `mulai tgl 1` |
+| pengaturan 02.4: kartu budget → 00.16, buat apa aja, limit bulanan, sembunyiin nominal, **ekspor csv**, **import csv** (02.4l–o), versi | reminder harian, rekap mingguan, kunci face id, mode terang/gelap, backup & pulihin, chip `mulai tgl 1` |
 
 Alur first-run: onboarding 01.1 → atur awal 01.4 → kantong pertama 01.4b → beranda 02.1. Layar login dilewati.
 
@@ -284,6 +284,10 @@ Input (keypad) dan ekspor CSV nggak di-mask.
 - Nama file: `mibu-yyyyMMdd.csv`, dibagikan lewat share sheet.
 - Dependency baru: `share_plus`.
 
+## Import CSV
+
+Balikin file ekspor mibu sendiri (02.4l–o, ImportSheet 00.30). Aturan dobel, buat apa baru, batalin: [IMPORT_PLAN.md](IMPORT_PLAN.md). Dependency baru: `file_picker`.
+
 ## Arsitektur
 
 - Tetap MVVM + Riverpod yang udah ada (`ui/features/*/views` + `view_models`).
@@ -307,7 +311,7 @@ Input (keypad) dan ekspor CSV nggak di-mask.
 ## Risiko
 
 - **Data hilang saat ganti HP atau uninstall.** Data cuma ada di device. File Drift ada di folder documents app, harusnya ikut iCloud device backup (iOS) dan Auto Backup (Android). Tapi ini **harus dites di device asli** sebelum rilis. Ekspor CSV jadi jaring pengaman.
-- **Belum ada impor.** CSV cuma bisa diekspor, belum bisa dipulihkan dari app. Kalau perlu, tambah di pasca-MVP bareng backup & pulihin.
+- **Import cuma catatan.** CSV balikin transaksi + buat apa; budget, limit & tanggal gajian diset ulang manual. Backup penuh nunggu backup & pulihin.
 
 ## Pasca-MVP
 
