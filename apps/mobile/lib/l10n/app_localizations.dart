@@ -124,12 +124,6 @@ abstract class AppLocalizations {
   /// **'pengaturan'**
   String get tabSettings;
 
-  /// No description provided for @balanceLabel.
-  ///
-  /// In id, this message translates to:
-  /// **'saldo kamu'**
-  String get balanceLabel;
-
   /// No description provided for @safeToSpendToday.
   ///
   /// In id, this message translates to:
@@ -289,7 +283,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeMonthlyBalance.
   ///
   /// In id, this message translates to:
-  /// **'saldo per bulan'**
+  /// **'sisa pemasukan per bulan'**
   String get homeMonthlyBalance;
 
   /// No description provided for @homeTapMonthHint.
@@ -370,18 +364,6 @@ abstract class AppLocalizations {
   /// **'ngerti'**
   String get infoOk;
 
-  /// No description provided for @infoSaldoTitle.
-  ///
-  /// In id, this message translates to:
-  /// **'saldo kamu'**
-  String get infoSaldoTitle;
-
-  /// No description provided for @infoSaldoBody.
-  ///
-  /// In id, this message translates to:
-  /// **'saldo awal + semua catatan sejak itu. sisa bulan lalu ikut kebawa.'**
-  String get infoSaldoBody;
-
   /// No description provided for @infoBudgetTitle.
   ///
   /// In id, this message translates to:
@@ -400,6 +382,12 @@ abstract class AppLocalizations {
   /// **'budget {budget} − semua pengeluaran {spent} = kelewat {over}.'**
   String infoBudgetBodyOver(String budget, String spent, String over);
 
+  /// No description provided for @infoBudgetNone.
+  ///
+  /// In id, this message translates to:
+  /// **'belum ada budget. pasang dulu biar aman jajan bisa dihitung.'**
+  String get infoBudgetNone;
+
   /// No description provided for @infoSafeTitle.
   ///
   /// In id, this message translates to:
@@ -409,14 +397,8 @@ abstract class AppLocalizations {
   /// No description provided for @infoSafeBody.
   ///
   /// In id, this message translates to:
-  /// **'jatah hari ini = yang lebih kecil dari saldo ÷ {days} hari ({saldo}) dan sisa budget ÷ {budgetDays} hari ({budget}), dikurangi yang udah kepake hari ini.'**
-  String infoSafeBody(int days, String saldo, int budgetDays, String budget);
-
-  /// No description provided for @infoSafeBodyNoBudget.
-  ///
-  /// In id, this message translates to:
-  /// **'jatah hari ini = saldo ÷ {days} hari ({saldo}), dikurangi yang udah kepake hari ini.'**
-  String infoSafeBodyNoBudget(int days, String saldo);
+  /// **'jatah hari ini = sisa budget ÷ {days} hari ({share}), dikurangi yang udah kepake hari ini.'**
+  String infoSafeBody(int days, String share);
 
   /// No description provided for @infoJarTitle.
   ///
@@ -471,6 +453,18 @@ abstract class AppLocalizations {
   /// **'kelewat budget'**
   String get heroBudgetOver;
 
+  /// No description provided for @heroSpent.
+  ///
+  /// In id, this message translates to:
+  /// **'kepake bulan ini'**
+  String get heroSpent;
+
+  /// No description provided for @heroSpentEnd.
+  ///
+  /// In id, this message translates to:
+  /// **'kepake {month}'**
+  String heroSpentEnd(String month);
+
   /// No description provided for @heroBudgetLeftEnd.
   ///
   /// In id, this message translates to:
@@ -507,6 +501,12 @@ abstract class AppLocalizations {
   /// **'pasang budget'**
   String get heroSetBudget;
 
+  /// No description provided for @heroSetBudgetChip.
+  ///
+  /// In id, this message translates to:
+  /// **'atur budget dulu'**
+  String get heroSetBudgetChip;
+
   /// No description provided for @heroCatatGajian.
   ///
   /// In id, this message translates to:
@@ -536,42 +536,6 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'rata²/hari'**
   String get heroAvgDay;
-
-  /// No description provided for @heroHint.
-  ///
-  /// In id, this message translates to:
-  /// **'tap buat liat sisa budget'**
-  String get heroHint;
-
-  /// No description provided for @heroHintOk.
-  ///
-  /// In id, this message translates to:
-  /// **'oke'**
-  String get heroHintOk;
-
-  /// No description provided for @heroFlipAria.
-  ///
-  /// In id, this message translates to:
-  /// **'{label}, ketuk buat ganti ke {other}'**
-  String heroFlipAria(String label, String other);
-
-  /// No description provided for @heroModeSaldo.
-  ///
-  /// In id, this message translates to:
-  /// **'saldo'**
-  String get heroModeSaldo;
-
-  /// No description provided for @heroModeBudget.
-  ///
-  /// In id, this message translates to:
-  /// **'sisa budget'**
-  String get heroModeBudget;
-
-  /// No description provided for @homeBalanceEnd.
-  ///
-  /// In id, this message translates to:
-  /// **'saldo akhir {month}'**
-  String homeBalanceEnd(String month);
 
   /// No description provided for @homePocketPill.
   ///
@@ -690,8 +654,14 @@ abstract class AppLocalizations {
   /// No description provided for @balanceAfter.
   ///
   /// In id, this message translates to:
-  /// **'saldo abis ini'**
+  /// **'sisa budget abis ini'**
   String get balanceAfter;
+
+  /// No description provided for @incomeAfter.
+  ///
+  /// In id, this message translates to:
+  /// **'pemasukan bulan ini jadi'**
+  String get incomeAfter;
 
   /// No description provided for @leftAmount.
   ///
@@ -1298,6 +1268,12 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'berapa yang boleh kepake sebulan?'**
   String get budgetSub;
+
+  /// No description provided for @budgetLastSpent.
+  ///
+  /// In id, this message translates to:
+  /// **'bulan lalu kepake {amount}'**
+  String budgetLastSpent(String amount);
 
   /// No description provided for @budgetLabelNow.
   ///
@@ -2112,7 +2088,7 @@ abstract class AppLocalizations {
   /// No description provided for @setupBack.
   ///
   /// In id, this message translates to:
-  /// **'balik ke saldo'**
+  /// **'balik ke budget'**
   String get setupBack;
 
   /// No description provided for @setupLater.
@@ -2124,13 +2100,19 @@ abstract class AppLocalizations {
   /// No description provided for @setupBalanceTitle.
   ///
   /// In id, this message translates to:
-  /// **'saldo kamu sekarang berapa?'**
+  /// **'budget kamu sebulan berapa?'**
   String get setupBalanceTitle;
+
+  /// No description provided for @setupBudgetBody.
+  ///
+  /// In id, this message translates to:
+  /// **'batas jajan sampai gajian berikutnya. boleh dikosongin, bisa diatur nanti.'**
+  String get setupBudgetBody;
 
   /// No description provided for @setupBalanceLabel.
   ///
   /// In id, this message translates to:
-  /// **'saldo awal'**
+  /// **'budget per bulan'**
   String get setupBalanceLabel;
 
   /// No description provided for @setupPaydayTitle.
@@ -2226,14 +2208,20 @@ abstract class AppLocalizations {
   /// No description provided for @setupFree.
   ///
   /// In id, this message translates to:
-  /// **'belum dijatah {free} dari saldo {balance}'**
+  /// **'belum dijatah {free} dari budget {balance}'**
   String setupFree(String free, String balance);
 
   /// No description provided for @setupOver.
   ///
   /// In id, this message translates to:
-  /// **'lebih {over} dari saldo — santai, gajian nambah'**
+  /// **'lebih {over} dari budget'**
   String setupOver(String over);
+
+  /// No description provided for @setupLimitTotal.
+  ///
+  /// In id, this message translates to:
+  /// **'total limit {total}'**
+  String setupLimitTotal(String total);
 
   /// No description provided for @setupTapHint.
   ///

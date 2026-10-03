@@ -26,18 +26,12 @@ mixin SyncColumns on Table {
 
 @DataClassName('ProfileRow')
 class Profiles extends Table with SyncColumns {
-  IntColumn get openingBalance => integer()();
-  DateTimeColumn get openingAt => dateTime()();
   IntColumn get payday =>
       integer()(); // 1–31, 31 = akhir; past month end = last day
   BoolColumn get hideAmounts => boolean().withDefault(const Constant(false))();
   DateTimeColumn get onboardedAt => dateTime().nullable()();
   TextColumn get recentSearches =>
       text().withDefault(const Constant(''))(); // newline-separated, ≤ 5
-  // Beranda hero: last pick (saldo / sisa budget) and the 1× hint.
-  TextColumn get heroMode =>
-      textEnum<BalanceMode>().withDefault(Constant(BalanceMode.saldo.name))();
-  BoolColumn get heroHintSeen => boolean().withDefault(const Constant(false))();
 }
 
 @DataClassName('CategoryRow')

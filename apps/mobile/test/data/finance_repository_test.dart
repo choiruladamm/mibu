@@ -95,12 +95,7 @@ void main() {
       );
       addTearDown(fresh.close);
       final r = FinanceRepository(fresh);
-      await r.completeSetup(
-        openingBalance: 1000000,
-        payday: 25,
-        pockets: {'makan'},
-        now: now,
-      );
+      await r.completeSetup(payday: 25, pockets: {'makan'}, now: now);
       final rules = await r.watchPeriodRules().first;
       expect(rules, hasLength(1));
       expect(
@@ -130,9 +125,6 @@ void main() {
           shift: PaydayShift.none,
         ),
       ]);
-      // Entries before the opening date aren't in the totals: open on 1 sep.
-      await (fresh.update(fresh.profiles))
-          .write(ProfilesCompanion(openingAt: Value(DateTime(2026, 9, 1))));
       final cat = (await r.watchCategories(cal(now)).first).first.id;
       for (final at in [DateTime(2026, 9, 26), DateTime(2026, 10, 5)]) {
         await r.addTransaction(
@@ -144,9 +136,7 @@ void main() {
           at: at,
         );
       }
-      final totals = await r
-          .watchTotals(await r.watchProfile(cal(now)).first, now, periods: p25)
-          .first;
+      final totals = await r.watchTotals(now, periods: p25).first;
       expect(totals.spent[DateTime(2026, 10)], 200000); // both in "oktober"
       expect(totals.spent[DateTime(2026, 9)], isNull);
     },
@@ -167,8 +157,9 @@ void main() {
       );
       addTearDown(fresh.close);
       final r = FinanceRepository(fresh);
+      // Budget typed at 01.4 lands in the period setup runs in.
       await r.completeSetup(
-        openingBalance: 1000000,
+        budget: 4500000,
         payday: 25,
         pockets: {'makan'},
         now: today,
@@ -196,14 +187,22 @@ void main() {
       // Both count against the kantong and the budget...
       final pocket = (await r.watchPockets(oct).first).single;
       expect(pocket.spent, 50000);
-      // ...and so does sisa budget, while saldo only follows what's logged
-      // from the install on: the opening balance already has yesterday in it.
-      final profile = await r.watchProfile(oct).first;
-      final totals = await r
-          .watchTotals(profile, today, periods: periods)
-          .first;
+      // ...and so does sisa budget.
+      expect(await r.watchBudget(oct).first, 4500000);
+      // Salary back-filled to 25 sep is still this period's income: no
+      // opening date cuts it off (docs/PERIOD_LEDGER_PLAN.md).
+      await r.addTransaction(
+        amount: 9000000,
+        categoryId: null,
+        place: '',
+        note: '',
+        tags: const [],
+        at: DateTime(2026, 9, 25, 9),
+      );
+      final totals = await r.watchTotals(today, periods: periods).first;
       expect(totals.spent[DateTime(2026, 10)], 50000);
-      expect(totals.balance, 1000000 - 25000); // only today's lunch
+      expect(totals.income[DateTime(2026, 10)], 9000000);
+      expect(totals.nets[DateTime(2026, 10)], 9000000 - 50000);
       expect(totals.spentToday, 25000);
     },
   );
@@ -227,14 +226,13 @@ void main() {
   });
 
   test(
-    'seed: balance, nets and pockets are derived from transactions',
+    'seed: nets and pockets are derived from transactions',
     () async {
       final profile = await repo.watchProfile(cal(now)).first;
       expect(profile.payday, 25);
       expect(profile.monthlyBudget, 8000000);
 
-      final totals = await repo.watchTotals(profile, now).first;
-      expect(totals.balance, 4530000);
+      final totals = await repo.watchTotals(now).first;
       expect(totals.nets, {
         DateTime(2026, 7): 546000,
         DateTime(2026, 8): -844500,
@@ -259,7 +257,6 @@ void main() {
   );
 
   test('soft-deleted and uncategorized transactions', () async {
-    final profile = await repo.watchProfile(cal(now)).first;
     final petshop = await (db.select(
       db.transactions,
     )..where((t) => t.place.equals('petshop'))).getSingle();
@@ -269,8 +266,8 @@ void main() {
         .into(db.transactions)
         .insert(TransactionsCompanion.insert(amount: -10000, at: now));
 
-    final totals = await repo.watchTotals(profile, now).first;
-    expect(totals.balance, 4530000 + 450000 - 10000);
+    final totals = await repo.watchTotals(now).first;
+    expect(totals.nets[DateTime(2026, 10)], -4059000 + 450000 - 10000);
     expect(totals.spentToday, 37000);
 
     final pockets = await repo.watchPockets(cal(now)).first;
@@ -430,10 +427,9 @@ void main() {
   });
 
   test('uncategorized: in totals, in no pocket, counts once edited', () async {
-    final profile = await repo.watchProfile(cal(now)).first;
     final pocketsBefore = await repo.watchPockets(cal(now)).first;
     final spentBefore =
-        (await repo.watchTotals(profile, now).first).spent[DateTime(2026, 10)]!;
+        (await repo.watchTotals(now).first).spent[DateTime(2026, 10)]!;
     await repo.addTransaction(
       amount: -20000,
       categoryId: null,
@@ -443,7 +439,7 @@ void main() {
       at: now,
     );
     expect(
-      (await repo.watchTotals(profile, now).first).spent[DateTime(2026, 10)],
+      (await repo.watchTotals(now).first).spent[DateTime(2026, 10)],
       spentBefore + 20000,
     );
     expect(
@@ -574,15 +570,14 @@ void main() {
       expect((await r.watchProfile(cal(now)).first).onboarded, isFalse);
 
       await r.completeSetup(
-        openingBalance: 2500000,
         payday: 0,
         pockets: {'makan', 'ngopi'},
         now: now,
       );
       final p = await r.watchProfile(cal(now)).first;
       expect(
-        (p.onboarded, p.openingBalance, p.payday, p.monthlyBudget),
-        (true, 2500000, 0, null),
+        (p.onboarded, p.payday, p.monthlyBudget),
+        (true, 0, null),
       );
       final cats = await r.watchCategories(cal(now)).first;
       expect(cats.map((c) => c.name), [
@@ -604,13 +599,8 @@ void main() {
       );
 
       // Already has categories (seeded): only the profile changes.
-      await repo.completeSetup(
-        openingBalance: 1,
-        payday: 10,
-        pockets: {'makan'},
-        now: now,
-      );
-      expect((await repo.watchProfile(cal(now)).first).openingBalance, 1);
+      await repo.completeSetup(payday: 10, pockets: {'makan'}, now: now);
+      expect((await repo.watchProfile(cal(now)).first).payday, 10);
       expect(await repo.watchCategories(cal(now)).first, hasLength(6));
     },
   );

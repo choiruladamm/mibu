@@ -5,7 +5,6 @@
   "tabPockets": "kantong",
   "tabStats": "statistik",
   "tabSettings": "pengaturan",
-  "balanceLabel": "saldo kamu",
   "safeToSpendToday": "aman jajan hari ini",
   "overspentToday": "kebablasan hari ini",
   "uncategorized": "lain-lain",
@@ -53,7 +52,7 @@
       }
     }
   },
-  "homeMonthlyBalance": "saldo per bulan",
+  "homeMonthlyBalance": "sisa pemasukan per bulan",
   "homeTapMonthHint": "tap bulan buat intip",
   "homeRecent": "baru aja",
   "homePockets": "kantong",
@@ -105,18 +104,15 @@
   },
   "infoWhere": "dari mana angkanya?",
   "infoOk": "ngerti",
-  "infoSaldoTitle": "saldo kamu",
-  "infoSaldoBody": "saldo awal + semua catatan sejak itu. sisa bulan lalu ikut kebawa.",
   "infoBudgetTitle": "sisa budget",
   "infoBudgetBody": "budget {budget} − semua pengeluaran {spent} = {left}.",
   "@infoBudgetBody": {"placeholders": {"budget": {"type": "String"}, "spent": {"type": "String"}, "left": {"type": "String"}}},
   "infoBudgetBodyOver": "budget {budget} − semua pengeluaran {spent} = kelewat {over}.",
   "@infoBudgetBodyOver": {"placeholders": {"budget": {"type": "String"}, "spent": {"type": "String"}, "over": {"type": "String"}}},
+  "infoBudgetNone": "belum ada budget. pasang dulu biar aman jajan bisa dihitung.",
   "infoSafeTitle": "aman jajan hari ini",
-  "infoSafeBody": "jatah hari ini = yang lebih kecil dari saldo ÷ {days} hari ({saldo}) dan sisa budget ÷ {budgetDays} hari ({budget}), dikurangi yang udah kepake hari ini.",
-  "@infoSafeBody": {"placeholders": {"days": {"type": "int"}, "saldo": {"type": "String"}, "budgetDays": {"type": "int"}, "budget": {"type": "String"}}},
-  "infoSafeBodyNoBudget": "jatah hari ini = saldo ÷ {days} hari ({saldo}), dikurangi yang udah kepake hari ini.",
-  "@infoSafeBodyNoBudget": {"placeholders": {"days": {"type": "int"}, "saldo": {"type": "String"}}},
+  "infoSafeBody": "jatah hari ini = sisa budget ÷ {days} hari ({share}), dikurangi yang udah kepake hari ini.",
+  "@infoSafeBody": {"placeholders": {"days": {"type": "int"}, "share": {"type": "String"}}},
   "infoJarTitle": "sisa jajan",
   "infoJarBody": "total limit kantong {limit} − kepake di kantong {spent} = {left}.",
   "@infoJarBody": {"placeholders": {"limit": {"type": "String"}, "spent": {"type": "String"}, "left": {"type": "String"}}},
@@ -129,6 +125,9 @@
   "@pocketsBudgetShort": {"placeholders": {"amount": {"type": "String"}}},
   "heroBudgetLeft": "sisa budget",
   "heroBudgetOver": "kelewat budget",
+  "heroSpent": "kepake bulan ini",
+  "heroSpentEnd": "kepake {month}",
+  "@heroSpentEnd": {"placeholders": {"month": {"type": "String"}}},
   "heroBudgetLeftEnd": "sisa budget akhir {month}",
   "@heroBudgetLeftEnd": {"placeholders": {"month": {"type": "String"}}},
   "heroBudgetOverEnd": "kelewat budget akhir {month}",
@@ -140,26 +139,13 @@
   "heroBudgetOverSub": "budget bulan ini kelewat {amount}",
   "@heroBudgetOverSub": {"placeholders": {"amount": {"type": "String"}}},
   "heroSetBudget": "pasang budget",
+  "heroSetBudgetChip": "atur budget dulu",
   "heroCatatGajian": "udah gajian? catat",
   "heroCatatGajianLate": "gajian belum masuk? catat",
   "heroRemDulu": "rem dulu ya",
   "heroDaysLeft": "{n} hari lagi",
   "@heroDaysLeft": {"placeholders": {"n": {"type": "int"}}},
   "heroAvgDay": "rata²/hari",
-  "heroHint": "tap buat liat sisa budget",
-  "heroHintOk": "oke",
-  "heroFlipAria": "{label}, ketuk buat ganti ke {other}",
-  "@heroFlipAria": {"placeholders": {"label": {"type": "String"}, "other": {"type": "String"}}},
-  "heroModeSaldo": "saldo",
-  "heroModeBudget": "sisa budget",
-  "homeBalanceEnd": "saldo akhir {month}",
-  "@homeBalanceEnd": {
-    "placeholders": {
-      "month": {
-        "type": "String"
-      }
-    }
-  },
   "homePocketPill": "buka kantong {name}, {pct}% kepake",
   "@homePocketPill": {
     "placeholders": {
@@ -223,7 +209,8 @@
       }
     }
   },
-  "balanceAfter": "saldo abis ini",
+  "balanceAfter": "sisa budget abis ini",
+  "incomeAfter": "pemasukan bulan ini jadi",
   "leftAmount": "sisa {amount}",
   "@leftAmount": {
     "placeholders": {
@@ -536,6 +523,8 @@
   "undo": "batalin",
   "budgetTitle": "budget bulanan",
   "budgetSub": "berapa yang boleh kepake sebulan?",
+  "budgetLastSpent": "bulan lalu kepake {amount}",
+  "@budgetLastSpent": {"placeholders": {"amount": {"type": "String"}}},
   "budgetLabelNow": "budget sekarang",
   "budgetLabelSuggest": "saran dari total limit",
   "budgetAutoFilled": "diisi otomatis",
@@ -1056,10 +1045,11 @@
       }
     }
   },
-  "setupBack": "balik ke saldo",
+  "setupBack": "balik ke budget",
   "setupLater": "nanti aja",
-  "setupBalanceTitle": "saldo kamu sekarang berapa?",
-  "setupBalanceLabel": "saldo awal",
+  "setupBalanceTitle": "budget kamu sebulan berapa?",
+  "setupBudgetBody": "batas jajan sampai gajian berikutnya. boleh dikosongin, bisa diatur nanti.",
+  "setupBalanceLabel": "budget per bulan",
   "setupPaydayTitle": "gajian tiap tanggal berapa?",
   "setupPaydayBody": "biar jatah harian dihitung sampai gajian berikutnya",
   "paydayCommon": "umum",
@@ -1096,7 +1086,7 @@
   },
   "setupNoPockets": "belum ada limit",
   "setupSummary": "ringkasan limit",
-  "setupFree": "belum dijatah {free} dari saldo {balance}",
+  "setupFree": "belum dijatah {free} dari budget {balance}",
   "@setupFree": {
     "placeholders": {
       "free": {
@@ -1107,7 +1097,9 @@
       }
     }
   },
-  "setupOver": "lebih {over} dari saldo — santai, gajian nambah",
+  "setupOver": "lebih {over} dari budget",
+  "setupLimitTotal": "total limit {total}",
+  "@setupLimitTotal": {"placeholders": {"total": {"type": "String"}}},
   "@setupOver": {
     "placeholders": {
       "over": {

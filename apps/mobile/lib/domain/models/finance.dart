@@ -28,46 +28,33 @@ class RecentPick {
   final String place;
 }
 
+/// One point of the beranda chart: what's left of a period's income.
 class MonthBalance {
   const MonthBalance({required this.month, required this.amount});
 
-  final DateTime month; // first day of month
-  final int amount; // balance at month end (or now, for the current month)
+  final DateTime month; // the period's month label (first of month)
+  final int amount; // sisa pemasukan: income − spending in that period
 }
 
-/// What the beranda hero shows: saldo kamu (cumulative) or sisa budget.
-/// (Not `HeroMode`: Flutter has a widget by that name.)
-enum BalanceMode { saldo, budget }
-
+/// No saldo here: mibu is a ledger per payday period, so nothing carries
+/// over and there's no opening balance (docs/PERIOD_LEDGER_PLAN.md).
 class Profile {
   const Profile({
-    required this.openingBalance,
-    required this.openingAt,
     required this.payday,
     this.monthlyBudget,
     this.hideAmounts = false,
     this.onboarded = false,
     this.recentSearches = const [],
-    this.heroMode = BalanceMode.saldo,
-    this.heroHintSeen = false,
   });
 
   /// Before 01.4 atur awal has run.
-  static final empty = Profile(
-    openingBalance: 0,
-    openingAt: DateTime(2000),
-    payday: 0,
-  );
+  static const empty = Profile(payday: 0);
 
-  final int openingBalance;
-  final DateTime openingAt; // transactions before this aren't in the balance
   final int payday; // 1–31, 31 = akhir (legacy 0 too)
   final int? monthlyBudget; // budget bulanan, set by the user; null = not set
   final bool hideAmounts;
   final bool onboarded; // 01.4 atur awal done (or skipped with "nanti aja")
   final List<String> recentSearches; // 04.2b terakhir dicari, newest first
-  final BalanceMode heroMode; // last pick, kept for every month
-  final bool heroHintSeen; // "tap buat liat sisa budget" shown once
 }
 
 /// 01.4b kantong pertama: presets with the board's monthly limits.
@@ -203,7 +190,7 @@ typedef PaydayInfo = ({
 /// On the scheduled day or after it with no salary logged yet: today / late;
 /// late needs a salary logged before (people who never log it don't get
 /// nagged) and ends after [paydayLateMaxDays]. Same cycles as the period
-/// resolver, so budget and saldo count to the same day.
+/// resolver.
 PaydayInfo paydayInfo({
   required DateTime now,
   required int payday,
@@ -259,91 +246,45 @@ PaydayInfo paydayInfo({
   return upcoming;
 }
 
-/// Where "aman jajan hari ini" comes from: today's share by saldo, by budget
-/// (null without one), and the one used. [share] is before today's spending.
-typedef SafeShare = ({
-  int saldoShare,
-  int? budgetShare,
-  int share,
-  bool budgetBinds, // the budget share is the smaller one
-});
-
-/// The shares behind [safeToSpendToday], also shown by the "dari mana
-/// angkanya?" dialog so the explanation can't drift from the figure.
-SafeShare safeShare({
-  required int balance,
+/// Today's share of what's left of the budget, before today's spending:
+/// (sisa budget + spent today) ÷ days left in the period, today included.
+/// Null without a budget: aman jajan only ever comes from the budget the
+/// user set, never from income. Also shown by "dari mana angkanya?" so the
+/// explanation can't drift from the figure.
+int? safeShare({
+  required int? budgetLeft,
   required int spentToday,
   required int days,
-  int? budgetLeft,
-  int budgetDays = 1,
-}) {
-  if (balance <= 0 || days <= 0) {
-    return (saldoShare: 0, budgetShare: null, share: 0, budgetBinds: false);
-  }
-  final saldo = (balance + spentToday) ~/ days;
-  final budget = budgetLeft == null
-      ? null
-      : (budgetLeft + spentToday) ~/ (budgetDays < 1 ? 1 : budgetDays);
-  final binds = budget != null && budget < saldo;
-  return (
-    saldoShare: saldo,
-    budgetShare: budget,
-    share: binds ? budget : saldo,
-    budgetBinds: binds,
-  );
-}
+}) => budgetLeft == null
+    ? null
+    : (budgetLeft + spentToday) ~/ (days < 1 ? 1 : days);
 
 /// "aman jajan hari ini": today's [safeShare] minus what's already spent
-/// today. With a budget ([budgetLeft] = budget − spent this period,
-/// [budgetDays] = days left in the period) it's the smaller of the saldo and
-/// budget shares, so the chip never invites going past the budget the user
-/// set. Negative = overspent today. See MVP_PLAN.md.
-int safeToSpendToday({
-  required int balance,
+/// today ([budgetLeft] = budget − spent this period, [days] = days left in
+/// the period). Negative = overspent today; null without a budget. See
+/// MVP_PLAN.md.
+int? safeToSpendToday({
+  required int? budgetLeft,
   required int spentToday,
   required int days,
-  int? budgetLeft,
-  int budgetDays = 1,
-}) {
-  if (balance <= 0 || days <= 0) return 0;
-  return safeShare(
-        balance: balance,
-        spentToday: spentToday,
-        days: days,
-        budgetLeft: budgetLeft,
-        budgetDays: budgetDays,
-      ).share -
-      spentToday;
-}
+}) => switch (safeShare(
+  budgetLeft: budgetLeft,
+  spentToday: spentToday,
+  days: days,
+)) {
+  final share? => share - spentToday,
+  null => null,
+};
 
 int _monthIndex(DateTime m) => m.year * 12 + m.month;
 
-/// Balance at the end of [month] (first-of-month key, not after [now]'s).
-/// Walks back from [balance] (= now) by [nets] (month → net change).
-int monthEndBalance({
-  required DateTime now,
-  required int balance,
-  required Map<DateTime, int> nets,
-  required DateTime month,
-}) {
-  var b = balance;
-  for (
-    var m = DateTime(now.year, now.month);
-    _monthIndex(m) > _monthIndex(month);
-    m = DateTime(m.year, m.month - 1)
-  ) {
-    b -= nets[m] ?? 0;
-  }
-  return b;
-}
-
-/// "saldo per bulan": 6 months from [start] (default window = 3 past, now,
-/// 2 predicted). Up to [now]'s month: balance at month end. After it:
-/// prediction = balance + k × average net of the 3 months before now.
+/// The beranda chart: 6 periods from [start] (default window = 3 past, now,
+/// 2 peeks), each one's sisa pemasukan ([nets], month label → income −
+/// spending). Nothing carries over between periods. After [now]'s month:
+/// a peek at the average of the 3 periods before now.
 List<MonthBalance> balanceSeries({
   required DateTime now,
   required DateTime start,
-  required int balance,
   required Map<DateTime, int> nets,
 }) {
   final cur = DateTime(now.year, now.month);
@@ -354,17 +295,11 @@ List<MonthBalance> balanceSeries({
     for (var i = 0; i < 6; i++)
       () {
         final month = DateTime(start.year, start.month + i);
-        final ahead = _monthIndex(month) - _monthIndex(cur);
         return MonthBalance(
           month: month,
-          amount: ahead > 0
-              ? balance + avg * ahead
-              : monthEndBalance(
-                  now: now,
-                  balance: balance,
-                  nets: nets,
-                  month: month,
-                ),
+          amount: _monthIndex(month) > _monthIndex(cur)
+              ? avg
+              : nets[month] ?? 0,
         );
       }(),
   ];

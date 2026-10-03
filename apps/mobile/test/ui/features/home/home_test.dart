@@ -3,10 +3,8 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mibu/domain/models/finance.dart';
 import 'package:mibu/domain/period.dart';
 import 'package:mibu/data/repositories/finance_repository.dart';
-import 'package:hugeicons/hugeicons.dart';
 import 'package:mibu/data/database/app_database.dart';
 import 'package:mibu/data/database/seed.dart';
 import 'package:mibu/l10n/app_localizations.dart';
@@ -77,13 +75,12 @@ void main() {
   ) async {
     await pump(tester, memoryDb());
 
-    expect(find.text('4.530.000'), findsOneWidget);
-    expect(find.text('saldo kamu'), findsOneWidget);
+    expect(find.text('3.941.000'), findsOneWidget); // 8jt − 4.059.000
+    expect(find.text('sisa budget'), findsOneWidget);
     expect(find.text('oktober'), findsOneWidget);
     expect(find.text('gajian lagi 9 hari'), findsOneWidget); // 25 okt = minggu
-    // Budget side of aman jajan wins, it's the smaller one:
+    // Aman jajan from the budget only:
     // (8jt − 4.059.000 kepake + 27.000 hari ini) ÷ 18 hari − 27.000.
-    // The saldo side would say Rp479K (÷ 9 days to gajian Fri 23).
     expect(find.textContaining('Rp193K', findRichText: true), findsOneWidget);
 
     expect(find.text('kantong'), findsOneWidget);
@@ -113,9 +110,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(findMeta(['prediksi', 'nov']), findsOneWidget);
-    expect(find.text('± Rp6,39jt'), findsOneWidget);
+    // Average sisa pemasukan of jul–sep: (546K − 844,5K + 5,8875jt) ÷ 3.
+    expect(find.text('± Rp1,86jt'), findsOneWidget);
     expect(find.text('november'), findsOneWidget);
-    expect(find.text('saldo kamu'), findsOneWidget);
+    expect(find.text('sisa budget'), findsOneWidget);
     expect(find.text('baru aja'), findsOneWidget);
   });
 
@@ -127,19 +125,12 @@ void main() {
     await tester.tap(find.text('sep'));
     await settle(tester);
 
-    expect(find.text('saldo akhir september'), findsOneWidget);
-    expect(find.text('8.589.000'), findsOneWidget);
-    expect(find.text('per 30 sep'), findsOneWidget);
-    // Rp2.612.500 spent ÷ 30 days
-    expect(findMeta(['rata²/hari', 'Rp87K']), findsOneWidget);
-    // The pill follows into past months: budget Rp8jt − Rp2.612.500 spent.
-    await tester.tap(find.text('saldo akhir september'));
-    await settle(tester);
+    // Budget Rp8jt − Rp2.612.500 spent.
     expect(find.text('sisa budget akhir september'), findsOneWidget);
     expect(find.text('5.387.500'), findsOneWidget);
     expect(find.text('dari budget Rp8jt'), findsOneWidget);
-    await tester.tap(find.text('sisa budget akhir september'));
-    await settle(tester);
+    // Rp2.612.500 spent ÷ 30 days
+    expect(findMeta(['rata²/hari', 'Rp87K']), findsOneWidget);
     expect(find.text('terakhir di september'), findsOneWidget);
     expect(find.text('liat semua di september (2)'), findsOneWidget);
     expect(findEmojiText('🐶 0%'), findsOneWidget); // no anabul that month
@@ -168,8 +159,7 @@ void main() {
 
     expect(find.text('pilih bulan'), findsNothing);
     expect(find.text('agustus'), findsOneWidget);
-    expect(find.text('saldo akhir agustus'), findsOneWidget);
-    expect(find.text('2.701.500'), findsOneWidget);
+    expect(find.textContaining('budget akhir agustus'), findsOneWidget);
     expect(find.text('terakhir di agustus'), findsOneWidget);
 
     // "bulan ini" brings everything back.
@@ -177,7 +167,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('bulan ini'));
     await settle(tester);
-    expect(find.text('saldo kamu'), findsOneWidget);
+    expect(find.text('sisa budget'), findsOneWidget);
     expect(find.text('baru aja'), findsOneWidget);
   });
 
@@ -185,7 +175,7 @@ void main() {
     tester,
   ) async {
     await pump(tester, memoryDb());
-    expect(find.text('saldo kamu'), findsOneWidget);
+    expect(find.text('sisa budget'), findsOneWidget);
 
     await tester.drag(
       find.byType(SingleChildScrollView),
@@ -193,27 +183,13 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('saldo kamu'), findsNWidgets(2)); // hero + compact
+    expect(find.text('sisa budget'), findsNWidgets(2)); // hero + compact
     expect(find.text('oktober'), findsNWidgets(2)); // picker stays reachable
-
-    // The compact header flips the mode too, and follows it.
     final sticky = find.byKey(const ValueKey('sticky'));
-    await tester.tap(
-      find.descendant(of: sticky, matching: find.text('saldo kamu')),
-    );
-    await settle(tester);
-    expect(
-      find.descendant(of: sticky, matching: find.text('sisa budget')),
-      findsOneWidget,
-    );
     expect(
       find.descendant(of: sticky, matching: find.text('Rp3,94jt')),
       findsOneWidget,
     );
-
-    await tester.drag(find.byType(SingleChildScrollView), const Offset(0, 300));
-    await tester.pumpAndSettle();
-    expect(find.text('sisa budget'), findsOneWidget); // hero kept the pick
   });
 
   testWidgets('beranda: nothing logged yet shows the big catat card', (
@@ -258,7 +234,8 @@ void main() {
     );
     await settle(tester);
 
-    expect(find.text('saldo akhir juni'), findsOneWidget);
+    // No budget before jul in the fixture: what was spent (nothing).
+    expect(find.text('kepake juni'), findsOneWidget);
     expect(find.text('terakhir di juni'), findsOneWidget);
     expect(find.text('belum ada catatan di juni'), findsOneWidget);
     expect(find.textContaining('liat semua '), findsNothing);
@@ -290,50 +267,19 @@ void main() {
     expect(container.read(homeProvider), isA<AsyncError<HomeState>>());
   });
 
-  Future<Profile> profileOf(WidgetTester tester, AppDatabase db) async =>
-      (await tester.runAsync(
-        () => FinanceRepository(db).watchProfile(cal(now)).first,
-      ))!;
-
-  testWidgets('hero: pill flips saldo ⇄ sisa budget, remembered, hint once', (
-    tester,
-  ) async {
+  testWidgets('hero: sisa budget, no saldo, no toggle', (tester) async {
     final db = memoryDb();
     await pump(tester, db);
 
-    // Default saldo; first time the hint points at the pill.
-    expect(find.text('saldo kamu'), findsOneWidget);
-    expect(find.text('4.530.000'), findsOneWidget);
-    expect(find.text('tap buat liat sisa budget'), findsOneWidget);
-
-    await tester.tap(find.text('saldo kamu'));
-    await settle(tester);
     expect(find.text('sisa budget'), findsOneWidget);
     expect(find.text('3.941.000'), findsOneWidget); // 8jt − 4.059.000
-    expect(find.text('dari budget Rp8jt'), findsOneWidget);
-    expect(find.text('tap buat liat sisa budget'), findsNothing); // used
-    // The chip doesn't follow the mode.
-    expect(find.textContaining('Rp193K', findRichText: true), findsOneWidget);
-    var p = await profileOf(tester, db);
-    expect((p.heroMode, p.heroHintSeen), (BalanceMode.budget, true));
-
-    await tester.tap(find.text('sisa budget'));
-    await settle(tester);
-    expect(find.text('saldo kamu'), findsOneWidget);
-    expect((await profileOf(tester, db)).heroMode, BalanceMode.saldo);
-  });
-
-  testWidgets('hero: oke retires the hint without flipping', (tester) async {
-    final db = memoryDb();
-    await pump(tester, db);
-    await tester.tap(find.text('oke'));
-    await settle(tester);
+    expect(find.text('saldo kamu'), findsNothing);
     expect(find.text('tap buat liat sisa budget'), findsNothing);
-    final p = await profileOf(tester, db);
-    expect((p.heroMode, p.heroHintSeen), (BalanceMode.saldo, true));
+    // aman jajan from the budget only: 3.941.000 ÷ 18 days, less today.
+    expect(find.textContaining('Rp193K', findRichText: true), findsOneWidget);
   });
 
-  testWidgets('hero: no budget → plain label, pasang budget link, no hint', (
+  testWidgets('hero: no budget → kepake, pasang budget, no aman jajan', (
     tester,
   ) async {
     final db = memoryDb();
@@ -341,12 +287,15 @@ void main() {
     await tester.runAsync(() => setBudgetOf(db, null));
     await settle(tester);
 
-    expect(find.text('saldo kamu'), findsOneWidget);
+    expect(find.text('kepake bulan ini'), findsOneWidget);
+    expect(find.text('4.059.000'), findsOneWidget);
     expect(find.text('pasang budget'), findsOneWidget);
-    expect(find.text('tap buat liat sisa budget'), findsNothing);
-    expect(find.byType(HugeIcon).evaluate().length, greaterThan(0));
-    // aman jajan falls back to the saldo side: ÷ 9 days → Rp479K.
-    expect(find.textContaining('Rp479K', findRichText: true), findsOneWidget);
+    // Never guessed from income: the chip asks for a budget instead.
+    expect(find.textContaining('aman jajan', findRichText: true), findsNothing);
+    expect(
+      find.textContaining('atur budget dulu', findRichText: true),
+      findsOneWidget,
+    );
   });
 
   testWidgets('hero: budget gone → kelewat, rem dulu chip', (tester) async {
@@ -358,14 +307,11 @@ void main() {
     expect(find.text('budget bulan ini kelewat Rp3,06jt'), findsOneWidget);
     expect(findMeta(['rem dulu ya', '18 hari lagi']), findsOneWidget);
     expect(find.textContaining('aman jajan', findRichText: true), findsNothing);
-
-    await tester.tap(find.text('saldo kamu'));
-    await settle(tester);
     expect(find.text('kelewat budget'), findsOneWidget);
     expect(find.text('3.059.000'), findsOneWidget);
   });
 
-  testWidgets('hero: "?" explains saldo, sisa budget and aman jajan', (
+  testWidgets('hero: "?" explains sisa budget and aman jajan, no saldo', (
     tester,
   ) async {
     await pump(tester, memoryDb());
@@ -373,16 +319,14 @@ void main() {
     await settle(tester);
 
     expect(find.text('dari mana angkanya?'), findsOneWidget);
-    expect(find.textContaining('saldo awal + semua catatan'), findsOneWidget);
+    expect(find.textContaining('saldo'), findsNothing);
     expect(
       find.text('budget Rp8jt − semua pengeluaran Rp4,06jt = Rp3,94jt.'),
       findsOneWidget,
     );
-    // The same shares the chip is made of: saldo ÷ 9, budget ÷ 18 (smaller).
+    // The same share the chip is made of.
     expect(
-      find.textContaining(
-        'saldo ÷ 9 hari (Rp506K) dan sisa budget ÷ 18 hari (Rp220K)',
-      ),
+      find.textContaining('sisa budget ÷ 18 hari (Rp220K)'),
       findsOneWidget,
     );
     await tester.tap(find.text('ngerti'));
@@ -494,8 +438,6 @@ void main() {
         ))!.fold<int>(0, (a, t) => a - t.amount);
         expect(spent, greaterThan(4159000 - 1)); // october's + the 27 sep one
 
-        await tester.tap(find.text('saldo kamu'));
-        await settle(tester);
         final left = 8000000 - spent;
         expect(find.text(rupiah(left).replaceFirst('Rp', '')), findsOneWidget);
         expect(find.text('oktober'), findsWidgets); // still "oktober"

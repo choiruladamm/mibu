@@ -76,17 +76,11 @@ final salaryDatesProvider = StreamProvider<List<DateTime>>(
   (ref) => ref.watch(financeRepositoryProvider).watchSalaryDates(),
 );
 
-final totalsProvider = StreamProvider<Totals>((ref) {
-  final profile = ref.watch(profileProvider).value;
-  if (profile == null) return const Stream.empty();
-  return ref
+final totalsProvider = StreamProvider<Totals>(
+  (ref) => ref
       .watch(financeRepositoryProvider)
-      .watchTotals(
-        profile,
-        ref.watch(nowProvider),
-        periods: ref.watch(periodsProvider),
-      );
-});
+      .watchTotals(ref.watch(nowProvider), periods: ref.watch(periodsProvider)),
+);
 final pocketsProvider = StreamProvider<List<Pocket>>(
   (ref) => ref
       .watch(financeRepositoryProvider)

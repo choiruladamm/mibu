@@ -54,28 +54,6 @@ class $ProfilesTable extends Profiles
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _openingBalanceMeta = const VerificationMeta(
-    'openingBalance',
-  );
-  @override
-  late final GeneratedColumn<int> openingBalance = GeneratedColumn<int>(
-    'opening_balance',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _openingAtMeta = const VerificationMeta(
-    'openingAt',
-  );
-  @override
-  late final GeneratedColumn<DateTime> openingAt = GeneratedColumn<DateTime>(
-    'opening_at',
-    aliasedName,
-    false,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: true,
-  );
   static const VerificationMeta _paydayMeta = const VerificationMeta('payday');
   @override
   late final GeneratedColumn<int> payday = GeneratedColumn<int>(
@@ -124,44 +102,15 @@ class $ProfilesTable extends Profiles
     defaultValue: const Constant(''),
   );
   @override
-  late final GeneratedColumnWithTypeConverter<BalanceMode, String> heroMode =
-      GeneratedColumn<String>(
-        'hero_mode',
-        aliasedName,
-        false,
-        type: DriftSqlType.string,
-        requiredDuringInsert: false,
-        defaultValue: Constant(BalanceMode.saldo.name),
-      ).withConverter<BalanceMode>($ProfilesTable.$converterheroMode);
-  static const VerificationMeta _heroHintSeenMeta = const VerificationMeta(
-    'heroHintSeen',
-  );
-  @override
-  late final GeneratedColumn<bool> heroHintSeen = GeneratedColumn<bool>(
-    'hero_hint_seen',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("hero_hint_seen" IN (0, 1))',
-    ),
-    defaultValue: const Constant(false),
-  );
-  @override
   List<GeneratedColumn> get $columns => [
     id,
     createdAt,
     updatedAt,
     deletedAt,
-    openingBalance,
-    openingAt,
     payday,
     hideAmounts,
     onboardedAt,
     recentSearches,
-    heroMode,
-    heroHintSeen,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -195,25 +144,6 @@ class $ProfilesTable extends Profiles
         _deletedAtMeta,
         deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
       );
-    }
-    if (data.containsKey('opening_balance')) {
-      context.handle(
-        _openingBalanceMeta,
-        openingBalance.isAcceptableOrUnknown(
-          data['opening_balance']!,
-          _openingBalanceMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_openingBalanceMeta);
-    }
-    if (data.containsKey('opening_at')) {
-      context.handle(
-        _openingAtMeta,
-        openingAt.isAcceptableOrUnknown(data['opening_at']!, _openingAtMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_openingAtMeta);
     }
     if (data.containsKey('payday')) {
       context.handle(
@@ -250,15 +180,6 @@ class $ProfilesTable extends Profiles
         ),
       );
     }
-    if (data.containsKey('hero_hint_seen')) {
-      context.handle(
-        _heroHintSeenMeta,
-        heroHintSeen.isAcceptableOrUnknown(
-          data['hero_hint_seen']!,
-          _heroHintSeenMeta,
-        ),
-      );
-    }
     return context;
   }
 
@@ -284,14 +205,6 @@ class $ProfilesTable extends Profiles
         DriftSqlType.dateTime,
         data['${effectivePrefix}deleted_at'],
       ),
-      openingBalance: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}opening_balance'],
-      )!,
-      openingAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}opening_at'],
-      )!,
       payday: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}payday'],
@@ -308,16 +221,6 @@ class $ProfilesTable extends Profiles
         DriftSqlType.string,
         data['${effectivePrefix}recent_searches'],
       )!,
-      heroMode: $ProfilesTable.$converterheroMode.fromSql(
-        attachedDatabase.typeMapping.read(
-          DriftSqlType.string,
-          data['${effectivePrefix}hero_mode'],
-        )!,
-      ),
-      heroHintSeen: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}hero_hint_seen'],
-      )!,
     );
   }
 
@@ -325,9 +228,6 @@ class $ProfilesTable extends Profiles
   $ProfilesTable createAlias(String alias) {
     return $ProfilesTable(attachedDatabase, alias);
   }
-
-  static JsonTypeConverter2<BalanceMode, String, String> $converterheroMode =
-      const EnumNameConverter<BalanceMode>(BalanceMode.values);
 }
 
 class ProfileRow extends DataClass implements Insertable<ProfileRow> {
@@ -335,27 +235,19 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
-  final int openingBalance;
-  final DateTime openingAt;
   final int payday;
   final bool hideAmounts;
   final DateTime? onboardedAt;
   final String recentSearches;
-  final BalanceMode heroMode;
-  final bool heroHintSeen;
   const ProfileRow({
     required this.id,
     required this.createdAt,
     required this.updatedAt,
     this.deletedAt,
-    required this.openingBalance,
-    required this.openingAt,
     required this.payday,
     required this.hideAmounts,
     this.onboardedAt,
     required this.recentSearches,
-    required this.heroMode,
-    required this.heroHintSeen,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -366,20 +258,12 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
     if (!nullToAbsent || deletedAt != null) {
       map['deleted_at'] = Variable<DateTime>(deletedAt);
     }
-    map['opening_balance'] = Variable<int>(openingBalance);
-    map['opening_at'] = Variable<DateTime>(openingAt);
     map['payday'] = Variable<int>(payday);
     map['hide_amounts'] = Variable<bool>(hideAmounts);
     if (!nullToAbsent || onboardedAt != null) {
       map['onboarded_at'] = Variable<DateTime>(onboardedAt);
     }
     map['recent_searches'] = Variable<String>(recentSearches);
-    {
-      map['hero_mode'] = Variable<String>(
-        $ProfilesTable.$converterheroMode.toSql(heroMode),
-      );
-    }
-    map['hero_hint_seen'] = Variable<bool>(heroHintSeen);
     return map;
   }
 
@@ -391,16 +275,12 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
       deletedAt: deletedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(deletedAt),
-      openingBalance: Value(openingBalance),
-      openingAt: Value(openingAt),
       payday: Value(payday),
       hideAmounts: Value(hideAmounts),
       onboardedAt: onboardedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(onboardedAt),
       recentSearches: Value(recentSearches),
-      heroMode: Value(heroMode),
-      heroHintSeen: Value(heroHintSeen),
     );
   }
 
@@ -414,16 +294,10 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
-      openingBalance: serializer.fromJson<int>(json['openingBalance']),
-      openingAt: serializer.fromJson<DateTime>(json['openingAt']),
       payday: serializer.fromJson<int>(json['payday']),
       hideAmounts: serializer.fromJson<bool>(json['hideAmounts']),
       onboardedAt: serializer.fromJson<DateTime?>(json['onboardedAt']),
       recentSearches: serializer.fromJson<String>(json['recentSearches']),
-      heroMode: $ProfilesTable.$converterheroMode.fromJson(
-        serializer.fromJson<String>(json['heroMode']),
-      ),
-      heroHintSeen: serializer.fromJson<bool>(json['heroHintSeen']),
     );
   }
   @override
@@ -434,16 +308,10 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
-      'openingBalance': serializer.toJson<int>(openingBalance),
-      'openingAt': serializer.toJson<DateTime>(openingAt),
       'payday': serializer.toJson<int>(payday),
       'hideAmounts': serializer.toJson<bool>(hideAmounts),
       'onboardedAt': serializer.toJson<DateTime?>(onboardedAt),
       'recentSearches': serializer.toJson<String>(recentSearches),
-      'heroMode': serializer.toJson<String>(
-        $ProfilesTable.$converterheroMode.toJson(heroMode),
-      ),
-      'heroHintSeen': serializer.toJson<bool>(heroHintSeen),
     };
   }
 
@@ -452,27 +320,19 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
     DateTime? createdAt,
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
-    int? openingBalance,
-    DateTime? openingAt,
     int? payday,
     bool? hideAmounts,
     Value<DateTime?> onboardedAt = const Value.absent(),
     String? recentSearches,
-    BalanceMode? heroMode,
-    bool? heroHintSeen,
   }) => ProfileRow(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
-    openingBalance: openingBalance ?? this.openingBalance,
-    openingAt: openingAt ?? this.openingAt,
     payday: payday ?? this.payday,
     hideAmounts: hideAmounts ?? this.hideAmounts,
     onboardedAt: onboardedAt.present ? onboardedAt.value : this.onboardedAt,
     recentSearches: recentSearches ?? this.recentSearches,
-    heroMode: heroMode ?? this.heroMode,
-    heroHintSeen: heroHintSeen ?? this.heroHintSeen,
   );
   ProfileRow copyWithCompanion(ProfilesCompanion data) {
     return ProfileRow(
@@ -480,10 +340,6 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
-      openingBalance: data.openingBalance.present
-          ? data.openingBalance.value
-          : this.openingBalance,
-      openingAt: data.openingAt.present ? data.openingAt.value : this.openingAt,
       payday: data.payday.present ? data.payday.value : this.payday,
       hideAmounts: data.hideAmounts.present
           ? data.hideAmounts.value
@@ -494,10 +350,6 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
       recentSearches: data.recentSearches.present
           ? data.recentSearches.value
           : this.recentSearches,
-      heroMode: data.heroMode.present ? data.heroMode.value : this.heroMode,
-      heroHintSeen: data.heroHintSeen.present
-          ? data.heroHintSeen.value
-          : this.heroHintSeen,
     );
   }
 
@@ -508,14 +360,10 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
-          ..write('openingBalance: $openingBalance, ')
-          ..write('openingAt: $openingAt, ')
           ..write('payday: $payday, ')
           ..write('hideAmounts: $hideAmounts, ')
           ..write('onboardedAt: $onboardedAt, ')
-          ..write('recentSearches: $recentSearches, ')
-          ..write('heroMode: $heroMode, ')
-          ..write('heroHintSeen: $heroHintSeen')
+          ..write('recentSearches: $recentSearches')
           ..write(')'))
         .toString();
   }
@@ -526,14 +374,10 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
     createdAt,
     updatedAt,
     deletedAt,
-    openingBalance,
-    openingAt,
     payday,
     hideAmounts,
     onboardedAt,
     recentSearches,
-    heroMode,
-    heroHintSeen,
   );
   @override
   bool operator ==(Object other) =>
@@ -543,14 +387,10 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
-          other.openingBalance == this.openingBalance &&
-          other.openingAt == this.openingAt &&
           other.payday == this.payday &&
           other.hideAmounts == this.hideAmounts &&
           other.onboardedAt == this.onboardedAt &&
-          other.recentSearches == this.recentSearches &&
-          other.heroMode == this.heroMode &&
-          other.heroHintSeen == this.heroHintSeen);
+          other.recentSearches == this.recentSearches);
 }
 
 class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
@@ -558,28 +398,20 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
-  final Value<int> openingBalance;
-  final Value<DateTime> openingAt;
   final Value<int> payday;
   final Value<bool> hideAmounts;
   final Value<DateTime?> onboardedAt;
   final Value<String> recentSearches;
-  final Value<BalanceMode> heroMode;
-  final Value<bool> heroHintSeen;
   final Value<int> rowid;
   const ProfilesCompanion({
     this.id = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
-    this.openingBalance = const Value.absent(),
-    this.openingAt = const Value.absent(),
     this.payday = const Value.absent(),
     this.hideAmounts = const Value.absent(),
     this.onboardedAt = const Value.absent(),
     this.recentSearches = const Value.absent(),
-    this.heroMode = const Value.absent(),
-    this.heroHintSeen = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ProfilesCompanion.insert({
@@ -587,31 +419,21 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
-    required int openingBalance,
-    required DateTime openingAt,
     required int payday,
     this.hideAmounts = const Value.absent(),
     this.onboardedAt = const Value.absent(),
     this.recentSearches = const Value.absent(),
-    this.heroMode = const Value.absent(),
-    this.heroHintSeen = const Value.absent(),
     this.rowid = const Value.absent(),
-  }) : openingBalance = Value(openingBalance),
-       openingAt = Value(openingAt),
-       payday = Value(payday);
+  }) : payday = Value(payday);
   static Insertable<ProfileRow> custom({
     Expression<String>? id,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
-    Expression<int>? openingBalance,
-    Expression<DateTime>? openingAt,
     Expression<int>? payday,
     Expression<bool>? hideAmounts,
     Expression<DateTime>? onboardedAt,
     Expression<String>? recentSearches,
-    Expression<String>? heroMode,
-    Expression<bool>? heroHintSeen,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -619,14 +441,10 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
-      if (openingBalance != null) 'opening_balance': openingBalance,
-      if (openingAt != null) 'opening_at': openingAt,
       if (payday != null) 'payday': payday,
       if (hideAmounts != null) 'hide_amounts': hideAmounts,
       if (onboardedAt != null) 'onboarded_at': onboardedAt,
       if (recentSearches != null) 'recent_searches': recentSearches,
-      if (heroMode != null) 'hero_mode': heroMode,
-      if (heroHintSeen != null) 'hero_hint_seen': heroHintSeen,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -636,14 +454,10 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
-    Value<int>? openingBalance,
-    Value<DateTime>? openingAt,
     Value<int>? payday,
     Value<bool>? hideAmounts,
     Value<DateTime?>? onboardedAt,
     Value<String>? recentSearches,
-    Value<BalanceMode>? heroMode,
-    Value<bool>? heroHintSeen,
     Value<int>? rowid,
   }) {
     return ProfilesCompanion(
@@ -651,14 +465,10 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
-      openingBalance: openingBalance ?? this.openingBalance,
-      openingAt: openingAt ?? this.openingAt,
       payday: payday ?? this.payday,
       hideAmounts: hideAmounts ?? this.hideAmounts,
       onboardedAt: onboardedAt ?? this.onboardedAt,
       recentSearches: recentSearches ?? this.recentSearches,
-      heroMode: heroMode ?? this.heroMode,
-      heroHintSeen: heroHintSeen ?? this.heroHintSeen,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -678,12 +488,6 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
     if (deletedAt.present) {
       map['deleted_at'] = Variable<DateTime>(deletedAt.value);
     }
-    if (openingBalance.present) {
-      map['opening_balance'] = Variable<int>(openingBalance.value);
-    }
-    if (openingAt.present) {
-      map['opening_at'] = Variable<DateTime>(openingAt.value);
-    }
     if (payday.present) {
       map['payday'] = Variable<int>(payday.value);
     }
@@ -695,14 +499,6 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
     }
     if (recentSearches.present) {
       map['recent_searches'] = Variable<String>(recentSearches.value);
-    }
-    if (heroMode.present) {
-      map['hero_mode'] = Variable<String>(
-        $ProfilesTable.$converterheroMode.toSql(heroMode.value),
-      );
-    }
-    if (heroHintSeen.present) {
-      map['hero_hint_seen'] = Variable<bool>(heroHintSeen.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -717,14 +513,10 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
-          ..write('openingBalance: $openingBalance, ')
-          ..write('openingAt: $openingAt, ')
           ..write('payday: $payday, ')
           ..write('hideAmounts: $hideAmounts, ')
           ..write('onboardedAt: $onboardedAt, ')
           ..write('recentSearches: $recentSearches, ')
-          ..write('heroMode: $heroMode, ')
-          ..write('heroHintSeen: $heroHintSeen, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3418,14 +3210,10 @@ typedef $$ProfilesTableCreateCompanionBuilder = ProfilesCompanion Function({
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
   Value<DateTime?> deletedAt,
-  required int openingBalance,
-  required DateTime openingAt,
   required int payday,
   Value<bool> hideAmounts,
   Value<DateTime?> onboardedAt,
   Value<String> recentSearches,
-  Value<BalanceMode> heroMode,
-  Value<bool> heroHintSeen,
   Value<int> rowid,
 });
 typedef $$ProfilesTableUpdateCompanionBuilder = ProfilesCompanion Function({
@@ -3433,14 +3221,10 @@ typedef $$ProfilesTableUpdateCompanionBuilder = ProfilesCompanion Function({
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
   Value<DateTime?> deletedAt,
-  Value<int> openingBalance,
-  Value<DateTime> openingAt,
   Value<int> payday,
   Value<bool> hideAmounts,
   Value<DateTime?> onboardedAt,
   Value<String> recentSearches,
-  Value<BalanceMode> heroMode,
-  Value<bool> heroHintSeen,
   Value<int> rowid,
 });
 
@@ -3473,16 +3257,6 @@ class $$ProfilesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get openingBalance => $composableBuilder(
-    column: $table.openingBalance,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get openingAt => $composableBuilder(
-    column: $table.openingAt,
-    builder: (column) => ColumnFilters(column),
-  );
-
   ColumnFilters<int> get payday => $composableBuilder(
     column: $table.payday,
     builder: (column) => ColumnFilters(column),
@@ -3500,17 +3274,6 @@ class $$ProfilesTableFilterComposer
 
   ColumnFilters<String> get recentSearches => $composableBuilder(
     column: $table.recentSearches,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnWithTypeConverterFilters<BalanceMode, BalanceMode, String>
-  get heroMode => $composableBuilder(
-    column: $table.heroMode,
-    builder: (column) => ColumnWithTypeConverterFilters(column),
-  );
-
-  ColumnFilters<bool> get heroHintSeen => $composableBuilder(
-    column: $table.heroHintSeen,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -3544,16 +3307,6 @@ class $$ProfilesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get openingBalance => $composableBuilder(
-    column: $table.openingBalance,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<DateTime> get openingAt => $composableBuilder(
-    column: $table.openingAt,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<int> get payday => $composableBuilder(
     column: $table.payday,
     builder: (column) => ColumnOrderings(column),
@@ -3571,16 +3324,6 @@ class $$ProfilesTableOrderingComposer
 
   ColumnOrderings<String> get recentSearches => $composableBuilder(
     column: $table.recentSearches,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get heroMode => $composableBuilder(
-    column: $table.heroMode,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<bool> get heroHintSeen => $composableBuilder(
-    column: $table.heroHintSeen,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -3606,14 +3349,6 @@ class $$ProfilesTableAnnotationComposer
   GeneratedColumn<DateTime> get deletedAt =>
       $composableBuilder(column: $table.deletedAt, builder: (column) => column);
 
-  GeneratedColumn<int> get openingBalance => $composableBuilder(
-    column: $table.openingBalance,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<DateTime> get openingAt =>
-      $composableBuilder(column: $table.openingAt, builder: (column) => column);
-
   GeneratedColumn<int> get payday =>
       $composableBuilder(column: $table.payday, builder: (column) => column);
 
@@ -3629,14 +3364,6 @@ class $$ProfilesTableAnnotationComposer
 
   GeneratedColumn<String> get recentSearches => $composableBuilder(
     column: $table.recentSearches,
-    builder: (column) => column,
-  );
-
-  GeneratedColumnWithTypeConverter<BalanceMode, String> get heroMode =>
-      $composableBuilder(column: $table.heroMode, builder: (column) => column);
-
-  GeneratedColumn<bool> get heroHintSeen => $composableBuilder(
-    column: $table.heroHintSeen,
     builder: (column) => column,
   );
 }
@@ -3676,28 +3403,20 @@ class $$ProfilesTableTableManager
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
-                Value<int> openingBalance = const Value.absent(),
-                Value<DateTime> openingAt = const Value.absent(),
                 Value<int> payday = const Value.absent(),
                 Value<bool> hideAmounts = const Value.absent(),
                 Value<DateTime?> onboardedAt = const Value.absent(),
                 Value<String> recentSearches = const Value.absent(),
-                Value<BalanceMode> heroMode = const Value.absent(),
-                Value<bool> heroHintSeen = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ProfilesCompanion(
                 id: id,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
-                openingBalance: openingBalance,
-                openingAt: openingAt,
                 payday: payday,
                 hideAmounts: hideAmounts,
                 onboardedAt: onboardedAt,
                 recentSearches: recentSearches,
-                heroMode: heroMode,
-                heroHintSeen: heroHintSeen,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -3706,28 +3425,20 @@ class $$ProfilesTableTableManager
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
-                required int openingBalance,
-                required DateTime openingAt,
                 required int payday,
                 Value<bool> hideAmounts = const Value.absent(),
                 Value<DateTime?> onboardedAt = const Value.absent(),
                 Value<String> recentSearches = const Value.absent(),
-                Value<BalanceMode> heroMode = const Value.absent(),
-                Value<bool> heroHintSeen = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ProfilesCompanion.insert(
                 id: id,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
-                openingBalance: openingBalance,
-                openingAt: openingAt,
                 payday: payday,
                 hideAmounts: hideAmounts,
                 onboardedAt: onboardedAt,
                 recentSearches: recentSearches,
-                heroMode: heroMode,
-                heroHintSeen: heroHintSeen,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

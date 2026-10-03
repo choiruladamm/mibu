@@ -142,6 +142,8 @@ void main() {
     // Edit: first key replaces the current Rp8jt.
     await openSheet();
     expect(find.text('budget sekarang'), findsOneWidget);
+    // A hint from last period's spending (sep: Rp2.612.500), not income.
+    expect(find.text('bulan lalu kepake Rp2,61jt'), findsOneWidget);
     expect(find.text('8.000.000'), findsOneWidget);
     for (final k in ['5', '000', '000']) {
       await tester.tap(

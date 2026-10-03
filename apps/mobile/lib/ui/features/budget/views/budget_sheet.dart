@@ -21,10 +21,13 @@ Future<void> editBudget(BuildContext context, WidgetRef ref) async {
   final prev = ref.read(profileProvider).value?.monthlyBudget;
   final total = [...?ref.read(pocketsProvider).value]
       .fold(0, (sum, p) => sum + p.budget);
+  // A hint from what was really spent, never from income.
+  final last = ref.read(periodsProvider).prev(period).key;
+  final lastSpent = ref.read(totalsProvider).value?.spent[last];
 
   final v = await showAppSheet<int>(
     context,
-    BudgetSheet(budget: prev, pocketsTotal: total),
+    BudgetSheet(budget: prev, pocketsTotal: total, lastSpent: lastSpent),
     enableDrag: false,
   );
   if (v == null || !context.mounted) return;
@@ -57,10 +60,12 @@ class BudgetSheet extends StatefulWidget {
     super.key,
     required this.budget,
     required this.pocketsTotal,
+    this.lastSpent,
   });
 
   final int? budget; // null = not set → prefill from the pockets
   final int pocketsTotal; // Σ pocket limits
+  final int? lastSpent; // spent last period; null = nothing logged then
 
   @override
   State<BudgetSheet> createState() => _BudgetSheetState();
@@ -110,6 +115,13 @@ class _BudgetSheetState extends State<BudgetSheet> {
                       color: AppColors.muted,
                     ),
                   ),
+                  if (widget.lastSpent case final spent? when spent > 0) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      l.budgetLastSpent(rupiahCompact(spent)),
+                      style: AppText.caption.copyWith(color: AppColors.muted),
+                    ),
+                  ],
                   const SizedBox(height: 18),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),

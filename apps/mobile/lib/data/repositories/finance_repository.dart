@@ -7,18 +7,24 @@ import '../../domain/period.dart';
 import '../database/app_database.dart';
 
 /// Balance-related sums; everything derived from `transactions`.
+/// Per budget period, keyed by its month label. No saldo: nothing carries
+/// over between periods (docs/PERIOD_LEDGER_PLAN.md).
 class Totals {
   const Totals({
-    required this.balance,
-    required this.nets,
+    required this.income,
     required this.spent,
     required this.spentToday,
   });
 
-  final int balance;
-  final Map<DateTime, int> nets; // first of month → net change
-  final Map<DateTime, int> spent; // first of month → expenses, positive
+  final Map<DateTime, int> income; // month label → income
+  final Map<DateTime, int> spent; // month label → expenses, positive
   final int spentToday; // positive
+
+  /// Sisa pemasukan per period: income − spending.
+  Map<DateTime, int> get nets => {
+    for (final m in {...income.keys, ...spent.keys})
+      m: (income[m] ?? 0) - (spent[m] ?? 0),
+  };
 }
 
 /// An expense category without a limit, with this month's spending and
@@ -46,8 +52,6 @@ class FinanceRepository {
       return r == null
           ? Profile.empty
           : Profile(
-              openingBalance: r.openingBalance,
-              openingAt: r.openingAt,
               payday: r.payday,
               monthlyBudget: row!.read(budget),
               hideAmounts: r.hideAmounts,
@@ -55,8 +59,6 @@ class FinanceRepository {
               recentSearches: r.recentSearches.isEmpty
                   ? const []
                   : r.recentSearches.split('\n'),
-              heroMode: r.heroMode,
-              heroHintSeen: r.heroHintSeen,
             );
     });
   }
@@ -206,11 +208,12 @@ class FinanceRepository {
             SegmentedResolver([calendarBase, ...rules], salaries: salaries),
       );
 
-  /// 01.4 / 01.4b: writes the profile and the starter categories — every
-  /// preset (picked ones become kantong with their limit) plus 💰 gajian.
-  /// Categories are only added to an empty table.
+  /// 01.4 / 01.4b: writes the profile, the [budget] if one was typed (none
+  /// is required) and the starter categories — every preset (picked ones
+  /// become kantong with their limit) plus 💰 gajian. Categories are only
+  /// added to an empty table.
   Future<void> completeSetup({
-    required int openingBalance,
+    int? budget,
     required int payday,
     required Set<String> pockets,
     required DateTime now,
@@ -223,8 +226,6 @@ class FinanceRepository {
       shift: PaydayShift.previousWorkday,
     ).periodOf(now);
     final row = ProfilesCompanion(
-      openingBalance: Value(openingBalance),
-      openingAt: Value(now),
       payday: Value(payday),
       onboardedAt: Value(now),
       updatedAt: Value(now),
@@ -233,6 +234,17 @@ class FinanceRepository {
       p,
     )..where((r) => r.deletedAt.isNull())).write(row);
     if (updated == 0) await _db.into(p).insert(row);
+    if (budget != null && budget > 0) {
+      await _db
+          .into(_db.budgets)
+          .insert(
+            BudgetsCompanion.insert(
+              periodStart: period.start,
+              periodEnd: period.end,
+              amount: Value(budget),
+            ),
+          );
+    }
 
     // Periods follow gajian from the start of time, so a back-filled entry
     // lands in the right period. Re-running setup keeps the rule it has.
@@ -298,14 +310,13 @@ class FinanceRepository {
     });
   });
 
-  /// Balance, per-period nets / spending and today's spending. [Totals.spent]
-  /// counts every live expense; balance, nets and today's spending only those
-  /// from the opening date on.
-  // ponytail: reads every entry since opening and sums in Dart (local-time
-  // months; SQL strftime is UTC). Fine for years of daily use; move to a
-  // cached monthly table if it ever shows.
+  /// Income and spending per period, plus today's spending. Every live
+  /// entry counts in the period its date falls in, whenever it was logged
+  /// (a gajian back-filled to 25 sep is still that period's income).
+  // ponytail: reads every entry and sums in Dart (local-time periods; SQL
+  // strftime is UTC). Fine for years of daily use; move to a cached
+  // per-period table if it ever shows.
   Stream<Totals> watchTotals(
-    Profile profile,
     DateTime now, {
     PeriodResolver periods = const CalendarMonthResolver(),
   }) {
@@ -314,29 +325,20 @@ class FinanceRepository {
       ..addColumns([_tx.at, _tx.amount])
       ..where(_tx.deletedAt.isNull());
     return q.watch().map((rows) {
-      var balance = profile.openingBalance, spentToday = 0;
-      final nets = <DateTime, int>{}, spent = <DateTime, int>{};
+      var spentToday = 0;
+      final income = <DateTime, int>{}, spent = <DateTime, int>{};
       for (final r in rows) {
         final at = r.read(_tx.at)!, v = r.read(_tx.amount)!;
         // Keyed by the period's month label ("oktober" = 25 sep – 24 okt).
         final month = periods.periodOf(at).key;
-        // What was spent counts whenever it was logged for: a rent paid
-        // before the app was set up still came out of this period's budget
-        // (the kantong count it too).
-        if (v < 0) spent[month] = (spent[month] ?? 0) - v;
-        // The saldo only follows entries from the opening date on: the
-        // balance typed in at 01.4 already has the earlier ones in it.
-        if (at.isBefore(profile.openingAt)) continue;
-        balance += v;
-        nets[month] = (nets[month] ?? 0) + v;
-        if (v < 0 && !at.isBefore(today)) spentToday -= v;
+        if (v < 0) {
+          spent[month] = (spent[month] ?? 0) - v;
+          if (!at.isBefore(today)) spentToday -= v;
+        } else {
+          income[month] = (income[month] ?? 0) + v;
+        }
       }
-      return Totals(
-        balance: balance,
-        nets: nets,
-        spent: spent,
-        spentToday: spentToday,
-      );
+      return Totals(income: income, spent: spent, spentToday: spentToday);
     });
   }
 
@@ -691,24 +693,6 @@ class FinanceRepository {
         .map((r) => r?.amount);
   }
 
-  /// 02.1 hero: saldo kamu ⇄ sisa budget.
-  Future<void> setBalanceMode(BalanceMode mode) =>
-      (_db.update(_db.profiles)..where((p) => p.deletedAt.isNull())).write(
-        ProfilesCompanion(
-          heroMode: Value(mode),
-          updatedAt: Value(DateTime.now()),
-        ),
-      );
-
-  /// The "tap buat liat sisa budget" hint was shown (or used).
-  Future<void> markHeroHintSeen() =>
-      (_db.update(_db.profiles)..where((p) => p.deletedAt.isNull())).write(
-        ProfilesCompanion(
-          heroHintSeen: const Value(true),
-          updatedAt: Value(DateTime.now()),
-        ),
-      );
-
   /// 02.4 tanggal gajian (00.24): 1–31, 31 = akhir. Periods already lived
   /// stay as they were: the new day starts with the next period. Right after
   /// 01.4 (still in the first period, or no payday rule yet) it applies at
@@ -754,13 +738,8 @@ class FinanceRepository {
               );
 
     // No payday rule yet, or still in the period the app was set up in: now.
-    final setUpOn = opening == null
-        ? today
-        : DateTime(
-            opening.openingAt.year,
-            opening.openingAt.month,
-            opening.openingAt.day,
-          );
+    final at = opening?.onboardedAt;
+    final setUpOn = at == null ? today : DateTime(at.year, at.month, at.day);
     if (payday.isEmpty || (payday.length == 1 && current.contains(setUpOn))) {
       await Future.sync(() => write(payday.firstOrNull, today));
       return null;

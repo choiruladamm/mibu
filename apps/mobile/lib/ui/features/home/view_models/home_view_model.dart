@@ -43,12 +43,7 @@ final homeChartProvider = Provider<HomeChart?>((ref) {
   final totals = ref.watch(totalsProvider).value;
   if (totals == null) return null;
   return (
-    months: balanceSeries(
-      now: now,
-      start: pick.start,
-      balance: totals.balance,
-      nets: totals.nets,
-    ),
+    months: balanceSeries(now: now, start: pick.start, nets: totals.nets),
     selected: pick.selected,
     now:
         (now.year * 12 + now.month) - (pick.start.year * 12 + pick.start.month),
@@ -63,7 +58,6 @@ class HomeState {
     required this.month,
     required this.selected,
     required this.isCurrent,
-    required this.balance,
     required this.months,
     required this.nowIndex,
     required this.pockets,
@@ -78,8 +72,6 @@ class HomeState {
     required this.monthSpent,
     required this.periodDays,
     required this.budgetDaysLeft,
-    required this.heroMode,
-    required this.heroHintSeen,
     required this.noEntries,
   });
 
@@ -89,7 +81,6 @@ class HomeState {
   /// Month picked in the chart; after [month] = predicted peek only.
   final DateTime selected;
   final bool isCurrent;
-  final int balance; // now, or at the end of [month]
   final List<MonthBalance> months; // the 6-month window
   final int nowIndex; // of the current month in [months]; ≥ 6 = past the window
   final List<Pocket> pockets; // that month, most used first
@@ -97,20 +88,14 @@ class HomeState {
   final int count; // entries in [month]
   final DateTime today;
   final PaydayInfo payday; // today, telat, or how long until gajian
-  final int safeToSpendToday; // negative = overspent today
-  final SafeShare safe; // the shares behind it, for "dari mana angkanya?"
+  final int? safeToSpendToday; // negative = overspent today; null = no budget
+  final int? safe; // today's share behind it, for "dari mana angkanya?"
   final Period period; // the budget period [month] is named after
   final int? budget; // in force for [month]; null = none
   final int monthSpent; // expenses in [month], positive
   final int periodDays; // length of [month]'s period (rata²/hari)
   final int budgetDaysLeft; // days left in the current period, today included
-  final BalanceMode heroMode; // last pick; folded to saldo without a budget
-  final bool heroHintSeen;
   final bool noEntries; // nothing ever logged
-
-  /// The pill only exists with a budget; without one it's saldo only.
-  bool get canFlip => budget != null;
-  bool get isBudget => canFlip && heroMode == BalanceMode.budget;
 
   /// budget − spent in [month]; negative = kelewat. Null without a budget.
   int? get budgetLeft => budget == null ? null : budget! - monthSpent;
@@ -167,7 +152,7 @@ final homeProvider = Provider<AsyncValue<HomeState>>((ref) {
         budgetIn.hasValue,
       )
       case (
-        final profile?,
+        _?,
         final totals?,
         final pockets?,
         final own?,
@@ -201,20 +186,13 @@ final homeProvider = Provider<AsyncValue<HomeState>>((ref) {
       groups.insert(0, (day: today, total: 0, rows: const []));
     }
 
-    final balance = isCurrent
-        ? totals.balance
-        : monthEndBalance(
-            now: cur,
-            balance: totals.balance,
-            nets: totals.nets,
-            month: month,
-          );
+    // Aman jajan comes from the budget only, counted to the period's end.
+    final budgetLeft = isCurrent && budget != null ? budget - monthSpent : null;
     return AsyncData(
       HomeState(
         month: month,
         selected: pick.selected,
         isCurrent: isCurrent,
-        balance: balance,
         months: chart.months,
         nowIndex: chart.now,
         pockets: ([...pockets]..sort((a, b) => b.usedPct.compareTo(a.usedPct))),
@@ -223,28 +201,20 @@ final homeProvider = Provider<AsyncValue<HomeState>>((ref) {
         today: today,
         payday: payday,
         safeToSpendToday: safeToSpendToday(
-          balance: totals.balance,
+          budgetLeft: budgetLeft,
           spentToday: totals.spentToday,
-          // On payday / telat the hero swaps the chip for "catat gajian"
-          // (02.1p o–q); the figure still counts to the next payday.
-          days: payday.daysToNext,
-          budgetLeft: isCurrent && budget != null ? budget - monthSpent : null,
-          budgetDays: budgetDaysLeft,
+          days: budgetDaysLeft,
         ),
         safe: safeShare(
-          balance: totals.balance,
+          budgetLeft: budgetLeft,
           spentToday: totals.spentToday,
-          days: payday.daysToNext,
-          budgetLeft: isCurrent && budget != null ? budget - monthSpent : null,
-          budgetDays: budgetDaysLeft,
+          days: budgetDaysLeft,
         ),
         period: period,
         budget: budget,
         monthSpent: monthSpent,
         periodDays: period.length,
         budgetDaysLeft: budgetDaysLeft,
-        heroMode: profile.heroMode,
-        heroHintSeen: profile.heroHintSeen,
         noEntries: noEntries,
       ),
     );

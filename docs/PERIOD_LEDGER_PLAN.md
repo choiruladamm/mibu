@@ -1,12 +1,31 @@
 # mibu — buku catatan per periode gajian
 
-Keputusan 2026-10-03, **belum dikerjain**. Gantiin model "saldo kumulatif" (saldo awal + semua catatan) yang ada di [MVP_PLAN.md](MVP_PLAN.md) dan hero toggle di [FEATURES.md](FEATURES.md). Dasar periodenya tetap [PAYDAY_CYCLE_PLAN.md](PAYDAY_CYCLE_PLAN.md).
+Keputusan 2026-10-03. Logic sama UI sementaranya udah jalan, desain final nyusul (lihat [Status](#status)). Gantiin model "saldo kumulatif" (saldo awal + semua catatan) yang ada di [MVP_PLAN.md](MVP_PLAN.md) dan hero toggle di [FEATURES.md](FEATURES.md). Dasar periodenya tetap [PAYDAY_CYCLE_PLAN.md](PAYDAY_CYCLE_PLAN.md).
 
 ## Ringkasan
 
 mibu itu **buku catatan pemasukan dan pengeluaran per periode gajian**, bukan cermin rekening bank. Saldo bank bukan urusan app ini. Tugasnya: nyatet, batesin budget per periode, dan ngasih tau berapa jajan yang aman.
 
 User-nya orang kantoran, atau kantoran + freelance, yang tau kapan gajiannya. Tanggal gajian itu patokan satu-satunya buat semua angka. Nggak ada angka yang kebawa lintas periode.
+
+## Status
+
+| Langkah | Status | Catatan |
+|---|---|---|
+| 1. Domain + test | ✅ | `safeShare` / `safeToSpendToday` budget aja (null tanpa budget). `balanceSeries` = sisa pemasukan per periode, intip = rata² 3 periode. `monthEndBalance` dibuang. |
+| 2. Skema + seed | ✅ | `openingBalance`, `openingAt`, `heroMode`, `heroHintSeen` di-drop. Fixture `onboardedAt` = awal data contoh (app yang udah lama dipakai). |
+| 3. Repository | ✅ | `Totals` = `income` + `spent` per periode, `nets` turunan, tanpa `openingAt`. `completeSetup(budget?)`. `setPayday` pakai `onboardedAt` buat "periode setup". |
+| 4. Hero + chip + info | ✅ sementara | Sisa budget, tanpa toggle/hint. Tanpa budget: "kepake bulan ini" + "pasang budget" + chip "atur budget dulu". Dialog: sisa budget + aman jajan. |
+| 5. Setup 01.4 | ✅ sementara | Kolom saldo jadi budget opsional (chip 3/5/7/10jt), preview aman jajan cuma kalau diisi. 01.4b dibandingin ke budget, tanpa budget "total limit Rp…". |
+| 6. Sheet budget | ✅ | "bulan lalu kepake Rp…" (pengeluaran periode lalu). |
+| 7. Kantong | ✅ | Nggak ada copy saldo yang perlu diubah. |
+| 8. Sheet gajian | ✅ sementara | Kartu ink: aman jajan hari ini aja, tanpa coret sebelum → sesudah (ganti tanggal berlaku periode depan, jadi angkanya nggak gerak). |
+| 3.1 bar dampak | ✅ | Pengeluaran non-kantong → "sisa budget abis ini" (disembunyiin tanpa budget), pemasukan → "pemasukan bulan ini jadi". |
+| Grafik beranda | ✅ sementara | Tetap di beranda, isinya "sisa pemasukan per bulan". Posisi final nunggu desain. |
+| 9. Statistik | ⏳ | Kartu sisa pemasukan + banding, nunggu board 04.1. |
+| 11. Docs | ⏳ | MVP_PLAN (Turunan, Aman jajan) & FEATURES masih nunjuk ke doc ini, belum ditulis ulang. |
+
+"Sementara" = jalan dan dites, tapi copy/layout nunggu board desain.
 
 ## Kenapa ganti
 

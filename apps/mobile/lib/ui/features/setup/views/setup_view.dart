@@ -17,10 +17,11 @@ import '../../../core/widgets/payday_chip.dart';
 
 final _dots = NumberFormat('#,##0', 'id_ID');
 
-const _quick = [500000, 1000000, 2500000, 5000000];
+const _quick = [3000000, 5000000, 7000000, 10000000];
 const _maxDigits = 12;
 
-/// 01.4 atur awal (saldo + gajian) → 01.4b kantong pertama.
+/// 01.4 atur awal (budget + gajian, nothing required) → 01.4b kantong
+/// pertama.
 class SetupView extends ConsumerStatefulWidget {
   const SetupView({super.key, required this.onDone});
 
@@ -68,7 +69,7 @@ class _SetupViewState extends ConsumerState<SetupView> {
     await ref
         .read(financeRepositoryProvider)
         .completeSetup(
-          openingBalance: _value,
+          budget: _value > 0 ? _value : null,
           payday: _payday,
           pockets: withPockets ? _pockets : const {},
           now: ref.read(clockProvider)(),
@@ -295,6 +296,8 @@ class _SetupViewState extends ConsumerState<SetupView> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _title(l.setupBalanceTitle),
+        const SizedBox(height: 6),
+        Text(l.setupBudgetBody, style: muted),
         const SizedBox(height: 22),
         Container(
           padding: const EdgeInsets.only(bottom: 10),
@@ -381,85 +384,88 @@ class _SetupViewState extends ConsumerState<SetupView> {
               ),
           ],
         ),
-        const SizedBox(height: 20),
-        Semantics(
-          container: true,
-          label: l.setupDaily,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-            decoration: BoxDecoration(
-              color: AppColors.mist,
-              borderRadius: BorderRadius.circular(AppRadius.groupCard),
-            ),
-            child: Row(
-              spacing: 12,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: 4,
-                    children: [
-                      Text(l.setupDaily, style: muted),
-                      Text(
-                        rupiahCompact(v ~/ left),
-                        style: AppText.title.copyWith(
-                          fontSize: 30,
-                          letterSpacing: -0.9,
-                          height: 1,
-                          fontFeatures: const [FontFeature.tabularFigures()],
-                        ),
-                      ),
-                      MetaLine([
-                        l.setupUntil,
-                        l.pocketsDaysLeft(left),
-                      ], style: muted),
-                    ],
-                  ),
-                ),
-                ExcludeSemantics(
-                  child: SizedBox(
-                    width: 84,
-                    child: Wrap(
+        // Aman jajan only comes from a budget: nothing to preview without one.
+        if (v > 0) ...[
+          const SizedBox(height: 20),
+          Semantics(
+            container: true,
+            label: l.setupDaily,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+              decoration: BoxDecoration(
+                color: AppColors.mist,
+                borderRadius: BorderRadius.circular(AppRadius.groupCard),
+              ),
+              child: Row(
+                spacing: 12,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       spacing: 4,
-                      runSpacing: 4,
                       children: [
-                        for (var i = 0; i < 18; i++)
-                          Container(
-                            width: 10,
-                            height: 10,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: i < left
-                                  ? AppColors.ink
-                                  : Colors.transparent,
-                              border: i < left
-                                  ? null
-                                  : Border.all(
-                                      color: AppColors.line,
-                                      width: AppStroke.hairline,
-                                    ),
-                            ),
+                        Text(l.setupDaily, style: muted),
+                        Text(
+                          rupiahCompact(v ~/ left),
+                          style: AppText.title.copyWith(
+                            fontSize: 30,
+                            letterSpacing: -0.9,
+                            height: 1,
+                            fontFeatures: const [FontFeature.tabularFigures()],
                           ),
+                        ),
+                        MetaLine([
+                          l.setupUntil,
+                          l.pocketsDaysLeft(left),
+                        ], style: muted),
                       ],
                     ),
                   ),
-                ),
-              ],
+                  ExcludeSemantics(
+                    child: SizedBox(
+                      width: 84,
+                      child: Wrap(
+                        spacing: 4,
+                        runSpacing: 4,
+                        children: [
+                          for (var i = 0; i < 18; i++)
+                            Container(
+                              width: 10,
+                              height: 10,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: i < left
+                                    ? AppColors.ink
+                                    : Colors.transparent,
+                                border: i < left
+                                    ? null
+                                    : Border.all(
+                                        color: AppColors.line,
+                                        width: AppStroke.hairline,
+                                      ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
+        ],
       ],
     );
   }
 
   Widget _pocketStep(AppLocalizations l) {
-    final saldo = _value;
+    final budget = _value;
     final chosen = [
       for (final p in setupPockets)
         if (_pockets.contains(p.$2)) p,
     ];
     final total = chosen.fold(0, (s, p) => s + p.$3);
-    final base = [saldo, total, 1].reduce((a, b) => a > b ? a : b);
+    final base = [budget, total, 1].reduce((a, b) => a > b ? a : b);
     const shades = [
       AppColors.paper,
       AppColors.pressed,
@@ -543,7 +549,7 @@ class _SetupViewState extends ConsumerState<SetupView> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         spacing: 2,
                         children: [
-                          // Widths are shares of max(saldo, total).
+                          // Widths are shares of max(budget, total).
                           for (final (i, p) in chosen.indexed)
                             Expanded(
                               flex: p.$3 ~/ 1000,
@@ -561,12 +567,14 @@ class _SetupViewState extends ConsumerState<SetupView> {
                 Text(
                   chosen.isEmpty
                       ? l.setupTapHint
-                      : total <= saldo
+                      : budget == 0
+                      ? l.setupLimitTotal(rupiahCompact(total))
+                      : total <= budget
                       ? l.setupFree(
-                          rupiahCompact(saldo - total),
-                          rupiahCompact(saldo),
+                          rupiahCompact(budget - total),
+                          rupiahCompact(budget),
                         )
-                      : l.setupOver(rupiahCompact(total - saldo)),
+                      : l.setupOver(rupiahCompact(total - budget)),
                   style: AppText.caption.copyWith(color: AppColors.onInkMuted),
                 ),
               ],

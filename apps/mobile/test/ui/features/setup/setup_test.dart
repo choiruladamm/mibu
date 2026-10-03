@@ -63,11 +63,13 @@ void main() {
     final (db, done) = await pump(tester);
     final repo = FinanceRepository(db);
 
-    await tester.tap(find.text('Rp2,5jt'));
+    // Budget is optional: nothing to preview until one is typed.
+    expect(find.text('aman jajan per hari'), findsNothing);
+    await tester.tap(find.text('Rp3jt'));
     await tester.pump();
-    expect(find.text('2.500.000'), findsOneWidget);
-    // 25 okt is a Sunday → paid Fri 23: 9 days incl. today → 2.500.000 ÷ 9
-    expect(find.text('Rp278K'), findsOneWidget);
+    expect(find.text('3.000.000'), findsOneWidget);
+    // 25 okt is a Sunday → paid Fri 23: 9 days incl. today → 3.000.000 ÷ 9
+    expect(find.text('Rp333K'), findsOneWidget);
     expect(findMeta(['sampai gajian', '9 hari lagi']), findsOneWidget);
 
     await tester.tap(find.bySemanticsLabel('akhir bulan'));
@@ -89,13 +91,13 @@ void main() {
     // Default 4: 1,5jt + 300K + 500K + 600K = 2,9jt.
     expect(find.text('4 dikasih limit'), findsOneWidget);
     expect(find.text('Rp2,9jt/bln'), findsOneWidget);
-    expect(find.text('belum dijatah Rp100K dari saldo Rp3jt'), findsOneWidget);
+    expect(find.text('belum dijatah Rp100K dari budget Rp3jt'), findsOneWidget);
 
     await tester.tap(find.text('hiburan'));
     await tester.pump();
     expect(find.text('5 dikasih limit'), findsOneWidget);
     expect(
-      find.text('lebih Rp300K dari saldo — santai, gajian nambah'),
+      find.text('lebih Rp300K dari budget'),
       findsOneWidget,
     );
 
@@ -105,7 +107,7 @@ void main() {
     expect(done, [1]);
     final p = (await tester.runAsync(() => repo.watchProfile(cal(now)).first))!;
     expect(
-      (p.onboarded, p.openingBalance, p.payday),
+      (p.onboarded, p.monthlyBudget, p.payday),
       (true, 3000000, 31),
     ); // akhir = 31
     final pockets = (await tester.runAsync(
@@ -130,7 +132,8 @@ void main() {
     await settle(tester);
     expect(done, [1]);
     final p = (await tester.runAsync(() => repo.watchProfile(cal(now)).first))!;
-    expect((p.onboarded, p.openingBalance, p.payday), (true, 0, 25));
+    // Nothing is required: no budget, no kantong.
+    expect((p.onboarded, p.monthlyBudget, p.payday), (true, null, 25));
     expect(
       await tester.runAsync(() => repo.watchPockets(cal(now)).first),
       isEmpty,

@@ -79,25 +79,22 @@ class _PaydaySheetState extends ConsumerState<_PaydaySheet> {
     final totals = ref.watch(totalsProvider).value;
     PaydayInfo infoFor(int d) =>
         paydayInfo(now: now, payday: d, salaries: salaries);
-    // Same figure as the beranda chip: the smaller of the saldo and budget
-    // shares, so only the saldo side moves with the date.
+    // Same figure as the beranda chip: sisa budget ÷ days left in the
+    // running period. A new date never changes it (it applies from the next
+    // period). Null without a budget (the row hides).
     final period = ref.watch(currentPeriodProvider);
     final budget = ref.watch(budgetInPeriodProvider(period)).value;
     final monthSpent = totals?.spent[period.key] ?? 0;
-    int jajan(PaydayInfo i) => safeToSpendToday(
-      balance: totals?.balance ?? 0,
-      spentToday: totals?.spentToday ?? 0,
-      days: i.daysToNext,
+    final jajan = safeToSpendToday(
       budgetLeft: budget == null ? null : budget - monthSpent,
-      budgetDays: period.daysLeft(now),
+      spentToday: totals?.spentToday ?? 0,
+      days: period.daysLeft(now),
     );
 
     final info = infoFor(_sel);
     final today = info.status == PaydayStatus.today;
     final nextDate = today ? DateTime(now.year, now.month, now.day) : info.next;
     final changed = _sel != widget.saved;
-    final before = jajan(infoFor(widget.saved));
-    final after = jajan(info);
     final custom = !paydayChoices.contains(_sel);
     final muted = AppText.label.copyWith(color: AppColors.muted);
 
@@ -207,8 +204,7 @@ class _PaydaySheetState extends ConsumerState<_PaydaySheet> {
             inText: today ? l.paydayNextToday : l.paydayNextIn(info.daysToNext),
             // Struck through only when the figure really moves (a binding
             // budget keeps it the same).
-            before: changed && before != after ? rupiahCompact(before) : null,
-            after: rupiahCompact(after),
+            jajan: jajan == null ? null : rupiahCompact(jajan),
           ),
           const SizedBox(height: 12),
           Padding(
@@ -247,17 +243,16 @@ class _PaydaySheetState extends ConsumerState<_PaydaySheet> {
   }
 }
 
-/// Ink card: the payday it'll count to, and aman jajan before → after.
+/// Ink card: the payday it'll count to, and today's aman jajan.
 class _NextCard extends StatelessWidget {
   const _NextCard({
     required this.date,
     required this.inText,
-    required this.before,
-    required this.after,
+    required this.jajan,
   });
 
-  final String date, inText, after;
-  final String? before; // null = unchanged
+  final String date, inText;
+  final String? jajan; // null = no budget, no aman jajan row
 
   @override
   Widget build(BuildContext context) {
@@ -291,36 +286,24 @@ class _NextCard extends StatelessWidget {
               color: AppColors.paper,
             ),
           ),
-          const Divider(height: 1, color: Color(0xFF333333)),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(l.paydayJajanBecomes, style: soft.copyWith(fontSize: 14)),
-              Text.rich(
-                TextSpan(
-                  children: [
-                    if (before != null)
-                      TextSpan(
-                        text: '$before  ',
-                        style: const TextStyle(
-                          color: AppColors.subtle,
-                          decoration: TextDecoration.lineThrough,
-                        ),
-                      ),
-                    TextSpan(
-                      text: l.paydayPerDay(after),
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                  ],
+          if (jajan case final jajan?) ...[
+            const Divider(height: 1, color: Color(0xFF333333)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(l.paydayJajanBecomes, style: soft.copyWith(fontSize: 14)),
+                Text(
+                  l.paydayPerDay(jajan),
+                  style: AppText.label.copyWith(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.paper,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
                 ),
-                style: AppText.label.copyWith(
-                  fontSize: 15,
-                  color: AppColors.paper,
-                  fontFeatures: const [FontFeature.tabularFigures()],
-                ),
-              ),
-            ],
-          ),
+              ],
+            ),
+          ],
         ],
       ),
     );

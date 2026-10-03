@@ -403,8 +403,9 @@ class _AmountState extends State<_Amount> with SingleTickerProviderStateMixin {
   }
 }
 
-/// Pocket bar: what's spent + this entry, then "sisa" / "kelebihan".
-/// Income or a category without a limit shows the balance after instead.
+/// Pocket bar: what's spent + this entry, then "sisa" / "kelebihan". An
+/// expense outside a kantong shows the period's sisa budget after it (none
+/// without a budget); income shows the period's income after it.
 class _Impact extends ConsumerWidget {
   const _Impact({required this.state});
 
@@ -415,16 +416,11 @@ class _Impact extends ConsumerWidget {
     final l = AppLocalizations.of(context)!;
     final s = state;
     final v = s.amount;
+    final period = ref.watch(periodsProvider).periodOf(s.day);
     final pockets =
-        ref
-            .watch(
-              pocketsInPeriodProvider(
-                ref.watch(periodsProvider).periodOf(s.day),
-              ),
-            )
-            .value ??
-        const <Pocket>[];
-    final balance = ref.watch(totalsProvider).value?.balance ?? 0;
+        ref.watch(pocketsInPeriodProvider(period)).value ?? const <Pocket>[];
+    final totals = ref.watch(totalsProvider).value;
+    final budget = ref.watch(budgetInPeriodProvider(period)).value;
     final pocket = s.kind == CategoryKind.expense
         ? pockets.where((p) => p.id == s.category?.id).firstOrNull
         : null;
@@ -440,13 +436,23 @@ class _Impact extends ConsumerWidget {
       note = left >= 0
           ? l.leftAmount(rupiahCompact(left))
           : l.overAmount(rupiahCompact(-left));
-    } else {
-      final after = s.kind == CategoryKind.income ? balance + v : balance - v;
-      final whole = s.kind == CategoryKind.income ? after : balance;
-      prev = whole <= 0 ? 0 : ((whole - v) / whole).clamp(0.0, 1.0);
-      add = whole <= 0 ? 0 : (v / whole).clamp(0.0, 1.0 - prev);
-      label = l.balanceAfter;
+    } else if (s.kind == CategoryKind.income) {
+      final after = (totals?.income[period.key] ?? 0) + v;
+      prev = after <= 0 ? 0 : ((after - v) / after).clamp(0.0, 1.0);
+      add = after <= 0 ? 0 : (v / after).clamp(0.0, 1.0 - prev);
+      label = l.incomeAfter;
       note = rupiahCompact(after);
+    } else if (budget != null && budget > 0) {
+      final spent = totals?.spent[period.key] ?? 0;
+      final left = budget - spent - v;
+      prev = (spent / budget).clamp(0.0, 1.0);
+      add = (v / budget).clamp(0.0, 1.0 - prev);
+      label = l.balanceAfter;
+      note = left >= 0
+          ? rupiahCompact(left)
+          : l.overAmount(rupiahCompact(-left));
+    } else {
+      return const SizedBox.shrink();
     }
 
     return Padding(

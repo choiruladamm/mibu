@@ -2,13 +2,11 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:intl/intl.dart';
 
-import '../../../../data/repositories/finance_repository.dart';
 import '../../../../domain/models/finance.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../routing/router.dart';
@@ -136,12 +134,6 @@ class _HomeViewState extends ConsumerState<HomeView> {
                   const SizedBox(height: 18),
                   _Hero(
                     data: hero,
-                    canFlip: s.canFlip,
-                    flipAria: _flipAria(s, l, hero.label),
-                    showHint: s.canFlip && !s.heroHintSeen && s.isCurrent,
-                    onFlip: () => _flip(s),
-                    onHintOk: () =>
-                        ref.read(financeRepositoryProvider).markHeroHintSeen(),
                     onInfo: () => _info(s, l),
                     onSetBudget: () => editBudget(context, ref),
                   ),
@@ -263,56 +255,28 @@ class _HomeViewState extends ConsumerState<HomeView> {
                             Expanded(
                               child: Align(
                                 alignment: Alignment.centerLeft,
-                                child: Semantics(
-                                  button: s.canFlip,
-                                  toggled: s.canFlip ? s.isBudget : null,
-                                  label: _flipAria(s, l, hero.label),
-                                  excludeSemantics: s.canFlip,
-                                  child: GestureDetector(
-                                    behavior: HitTestBehavior.opaque,
-                                    onTap: s.canFlip ? () => _flip(s) : null,
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          spacing: 4,
-                                          children: [
-                                            Flexible(
-                                              child: Text(
-                                                hero.label,
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: AppText.micro.copyWith(
-                                                  color: AppColors.muted,
-                                                ),
-                                              ),
-                                            ),
-                                            if (s.canFlip)
-                                              const HugeIcon(
-                                                icon: HugeIcons
-                                                    .strokeRoundedArrowDataTransferHorizontal,
-                                                size: 12,
-                                                strokeWidth: 2,
-                                                color: AppColors.muted,
-                                              ),
-                                          ],
-                                        ),
-                                        Text(
-                                          context.rpCompact(hero.amount),
-                                          maxLines: 1,
-                                          style: AppText.label.copyWith(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.w600,
-                                            letterSpacing: -0.4,
-                                          ),
-                                        ),
-                                      ],
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      hero.label,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: AppText.micro.copyWith(
+                                        color: AppColors.muted,
+                                      ),
                                     ),
-                                  ),
+                                    Text(
+                                      context.rpCompact(hero.amount),
+                                      maxLines: 1,
+                                      style: AppText.label.copyWith(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w600,
+                                        letterSpacing: -0.4,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
@@ -362,69 +326,38 @@ class _HomeViewState extends ConsumerState<HomeView> {
     );
   }
 
-  /// "?" next to the hero's small line: how saldo, sisa budget and aman jajan
-  /// are worked out, with this user's numbers.
+  /// "?" next to the hero's small line: how sisa budget and aman jajan are
+  /// worked out, with this user's numbers.
   void _info(HomeState s, AppLocalizations l) {
     final rp = context.rpCompact;
-    InfoLine saldo() => (title: l.infoSaldoTitle, body: l.infoSaldoBody);
-    InfoLine budget() {
-      final left = s.budgetLeft ?? 0;
-      return (
-        title: l.infoBudgetTitle,
-        body: left < 0
-            ? l.infoBudgetBodyOver(
-                rp(s.budget ?? 0),
-                rp(s.monthSpent),
-                rp(-left),
-              )
-            : l.infoBudgetBody(rp(s.budget ?? 0), rp(s.monthSpent), rp(left)),
-      );
-    }
-
+    final left = s.budgetLeft;
     showNumbersInfo(
       context,
       lines: [
-        if (s.isBudget) ...[
-          budget(),
-          saldo(),
-        ] else ...[
-          saldo(),
-          if (s.canFlip) budget(),
-        ],
-        if (s.isCurrent)
+        (
+          title: l.infoBudgetTitle,
+          body: left == null
+              ? l.infoBudgetNone
+              : left < 0
+              ? l.infoBudgetBodyOver(
+                  rp(s.budget ?? 0),
+                  rp(s.monthSpent),
+                  rp(-left),
+                )
+              : l.infoBudgetBody(rp(s.budget ?? 0), rp(s.monthSpent), rp(left)),
+        ),
+        if (s.isCurrent && s.safe != null)
           (
             title: l.infoSafeTitle,
-            body: s.safe.budgetShare == null
-                ? l.infoSafeBodyNoBudget(
-                    s.payday.daysToNext,
-                    rp(s.safe.saldoShare),
-                  )
-                : l.infoSafeBody(
-                    s.payday.daysToNext,
-                    rp(s.safe.saldoShare),
-                    s.budgetDaysLeft,
-                    rp(s.safe.budgetShare!),
-                  ),
+            body: l.infoSafeBody(s.budgetDaysLeft, rp(s.safe!)),
           ),
       ],
     );
   }
 
-  /// Hero pill: saldo ⇄ sisa budget. Remembered, haptic, and using it once
-  /// retires the hint.
-  void _flip(HomeState s) {
-    if (!s.canFlip) return;
-    final repo = ref.read(financeRepositoryProvider);
-    HapticFeedback.lightImpact();
-    repo.setBalanceMode(s.isBudget ? BalanceMode.saldo : BalanceMode.budget);
-    if (!s.heroHintSeen) repo.markHeroHintSeen();
-  }
-
-  static String _flipAria(HomeState s, AppLocalizations l, String label) =>
-      l.heroFlipAria(label, s.isBudget ? l.heroModeSaldo : l.heroModeBudget);
-
   /// What the hero shows for [s]: label, amount, the small line under it and
-  /// the chip (02.1p, 00.23b). The chip never follows the mode.
+  /// the chip (02.1p, 00.23b). Sisa budget; without a budget, what's been
+  /// spent and a nudge to set one (docs/PERIOD_LEDGER_PLAN.md).
   _HeroData _hero(HomeState s, AppLocalizations l) {
     final month = _name(s.month);
     final left = s.budgetLeft;
@@ -433,23 +366,23 @@ class _HomeViewState extends ConsumerState<HomeView> {
     // label + amount
     final String label;
     final int amount;
-    if (s.isBudget) {
+    if (left != null) {
       label = s.isCurrent
           ? (negative ? l.heroBudgetOver : l.heroBudgetLeft)
           : (negative
                 ? l.heroBudgetOverEnd(month)
                 : l.heroBudgetLeftEnd(month));
-      amount = (left ?? 0).abs();
+      amount = left.abs();
     } else {
-      label = s.isCurrent ? l.balanceLabel : l.homeBalanceEnd(month);
-      amount = s.balance;
+      label = s.isCurrent ? l.heroSpent : l.heroSpentEnd(month);
+      amount = s.monthSpent;
     }
 
     // small line
     String sub;
     var warn = false;
-    if (s.isBudget) {
-      sub = l.heroFromBudget(context.rpCompact(s.budget ?? 0));
+    if (!s.isCurrent && s.budget != null) {
+      sub = l.heroFromBudget(context.rpCompact(s.budget!));
     } else if (!s.isCurrent) {
       // The period's last day (it ends the day before the next payday).
       final last = DateTime(
@@ -496,6 +429,14 @@ class _HomeViewState extends ConsumerState<HomeView> {
         outline: true,
         onTap: () => context.push(Routes.addEntry, extra: AddEntryStart.salary),
       );
+    } else if (s.budget == null) {
+      chip = (
+        text: l.heroSetBudgetChip,
+        value: null,
+        icon: _ChipIcon.plus,
+        outline: true,
+        onTap: () => editBudget(context, ref),
+      );
     } else if (s.overBudget) {
       chip = (
         text: l.heroRemDulu,
@@ -505,10 +446,11 @@ class _HomeViewState extends ConsumerState<HomeView> {
         onTap: () => goTab(context, AppTab.pockets),
       );
     } else {
-      final over = s.safeToSpendToday < 0;
+      final safe = s.safeToSpendToday ?? 0;
+      final over = safe < 0;
       chip = (
         text: over ? l.overspentToday : l.safeToSpendToday,
-        value: context.rpCompact(s.safeToSpendToday.abs()),
+        value: context.rpCompact(safe.abs()),
         icon: over ? _ChipIcon.alert : _ChipIcon.tick,
         outline: false,
         onTap: () => goTab(context, AppTab.pockets),
@@ -520,7 +462,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
       amount: amount,
       sub: sub,
       subWarn: warn,
-      setBudget: !s.canFlip && s.isCurrent,
+      setBudget: s.budget == null && s.isCurrent,
       chip: chip,
     );
   }
@@ -585,24 +527,17 @@ typedef _HeroData = ({
 
 final _monthShort = DateFormat.MMM('id');
 
-/// 02.1 hero (HeroSaldo 00.23b): label pill (saldo ⇄ sisa budget), amount,
-/// one small line, and the chip.
+/// 02.1 hero (HeroSaldo 00.23b): label, amount, one small line, and the
+/// chip.
 class _Hero extends StatelessWidget {
   const _Hero({
     required this.data,
-    required this.canFlip,
-    required this.flipAria,
-    required this.showHint,
-    required this.onFlip,
-    required this.onHintOk,
     required this.onSetBudget,
     required this.onInfo,
   });
 
   final _HeroData data;
-  final bool canFlip, showHint;
-  final String flipAria;
-  final VoidCallback onFlip, onHintOk, onSetBudget, onInfo;
+  final VoidCallback onSetBudget, onInfo;
 
   @override
   Widget build(BuildContext context) {
@@ -613,68 +548,12 @@ class _Hero extends StatelessWidget {
         data.label,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: AppText.label.copyWith(
-          fontSize: 14,
-          fontWeight: canFlip ? FontWeight.w500 : FontWeight.w400,
-          color: canFlip ? AppColors.ink : AppColors.muted,
-        ),
+        style: AppText.label.copyWith(fontSize: 14, color: AppColors.muted),
       ),
     );
     return Column(
       children: [
-        // First time only: sits above the pill and pushes the hero down a bit
-        // (a floating bubble outside the hero's box can't be tapped).
-        AnimatedSize(
-          duration: AppMotion.select,
-          curve: AppMotion.ease,
-          alignment: Alignment.topCenter,
-          child: showHint
-              ? Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _HeroHint(
-                    text: l.heroHint,
-                    ok: l.heroHintOk,
-                    onOk: onHintOk,
-                  ),
-                )
-              : const SizedBox(width: double.infinity),
-        ),
-        if (canFlip)
-          Semantics(
-            button: true,
-            label: flipAria,
-            excludeSemantics: true,
-            child: GestureDetector(
-              onTap: onFlip,
-              child: Container(
-                height: 32,
-                constraints: BoxConstraints(
-                  maxWidth:
-                      MediaQuery.sizeOf(context).width - 2 * AppSpace.gutter,
-                ),
-                padding: const EdgeInsets.only(left: 14, right: 10),
-                decoration: BoxDecoration(
-                  color: AppColors.mist,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  spacing: 6,
-                  children: [
-                    Flexible(child: label),
-                    const HugeIcon(
-                      icon: HugeIcons.strokeRoundedArrowDataTransferHorizontal,
-                      size: 16,
-                      strokeWidth: 1.8,
-                      color: AppColors.muted,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          )
-        else
-          SizedBox(height: 32, child: Center(child: label)),
+        SizedBox(height: 32, child: Center(child: label)),
         const SizedBox(height: 8),
         // Long balances shrink instead of overflowing.
         _gutterFit(
@@ -848,83 +727,6 @@ class _Hero extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-/// "tap buat liat sisa budget" + oke, once, pointing at the pill.
-class _HeroHint extends StatelessWidget {
-  const _HeroHint({required this.text, required this.ok, required this.onOk});
-
-  final String text, ok;
-  final VoidCallback onOk;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      liveRegion: true,
-      child: Stack(
-        clipBehavior: Clip.none,
-        alignment: Alignment.bottomCenter,
-        children: [
-          Container(
-            padding: const EdgeInsets.fromLTRB(14, 8, 8, 8),
-            decoration: BoxDecoration(
-              color: AppColors.ink,
-              borderRadius: BorderRadius.circular(14),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x2E111111),
-                  blurRadius: 20,
-                  offset: Offset(0, 8),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              spacing: 10,
-              children: [
-                Flexible(
-                  child: Text(
-                    text,
-                    style: AppText.caption.copyWith(
-                      fontSize: 13,
-                      color: AppColors.paper,
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: onOk,
-                  child: Container(
-                    height: 26,
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: AppColors.paper,
-                      borderRadius: BorderRadius.circular(13),
-                    ),
-                    child: Text(
-                      ok,
-                      style: AppText.micro.copyWith(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.ink,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Positioned(
-            bottom: -5,
-            child: Transform.rotate(
-              angle: math.pi / 4,
-              child: Container(width: 10, height: 10, color: AppColors.ink),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -1337,7 +1139,8 @@ class _NoEntries extends StatelessWidget {
 /// month index and height, and where the pill sits.
 typedef _Frame = ({List<double> ys, double sel, double y, double pillTop});
 
-/// "saldo per bulan" — curve through month balances, tap a month to peek.
+/// "sisa pemasukan per bulan" — curve through each period's income − spending,
+/// tap a month to peek.
 /// Curve, marker and pill share one controller so they always move together,
 /// also when the 6-month window slides.
 class _BalanceChart extends StatefulWidget {
