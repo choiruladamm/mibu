@@ -418,6 +418,12 @@ abstract class AppLocalizations {
   /// **'belum ada budget. pasang dulu biar aman jajan bisa dihitung.'**
   String get infoBudgetNone;
 
+  /// No description provided for @infoSafeWaiting.
+  ///
+  /// In id, this message translates to:
+  /// **'nunggu budget dipasang'**
+  String get infoSafeWaiting;
+
   /// No description provided for @infoSafeTitle.
   ///
   /// In id, this message translates to:
@@ -874,11 +880,35 @@ abstract class AppLocalizations {
   /// **'limit'**
   String get pocketsJarNew;
 
-  /// No description provided for @pocketsLeftTitle.
+  /// No description provided for @pocketsBudgetTitle.
   ///
   /// In id, this message translates to:
-  /// **'sisa jajan {month}'**
-  String pocketsLeftTitle(String month);
+  /// **'sisa budget {month}'**
+  String pocketsBudgetTitle(String month);
+
+  /// No description provided for @pocketsOverTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'kelewat budget {month}'**
+  String pocketsOverTitle(String month);
+
+  /// No description provided for @pocketsJarsTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'sisa di toples {month}'**
+  String pocketsJarsTitle(String month);
+
+  /// No description provided for @pocketsJarsLeft.
+  ///
+  /// In id, this message translates to:
+  /// **'di toples sisa {left} dari {limit}'**
+  String pocketsJarsLeft(String left, String limit);
+
+  /// No description provided for @pocketsJarsMore.
+  ///
+  /// In id, this message translates to:
+  /// **'di toples sisa {left}, lebih dari sisa budget'**
+  String pocketsJarsMore(String left);
 
   /// No description provided for @pocketsSpentOf.
   ///

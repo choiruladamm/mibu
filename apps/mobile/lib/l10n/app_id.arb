@@ -119,6 +119,7 @@
   "infoJarOutside": "bisa beda dari sisa budget, soalnya {amount} kepake di luar kantong.",
   "@infoJarOutside": {"placeholders": {"amount": {"type": "String"}}},
   "infoBudgetNone": "belum ada budget. pasang dulu biar aman jajan bisa dihitung.",
+  "infoSafeWaiting": "nunggu budget dipasang",
   "infoSafeTitle": "aman jajan per hari",
   "infoJarTitle": "sisa jajan (kantong)",
   "heroBudgetLeft": "sisa budget",
@@ -323,8 +324,16 @@
   "noteLeaveEmpty": "nggak jadi, kosongin",
   "pocketsSetLimit": "pasang limit",
   "pocketsJarNew": "limit",
-  "pocketsLeftTitle": "sisa jajan {month}",
-  "@pocketsLeftTitle": {
+  "pocketsBudgetTitle": "sisa budget {month}",
+  "pocketsOverTitle": "kelewat budget {month}",
+  "@pocketsOverTitle": {"placeholders": {"month": {"type": "String"}}},
+  "pocketsJarsTitle": "sisa di toples {month}",
+  "@pocketsJarsTitle": {"placeholders": {"month": {"type": "String"}}},
+  "pocketsJarsLeft": "di toples sisa {left} dari {limit}",
+  "@pocketsJarsLeft": {"placeholders": {"left": {"type": "String"}, "limit": {"type": "String"}}},
+  "pocketsJarsMore": "di toples sisa {left}, lebih dari sisa budget",
+  "@pocketsJarsMore": {"placeholders": {"left": {"type": "String"}}},
+  "@pocketsBudgetTitle": {
     "placeholders": {
       "month": {
         "type": "String"

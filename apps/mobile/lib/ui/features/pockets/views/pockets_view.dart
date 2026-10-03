@@ -71,6 +71,7 @@ class _PocketsViewState extends ConsumerState<PocketsView> {
     final l = AppLocalizations.of(context)!;
     final muted = AppText.label.copyWith(fontSize: 14, color: AppColors.muted);
     final selected = s.selected;
+    final month = _monthFull.format(s.month).toLowerCase();
     Widget gutter(Widget child) => Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpace.gutter),
       child: child,
@@ -107,12 +108,13 @@ class _PocketsViewState extends ConsumerState<PocketsView> {
                     Row(
                       children: [
                         Flexible(
-                          child: Text(
-                            l.pocketsLeftTitle(
-                              _monthFull.format(s.month).toLowerCase(),
-                            ),
-                            style: muted,
-                          ),
+                          // Sisa budget, same figure as beranda; without a
+                          // budget, what's left in the jars.
+                          child: Text(switch (s.budgetLeft) {
+                            null => l.pocketsJarsTitle(month),
+                            < 0 => l.pocketsOverTitle(month),
+                            _ => l.pocketsBudgetTitle(month),
+                          }, style: muted),
                         ),
                         // How sisa jajan and sisa budget differ: 02.2k.
                         InfoDisc(onTap: () => _info(context, s)),
@@ -122,7 +124,9 @@ class _PocketsViewState extends ConsumerState<PocketsView> {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  gutter(PeekTap(child: _Amount(s.left))),
+                  gutter(
+                    PeekTap(child: _Amount((s.budgetLeft ?? s.left).abs())),
+                  ),
                   const SizedBox(height: 4),
                   gutter(
                     Align(
@@ -269,8 +273,17 @@ class _BudgetLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
-    final budget = state.budget;
+    final s = state;
+    final budget = s.budget;
+    final rp = context.rpCompact;
     final muted = AppText.label.copyWith(fontSize: 14, color: AppColors.muted);
+    // The jars promise more than the budget has left (02.2n): say so in
+    // ink instead of the budget part; "?" explains why.
+    final tight =
+        s.pockets.isNotEmpty &&
+        s.budgetLeft != null &&
+        s.budgetLeft! >= 0 &&
+        s.left > s.budgetLeft!;
     return Transform.translate(
       offset: const Offset(-8, 0),
       child: Semantics(
@@ -290,28 +303,39 @@ class _BudgetLine extends StatelessWidget {
                     TextSpan(
                       children: MetaLine.join([
                         TextSpan(
-                          text: state.pockets.isEmpty
+                          text: s.pockets.isEmpty
                               ? l.pocketsNoLimit
-                              : l.pocketsSpentOf(
-                                  context.rpCompact(state.spent),
-                                  context.rpCompact(state.limit),
+                              : budget == null
+                              ? l.pocketsSpentOf(rp(s.spent), rp(s.limit))
+                              : tight
+                              ? l.pocketsJarsMore(rp(s.left))
+                              : l.pocketsJarsLeft(
+                                  rp(s.left < 0 ? 0 : s.left),
+                                  rp(s.limit),
                                 ),
+                          style: tight
+                              ? const TextStyle(
+                                  color: AppColors.ink,
+                                  fontWeight: FontWeight.w600,
+                                )
+                              : null,
                         ),
-                        TextSpan(
-                          text: budget == null
-                              ? l.pocketsSetBudget
-                              : l.pocketsBudget(context.rpCompact(budget)),
-                          style: TextStyle(
-                            color: AppColors.ink,
-                            fontWeight: budget == null
-                                ? FontWeight.w600
-                                : FontWeight.w400,
-                            decoration: budget == null
-                                ? TextDecoration.underline
-                                : null,
-                            decorationColor: AppColors.ink,
+                        if (!tight)
+                          TextSpan(
+                            text: budget == null
+                                ? l.pocketsSetBudget
+                                : l.pocketsBudget(context.rpCompact(budget)),
+                            style: TextStyle(
+                              color: AppColors.ink,
+                              fontWeight: budget == null
+                                  ? FontWeight.w600
+                                  : FontWeight.w400,
+                              decoration: budget == null
+                                  ? TextDecoration.underline
+                                  : null,
+                              decorationColor: AppColors.ink,
+                            ),
                           ),
-                        ),
                       ]),
                     ),
                     maxLines: 1,

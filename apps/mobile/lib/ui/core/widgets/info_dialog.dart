@@ -53,9 +53,17 @@ Future<void> showNumbersInfo(
               ? l.infoBudgetNone
               : l.infoBudgetCalc(rp(budget), rp(spent)),
           note: null,
-          on: hero,
+          on: true, // the big figure on both beranda and kantong
         ),
-        if (share != null && left != null)
+        if (left == null)
+          (
+            title: l.infoSafeTitle,
+            value: '—',
+            calc: l.infoSafeWaiting,
+            note: null,
+            on: false,
+          )
+        else if (share != null)
           (
             title: l.infoSafeTitle,
             value: rp(share),
@@ -88,18 +96,15 @@ typedef _Card = ({
   bool on, // ink: the figure the sheet was opened from
 });
 
-/// The "?" next to a figure that opens [showNumbersInfo]; an ink "!" when the
-/// figures on screen disagree ([alert]), so it only shouts when it matters.
+/// The "?" next to a figure that opens [showNumbersInfo].
 class InfoDisc extends StatelessWidget {
   const InfoDisc({
     super.key,
     required this.onTap,
-    this.alert = false,
     this.target = 32,
   });
 
   final VoidCallback onTap;
-  final bool alert;
   final double target; // tap area around the 20px disc
 
   @override
@@ -120,15 +125,15 @@ class InfoDisc extends StatelessWidget {
               height: 20,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: alert ? AppColors.ink : AppColors.mist,
+                color: AppColors.mist,
                 shape: BoxShape.circle,
               ),
               child: Text(
-                alert ? '!' : '?',
+                '?',
                 style: AppText.micro.copyWith(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
-                  color: alert ? AppColors.paper : AppColors.muted,
+                  color: AppColors.muted,
                 ),
               ),
             ),

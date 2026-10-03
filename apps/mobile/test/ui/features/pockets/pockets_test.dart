@@ -14,6 +14,9 @@ import 'package:mibu/ui/features/pockets/views/pockets_view.dart';
 import '../../../meta.dart';
 import '../../../db.dart';
 
+/// The small line under the big figure; it opens BudgetSheet.
+final _budgetLine = RegExp(r'^(di toples|Rp\S+ dari Rp\S+ kepake)');
+
 void main() {
   Future<AppDatabase> pump(
     WidgetTester tester,
@@ -62,13 +65,14 @@ void main() {
   ) async {
     final db = await pump(tester, const Size(390, 844));
 
-    // Σ limit 3,3jt − Σ kepake 1,66jt; 14 okt → 18 days incl. today
-    expect(find.text('sisa jajan oktober'), findsOneWidget);
-    expect(find.text('1.640.000'), findsOneWidget);
-    expect(find.text('18 hari lagi'), findsOneWidget);
+    // Big figure = sisa budget, same as beranda: 8jt − 4,059jt kepake.
+    // The jars (Σ limit 3,3jt − Σ kepake 1,66jt) are the small line.
+    expect(find.text('sisa budget oktober'), findsOneWidget);
+    expect(find.text('3.941.000'), findsOneWidget);
+    expect(find.text('18 hari lagi'), findsOneWidget); // 14 okt, today incl.
     expect(
       find.text(
-        'Rp1,66jt dari Rp3,3jt kepake\uFFFCbudget Rp8jt', // dot = placeholder
+        'di toples sisa Rp1,64jt dari Rp3,3jt\uFFFCbudget Rp8jt', // dot = placeholder
         findRichText: true,
       ),
       findsOneWidget,
@@ -135,7 +139,7 @@ void main() {
     }
 
     Future<void> openSheet() async {
-      await tester.tap(find.textContaining('kepake', findRichText: true));
+      await tester.tap(find.textContaining(_budgetLine, findRichText: true));
       await tester.pumpAndSettle();
     }
 
@@ -199,7 +203,7 @@ void main() {
     tester,
   ) async {
     final db = await pump(tester, const Size(390, 844));
-    await tester.tap(find.textContaining('kepake', findRichText: true));
+    await tester.tap(find.textContaining(_budgetLine, findRichText: true));
     await tester.pumpAndSettle();
     expect(find.text('budget per periode'), findsOneWidget);
 
@@ -547,5 +551,46 @@ void main() {
       () => db.select(db.profiles).getSingle(),
     ))!;
     expect(p.pocketsIntroSeen, isTrue);
+  });
+
+  testWidgets('header: tight, kelewat, no budget (02.2n / m / b / o)', (
+    tester,
+  ) async {
+    final db = await pump(tester, const Size(390, 844));
+
+    // Budget Rp5jt: Rp941K left, the jars still promise Rp1,64jt.
+    await tester.runAsync(() => setBudgetOf(db, 5000000));
+    await settle(tester);
+    expect(find.text('sisa budget oktober'), findsOneWidget);
+    expect(find.text('941.000'), findsOneWidget);
+    expect(
+      find.text(
+        'di toples sisa Rp1,64jt, lebih dari sisa budget',
+        findRichText: true,
+      ),
+      findsOneWidget,
+    );
+
+    // Budget Rp1,5jt: gone, the big figure is how far past it.
+    await tester.runAsync(() => setBudgetOf(db, 1500000));
+    await settle(tester);
+    expect(find.text('kelewat budget oktober'), findsOneWidget);
+    expect(find.text('2.559.000'), findsOneWidget);
+
+    // No budget: what's left in the jars, and a nudge to set one.
+    await tester.runAsync(() => setBudgetOf(db, null));
+    await settle(tester);
+    expect(find.text('sisa di toples oktober'), findsOneWidget);
+    expect(find.text('1.640.000'), findsOneWidget);
+    expect(
+      find.text(
+        'Rp1,66jt dari Rp3,3jt kepake\uFFFCpasang budget',
+        findRichText: true,
+      ),
+      findsOneWidget,
+    );
+    await tester.tap(find.bySemanticsLabel('dari mana angkanya?'));
+    await settle(tester);
+    expect(find.text('nunggu budget dipasang'), findsOneWidget);
   });
 }

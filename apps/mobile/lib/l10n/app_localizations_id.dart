@@ -204,6 +204,9 @@ class AppLocalizationsId extends AppLocalizations {
       'belum ada budget. pasang dulu biar aman jajan bisa dihitung.';
 
   @override
+  String get infoSafeWaiting => 'nunggu budget dipasang';
+
+  @override
   String get infoSafeTitle => 'aman jajan per hari';
 
   @override
@@ -476,8 +479,28 @@ class AppLocalizationsId extends AppLocalizations {
   String get pocketsJarNew => 'limit';
 
   @override
-  String pocketsLeftTitle(String month) {
-    return 'sisa jajan $month';
+  String pocketsBudgetTitle(String month) {
+    return 'sisa budget $month';
+  }
+
+  @override
+  String pocketsOverTitle(String month) {
+    return 'kelewat budget $month';
+  }
+
+  @override
+  String pocketsJarsTitle(String month) {
+    return 'sisa di toples $month';
+  }
+
+  @override
+  String pocketsJarsLeft(String left, String limit) {
+    return 'di toples sisa $left dari $limit';
+  }
+
+  @override
+  String pocketsJarsMore(String left) {
+    return 'di toples sisa $left, lebih dari sisa budget';
   }
 
   @override
