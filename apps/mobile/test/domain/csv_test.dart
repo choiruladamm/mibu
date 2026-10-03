@@ -95,11 +95,26 @@ void main() {
       expect(parseTransactionsCsv(''), isNull);
     });
 
+    test('a file Excel re-saved: `;`, d/M/yyyy, H:mm and seconds', () {
+      final parsed = parseTransactionsCsv(
+        '${csvHeader.replaceAll(',', ';')}\r\n'
+        '2/10/2026;7:05;pengeluaran;25000;makan;🍜;;"a; b";\r\n'
+        '02/10/2026;07:05:59;pemasukan;4500000;gajian;💼;;;\r\n'
+        '31/02/2026;07:05;pengeluaran;25000;;;;;\r\n'
+        '2/10/2026;24:00;pengeluaran;25000;;;;;\r\n',
+      )!;
+      expect(parsed.bad, 2);
+      final [food, salary] = parsed.entries;
+      expect(food.at, DateTime(2026, 10, 2, 7, 5));
+      expect(food.note, 'a; b');
+      expect(salary.at, DateTime(2026, 10, 2, 7, 5));
+    });
+
     test('rows that don\'t read are counted, the rest still come in', () {
       final parsed = parseTransactionsCsv(
         '$head'
         '2026-02-31,07:05,pengeluaran,25000,,,,,\r\n' // no 31 feb
-        '2026-10-02,7:05,pengeluaran,25000,,,,,\r\n'
+        '2026-10-02,7:5,pengeluaran,25000,,,,,\r\n'
         '2026-10-02,07:05,transfer,25000,,,,,\r\n'
         '2026-10-02,07:05,pengeluaran,0,,,,,\r\n'
         '2026-10-02,07:05,pengeluaran,25.000,,,,,\r\n'

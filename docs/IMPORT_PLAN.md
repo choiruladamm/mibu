@@ -45,6 +45,7 @@ Fungsi murni `parseTransactionsCsv` di `domain/csv.dart`.
 - Header wajib persis `csvHeader`. Beda → tolak dengan pesan jelas, jangan nebak.
 - `jenis`: `pengeluaran` → amount negatif, `pemasukan` → positif.
 - `tanggal` + `jam` → `at` waktu lokal.
+- File yang di-save ulang Excel (id) tetap kebaca: separator `;` (dilihat dari header), tanggal `d/M/yyyy`, jam `H:mm` / `HH:mm:ss` (detik dibuang). `MM/dd` (US) nggak didukung, ambigu sama `dd/MM`.
 - `tag` dipisah spasi.
 - Baris rusak: dilewatin + dihitung, impor nggak gagal semua.
 

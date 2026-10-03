@@ -48,8 +48,9 @@ typedef CsvEntry = ({
   List<String> tags,
 });
 
-/// RFC 4180 records: quoted fields may hold commas, `""` and line breaks.
-List<List<String>> _records(String s) {
+/// RFC 4180 records split on [sep]: quoted fields may hold it, `""` and
+/// line breaks.
+List<List<String>> _records(String s, String sep) {
   final out = <List<String>>[];
   var row = <String>[];
   final f = StringBuffer();
@@ -78,7 +79,7 @@ List<List<String>> _records(String s) {
       }
     } else if (c == '"') {
       quoted = true;
-    } else if (c == ',') {
+    } else if (c == sep) {
       endField();
     } else if (c == '\n') {
       endRow();
@@ -90,20 +91,36 @@ List<List<String>> _records(String s) {
   return out;
 }
 
-final _dateRe = RegExp(r'^\d{4}-\d{2}-\d{2}$');
-final _timeRe = RegExp(r'^\d{2}:\d{2}$');
+// yyyy-MM-dd as mibu writes it, or d/M/yyyy: Excel (id) re-saves dates so.
+final _isoDate = RegExp(r'^(\d{4})-(\d{2})-(\d{2})$');
+final _idDate = RegExp(r'^(\d{1,2})/(\d{1,2})/(\d{4})$');
+// HH:mm; Excel may drop the leading 0 or add seconds (dropped here).
+final _timeRe = RegExp(r'^(\d{1,2}):(\d{2})(?::\d{2})?$');
+
+DateTime? _at(String date, String time) {
+  final ymd = switch ((_isoDate.firstMatch(date), _idDate.firstMatch(date))) {
+    (final m?, _) => [m[1]!, m[2]!, m[3]!],
+    (_, final m?) => [m[3]!, m[2]!, m[1]!],
+    _ => null,
+  };
+  final t = _timeRe.firstMatch(time);
+  if (ymd == null || t == null) return null;
+  final [y, mo, d] = [for (final v in ymd) int.parse(v)];
+  final h = int.parse(t[1]!), mi = int.parse(t[2]!);
+  final at = DateTime(y, mo, d, h, mi);
+  // DateTime rolls 31 feb over to march, 24:00 to the next day: not real.
+  return at.month == mo && at.day == d && at.hour == h && at.minute == mi
+      ? at
+      : null;
+}
+
 final _digits = RegExp(r'^\d+$');
 
 CsvEntry? _entry(List<String> r) {
   if (r.length != 9) return null;
   final [date, time, kind, nominal, category, emoji, place, note, tags] = r;
-  if (!_dateRe.hasMatch(date) || !_timeRe.hasMatch(time)) return null;
-  final at = DateTime.tryParse('${date}T$time');
-  // DateTime.parse rolls 31 feb over to march: not a real date.
-  if (at == null ||
-      DateFormat('yyyy-MM-dd HH:mm').format(at) != '$date $time') {
-    return null;
-  }
+  final at = _at(date.trim(), time.trim());
+  if (at == null) return null;
   if (!_digits.hasMatch(nominal)) return null;
   final n = int.parse(nominal);
   if (n == 0) return null;
@@ -125,9 +142,15 @@ CsvEntry? _entry(List<String> r) {
 }
 
 /// Import: [csv] as written by [transactionsCsv] → its rows, plus how many
-/// rows didn't read ([bad]). Null = not a mibu export (header differs).
+/// rows didn't read ([bad]). Null = not a mibu export (header differs). A
+/// file Excel saved with `;` (id locale) reads too.
 ({List<CsvEntry> entries, int bad})? parseTransactionsCsv(String csv) {
-  final records = _records(csv.startsWith('\u{FEFF}') ? csv.substring(1) : csv);
+  final body = csv.startsWith('\u{FEFF}') ? csv.substring(1) : csv;
+  final head = body.split('\n').first;
+  final records = _records(
+    body,
+    head.contains(';') && !head.contains(',') ? ';' : ',',
+  );
   if (records.isEmpty || records.first.join(',') != csvHeader) return null;
   final entries = <CsvEntry>[];
   var bad = 0;
