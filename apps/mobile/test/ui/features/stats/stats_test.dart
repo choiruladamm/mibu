@@ -107,6 +107,25 @@ void main() {
     expect(chip.width, greaterThan(column.width)); // not clipped to 1/12
     expect(chip.left, greaterThan(16)); // still inside the card
     expect(chip.right, lessThan(900 - 16));
+
+    // Edge bars: the pill shifts inwards instead of running off the chart.
+    for (final (range, edge) in [
+      ('1 jan – 31 jan', 'left'),
+      ('1 des – 31 des', 'right'),
+    ]) {
+      await tester.tap(find.bySemanticsLabel(RegExp('^$range')));
+      await settle(tester);
+      final col = tester.getRect(find.bySemanticsLabel(RegExp('^$range')));
+      // The pill names the period's dates.
+      final pill = tester.getRect(
+        find.textContaining(range, findRichText: true),
+      );
+      if (edge == 'left') {
+        expect(pill.left, greaterThanOrEqualTo(col.left - 0.5));
+      } else {
+        expect(pill.right, lessThanOrEqualTo(col.right + 0.5));
+      }
+    }
   });
 
   testWidgets('sekilas fits a 390 wide phone in every period', (tester) async {

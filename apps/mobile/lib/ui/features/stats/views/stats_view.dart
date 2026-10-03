@@ -428,6 +428,11 @@ class _Chart extends StatelessWidget {
                           isNow: i == s.current,
                           selected: i == selected,
                           emoji: i == peak ? emoji : null,
+                          // Edge bars pull their pill inwards: -1 = flush
+                          // left … 1 = flush right, so it stays in the card.
+                          pillAlign: s.bars.length < 2
+                              ? 0
+                              : -1 + 2 * i / (s.bars.length - 1),
                           // tahun: which dates the period covers.
                           range: s.period == StatsPeriod.year
                               ? periodRange(b.start, b.end)
@@ -528,8 +533,10 @@ class _Bar extends StatelessWidget {
     required this.label,
     required this.onTap,
     this.range,
+    this.pillAlign = 0,
   });
 
+  final double pillAlign; // pill's x alignment over the bar's column
   final String? range; // year bars: "25 sep – 22 okt" before the amount
   final int? value; // null = belum
   final double height, width;
@@ -556,12 +563,14 @@ class _Bar extends StatelessWidget {
           spacing: 10,
           children: [
             if (selected)
-              // Wider than the bar's column (a year bar is ~26 wide): centred
-              // on the bar, spilling into the card padding.
+              // Wider than the bar's column (a year bar is ~26 wide): spills
+              // sideways, shifted by [pillAlign] so the edge bars' pills
+              // don't run past the chart.
               SizedBox(
                 height: 26,
                 child: OverflowBox(
                   maxWidth: double.infinity,
+                  alignment: Alignment(pillAlign, 0),
                   child: Container(
                     height: 26,
                     padding: const EdgeInsets.symmetric(horizontal: 10),
