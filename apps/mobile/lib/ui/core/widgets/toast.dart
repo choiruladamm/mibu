@@ -32,6 +32,7 @@ void showToast(
       margin: EdgeInsets.fromLTRB(16, 0, 16, bottom),
       duration: _undoWindow,
       content: _Toast(
+        shownAt: DateTime.now(),
         icon: icon,
         title: title,
         sub: sub,
@@ -48,6 +49,7 @@ void showToast(
 
 class _Toast extends StatelessWidget {
   const _Toast({
+    required this.shownAt,
     required this.icon,
     required this.title,
     required this.sub,
@@ -58,6 +60,10 @@ class _Toast extends StatelessWidget {
   static const _enter = Duration(milliseconds: 260);
   static const _curve = Cubic(0.2, 0.9, 0.3, 1.2);
 
+  /// When it first showed. Moving to another screen rebuilds the toast in
+  /// that screen's Scaffold; timing from here keeps the entrance from
+  /// replaying (a blink) and the timer bar from refilling.
+  final DateTime shownAt;
   final ToastIcon icon;
   final String title, sub;
   final VoidCallback? onUndo;
@@ -67,8 +73,9 @@ class _Toast extends StatelessWidget {
     final l = AppLocalizations.of(context)!;
     final undo = onUndo != null;
     final trash = icon == ToastIcon.trash;
+    final elapsed = DateTime.now().difference(shownAt);
     return TweenAnimationBuilder(
-      tween: Tween(begin: 0.0, end: 1.0),
+      tween: Tween(begin: elapsed < _enter ? 0.0 : 1.0, end: 1.0),
       duration: _enter,
       curve: _curve,
       builder: (_, t, child) => Opacity(
@@ -78,11 +85,12 @@ class _Toast extends StatelessWidget {
           child: Transform.scale(scale: 0.96 + 0.04 * t, child: child),
         ),
       ),
-      child: Semantics(liveRegion: true, child: _body(l, undo, trash)),
+      child: Semantics(liveRegion: true, child: _body(l, undo, trash, elapsed)),
     );
   }
 
-  Widget _body(AppLocalizations l, bool undo, bool trash) {
+  Widget _body(AppLocalizations l, bool undo, bool trash, Duration elapsed) {
+    final left = elapsed >= _undoWindow ? Duration.zero : _undoWindow - elapsed;
     return Container(
       decoration: BoxDecoration(
         color: AppColors.ink,
@@ -185,8 +193,12 @@ class _Toast extends StatelessWidget {
               right: 0,
               bottom: 0,
               child: TweenAnimationBuilder(
-                tween: Tween(begin: 1.0, end: 0.0),
-                duration: _undoWindow,
+                // Picks up where it was after a screen change.
+                tween: Tween(
+                  begin: left.inMicroseconds / _undoWindow.inMicroseconds,
+                  end: 0.0,
+                ),
+                duration: left,
                 builder: (_, v, _) => FractionallySizedBox(
                   alignment: Alignment.centerLeft,
                   widthFactor: v,
