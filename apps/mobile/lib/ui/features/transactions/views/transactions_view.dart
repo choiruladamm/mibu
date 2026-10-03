@@ -209,7 +209,12 @@ class _Body extends ConsumerWidget {
         for (final g in s.groups)
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
-            child: _DayGroup(group: g, today: s.today, onOpen: onOpen),
+            child: _DayGroup(
+              group: g,
+              month: s.month,
+              today: s.today,
+              onOpen: onOpen,
+            ),
           ),
         const SizedBox(height: 28),
         Column(
@@ -784,11 +789,13 @@ class _Filter extends StatelessWidget {
 class _DayGroup extends StatelessWidget {
   const _DayGroup({
     required this.group,
+    required this.month,
     required this.today,
     required this.onOpen,
   });
 
   final DayGroup group;
+  final DateTime month;
   final DateTime today;
   final ValueChanged<Transaction>? onOpen;
 
@@ -840,7 +847,12 @@ class _DayGroup extends StatelessWidget {
             spacing: 2,
             children: [
               for (final t in group.rows)
-                TxRow(tx: t, onTap: onOpen == null ? null : () => onOpen!(t)),
+                TxRow(
+                  tx: t,
+                  onTap: onOpen == null ? null : () => onOpen!(t),
+                  onTagTap: (tag) =>
+                      context.push(Routes.searchIn(month, q: tag)),
+                ),
             ],
           ),
         ],

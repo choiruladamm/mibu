@@ -31,8 +31,17 @@ abstract final class Routes {
   static const stats = '/statistik';
   static const settings = '/pengaturan';
   static const search = '/cari';
-  static String searchIn(DateTime month) =>
-      '$search?month=${month.year}-${month.month.toString().padLeft(2, '0')}';
+  static String searchIn(DateTime month, {String? q}) => Uri(
+    path: search,
+    queryParameters: {
+      'month': '${month.year}-${month.month.toString().padLeft(2, '0')}',
+      'q': ?q,
+    },
+  ).toString();
+
+  /// 04.2 on this month, opened by tapping a tag chip on a TxRow (00.4b).
+  static String searchFor(String q) =>
+      Uri(path: search, queryParameters: {'q': q}).toString();
   static const addEntry = '/catat';
   static const transactions = '/transaksi';
   static String transactionsIn(DateTime month) =>
@@ -131,8 +140,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.search,
         // ?month=2026-09 from 04.1: search the month being viewed.
-        builder: (_, state) =>
-            SearchView(month: _monthParam(state.uri.queryParameters['month'])),
+        // &q=%23kantor from a TxRow tag chip: opens already searched.
+        builder: (_, state) => SearchView(
+          month: _monthParam(state.uri.queryParameters['month']),
+          initialQuery: state.uri.queryParameters['q'],
+        ),
       ),
       GoRoute(
         path: Routes.addEntry,

@@ -947,6 +947,7 @@ class _Recent extends ConsumerWidget {
                   TxRow(
                     tx: tx,
                     onTap: () => context.push(Routes.transaction(tx.id)),
+                    onTagTap: (t) => context.push(Routes.searchFor(t)),
                   ),
               ],
             ),

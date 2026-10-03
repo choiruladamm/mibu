@@ -98,8 +98,11 @@ void main() {
     expect(findMeta(['kemarin', 'sel 13 okt']), findsOneWidget);
     expect(find.text('sen 12 okt'), findsOneWidget);
     expect(find.text('-Rp1,02jt'), findsOneWidget); // kemarin: 3 entries
-    expect(findMeta(['gojek', '11.05']), findsOneWidget);
-    expect(findMeta(['dokter hewan', '17.00']), findsOneWidget);
+    // 00.4: tempat left, jam right
+    expect(findMeta(['gojek']), findsOneWidget);
+    expect(findMeta(['11:05']), findsOneWidget);
+    expect(findMeta(['dokter hewan']), findsOneWidget);
+    expect(findMeta(['17:00']), findsOneWidget);
     // 7 this month, 5 shown: the 11th stays behind the button.
     expect(find.text('semua transaksi (7)'), findsOneWidget);
     expect(find.textContaining('tokopedia'), findsNothing);

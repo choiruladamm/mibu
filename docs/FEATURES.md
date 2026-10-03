@@ -102,7 +102,7 @@ Tanda: **[diupdate]** = aturan/perilaku berubah dari design, **[perlu design]** 
 | id | komponen | catatan |
 |---|---|---|
 | 00.3 | TabBar | kapsul ngambang 4 tab + tombol + terpisah |
-| 00.4 | TxRow | emoji, label, sub, nominal, href (default 04.3) |
+| 00.4 | TxRow | 2 kolom simetris, selalu 64: kiri buat apa + chip tag (tag pertama + "+n") / tempat • catatan, kanan nominal / jam; href (default 04.3), tap chip → 04.2 |
 | 00.5 | NavHeader | back, title, sub, aksi search/close/edit |
 | 00.6 | ConfirmModal | bar dampak before/after, selalu dipasangin toast undo |
 | 00.7–8 | MonthPicker + MonthMenu | grid 3×4, mini bar per bulan, bulan depan dikunci |

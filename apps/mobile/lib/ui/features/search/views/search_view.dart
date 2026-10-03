@@ -31,10 +31,13 @@ String _name(DateTime m) => _monthName.format(m).toLowerCase();
 /// the 00.14 summary card and the first 3 hits. Idle (04.2b): terakhir
 /// dicari + coba cari; nothing found (04.2c): ways out.
 class SearchView extends ConsumerStatefulWidget {
-  const SearchView({super.key, this.month});
+  const SearchView({super.key, this.month, this.initialQuery});
 
   /// Month to search; null = this month.
   final DateTime? month;
+
+  /// Opens already searched, e.g. from a TxRow tag chip.
+  final String? initialQuery;
 
   @override
   ConsumerState<SearchView> createState() => _SearchViewState();
@@ -43,7 +46,7 @@ class SearchView extends ConsumerStatefulWidget {
 class _SearchViewState extends ConsumerState<SearchView> {
   static const _preview = 3;
 
-  final _controller = TextEditingController();
+  late final _controller = TextEditingController(text: widget.initialQuery);
   final _focus = FocusNode();
   CategoryKind? _kind; // null = semua
   int? _day; // day number in the period picked on the summary ticks
@@ -245,7 +248,7 @@ class _SearchViewState extends ConsumerState<SearchView> {
         spacing: 4,
         children: [
           for (final t in _expanded ? shown : shown.take(_preview))
-            TxRow(tx: t, withDate: true, onTap: () => open(t)),
+            TxRow(tx: t, withDate: true, onTap: () => open(t), onTagTap: _set),
         ],
       ),
       if (!_expanded && shown.length > _preview)
