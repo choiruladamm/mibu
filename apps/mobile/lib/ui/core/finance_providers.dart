@@ -94,7 +94,7 @@ final pocketsProvider = StreamProvider<List<Pocket>>(
       .watchPockets(ref.watch(currentPeriodProvider)),
 );
 
-/// 02.4 sembunyiin nominal: tap a hero amount or "intip 5 detik" (99.5d) to
+/// 02.4 sembunyiin nominal: tap a hero amount or "intip 5 detik" (04.1g) to
 /// peek; it closes after 5s, on another tap, or when routing resets it.
 class Peek extends Notifier<bool> {
   static const window = Duration(seconds: 5);

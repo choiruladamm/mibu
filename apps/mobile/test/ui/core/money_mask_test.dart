@@ -31,7 +31,7 @@ void main() {
     expect(find.text('-Rp450K|Rp4.530.000'), findsOneWidget);
     await tester.pumpWidget(probe(mask(HideAmounts.none)));
     expect(find.text('-Rp450K|Rp4.530.000'), findsOneWidget);
-    // 99.5 pemasukan aja: only figures flagged income.
+    // 02.4h pemasukan aja: only figures flagged income.
     await tester.pumpWidget(probe(mask(HideAmounts.income)));
     expect(find.text('-Rp450K|Rp•••'), findsOneWidget);
     await tester.pumpWidget(probe(mask(HideAmounts.all)));

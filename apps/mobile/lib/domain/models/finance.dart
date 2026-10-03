@@ -36,7 +36,7 @@ class PeriodPoint {
   final int amount; // kepake: spent in that period, positive
 }
 
-/// 02.4 sembunyiin nominal (99.5): what turns into `Rp•••`. [income] =
+/// 02.4 sembunyiin nominal (02.4h): what turns into `Rp•••`. [income] =
 /// pemasukan and the figures it can be read back from; [all] = everything.
 enum HideAmounts { none, income, all }
 

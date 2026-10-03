@@ -1,6 +1,6 @@
 # mibu — sembunyiin pemasukan
 
-**Dipasang 2026-10-03.** Design: board 99.5a–f + note 99.5 di artifact "mibu". Ringkasannya di [MVP_PLAN › Sembunyiin nominal](MVP_PLAN.md#sembunyiin-nominal).
+**Dipasang 2026-10-03.** Design: board 02.4h–i, 03.1e, 04.1f–h, 00.29 HideSheet + note di baris 02 (dulu proposal 99.5) di artifact "mibu". Ringkasannya di [MVP_PLAN › Sembunyiin nominal](MVP_PLAN.md#sembunyiin-nominal).
 
 ## Kenapa
 
@@ -16,20 +16,20 @@ Buka mibu di tempat rame (kantor, kafe, KRL). Pengeluaran harian aman diliat, ya
 | `income` | pemasukan aja | pemasukan + turunannya |
 | `all` | semua nominal | semua, perilaku switch lama |
 
-02.4 privasi (99.5a): switch diganti baris + ›, sub = mode sekarang. Tap → sheet 3 pilihan + contoh live 3 baris (99.5b). Simpan → toast + batalin.
+02.4 privasi (02.4h): switch diganti baris + ›, sub = mode sekarang. Tap → sheet 3 pilihan + contoh live 3 baris (02.4i). Simpan → toast + batalin.
 
 ## `pemasukan aja` nutup
 
 - nominal tiap pemasukan: TxRow (amount > 0), struk 04.3 transaksi pemasukan.
-- 04.1 kartu periode: pemasukan, sisa pemasukan (= pemasukan − pengeluaran), selisih "naik Rp… dari september", total hari yang ada gajian (99.5c).
-- 03.1 catat pemasukan (99.5f): angka yang diketik tetap keliatan, "pemasukan periode ini jadi" → `Rp•••`, bar proporsi dikosongin.
-- 04.2 cari: insight pemasukan + total hasil kalau isinya pemasukan. Ditambahin ke note 99.5 waktu build.
+- 04.1 kartu periode: pemasukan, sisa pemasukan (= pemasukan − pengeluaran), selisih "naik Rp… dari september", total hari yang ada gajian (04.1f).
+- 03.1 catat pemasukan (03.1e): angka yang diketik tetap keliatan, "pemasukan periode ini jadi" → `Rp•••`, bar proporsi dikosongin.
+- 04.2 cari: insight pemasukan + total hasil kalau isinya pemasukan. Ditambahin ke note waktu build.
 
 Nggak nutup: beranda (sisa budget, aman jajan, kepake), kantong, statistik, budget, pengeluaran per baris. Sejak [PERIOD_LEDGER_PLAN.md](PERIOD_LEDGER_PLAN.md) beranda udah nggak nampilin saldo, jadi nggak ada angka di sana yang bisa dipake ngitung gaji.
 
 ## Intip
 
-- `income`: hero beranda nggak di-mask, jadi tap hero bukan pintu intip lagi → chip "intip 5 detik" di kartu ringkasan 04.1 (99.5d).
+- `income`: hero beranda nggak di-mask, jadi tap hero bukan pintu intip lagi → chip "intip 5 detik" di kartu ringkasan 04.1 (04.1g).
 - Abis 5 detik / pindah layar → ketutup lagi. `peekProvider` + `Timer`, reset di router tetap.
 - Tanpa face id.
 

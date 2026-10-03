@@ -50,7 +50,7 @@ class AmountMask extends InheritedWidget {
 
 /// `context.rp(v)` etc.: the formatters above, masked when 02.4 says so.
 /// [income]: the figure is pemasukan or gives it away (a day total with a
-/// salary in it), so "pemasukan aja" hides it too (99.5).
+/// salary in it), so "pemasukan aja" hides it too (02.4h).
 /// Outside an [AmountMask] (tests) nothing is hidden.
 extension MoneyContext on BuildContext {
   AmountMask? get amountMask =>

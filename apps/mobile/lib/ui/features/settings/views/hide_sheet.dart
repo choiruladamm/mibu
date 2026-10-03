@@ -11,7 +11,7 @@ import '../../../core/widgets/app_emoji.dart';
 import '../../../core/widgets/sheet.dart';
 import '../../../core/widgets/toast.dart';
 
-/// 99.5 sembunyiin nominal: 3 choices → save → toast with batalin.
+/// 02.4h–i sembunyiin nominal: 3 choices → save → toast with batalin.
 Future<void> editHideAmounts(BuildContext context, WidgetRef ref) async {
   final repo = ref.read(financeRepositoryProvider);
   final saved =

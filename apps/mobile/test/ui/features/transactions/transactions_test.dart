@@ -216,7 +216,7 @@ void main() {
     await db.close();
   });
 
-  testWidgets('99.5c/d: pemasukan aja hides income figures, intip 5 detik', (
+  testWidgets('04.1f/g: pemasukan aja hides income figures, intip 5 detik', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(390, 844);

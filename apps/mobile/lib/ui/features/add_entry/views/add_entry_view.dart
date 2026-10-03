@@ -438,7 +438,7 @@ class _Impact extends ConsumerWidget {
           : l.overAmount(rupiahCompact(-left));
     } else if (s.kind == CategoryKind.income) {
       final after = (totals?.income[period.key] ?? 0) + v;
-      // 99.5f: what's being typed stays, the period total and its share don't.
+      // 03.1e: what's being typed stays, the period total and its share don't.
       if (context.hidesAmount(income: true)) {
         prev = 1;
         add = 0;

@@ -93,7 +93,7 @@ profile
   openingBalance  int               -- saldo saat atur awal (rupiah)
   openingAt       datetime          -- sejak kapan transaksi dihitung ke saldo
   payday          int               -- 1–31, 31 = akhir; lewat panjang bulan = hari terakhir
-  hideAmounts     int               -- HideAmounts: 0 none · 1 income · 2 all (99.5)
+  hideAmounts     int               -- HideAmounts: 0 none · 1 income · 2 all (02.4h)
   onboardedAt     datetime?
 
 categories
@@ -262,7 +262,7 @@ tahun:           kepake > limit → lewat budget
 
 ### Sembunyiin nominal
 
-`profile.hideAmounts` = `none` · `income` · `all` (99.5, detail di [HIDE_INCOME_PLAN.md](HIDE_INCOME_PLAN.md)). Pengaturan 02.4 → sheet 3 pilihan + contoh live, simpan → toast + batalin.
+`profile.hideAmounts` = `none` · `income` · `all` (02.4h–i, detail di [HIDE_INCOME_PLAN.md](HIDE_INCOME_PLAN.md)). Pengaturan 02.4 → sheet 3 pilihan + contoh live, simpan → toast + batalin.
 
 - `all`: semua nominal `Rp•••` (hero, kantong, TxRow, struk, budget, statistik).
 - `income` (pemasukan aja): pemasukan + yang bisa dipake ngitung gaji: TxRow / struk pemasukan, total hari yang ada pemasukan, kartu 04.1 (sisa pemasukan, pemasukan, selisihnya), ringkasan 04.2 kalau hasilnya ada pemasukan, bar "pemasukan periode ini jadi" di 03.1. Beranda, kantong, statistik, budget tetap keliatan.

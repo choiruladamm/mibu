@@ -70,7 +70,7 @@ final firstMonthProvider = StreamProvider<DateTime?>(
       .watchFirstMonth(periods: ref.watch(periodsProvider)),
 );
 
-/// [income]: a pemasukan is in it, so [total] gives it away (99.5).
+/// [income]: a pemasukan is in it, so [total] gives it away (02.4h).
 typedef DayGroup = ({
   DateTime day,
   int total,

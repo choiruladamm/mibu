@@ -498,7 +498,7 @@ class _PeriodCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
     final s = state;
-    // 99.5: income-side figures hide under "pemasukan aja" too.
+    // 04.1f: income-side figures hide under "pemasukan aja" too.
     final rp = context.rpCompact;
     String rpIn(int v) => context.rpCompact(v, income: true);
     final hideIn = context.hidesAmount(income: true);
@@ -675,7 +675,7 @@ class _PeriodCard extends StatelessWidget {
   }
 }
 
-/// 99.5d "intip 5 detik" ⇄ "tutup lagi", on the ink card.
+/// 04.1g "intip 5 detik" ⇄ "tutup lagi", on the ink card.
 class _PeekChip extends ConsumerWidget {
   const _PeekChip();
 

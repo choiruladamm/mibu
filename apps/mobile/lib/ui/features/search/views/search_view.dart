@@ -513,7 +513,7 @@ class _Summary extends StatelessWidget {
           ),
         )
         .toLowerCase();
-    // Any pemasukan in the hits: every figure here can give it away (99.5).
+    // Any pemasukan in the hits: every figure here can give it away (02.4h).
     String money(int v) => context.rpSigned(v, income: s.income > 0);
 
     final right = s.count == 1

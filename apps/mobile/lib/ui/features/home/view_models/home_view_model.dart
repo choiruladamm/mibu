@@ -119,7 +119,7 @@ class HomeState {
   int get todayNet =>
       groups.where((g) => g.day == today).fold(0, (sum, g) => sum + g.total);
 
-  /// A pemasukan today: [todayNet] gives it away (99.5).
+  /// A pemasukan today: [todayNet] gives it away (02.4h).
   bool get todayIncome => groups.any((g) => g.day == today && g.income);
 }
 

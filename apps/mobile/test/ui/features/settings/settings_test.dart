@@ -122,7 +122,7 @@ void main() {
     }
   });
 
-  testWidgets('99.5: sembunyiin nominal sheet, 3 modes, simpan + batalin', (
+  testWidgets('02.4h–i: sembunyiin nominal sheet, 3 modes, simpan + batalin', (
     tester,
   ) async {
     final db = await pump(tester);
