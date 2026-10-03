@@ -97,96 +97,114 @@ class _BudgetSheetState extends State<BudgetSheet> {
 
     return SheetFrame(
       title: l.budgetTitle,
+      sub: l.budgetSub,
       height: 640,
-      scrollable: false, // the keypad stays pinned; the top scrolls
+      scrollable: false, // fits 640 as drawn, nothing scrolls
       handleDrag: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Fits as drawn; on a shorter screen it scales down, never scrolls.
           Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    l.budgetSub,
-                    style: AppText.label.copyWith(
-                      fontSize: 14,
-                      color: AppColors.muted,
-                    ),
-                  ),
-                  if (widget.lastSpent case final spent? when spent > 0) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      l.budgetLastSpent(rupiahCompact(spent)),
-                      style: AppText.caption.copyWith(color: AppColors.muted),
-                    ),
-                  ],
-                  const SizedBox(height: 18),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: _AmountField(
-                      label: _edit ? l.budgetLabelNow : l.budgetLabelSuggest,
-                      hint: !_edit && _fresh && v > 0 ? l.budgetAutoFilled : '',
-                      value: v,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Container(
-                    constraints: const BoxConstraints(minHeight: 36),
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.mist,
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    // total limit left · ketik / belum dijatah / kurang right.
-                    child: Semantics(
-                      liveRegion: true,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        spacing: 8,
-                        children: [
-                          Flexible(
-                            child: Text(
-                              l.budgetInfoTotal(total),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppText.caption.copyWith(
-                                color: AppColors.muted,
-                              ),
-                            ),
-                          ),
-                          Flexible(
-                            child: Text(
-                              v == 0
-                                  ? l.budgetInfoType
-                                  : short
-                                  ? l.budgetInfoShort(
-                                      rupiahCompact(widget.pocketsTotal - v),
-                                    )
-                                  : l.limitFree(
-                                      rupiahCompact(v - widget.pocketsTotal),
-                                    ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.end,
-                              style: AppText.caption.copyWith(
-                                fontWeight: short
-                                    ? FontWeight.w600
-                                    : FontWeight.w400,
-                                color: short ? AppColors.ink : AppColors.muted,
-                              ),
-                            ),
-                          ),
-                        ],
+            child: LayoutBuilder(
+              builder: (_, box) => FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.topCenter,
+                child: SizedBox(
+                  width: box.maxWidth,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const SizedBox(height: 18),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: _AmountField(
+                          label: _edit
+                              ? l.budgetLabelNow
+                              : l.budgetLabelSuggest,
+                          hint: !_edit && _fresh && v > 0
+                              ? l.budgetAutoFilled
+                              : '',
+                          value: v,
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 12),
+                      Container(
+                        constraints: const BoxConstraints(minHeight: 36),
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.mist,
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        // total limit left · ketik / belum dijatah / kurang right.
+                        child: Semantics(
+                          liveRegion: true,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            spacing: 8,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  l.budgetInfoTotal(total),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppText.caption.copyWith(
+                                    color: AppColors.muted,
+                                  ),
+                                ),
+                              ),
+                              Flexible(
+                                child: Text(
+                                  v == 0
+                                      ? l.budgetInfoType
+                                      : short
+                                      ? l.budgetInfoShort(
+                                          rupiahCompact(
+                                            widget.pocketsTotal - v,
+                                          ),
+                                        )
+                                      : l.limitFree(
+                                          rupiahCompact(
+                                            v - widget.pocketsTotal,
+                                          ),
+                                        ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.end,
+                                  style: AppText.caption.copyWith(
+                                    fontWeight: short
+                                        ? FontWeight.w600
+                                        : FontWeight.w400,
+                                    color: short
+                                        ? AppColors.ink
+                                        : AppColors.muted,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      if (widget.lastSpent case final spent?
+                          when spent > 0) ...[
+                        const SizedBox(height: 8),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 18),
+                          child: Text(
+                            l.budgetLastSpent(rupiahCompact(spent)),
+                            style: AppText.caption.copyWith(
+                              color: AppColors.muted,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
@@ -215,7 +233,7 @@ class _BudgetSheetState extends State<BudgetSheet> {
               child: TextButton(
                 onPressed: () => Navigator.of(context).pop(0),
                 style: TextButton.styleFrom(
-                  minimumSize: const Size.fromHeight(AppSpace.minTouch),
+                  minimumSize: const Size.fromHeight(44),
                   foregroundColor: AppColors.ink,
                 ),
                 child: Text(

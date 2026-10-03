@@ -29,12 +29,14 @@ class SheetFrame extends StatelessWidget {
     required this.child,
     this.actions = const [],
     this.titleSize = 22,
+    this.sub,
     this.scrollable = true,
     this.close,
     this.handleDrag = false,
   });
 
   final String title;
+  final String? sub; // muted line under the title, inside the header
   final double height, titleSize;
   final List<Widget> actions;
   final Widget child;
@@ -72,12 +74,30 @@ class SheetFrame extends StatelessWidget {
                 spacing: 8,
                 children: [
                   Expanded(
-                    child: Semantics(
-                      header: true,
-                      child: Text(
-                        title,
-                        style: AppText.sheetTitle.copyWith(fontSize: titleSize),
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 4,
+                      children: [
+                        Semantics(
+                          header: true,
+                          child: Text(
+                            title,
+                            style: AppText.sheetTitle.copyWith(
+                              fontSize: titleSize,
+                            ),
+                          ),
+                        ),
+                        if (sub != null)
+                          Text(
+                            sub!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppText.label.copyWith(
+                              fontSize: 14,
+                              color: AppColors.muted,
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                   ...actions,
