@@ -56,6 +56,7 @@ class FinanceRepository {
               monthlyBudget: row!.read(budget),
               hideAmounts: r.hideAmounts,
               onboarded: r.onboardedAt != null,
+              onboardedAt: r.onboardedAt,
               recentSearches: r.recentSearches.isEmpty
                   ? const []
                   : r.recentSearches.split('\n'),
@@ -739,20 +740,26 @@ class FinanceRepository {
                 ),
               );
 
-    // No payday rule yet, or still in the period the app was set up in: now.
     final at = opening?.onboardedAt;
-    final setUpOn = at == null ? today : DateTime(at.year, at.month, at.day);
-    if (payday.isEmpty || (payday.length == 1 && current.contains(setUpOn))) {
+    final from = paydayChangeFrom(
+      [
+        for (final r in payday)
+          (
+            effectiveFrom: r.effectiveFrom,
+            mode: r.mode,
+            paydayDay: r.paydayDay,
+            shift: r.shift,
+          ),
+      ],
+      current: current,
+      today: today,
+      setUpOn: at == null ? today : DateTime(at.year, at.month, at.day),
+    );
+    if (from == null) {
       await Future.sync(() => write(payday.firstOrNull, today));
       return null;
     }
-    // Otherwise from the end of the running period; a change already queued
-    // is updated instead of stacked (its day stays: the running period can
-    // reach past it once merged with the sliver, see PAYDAY_CHANGE_PLAN).
-    final queued = payday
-        .where((r) => r.effectiveFrom.isAfter(today))
-        .lastOrNull;
-    final from = queued?.effectiveFrom ?? current.end;
+    final queued = payday.where((r) => r.effectiveFrom == from).firstOrNull;
     await Future.sync(() => write(queued, from));
     return from;
   });

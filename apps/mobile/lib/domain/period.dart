@@ -266,3 +266,37 @@ class SegmentedResolver extends PeriodResolver {
     return Period(p.id, start, end, normalDays: next.length);
   }
 }
+
+/// When a payday change made on [today] starts (02.4 tanggal gajian). Null =
+/// at once: no payday rule yet, or still in the period the app was set up in
+/// ([setUpOn]), so a wrong pick at setup is a one-tap fix. Else the change
+/// already queued (updated, not stacked: merged with its sliver the running
+/// period can reach past it) or the end of the running period [current].
+DateTime? paydayChangeFrom(
+  List<PeriodRule> rules, {
+  required Period current,
+  required DateTime today,
+  required DateTime setUpOn,
+}) {
+  final payday = [
+    for (final r in rules)
+      if (r.mode == PeriodMode.payday) r.effectiveFrom,
+  ];
+  if (payday.isEmpty || (payday.length == 1 && current.contains(setUpOn))) {
+    return null;
+  }
+  return payday.where((d) => d.isAfter(today)).firstOrNull ?? current.end;
+}
+
+/// [rules] with payday [day] from [from], replacing a rule queued that day:
+/// the periods a change would give, for the 00.24 preview.
+List<PeriodRule> withPayday(List<PeriodRule> rules, int day, DateTime from) => [
+  for (final r in rules)
+    if (r.effectiveFrom != from) r,
+  (
+    effectiveFrom: from,
+    mode: PeriodMode.payday,
+    paydayDay: day,
+    shift: PaydayShift.previousWorkday,
+  ),
+];

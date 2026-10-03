@@ -388,6 +388,12 @@ abstract class AppLocalizations {
   /// **'budget {budget} − kepake {spent}'**
   String infoBudgetCalc(String budget, String spent);
 
+  /// No description provided for @infoBudgetTransition.
+  ///
+  /// In id, this message translates to:
+  /// **'periode peralihan {days} hari, budget dihitung {days}/{normal}'**
+  String infoBudgetTransition(int days, int normal);
+
   /// No description provided for @infoSafeCalc.
   ///
   /// In id, this message translates to:
@@ -2589,6 +2595,30 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'aman jajan dihitung sampai {n} hari lagi'**
   String paydaySavedSub(int n);
+
+  /// No description provided for @paydaySavedSubMerged.
+  ///
+  /// In id, this message translates to:
+  /// **'periode ini jadi sampai {date}'**
+  String paydaySavedSubMerged(String date);
+
+  /// No description provided for @paydayPreviewRange.
+  ///
+  /// In id, this message translates to:
+  /// **'periode ini jadi {range}'**
+  String paydayPreviewRange(String range);
+
+  /// No description provided for @paydayPreviewDays.
+  ///
+  /// In id, this message translates to:
+  /// **'{n} hari'**
+  String paydayPreviewDays(int n);
+
+  /// No description provided for @paydayPreviewBudget.
+  ///
+  /// In id, this message translates to:
+  /// **'budget {amount}'**
+  String paydayPreviewBudget(String amount);
 
   /// No description provided for @settingsLimitMonthly.
   ///

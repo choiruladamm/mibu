@@ -14,6 +14,8 @@ import 'package:mibu/ui/core/widgets/app_emoji.dart';
 import 'package:mibu/ui/features/settings/views/settings_view.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
+import 'package:mibu/ui/core/widgets/meta_line.dart';
+
 import '../../../meta.dart';
 
 void main() {
@@ -257,11 +259,20 @@ void main() {
     await settle();
     await tester.tap(find.text('10'));
     await tester.pump();
+    // 14 okt: the running period ("oktober", 25 sep – 22 okt) ends 23 okt.
+    // The 10th's cycle there (9 okt – 9 nov) is "oktober" too, so it joins
+    // the running period; the preview says so before saving.
+    final preview = find.byWidgetPredicate(
+      (w) =>
+          w is MetaLine &&
+          w.spans.first.toPlainText() == 'periode ini jadi 25 sep – 9 nov',
+    );
+    expect(preview, findsOneWidget);
+    expect(tester.widget<MetaLine>(preview).spans[1].toPlainText(), '46 hari');
     await tester.tap(find.text('simpan tgl 10'));
     await settle();
 
-    // 14 okt: the running period ("oktober", 25 sep – 22 okt) ends 23 okt.
-    // The 10th starts from there; what's lived stays.
+    // The 10th starts from 23 okt; what's lived stays.
     final rows = await rules();
     expect(rows, hasLength(2));
     final queued = rows.firstWhere(
@@ -269,10 +280,7 @@ void main() {
     );
     expect((queued.mode, queued.paydayDay), (PeriodMode.payday, 10));
     expect(find.text('gajian jadi tgl 10'), findsOneWidget);
-    expect(
-      find.text('berlaku mulai jum 23 okt, periode ini selesai dulu'),
-      findsOneWidget,
-    );
+    expect(find.text('periode ini jadi sampai sen 9 nov'), findsOneWidget);
     // Today still counts to the old payday.
     expect(findMeta(['jum 23 okt', '9 hari lagi']), findsOneWidget);
 

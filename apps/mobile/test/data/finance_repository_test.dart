@@ -89,7 +89,7 @@ void main() {
         for (final p in await repo.watchPockets(oct).first) p.id: p,
       };
       expect(normal, isNotEmpty);
-    for (final p in await repo.watchPockets(t).first) {
+      for (final p in await repo.watchPockets(t).first) {
         expect(p.limit, normal[p.id]!.budget, reason: p.name);
         expect(p.budget, (p.limit * 7 / 30).round(), reason: p.name);
       }

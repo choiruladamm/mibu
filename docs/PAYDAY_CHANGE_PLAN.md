@@ -1,6 +1,6 @@
 # mibu — ganti tanggal gajian: potongan periode
 
-Keputusan 2026-10-03. Domain + data udah jalan, UI belum (lihat [Urutan kerja](#urutan-kerja)). Nambahin [PAYDAY_CYCLE_PLAN.md](PAYDAY_CYCLE_PLAN.md) (aturan 4: ganti gajian mulai periode berikutnya) dan [PERIOD_LEDGER_PLAN.md](PERIOD_LEDGER_PLAN.md) kasus 7. Di sana nama dobel ditulis "jarang, dibiarin dulu". Ternyata efeknya lebih dari sekadar nama.
+Keputusan 2026-10-03, udah jalan. Board desain 00.24 / 00.25 belum disamain. Nambahin [PAYDAY_CYCLE_PLAN.md](PAYDAY_CYCLE_PLAN.md) (aturan 4: ganti gajian mulai periode berikutnya) dan [PERIOD_LEDGER_PLAN.md](PERIOD_LEDGER_PLAN.md) kasus 7. Di sana nama dobel ditulis "jarang, dibiarin dulu". Ternyata efeknya lebih dari sekadar nama.
 
 ## Masalah
 
@@ -74,10 +74,12 @@ Hasilnya: satu nama = satu periode tetap terjaga, nggak ada bulan yang kelewat, 
 
 1. ✅ **Domain + test:** `SegmentedResolver` gabung S dobel ke P (`periodOf`, `prev`, `next`). Ditambah fungsi murni faktor periode transisi (null buat periode normal). Satu test per baris tabel [Masalah](#masalah): rentang, nama, faktor.
 2. ✅ **Data:** faktor dipakai di titik baca budget (`budgetInPeriodProvider` / `watchBudget`) dan limit kantong (`watchPockets`, `watchCategories`). Stats ikut otomatis lewat budget periode.
-3. **UI:** preview 00.24, baris penjelasan di 00.16 dan "dari mana angkanya?", copy di `app_id.arb`.
+3. ✅ **UI:** preview 00.24, baris penjelasan di 00.16 dan "dari mana angkanya?", copy di `app_id.arb`.
 
 Catatan implementasi:
 
 - `Period.normalDays` (null = periode normal) dan `prorate(amount, period)` ada di `domain/period.dart`. Angka yang diproporsi: `budgetInPeriodProvider`, budget di kantong, dan `Pocket.budget`. Sheet edit (00.16, limit, form kategori, total limit di 02.4) tetap pakai angka yang di-set: `Profile.monthlyBudget` dan `Pocket.limit`.
 - `setPayday`: kalau udah ada aturan yang antri, aturan itu yang diupdate (tanggal mulainya nggak berubah). Habis digabung, `current.end` bisa lewat dari tanggal aturan itu, jadi kalau masih pakai `current.end` bakal kebikin aturan ketiga.
-- Toast 00.24 masih bilang "berlaku mulai 23 okt, periode ini selesai dulu", padahal kalau digabung, periode ini baru selesai 10 nov. Ini dibenerin bareng preview di langkah 3.
+- Kapan ganti gajian mulai berlaku diputusin `paydayChangeFrom` (domain), dipakai `setPayday` dan preview 00.24. Preview ngitung periode lewat `withPayday` + `SegmentedResolver`, jadi angkanya sama persis dengan yang kesimpen.
+- Toast 00.24: kalau periode jalan berubah, bunyinya "periode ini jadi sampai sen 9 nov". Kalau nggak berubah, tetap "berlaku mulai …, periode ini selesai dulu".
+- 00.25: kartu sisa budget dapet catatan "periode peralihan n hari, budget dihitung n/30".

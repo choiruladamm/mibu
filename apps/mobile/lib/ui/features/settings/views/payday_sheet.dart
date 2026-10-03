@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show ProviderListenable;
 import 'package:intl/intl.dart';
 
 import '../../../../data/repositories/finance_repository.dart';
@@ -7,8 +8,11 @@ import '../../../../domain/models/finance.dart';
 import '../../../../domain/period.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../core/clock.dart';
+import '../../../core/dates.dart';
 import '../../../core/finance_providers.dart';
+import '../../../core/money.dart';
 import '../../../core/tokens.dart';
+import '../../../core/widgets/meta_line.dart';
 import '../../../core/widgets/payday_chip.dart';
 import '../../../core/widgets/sheet.dart';
 import '../../../core/widgets/toast.dart';
@@ -23,6 +27,7 @@ Future<void> editPayday(BuildContext context, WidgetRef ref) async {
   if (day == null || day == saved || !context.mounted) return;
 
   final now = ref.read(clockProvider)();
+  final after = _runningAfter(ref.read, day);
   final startsOn = await repo.setPayday(
     day,
     periods: ref.read(periodsProvider),
@@ -39,7 +44,9 @@ Future<void> editPayday(BuildContext context, WidgetRef ref) async {
     context,
     icon: ToastIcon.check,
     title: l.paydaySavedTitle(_label(l, day)),
-    sub: startsOn != null
+    sub: after != null
+        ? l.paydaySavedSubMerged(_lastDay(after))
+        : startsOn != null
         ? l.paydaySavedSubLater(_nextDay.format(startsOn).toLowerCase())
         : info.status == PaydayStatus.today
         ? l.paydaySavedSubToday
@@ -51,6 +58,33 @@ Future<void> editPayday(BuildContext context, WidgetRef ref) async {
     ),
   );
 }
+
+/// The running period if [day] were saved now, when that changes it (a
+/// sliver merged in, docs/PAYDAY_CHANGE_PLAN.md); null = it stays, or the
+/// change applies at once. [get] = ref.watch in build, ref.read otherwise.
+Period? _runningAfter(T Function<T>(ProviderListenable<T>) get, int day) {
+  final rules = get(periodRulesProvider).value;
+  if (rules == null) return null;
+  final current = get(currentPeriodProvider);
+  final today = dateOnly(get(nowProvider));
+  final at = get(profileProvider).value?.onboardedAt;
+  final from = paydayChangeFrom(
+    rules,
+    current: current,
+    today: today,
+    setUpOn: at == null ? today : dateOnly(at),
+  );
+  if (from == null) return null;
+  final after = SegmentedResolver([
+    calendarBase,
+    ...withPayday(rules, day, from),
+  ], salaries: get(salaryDatesProvider).value ?? const []).periodOf(today);
+  return after == current ? null : after;
+}
+
+String _lastDay(Period p) => _nextDay
+    .format(DateTime(p.end.year, p.end.month, p.end.day - 1))
+    .toLowerCase();
 
 /// Legacy 0 (akhir) reads as 31.
 int _normal(int day) => day == 0 ? 31 : day;
@@ -82,6 +116,8 @@ class _PaydaySheetState extends ConsumerState<_PaydaySheet> {
     final changed = _sel != widget.saved;
     final custom = !paydayChoices.contains(_sel);
     final muted = AppText.label.copyWith(color: AppColors.muted);
+    final after = changed ? _runningAfter(ref.watch, _sel) : null;
+    final budget = ref.watch(profileProvider).value?.monthlyBudget;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 10, 20, 28),
@@ -189,6 +225,20 @@ class _PaydaySheetState extends ConsumerState<_PaydaySheet> {
             inText: today ? l.paydayNextToday : l.paydayNextIn(info.daysToNext),
             shift: _shiftNote(l, _sel, info.next),
           ),
+          if (after != null) ...[
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: MetaLine([
+                l.paydayPreviewRange(periodRange(after.start, after.end)),
+                l.paydayPreviewDays(after.length),
+                if (budget != null)
+                  l.paydayPreviewBudget(
+                    context.rpCompact(prorate(budget, after)),
+                  ),
+              ], style: AppText.label.copyWith(fontWeight: FontWeight.w500)),
+            ),
+          ],
           const SizedBox(height: 12),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),

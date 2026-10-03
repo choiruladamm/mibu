@@ -52,7 +52,9 @@ Future<void> showNumbersInfo(
           calc: budget == null
               ? l.infoBudgetNone
               : l.infoBudgetCalc(rp(budget), rp(spent)),
-          note: null,
+          note: budget != null && period.normalDays != null
+              ? l.infoBudgetTransition(period.length, period.normalDays!)
+              : null,
           on: true, // the big figure on both beranda and kantong
         ),
         if (left == null)

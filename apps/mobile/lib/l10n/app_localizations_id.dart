@@ -180,6 +180,11 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
+  String infoBudgetTransition(int days, int normal) {
+    return 'periode peralihan $days hari, budget dihitung $days/$normal';
+  }
+
+  @override
   String infoSafeCalc(String left, int days) {
     return 'sisa budget $left ÷ $days hari sampai gajian';
   }
@@ -1582,6 +1587,26 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String paydaySavedSub(int n) {
     return 'aman jajan dihitung sampai $n hari lagi';
+  }
+
+  @override
+  String paydaySavedSubMerged(String date) {
+    return 'periode ini jadi sampai $date';
+  }
+
+  @override
+  String paydayPreviewRange(String range) {
+    return 'periode ini jadi $range';
+  }
+
+  @override
+  String paydayPreviewDays(int n) {
+    return '$n hari';
+  }
+
+  @override
+  String paydayPreviewBudget(String amount) {
+    return 'budget $amount';
   }
 
   @override

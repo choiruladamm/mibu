@@ -29,11 +29,11 @@ final recentPicksProvider = StreamProvider<List<RecentPick>>(
 
 /// Budget periods (fase 0). Calendar months until the rules load, so screens
 /// never wait on it.
-final _periodRules = StreamProvider<List<PeriodRule>>(
+final periodRulesProvider = StreamProvider<List<PeriodRule>>(
   (ref) => ref.watch(financeRepositoryProvider).watchPeriodRules(),
 );
 final periodsProvider = Provider<PeriodResolver>((ref) {
-  final rules = ref.watch(_periodRules).value;
+  final rules = ref.watch(periodRulesProvider).value;
   if (rules == null) return const CalendarMonthResolver();
   return SegmentedResolver([
     calendarBase,
@@ -47,7 +47,8 @@ final activePaydayProvider = Provider<int>((ref) {
   final now = ref.watch(nowProvider);
   final today = DateTime(now.year, now.month, now.day);
   final inForce = [
-    for (final r in ref.watch(_periodRules).value ?? const <PeriodRule>[])
+    for (final r
+        in ref.watch(periodRulesProvider).value ?? const <PeriodRule>[])
       if (r.mode == PeriodMode.payday && !r.effectiveFrom.isAfter(today)) r,
   ]..sort((a, b) => a.effectiveFrom.compareTo(b.effectiveFrom));
   return inForce.isNotEmpty
