@@ -54,14 +54,16 @@ void main() {
     tester,
   ) async {
     await pump(tester);
-    expect(findMeta(['keluar bulan ini', 'oktober 2026']), findsOneWidget);
-    expect(find.text('Rp4,06jt'), findsOneWidget);
+    expect(findMeta(['kepake bulan ini', '1 okt – 31 okt']), findsOneWidget);
+    // Total, and the 8–14 okt bar holds all of it (paling boros).
+    expect(find.text('Rp4,06jt'), findsWidgets);
     expect(find.text('↑ Rp1,45jt vs september'), findsOneWidget);
     expect(find.text('aman'), findsOneWidget);
     expect(find.text('masih ada Rp3,94jt buat 17 hari lagi'), findsOneWidget);
-    expect(findMeta(['budget Rp8jt', 'jatah sebulan']), findsOneWidget);
-    expect(find.text('dari 3 minggu'), findsOneWidget);
-    // sekilas: the biggest bar (5–11 okt: tokopedia) and why
+    expect(findMeta(['budget Rp8jt', 'jatah periode ini']), findsOneWidget);
+    // Bars run 7 days from the period's first day: 1–7, 8–14 okt so far.
+    expect(find.text('dari 2 minggu'), findsOneWidget);
+    // sekilas: the biggest bar (8–14 okt: tokopedia) and why
     expect(find.text('paling boros'), findsOneWidget);
     expect(find.text('gara-gara'), findsOneWidget);
     expect(find.text('belanja'), findsNWidgets(2)); // gara-gara + larinya
@@ -73,7 +75,7 @@ void main() {
     await pump(tester);
     await tester.tap(find.text('minggu'));
     await settle(tester);
-    expect(findMeta(['keluar minggu ini', '12 – 18 okt']), findsOneWidget);
+    expect(findMeta(['kepake minggu ini', '12 – 18 okt']), findsOneWidget);
     expect(find.text('Rp1,5jt'), findsOneWidget);
     expect(find.text('selasa'), findsOneWidget); // paling boros
     expect(find.text('rata²/hari'), findsOneWidget);
@@ -82,7 +84,7 @@ void main() {
 
     await tester.tap(find.bySemanticsLabel('periode sebelumnya'));
     await settle(tester);
-    expect(findMeta(['keluar', '5 – 11 okt']), findsOneWidget);
+    expect(findMeta(['kepake', '5 – 11 okt']), findsOneWidget);
     expect(find.text('Rp2,56jt'), findsNWidgets(2)); // total + boros (min 11)
     expect(find.text('lewat budget'), findsOneWidget); // > Rp1,81jt
   });
@@ -93,11 +95,14 @@ void main() {
     await pump(tester);
     await tester.tap(find.text('tahun'));
     await settle(tester);
-    await tester.tap(find.bySemanticsLabel(RegExp('^september, ')));
+    await tester.tap(find.bySemanticsLabel(RegExp('^1 sep – 30 sep, ')));
     await settle(tester);
-    final chip = tester.getRect(find.text('Rp2,61jt').first);
+    // The pill names the period's dates before the amount.
+    final chip = tester.getRect(
+      find.textContaining('Rp2,61jt', findRichText: true).first,
+    );
     final column = tester.getRect(
-      find.bySemanticsLabel(RegExp('^september, ')),
+      find.bySemanticsLabel(RegExp('^1 sep – 30 sep, ')),
     );
     expect(chip.width, greaterThan(column.width)); // not clipped to 1/12
     expect(chip.left, greaterThan(16)); // still inside the card
@@ -155,11 +160,15 @@ void main() {
     // Oktober gets Rp5jt; september still has the Rp8jt from july on.
     await tester.runAsync(() => setBudgetOf(db, 5000000));
     await settle(tester);
-    expect(findMeta(['budget Rp5jt', 'jatah sebulan']), findsOneWidget);
+    expect(findMeta(['budget Rp5jt', 'jatah periode ini']), findsOneWidget);
 
     await tester.tap(find.bySemanticsLabel('periode sebelumnya'));
     await settle(tester);
-    expect(findMeta(['budget Rp8jt', 'jatah sebulan']), findsOneWidget);
+    expect(
+      findMeta(['budget Rp8jt', 'jatah periode september']),
+      findsOneWidget,
+    );
+    expect(findMeta(['kepake september', '1 sep – 30 sep']), findsOneWidget);
   });
 }
 

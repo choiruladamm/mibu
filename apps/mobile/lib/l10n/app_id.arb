@@ -1269,10 +1269,12 @@
   "statsYear": "tahun",
   "statsPrev": "periode sebelumnya",
   "statsNext": "periode berikutnya",
-  "statsOut": "keluar",
-  "statsOutWeek": "keluar minggu ini",
-  "statsOutMonth": "keluar bulan ini",
-  "statsOutYear": "keluar tahun ini",
+  "statsOut": "kepake",
+  "statsOutPast": "kepake {month}",
+  "@statsOutPast": {"placeholders": {"month": {"type": "String"}}},
+  "statsOutWeek": "kepake minggu ini",
+  "statsOutMonth": "kepake bulan ini",
+  "statsOutYear": "kepake tahun ini",
   "statsUp": "↑ {amount} vs {than}",
   "@statsUp": {
     "placeholders": {
@@ -1297,7 +1299,7 @@
   },
   "statsLastWeek": "minggu lalu",
   "statsWeekBefore": "minggu sebelumnya",
-  "statsPerMonth": "rata² {amount} / bulan",
+  "statsPerMonth": "rata² {amount} / periode",
   "@statsPerMonth": {
     "placeholders": {
       "amount": {
@@ -1320,7 +1322,7 @@
   "statsLow": "paling hemat",
   "statsAvgDay": "rata²/hari",
   "statsAvgWeek": "rata²/minggu",
-  "statsAvgMonth": "rata²/bulan",
+  "statsAvgMonth": "rata²/periode",
   "statsFromDays": "dari {n} hari",
   "@statsFromDays": {
     "placeholders": {
@@ -1337,7 +1339,7 @@
       }
     }
   },
-  "statsFromMonths": "dari {n} bulan",
+  "statsFromMonths": "dari {n} periode",
   "@statsFromMonths": {
     "placeholders": {
       "n": {
@@ -1355,14 +1357,18 @@
     }
   },
   "statsLimitWeek": "jatah seminggu",
-  "statsLimitMonth": "jatah sebulan",
+  "statsLimitMonth": "jatah periode ini",
+  "statsLimitPast": "jatah periode {month}",
+  "@statsLimitPast": {"placeholders": {"month": {"type": "String"}}},
   "statsLimitYear": "jatah setahun",
   "statsPaceOver": "lewat budget",
   "statsPaceNear": "hampir abis",
   "statsPaceUnder": "di bawah budget",
   "statsPaceFine": "aman",
   "statsScopeWeek": "minggu ini",
-  "statsScopeMonth": "bulan ini",
+  "statsScopeMonth": "periode ini",
+  "statsScopePeriod": "periode {month}",
+  "@statsScopePeriod": {"placeholders": {"month": {"type": "String"}}},
   "statsOverBy": "kebablasan {amount} dari budget {scope}",
   "@statsOverBy": {
     "placeholders": {

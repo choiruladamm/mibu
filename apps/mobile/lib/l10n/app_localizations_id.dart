@@ -1665,16 +1665,21 @@ class AppLocalizationsId extends AppLocalizations {
   String get statsNext => 'periode berikutnya';
 
   @override
-  String get statsOut => 'keluar';
+  String get statsOut => 'kepake';
 
   @override
-  String get statsOutWeek => 'keluar minggu ini';
+  String statsOutPast(String month) {
+    return 'kepake $month';
+  }
 
   @override
-  String get statsOutMonth => 'keluar bulan ini';
+  String get statsOutWeek => 'kepake minggu ini';
 
   @override
-  String get statsOutYear => 'keluar tahun ini';
+  String get statsOutMonth => 'kepake bulan ini';
+
+  @override
+  String get statsOutYear => 'kepake tahun ini';
 
   @override
   String statsUp(String amount, String than) {
@@ -1694,7 +1699,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String statsPerMonth(String amount) {
-    return 'rata² $amount / bulan';
+    return 'rata² $amount / periode';
   }
 
   @override
@@ -1742,7 +1747,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get statsAvgWeek => 'rata²/minggu';
 
   @override
-  String get statsAvgMonth => 'rata²/bulan';
+  String get statsAvgMonth => 'rata²/periode';
 
   @override
   String statsFromDays(int n) {
@@ -1756,7 +1761,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String statsFromMonths(int n) {
-    return 'dari $n bulan';
+    return 'dari $n periode';
   }
 
   @override
@@ -1771,7 +1776,12 @@ class AppLocalizationsId extends AppLocalizations {
   String get statsLimitWeek => 'jatah seminggu';
 
   @override
-  String get statsLimitMonth => 'jatah sebulan';
+  String get statsLimitMonth => 'jatah periode ini';
+
+  @override
+  String statsLimitPast(String month) {
+    return 'jatah periode $month';
+  }
 
   @override
   String get statsLimitYear => 'jatah setahun';
@@ -1792,7 +1802,12 @@ class AppLocalizationsId extends AppLocalizations {
   String get statsScopeWeek => 'minggu ini';
 
   @override
-  String get statsScopeMonth => 'bulan ini';
+  String get statsScopeMonth => 'periode ini';
+
+  @override
+  String statsScopePeriod(String month) {
+    return 'periode $month';
+  }
 
   @override
   String statsOverBy(String amount, String scope) {

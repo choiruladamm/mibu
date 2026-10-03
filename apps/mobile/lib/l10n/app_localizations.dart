@@ -2725,25 +2725,31 @@ abstract class AppLocalizations {
   /// No description provided for @statsOut.
   ///
   /// In id, this message translates to:
-  /// **'keluar'**
+  /// **'kepake'**
   String get statsOut;
+
+  /// No description provided for @statsOutPast.
+  ///
+  /// In id, this message translates to:
+  /// **'kepake {month}'**
+  String statsOutPast(String month);
 
   /// No description provided for @statsOutWeek.
   ///
   /// In id, this message translates to:
-  /// **'keluar minggu ini'**
+  /// **'kepake minggu ini'**
   String get statsOutWeek;
 
   /// No description provided for @statsOutMonth.
   ///
   /// In id, this message translates to:
-  /// **'keluar bulan ini'**
+  /// **'kepake bulan ini'**
   String get statsOutMonth;
 
   /// No description provided for @statsOutYear.
   ///
   /// In id, this message translates to:
-  /// **'keluar tahun ini'**
+  /// **'kepake tahun ini'**
   String get statsOutYear;
 
   /// No description provided for @statsUp.
@@ -2773,7 +2779,7 @@ abstract class AppLocalizations {
   /// No description provided for @statsPerMonth.
   ///
   /// In id, this message translates to:
-  /// **'rata² {amount} / bulan'**
+  /// **'rata² {amount} / periode'**
   String statsPerMonth(String amount);
 
   /// No description provided for @statsNowWeek.
@@ -2863,7 +2869,7 @@ abstract class AppLocalizations {
   /// No description provided for @statsAvgMonth.
   ///
   /// In id, this message translates to:
-  /// **'rata²/bulan'**
+  /// **'rata²/periode'**
   String get statsAvgMonth;
 
   /// No description provided for @statsFromDays.
@@ -2881,7 +2887,7 @@ abstract class AppLocalizations {
   /// No description provided for @statsFromMonths.
   ///
   /// In id, this message translates to:
-  /// **'dari {n} bulan'**
+  /// **'dari {n} periode'**
   String statsFromMonths(int n);
 
   /// No description provided for @statsTrack.
@@ -2905,8 +2911,14 @@ abstract class AppLocalizations {
   /// No description provided for @statsLimitMonth.
   ///
   /// In id, this message translates to:
-  /// **'jatah sebulan'**
+  /// **'jatah periode ini'**
   String get statsLimitMonth;
+
+  /// No description provided for @statsLimitPast.
+  ///
+  /// In id, this message translates to:
+  /// **'jatah periode {month}'**
+  String statsLimitPast(String month);
 
   /// No description provided for @statsLimitYear.
   ///
@@ -2947,8 +2959,14 @@ abstract class AppLocalizations {
   /// No description provided for @statsScopeMonth.
   ///
   /// In id, this message translates to:
-  /// **'bulan ini'**
+  /// **'periode ini'**
   String get statsScopeMonth;
+
+  /// No description provided for @statsScopePeriod.
+  ///
+  /// In id, this message translates to:
+  /// **'periode {month}'**
+  String statsScopePeriod(String month);
 
   /// No description provided for @statsOverBy.
   ///

@@ -7,8 +7,8 @@ enum StatsPeriod { week, month, year }
 /// Half-open window [start, end), local midnights.
 typedef Span = ({DateTime start, DateTime end});
 
-/// The [p] window holding [d]: Monday week, budget period ([periods],
-/// calendar month in v1), calendar year.
+/// The [p] window holding [d]: Monday week, budget period ([periods]), and
+/// a year of 12 budget periods (januari … desember by name).
 Span spanOf(
   StatsPeriod p,
   DateTime d, {
@@ -19,10 +19,16 @@ Span spanOf(
     end: DateTime(d.year, d.month, d.day - d.weekday + 8),
   ),
   StatsPeriod.month => _span(periods.periodOf(d)),
-  StatsPeriod.year => (start: DateTime(d.year), end: DateTime(d.year + 1)),
+  StatsPeriod.year => _yearSpan(periods.periodOf(d).key.year, periods),
 };
 
 Span _span(Period p) => (start: p.start, end: p.end);
+
+/// The periods named januari … desember [y]: gajian 25 → 25 des – 24 des.
+Span _yearSpan(int y, PeriodResolver periods) => (
+  start: periods.periodForMonth(DateTime(y)).start,
+  end: periods.periodForMonth(DateTime(y, 12)).end,
+);
 
 /// The window [by] periods after [s] (negative = earlier).
 Span shiftSpan(
@@ -38,26 +44,33 @@ Span shiftSpan(
     }
     return _span(q);
   }
-  return spanOf(p, switch (p) {
-    StatsPeriod.week => DateTime(
-      s.start.year,
-      s.start.month,
-      s.start.day + 7 * by,
-    ),
-    _ => DateTime(s.start.year + by),
-  });
+  if (p == StatsPeriod.year) {
+    return _yearSpan(periods.periodOf(s.start).key.year + by, periods);
+  }
+  return spanOf(p, DateTime(s.start.year, s.start.month, s.start.day + 7 * by));
 }
 
-/// One bar per day (week), per Monday week clipped to the month (month:
-/// 1–4, 5–11 …), per month (year).
-List<Span> barsOf(StatsPeriod p, Span s) {
+/// One bar per day (week), per 7 days from the period's first day (month:
+/// 25 sep, 2 okt … — 29–31 days make a short 5th), per budget period
+/// (year: januari … desember).
+List<Span> barsOf(
+  StatsPeriod p,
+  Span s, {
+  PeriodResolver periods = const CalendarMonthResolver(),
+}) {
+  if (p == StatsPeriod.year) {
+    final y = periods.periodOf(s.start).key.year;
+    return [
+      for (var m = 1; m <= 12; m++)
+        _span(periods.periodForMonth(DateTime(y, m))),
+    ];
+  }
   final bars = <Span>[];
   var a = s.start;
   while (a.isBefore(s.end)) {
     var b = switch (p) {
       StatsPeriod.week => DateTime(a.year, a.month, a.day + 1),
-      StatsPeriod.month => DateTime(a.year, a.month, a.day - a.weekday + 8),
-      StatsPeriod.year => DateTime(a.year, a.month + 1),
+      _ => DateTime(a.year, a.month, a.day + 7),
     };
     if (b.isAfter(s.end)) b = s.end;
     bars.add((start: a, end: b));
@@ -95,8 +108,9 @@ class Stats {
     required this.span,
     required DateTime today,
     int? budget,
+    List<int?> yearBudgets = const [],
     PeriodResolver periods = const CalendarMonthResolver(),
-  }) : bars = barsOf(period, span),
+  }) : bars = barsOf(period, span, periods: periods),
        monthKey = periods.periodOf(span.start).key {
     final day = DateTime(today.year, today.month, today.day);
     _expenses = [
@@ -132,14 +146,20 @@ class Stats {
     left = length - elapsed;
 
     final b = budget;
-    limit = b == null || b <= 0
+    final set = [
+      for (final y in yearBudgets)
+        if (y != null && y > 0) y,
+    ];
+    limit = period == StatsPeriod.year
+        // Σ each period's own budget (ahead of now: today's, carried on).
+        ? (set.isEmpty ? null : set.fold<int>(0, (a, v) => a + v))
+        : b == null || b <= 0
         ? null
         : switch (period) {
             // Week crossing periods: the period of its Monday.
             StatsPeriod.week =>
               (b * 7 / periods.periodOf(span.start).length).round(),
-            StatsPeriod.month => b,
-            StatsPeriod.year => b * 12,
+            _ => b,
           };
   }
 

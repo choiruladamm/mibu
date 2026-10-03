@@ -9,6 +9,7 @@ import '../../../../domain/stats.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../routing/router.dart';
 import '../../../core/clock.dart';
+import '../../../core/dates.dart';
 import '../../../core/dashed.dart';
 import '../../../core/finance_providers.dart';
 import '../../../core/money.dart';
@@ -81,12 +82,22 @@ class _StatsViewState extends ConsumerState<StatsView> {
           ),
         )
         .value;
+    // tahun: each of its 12 periods' own budget, summed into "jatah setahun".
+    final yearBudgets = _period != StatsPeriod.year
+        ? const <int?>[]
+        : [
+            for (final b in barsOf(_period, span, periods: periods))
+              ref
+                  .watch(budgetInPeriodProvider(periods.periodOf(b.start)))
+                  .value,
+          ];
     final s = Stats(
       entries,
       period: _period,
       span: span,
       today: now,
       budget: budget,
+      yearBudgets: yearBudgets,
       periods: periods,
     );
     final prev = shiftSpan(_period, span, -1, periods: periods);
@@ -238,7 +249,9 @@ class _Hero extends StatelessWidget {
     final s = stats;
     final isNow = s.current >= 0;
     final caption = !isNow
-        ? l.statsOut
+        ? (s.period == StatsPeriod.month
+              ? l.statsOutPast(_lower(_monthFull, s.monthKey))
+              : l.statsOut)
         : switch (s.period) {
             StatsPeriod.week => l.statsOutWeek,
             StatsPeriod.month => l.statsOutMonth,
@@ -246,8 +259,7 @@ class _Hero extends StatelessWidget {
           };
     final range = switch (s.period) {
       StatsPeriod.week => _range(s.span),
-      StatsPeriod.month =>
-        '${_lower(_monthFull, s.monthKey)} ${s.monthKey.year}',
+      StatsPeriod.month => periodRange(s.span.start, s.span.end),
       StatsPeriod.year =>
         '${_lower(_monthShort, DateTime(2000))} – '
             '${_lower(_monthShort, DateTime(2000, 12))} ${s.span.start.year}',
@@ -349,15 +361,19 @@ class _Chart extends StatelessWidget {
 
     String label(Span b) => switch (s.period) {
       StatsPeriod.week => _lower(_weekday, b.start),
-      StatsPeriod.month =>
-        '${b.start.day}–${DateTime(b.end.year, b.end.month, b.end.day - 1).day}',
-      StatsPeriod.year => _lower(_monthFull, b.start)[0],
+      // The week's first day: 25 sep · 2 okt · 9 okt …
+      StatsPeriod.month => _lower(_dayMonth, b.start),
+      // Bar i is the period named after month i+1 (januari starts in des).
+      StatsPeriod.year => _lower(
+        _monthFull,
+        DateTime(2000, s.bars.indexOf(b) + 1),
+      )[0],
     };
     String full(Span b) => switch (s.period) {
       StatsPeriod.week =>
         '${_lower(_weekdayFull, b.start)} ${_lower(_dayMonth, b.start)}',
       StatsPeriod.month => _range(b),
-      StatsPeriod.year => _lower(_monthFull, b.start),
+      StatsPeriod.year => periodRange(b.start, b.end),
     };
     final small = AppText.caption.copyWith(
       fontSize: 12,
@@ -412,6 +428,10 @@ class _Chart extends StatelessWidget {
                           isNow: i == s.current,
                           selected: i == selected,
                           emoji: i == peak ? emoji : null,
+                          // tahun: which dates the period covers.
+                          range: s.period == StatsPeriod.year
+                              ? periodRange(b.start, b.end)
+                              : null,
                           label:
                               '${full(b)}, ${switch (s.spent[i]) {
                                 null => l.statsNotYet,
@@ -507,8 +527,10 @@ class _Bar extends StatelessWidget {
     required this.emoji,
     required this.label,
     required this.onTap,
+    this.range,
   });
 
+  final String? range; // year bars: "25 sep – 22 okt" before the amount
   final int? value; // null = belum
   final double height, width;
   final bool isNow, selected;
@@ -548,10 +570,22 @@ class _Bar extends StatelessWidget {
                       color: AppColors.paper,
                       borderRadius: BorderRadius.circular(13),
                     ),
-                    child: Text(
-                      future ? l.statsNotYet : context.rpCompact(value!),
-                      maxLines: 1,
-                      softWrap: false,
+                    child: MetaLine.rich(
+                      [
+                        if (range case final r?)
+                          TextSpan(
+                            text: r,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w400,
+                              color: AppColors.muted,
+                            ),
+                          ),
+                        TextSpan(
+                          text: future
+                              ? l.statsNotYet
+                              : context.rpCompact(value!),
+                        ),
+                      ],
                       style: AppText.caption.copyWith(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -929,7 +963,9 @@ class _Pace extends StatelessWidget {
           }
         : switch (s.period) {
             StatsPeriod.week => _range(s.span),
-            StatsPeriod.month => _lower(_monthFull, s.monthKey),
+            StatsPeriod.month => l.statsScopePeriod(
+              _lower(_monthFull, s.monthKey),
+            ),
             StatsPeriod.year => '${s.span.start.year}',
           };
     final headline = switch (pace) {
@@ -976,7 +1012,10 @@ class _Pace extends StatelessWidget {
                         l.statsBudget(context.rpCompact(limit)),
                         switch (s.period) {
                           StatsPeriod.week => l.statsLimitWeek,
-                          StatsPeriod.month => l.statsLimitMonth,
+                          StatsPeriod.month when isNow => l.statsLimitMonth,
+                          StatsPeriod.month => l.statsLimitPast(
+                            _lower(_monthFull, s.monthKey),
+                          ),
                           StatsPeriod.year => l.statsLimitYear,
                         },
                       ],

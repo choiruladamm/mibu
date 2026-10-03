@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mibu/domain/models/finance.dart';
+import 'package:mibu/domain/period.dart';
 import 'package:mibu/domain/stats.dart';
 
 void main() {
@@ -35,14 +36,14 @@ void main() {
     expect(span(spanOf(StatsPeriod.year, today)), '1/1–1/1');
   });
 
-  test('bars: 7 days, month weeks clipped to the month, 12 months', () {
+  test('bars: 7 days, month = 7-day runs from its first day, 12 periods', () {
     final month = spanOf(StatsPeriod.month, today);
     expect(barsOf(StatsPeriod.month, month).map(span), [
-      '10/1–10/5', // 1–4 (thu–sun)
-      '10/5–10/12',
-      '10/12–10/19',
-      '10/19–10/26',
-      '10/26–11/1',
+      '10/1–10/8', // from the period's first day, not Monday weeks
+      '10/8–10/15',
+      '10/15–10/22',
+      '10/22–10/29',
+      '10/29–11/1', // 31 days → a short 5th
     ]);
     expect(
       barsOf(StatsPeriod.week, spanOf(StatsPeriod.week, today)),
@@ -120,6 +121,8 @@ void main() {
       span: spanOf(p, today),
       today: today,
       budget: 8000000,
+      // tahun: Σ each period's own budget.
+      yearBudgets: List.filled(12, 8000000),
     );
 
     final w = of(StatsPeriod.week, 1000000);
@@ -146,5 +149,41 @@ void main() {
       today: today,
     );
     expect((s.elapsed, s.left, s.current, s.timePct), (30, 0, -1, 100));
+  });
+
+  test('year = 12 payday periods; jatah setahun = Σ their own budgets', () {
+    final p25 = SegmentedResolver([
+      (
+        effectiveFrom: DateTime(2020),
+        mode: PeriodMode.payday,
+        paydayDay: 25,
+        shift: PaydayShift.none,
+      ),
+    ]);
+    final y = spanOf(StatsPeriod.year, today, periods: p25);
+    // "januari" starts 25 des, "desember" ends 24 des.
+    expect((y.start, y.end), (DateTime(2025, 12, 25), DateTime(2026, 12, 25)));
+    final bars = barsOf(StatsPeriod.year, y, periods: p25);
+    expect(bars, hasLength(12));
+    expect(bars[9].start, DateTime(2026, 9, 25)); // "oktober"
+    expect(
+      shiftSpan(StatsPeriod.year, y, -1, periods: p25).start,
+      DateTime(2024, 12, 25),
+    );
+
+    // Periods without a budget add nothing; none at all = no limit.
+    Stats of(List<int?> b) => Stats(
+      const [],
+      period: StatsPeriod.year,
+      span: y,
+      today: today,
+      yearBudgets: b,
+      periods: p25,
+    );
+    expect(
+      of([...List.filled(6, null), ...List.filled(6, 8000000)]).limit,
+      48000000,
+    );
+    expect(of(List.filled(12, null)).limit, isNull);
   });
 }
