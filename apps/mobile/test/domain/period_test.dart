@@ -186,6 +186,31 @@ void main() {
     }
   });
 
+  test('weekend tetap from the next period: running one ends on Sunday', () {
+    PeriodRule pay(DateTime from, PaydayShift shift) => (
+      effectiveFrom: from,
+      mode: PeriodMode.payday,
+      paydayDay: 25,
+      shift: shift,
+    );
+    // 25 okt 2026 is a Sunday: jumat ends the period on 23 okt; switching to
+    // tetap from there gives a "oktober" sliver that joins it, and the result
+    // is just the tetap cycle: a normal period, nothing prorated.
+    final r = SegmentedResolver([
+      calendarBase,
+      pay(periodsFromStart, PaydayShift.previousWorkday),
+      pay(DateTime(2026, 10, 23), PaydayShift.none),
+    ]);
+    final p = r.periodOf(DateTime(2026, 10, 14));
+    expect(
+      (p.id, p.start, p.end),
+      ('2026-10', DateTime(2026, 9, 25), DateTime(2026, 10, 25)),
+    );
+    expect(p.normalDays, isNull);
+    expect(r.next(p).start, DateTime(2026, 10, 25));
+    tiles(r);
+  });
+
   test('prorate: transitions scale by length ÷ normal, others untouched', () {
     final normal = Period(
       '2026-10',

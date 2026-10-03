@@ -1,6 +1,6 @@
 # mibu — gajian jatuh weekend: jumat atau tetap
 
-Keputusan 2026-10-03. Desain udah di board (00.24, 02.4j–k), kode belum. Nambahin [PAYDAY_CYCLE_PLAN.md](PAYDAY_CYCLE_PLAN.md) (v1: weekend digeser ke jumat otomatis) dan pakai mekanisme ganti tanggal di [PAYDAY_CHANGE_PLAN.md](PAYDAY_CHANGE_PLAN.md).
+Keputusan 2026-10-03, udah jalan (board 00.24, 02.4j–k). Nambahin [PAYDAY_CYCLE_PLAN.md](PAYDAY_CYCLE_PLAN.md) (v1: weekend digeser ke jumat otomatis) dan pakai mekanisme ganti tanggal di [PAYDAY_CHANGE_PLAN.md](PAYDAY_CHANGE_PLAN.md).
 
 ## Masalah
 
@@ -21,7 +21,7 @@ Gajian yang jatuh sabtu / minggu selalu dihitung jumat sebelumnya (`PaydayShift.
 
 **00.24 PaydaySheet**
 
-- Di bawah kartu ink "gajian berikutnya" ada label kecil "kalau jatuh sabtu / minggu", di bawahnya dua chip [mundur ke jumat] [tetap tanggalnya] (tinggi 44). Kalau label dan chip dijejer satu baris, nggak muat di lebar 350. Bagian ini selalu tampil, karena pengaturannya berlaku buat bulan-bulan berikutnya juga, nggak cuma bulan ini.
+- Di bawah kartu ink "gajian berikutnya" ada label kecil "kalau jatuh sabtu / minggu", di bawahnya dua chip [mundur ke jumat] [tetap tanggalnya] (`PaydayChip`, sama kayak chip tanggal). Kalau label dan chip dijejer satu baris, nggak muat di lebar 350. Bagian ini selalu tampil, karena pengaturannya berlaku buat bulan-bulan berikutnya juga, nggak cuma bulan ini.
 - Kartu ink ngikutin pilihan:
   - jumat: "jum 23 okt" + catatan "tgl 25 jatuh hari minggu → dihitung jumat" (kayak sekarang)
   - tetap: "min 25 okt", tanpa catatan
@@ -52,6 +52,11 @@ Baris tanggal gajian tetap "tiap tgl 25". Kalau ditambah "• weekend tetap", le
 ## Urutan kerja
 
 1. ✅ **Desain:** 00.24 (pilihan weekend, kartu ink, label simpan, catatan), artboard baru 02.4j (sheet) dan 02.4k (kesimpen + batalin), toast, tanggal di 02.4, note baris 02.
-2. **Domain + test:** `paydayInfo` nerima `shift` (sekarang hardcode `previousWorkday`). Provider yang ngasih tanggal gajian aktif juga ngasih shift aturan yang berlaku.
-3. **Data:** `setPayday(day, shift)` nulis shift ke aturan (sekarang selalu `previousWorkday`). Sama kayak ganti tanggal: aturan yang udah antri diupdate.
-4. **UI:** pilihan weekend di 00.24, catatan shift (`_shiftNote`) ikut pilihan, preview + toast, tanggal di 02.4 ikut shift, copy di `app_id.arb`.
+2. ✅ **Domain + test:** `paydayInfo` nerima `shift` (sekarang hardcode `previousWorkday`). Provider yang ngasih tanggal gajian aktif juga ngasih shift aturan yang berlaku.
+3. ✅ **Data:** `setPayday(day, shift)` nulis shift ke aturan (sekarang selalu `previousWorkday`). Sama kayak ganti tanggal: aturan yang udah antri diupdate.
+4. ✅ **UI:** pilihan weekend di 00.24, catatan shift (`_shiftNote`) ikut pilihan, preview + toast, tanggal di 02.4 ikut shift, copy di `app_id.arb`.
+
+Catatan implementasi:
+
+- `activeShiftProvider` = shift aturan yang berlaku hari ini, dipakai `paydayInfo` di beranda dan 02.4. `paydayShiftProvider` = shift yang terakhir di-set, termasuk yang masih antri. Ini yang diedit di 00.24, sama kayak `Profile.payday` buat tanggal.
+- Sheet ngembaliin `(day, shift)`. `setPayday(day, shift:)` nulis keduanya, dan batalin balik ke dua-duanya.

@@ -224,7 +224,7 @@ void main() {
     expect(find.textContaining('jatuh hari'), findsNothing);
     expect(
       find.text(
-        'budget & limit ngikut gajian. ganti tanggal berlaku mulai periode berikutnya.',
+        'budget & limit ngikut gajian. ganti tanggal atau weekend berlaku mulai periode berikutnya.',
       ),
       findsOneWidget,
     );
@@ -335,6 +335,61 @@ void main() {
           .paydayDay,
       15,
     );
+
+    await tester.pumpWidget(const SizedBox());
+    await db.close();
+  });
+
+  testWidgets('tanggal gajian: weekend tetap tanggalnya (02.4j–k)', (
+    tester,
+  ) async {
+    final db = await pump(tester);
+    Future<void> settle() async {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 50)),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    // Lived-in: gajian 25, jumat. 25 okt 2026 is a Sunday → jum 23 okt.
+    await tester.runAsync(
+      () => db
+          .into(db.periodRules)
+          .insert(
+            PeriodRulesCompanion.insert(
+              effectiveFrom: DateTime(2026, 1, 1),
+              mode: PeriodMode.payday,
+              paydayDay: 25,
+              shift: const Value(PaydayShift.previousWorkday),
+            ),
+          ),
+    );
+    await settle();
+
+    await tester.tap(find.text('tanggal gajian'));
+    await settle();
+    expect(find.text('jum 23 okt'), findsOneWidget);
+    expect(find.text('oke'), findsOneWidget);
+
+    await tester.tap(find.text('tetap tanggalnya'));
+    await tester.pump();
+    // The card shows Sunday, the shift note is gone, saving says "simpan".
+    expect(find.text('min 25 okt'), findsOneWidget);
+    expect(find.textContaining('dihitung jumat'), findsNothing);
+    expect(find.text('periode ini jadi 25 sep – 24 okt'), findsOneWidget);
+    expect(find.text('simpan'), findsOneWidget);
+    await tester.tap(find.text('simpan'));
+    await settle();
+
+    final rows = (await tester.runAsync(
+      () => db.select(db.periodRules).get(),
+    ))!;
+    final queued = rows.firstWhere(
+      (r) => r.effectiveFrom == DateTime(2026, 10, 23),
+    );
+    expect((queued.paydayDay, queued.shift), (25, PaydayShift.none));
+    expect(find.text('gajian tetap di tgl 25'), findsOneWidget);
+    expect(find.text('periode ini jadi sampai sab 24 okt'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox());
     await db.close();

@@ -2557,8 +2557,44 @@ abstract class AppLocalizations {
   /// No description provided for @paydayBudgetNote.
   ///
   /// In id, this message translates to:
-  /// **'budget & limit ngikut gajian. ganti tanggal berlaku mulai periode berikutnya.'**
+  /// **'budget & limit ngikut gajian. ganti tanggal atau weekend berlaku mulai periode berikutnya.'**
   String get paydayBudgetNote;
+
+  /// No description provided for @paydayWeekendLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'kalau jatuh sabtu / minggu'**
+  String get paydayWeekendLabel;
+
+  /// No description provided for @paydayWeekendFriday.
+  ///
+  /// In id, this message translates to:
+  /// **'mundur ke jumat'**
+  String get paydayWeekendFriday;
+
+  /// No description provided for @paydayWeekendKeep.
+  ///
+  /// In id, this message translates to:
+  /// **'tetap tanggalnya'**
+  String get paydayWeekendKeep;
+
+  /// No description provided for @paydaySaveShift.
+  ///
+  /// In id, this message translates to:
+  /// **'simpan'**
+  String get paydaySaveShift;
+
+  /// No description provided for @paydaySavedKeepTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'gajian tetap di {label}'**
+  String paydaySavedKeepTitle(String label);
+
+  /// No description provided for @paydaySavedFridayTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'weekend dihitung jumat'**
+  String get paydaySavedFridayTitle;
 
   /// No description provided for @paydaySave.
   ///

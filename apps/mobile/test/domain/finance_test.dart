@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mibu/domain/models/finance.dart';
+import 'package:mibu/domain/period.dart';
 
 void main() {
   // 25 nov 2026 is a Wednesday; 25 okt 2026 a Sunday; 28 feb 2026 a Saturday.
@@ -28,6 +29,27 @@ void main() {
       // akhir (31) in feb 2026 → 28 feb, a Saturday → Fri 27.
       expect(at(DateTime(2026, 2, 10), payday: 31).next, DateTime(2026, 2, 27));
       expect(at(DateTime(2026, 4, 10), payday: 31).next, DateTime(2026, 4, 30));
+    });
+
+    test('weekend tetap: a Sunday payday stays on Sunday, no "telat"', () {
+      PaydayInfo keep(DateTime now) => paydayInfo(
+        now: now,
+        payday: 25,
+        shift: PaydayShift.none,
+        salaries: [DateTime(2026, 9, 25)],
+      );
+      final fri = keep(DateTime(2026, 10, 23));
+      expect(
+        (fri.status, fri.next, fri.daysLeft),
+        (PaydayStatus.upcoming, DateTime(2026, 10, 25), 2),
+      );
+      // jumat would already call Saturday late (salary not in yet).
+      expect(
+        at(DateTime(2026, 10, 24), paid: [DateTime(2026, 9, 25)]).status,
+        PaydayStatus.late,
+      );
+      expect(keep(DateTime(2026, 10, 24)).status, PaydayStatus.upcoming);
+      expect(keep(DateTime(2026, 10, 25)).status, PaydayStatus.today);
     });
 
     test('payday with no salary yet → today; logged → lasts to the next', () {

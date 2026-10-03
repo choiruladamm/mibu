@@ -178,6 +178,7 @@ final homeProvider = Provider<AsyncValue<HomeState>>((ref) {
     final payday = paydayInfo(
       now: now,
       payday: ref.watch(activePaydayProvider),
+      shift: ref.watch(activeShiftProvider),
       salaries: ref.watch(salaryDatesProvider).value ?? const [],
     );
     final noEntries = first.value == null;

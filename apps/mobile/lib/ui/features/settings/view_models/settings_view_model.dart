@@ -61,6 +61,7 @@ final settingsProvider = Provider<AsyncValue<SettingsState>>((ref) {
       paydayInfo: paydayInfo(
         now: ref.watch(nowProvider),
         payday: ref.watch(activePaydayProvider),
+        shift: ref.watch(activeShiftProvider),
         salaries: ref.watch(salaryDatesProvider).value ?? const [],
       ),
     ),

@@ -1560,7 +1560,27 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get paydayBudgetNote =>
-      'budget & limit ngikut gajian. ganti tanggal berlaku mulai periode berikutnya.';
+      'budget & limit ngikut gajian. ganti tanggal atau weekend berlaku mulai periode berikutnya.';
+
+  @override
+  String get paydayWeekendLabel => 'kalau jatuh sabtu / minggu';
+
+  @override
+  String get paydayWeekendFriday => 'mundur ke jumat';
+
+  @override
+  String get paydayWeekendKeep => 'tetap tanggalnya';
+
+  @override
+  String get paydaySaveShift => 'simpan';
+
+  @override
+  String paydaySavedKeepTitle(String label) {
+    return 'gajian tetap di $label';
+  }
+
+  @override
+  String get paydaySavedFridayTitle => 'weekend dihitung jumat';
 
   @override
   String paydaySave(String label) {

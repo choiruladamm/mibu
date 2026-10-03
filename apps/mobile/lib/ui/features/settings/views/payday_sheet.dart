@@ -19,17 +19,27 @@ import '../../../core/widgets/toast.dart';
 
 final _nextDay = DateFormat('EEE d MMM', 'id');
 
-/// 02.4e–g tanggal gajian: PaydaySheet (00.24), save → toast with batalin.
+typedef _Pick = ({int day, PaydayShift shift});
+
+/// 02.4e–k tanggal gajian: PaydaySheet (00.24), the day and what a weekend
+/// payday does (docs/PAYDAY_WEEKEND_PLAN.md); save → toast with batalin.
 Future<void> editPayday(BuildContext context, WidgetRef ref) async {
   final repo = ref.read(financeRepositoryProvider);
   final saved = _normal(ref.read(profileProvider).value?.payday ?? 25);
-  final day = await showAppSheet<int>(context, _PaydaySheet(saved: saved));
-  if (day == null || day == saved || !context.mounted) return;
+  final savedShift = ref.read(paydayShiftProvider);
+  final pick = await showAppSheet<_Pick>(
+    context,
+    _PaydaySheet(saved: saved, savedShift: savedShift),
+  );
+  if (pick == null || !context.mounted) return;
+  final (:day, :shift) = pick;
+  if (day == saved && shift == savedShift) return;
 
   final now = ref.read(clockProvider)();
-  final after = _runningAfter(ref.read, day);
+  final after = _runningAfter(ref.read, day, shift);
   final startsOn = await repo.setPayday(
     day,
+    shift: shift,
     periods: ref.read(periodsProvider),
     now: now,
   );
@@ -38,12 +48,18 @@ Future<void> editPayday(BuildContext context, WidgetRef ref) async {
   final info = paydayInfo(
     now: ref.read(clockProvider)(),
     payday: day,
+    shift: shift,
     salaries: ref.read(salaryDatesProvider).value ?? const [],
   );
   showToast(
     context,
     icon: ToastIcon.check,
-    title: l.paydaySavedTitle(_label(l, day)),
+    // Only the weekend changed: say that, short enough beside "batalin".
+    title: day != saved
+        ? l.paydaySavedTitle(_label(l, day))
+        : shift == PaydayShift.none
+        ? l.paydaySavedKeepTitle(_label(l, day))
+        : l.paydaySavedFridayTitle,
     sub: after != null
         ? l.paydaySavedSubMerged(_lastDay(after))
         : startsOn != null
@@ -53,6 +69,7 @@ Future<void> editPayday(BuildContext context, WidgetRef ref) async {
         : l.paydaySavedSub(info.daysToNext),
     onUndo: () => repo.setPayday(
       saved,
+      shift: savedShift,
       periods: ref.read(periodsProvider),
       now: ref.read(clockProvider)(),
     ),
@@ -62,7 +79,11 @@ Future<void> editPayday(BuildContext context, WidgetRef ref) async {
 /// The running period if [day] were saved now, when that changes it (a
 /// sliver merged in, docs/PAYDAY_CHANGE_PLAN.md); null = it stays, or the
 /// change applies at once. [get] = ref.watch in build, ref.read otherwise.
-Period? _runningAfter(T Function<T>(ProviderListenable<T>) get, int day) {
+Period? _runningAfter(
+  T Function<T>(ProviderListenable<T>) get,
+  int day,
+  PaydayShift shift,
+) {
   final rules = get(periodRulesProvider).value;
   if (rules == null) return null;
   final current = get(currentPeriodProvider);
@@ -77,7 +98,7 @@ Period? _runningAfter(T Function<T>(ProviderListenable<T>) get, int day) {
   if (from == null) return null;
   final after = SegmentedResolver([
     calendarBase,
-    ...withPayday(rules, day, from),
+    ...withPayday(rules, day, from, shift: shift),
   ], salaries: get(salaryDatesProvider).value ?? const []).periodOf(today);
   return after == current ? null : after;
 }
@@ -93,9 +114,10 @@ String _label(AppLocalizations l, int day) =>
     day == 31 ? l.settingsPaydayEnd : l.paydayOtherDay(day);
 
 class _PaydaySheet extends ConsumerStatefulWidget {
-  const _PaydaySheet({required this.saved});
+  const _PaydaySheet({required this.saved, required this.savedShift});
 
   final int saved;
+  final PaydayShift savedShift;
 
   @override
   ConsumerState<_PaydaySheet> createState() => _PaydaySheetState();
@@ -103,6 +125,7 @@ class _PaydaySheet extends ConsumerStatefulWidget {
 
 class _PaydaySheetState extends ConsumerState<_PaydaySheet> {
   late int _sel = widget.saved;
+  late PaydayShift _shift = widget.savedShift;
   bool _grid = false;
 
   @override
@@ -110,13 +133,18 @@ class _PaydaySheetState extends ConsumerState<_PaydaySheet> {
     final l = AppLocalizations.of(context)!;
     final now = ref.watch(nowProvider);
     final salaries = ref.watch(salaryDatesProvider).value ?? const [];
-    final info = paydayInfo(now: now, payday: _sel, salaries: salaries);
+    final info = paydayInfo(
+      now: now,
+      payday: _sel,
+      shift: _shift,
+      salaries: salaries,
+    );
     final today = info.status == PaydayStatus.today;
     final nextDate = today ? DateTime(now.year, now.month, now.day) : info.next;
-    final changed = _sel != widget.saved;
+    final changed = _sel != widget.saved || _shift != widget.savedShift;
     final custom = !paydayChoices.contains(_sel);
     final muted = AppText.label.copyWith(color: AppColors.muted);
-    final after = changed ? _runningAfter(ref.watch, _sel) : null;
+    final after = changed ? _runningAfter(ref.watch, _sel, _shift) : null;
     final budget = ref.watch(profileProvider).value?.monthlyBudget;
 
     return SingleChildScrollView(
@@ -223,7 +251,34 @@ class _PaydaySheetState extends ConsumerState<_PaydaySheet> {
           _NextCard(
             date: _nextDay.format(nextDate).toLowerCase(),
             inText: today ? l.paydayNextToday : l.paydayNextIn(info.daysToNext),
-            shift: _shiftNote(l, _sel, info.next),
+            shift: _shift == PaydayShift.none
+                ? null
+                : _shiftNote(l, _sel, info.next),
+          ),
+          const SizedBox(height: 14),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Text(
+              l.paydayWeekendLabel,
+              style: AppText.caption.copyWith(color: AppColors.muted),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final (s, label) in [
+                (PaydayShift.previousWorkday, l.paydayWeekendFriday),
+                (PaydayShift.none, l.paydayWeekendKeep),
+              ])
+                PaydayChip(
+                  day: 0,
+                  label: label,
+                  on: _shift == s,
+                  onTap: () => setState(() => _shift = s),
+                ),
+            ],
           ),
           if (after != null) ...[
             const SizedBox(height: 12),
@@ -264,8 +319,13 @@ class _PaydaySheetState extends ConsumerState<_PaydaySheet> {
           ),
           const SizedBox(height: 18),
           PrimaryButton(
-            label: changed ? l.paydaySave(_label(l, _sel)) : l.paydayOk,
-            onPressed: () => Navigator.of(context).pop(_sel),
+            label: _sel != widget.saved
+                ? l.paydaySave(_label(l, _sel))
+                : changed
+                ? l.paydaySaveShift
+                : l.paydayOk,
+            onPressed: () =>
+                Navigator.of(context).pop((day: _sel, shift: _shift)),
           ),
           const SizedBox(height: 6),
           SizedBox(

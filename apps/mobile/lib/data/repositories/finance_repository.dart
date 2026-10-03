@@ -703,6 +703,7 @@ class FinanceRepository {
   /// starts on, null = applies now.
   Future<DateTime?> setPayday(
     int day, {
+    PaydayShift shift = PaydayShift.previousWorkday,
     required PeriodResolver periods,
     required DateTime now,
   }) => _db.transaction(() async {
@@ -726,6 +727,7 @@ class FinanceRepository {
         ? (_db.update(rules)..where((r) => r.id.equals(row.id))).write(
             PeriodRulesCompanion(
               paydayDay: Value(day),
+              shift: Value(shift),
               updatedAt: Value(DateTime.now()),
             ),
           )
@@ -736,7 +738,7 @@ class FinanceRepository {
                   effectiveFrom: from,
                   mode: PeriodMode.payday,
                   paydayDay: day,
-                  shift: const Value(PaydayShift.previousWorkday),
+                  shift: Value(shift),
                 ),
               );
 

@@ -288,15 +288,15 @@ DateTime? paydayChangeFrom(
   return payday.where((d) => d.isAfter(today)).firstOrNull ?? current.end;
 }
 
-/// [rules] with payday [day] from [from], replacing a rule queued that day:
-/// the periods a change would give, for the 00.24 preview.
-List<PeriodRule> withPayday(List<PeriodRule> rules, int day, DateTime from) => [
+/// [rules] with payday [day] / [shift] from [from], replacing a rule queued
+/// that day: the periods a change would give, for the 00.24 preview.
+List<PeriodRule> withPayday(
+  List<PeriodRule> rules,
+  int day,
+  DateTime from, {
+  PaydayShift shift = PaydayShift.previousWorkday,
+}) => [
   for (final r in rules)
     if (r.effectiveFrom != from) r,
-  (
-    effectiveFrom: from,
-    mode: PeriodMode.payday,
-    paydayDay: day,
-    shift: PaydayShift.previousWorkday,
-  ),
+  (effectiveFrom: from, mode: PeriodMode.payday, paydayDay: day, shift: shift),
 ];

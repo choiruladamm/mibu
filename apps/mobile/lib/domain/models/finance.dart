@@ -194,7 +194,8 @@ typedef PaydayInfo = ({
 });
 
 /// [payday] 1–31 (31 = akhir; a day past the month's end = its last day). A
-/// payday on Saturday / Sunday is paid the Friday before. [salaries] = dates
+/// payday on Saturday / Sunday is paid the Friday before, unless [shift] is
+/// none (tetap tanggalnya, docs/PAYDAY_WEEKEND_PLAN.md). [salaries] = dates
 /// of live gajian income (any order): one logged up to [paydayEarlyDays]
 /// early starts the cycle that day, so the money lasts until the next one.
 /// On the scheduled day or after it with no salary logged yet: today / late;
@@ -204,15 +205,12 @@ typedef PaydayInfo = ({
 PaydayInfo paydayInfo({
   required DateTime now,
   required int payday,
+  PaydayShift shift = PaydayShift.previousWorkday,
   Iterable<DateTime> salaries = const [],
 }) {
   final today = DateTime(now.year, now.month, now.day);
   final paid = [for (final d in salaries) DateTime(d.year, d.month, d.day)];
-  final r = PaydayCycleResolver(
-    payday,
-    shift: PaydayShift.previousWorkday,
-    salaries: paid,
-  );
+  final r = PaydayCycleResolver(payday, shift: shift, salaries: paid);
   final cycle = r.cycleOf(today);
   final period = r.periodOf(today);
   int days(DateTime from, DateTime to) => DateTime.utc(

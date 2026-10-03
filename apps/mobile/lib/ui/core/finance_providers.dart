@@ -43,20 +43,42 @@ final periodsProvider = Provider<PeriodResolver>((ref) {
   ], salaries: ref.watch(salaryDatesProvider).value ?? const []);
 });
 
-/// The gajian day the periods run on today: the rule in force (a change
-/// queued for the next period doesn't count yet), else the profile's.
-final activePaydayProvider = Provider<int>((ref) {
+/// Payday rules, oldest first; with [today], only those in force by then.
+List<PeriodRule> _paydayRules(Ref ref, {DateTime? today}) => [
+  for (final r in ref.watch(periodRulesProvider).value ?? const <PeriodRule>[])
+    if (r.mode == PeriodMode.payday &&
+        (today == null || !r.effectiveFrom.isAfter(today)))
+      r,
+]..sort((a, b) => a.effectiveFrom.compareTo(b.effectiveFrom));
+
+/// The payday rule the periods run on today (a change queued for the next
+/// period doesn't count yet); null = none saved.
+final _activePaydayRule = Provider<PeriodRule?>((ref) {
   final now = ref.watch(nowProvider);
-  final today = DateTime(now.year, now.month, now.day);
-  final inForce = [
-    for (final r
-        in ref.watch(periodRulesProvider).value ?? const <PeriodRule>[])
-      if (r.mode == PeriodMode.payday && !r.effectiveFrom.isAfter(today)) r,
-  ]..sort((a, b) => a.effectiveFrom.compareTo(b.effectiveFrom));
-  return inForce.isNotEmpty
-      ? inForce.last.paydayDay
-      : ref.watch(profileProvider).value?.payday ?? 25;
+  return _paydayRules(
+    ref,
+    today: DateTime(now.year, now.month, now.day),
+  ).lastOrNull;
 });
+
+/// The gajian day the periods run on today: the rule in force, else the
+/// profile's.
+final activePaydayProvider = Provider<int>(
+  (ref) =>
+      ref.watch(_activePaydayRule)?.paydayDay ??
+      ref.watch(profileProvider).value?.payday ??
+      25,
+);
+
+/// Weekend handling in force today (jumat by default).
+final activeShiftProvider = Provider<PaydayShift>(
+  (ref) => ref.watch(_activePaydayRule)?.shift ?? PaydayShift.previousWorkday,
+);
+
+/// Weekend handling as last set, a queued change included: what 00.24 edits.
+final paydayShiftProvider = Provider<PaydayShift>(
+  (ref) => _paydayRules(ref).lastOrNull?.shift ?? PaydayShift.previousWorkday,
+);
 
 /// The month label of the budget period now falls in ("oktober" while it's
 /// 25 sep – 24 okt): what the beranda, 04.1 and the menus start on.
