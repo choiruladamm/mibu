@@ -22,7 +22,7 @@ class PaydayChip extends StatelessWidget {
   final int day; // 1–31, 31 = akhir
   final bool on;
   final VoidCallback onTap;
-  final String? label; // overrides the day / "akhir" text ("lain…")
+  final String? label; // overrides the day / "akhir" text ("lainnya")
 
   @override
   Widget build(BuildContext context) {

@@ -1179,7 +1179,7 @@
   "@paydayShiftNote": {"placeholders": {"day": {"type": "String"}, "weekday": {"type": "String"}}},
   "paydaySaturday": "sabtu",
   "paydaySunday": "minggu",
-  "paydayOther": "lain…",
+  "paydayOther": "lainnya",
   "paydayOtherLabel": "tanggal lain",
   "paydayOtherDay": "tgl {day}",
   "@paydayOtherDay": {"placeholders": {"day": {"type": "int"}}},

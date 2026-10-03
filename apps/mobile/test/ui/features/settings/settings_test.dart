@@ -206,10 +206,10 @@ void main() {
     await settle();
     expect(await saved(), 25);
 
-    // lain… → grid 1–31; akhir; nggak jadi changes nothing.
+    // lainnya → grid 1–31; akhir; nggak jadi changes nothing.
     await tester.tap(find.text('tanggal gajian'));
     await settle();
-    await tester.tap(find.text('lain…'));
+    await tester.tap(find.text('lainnya'));
     await tester.pump();
     await tester.tap(find.bySemanticsLabel('tanggal 7'));
     await tester.pump();

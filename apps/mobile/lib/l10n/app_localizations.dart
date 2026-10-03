@@ -2515,7 +2515,7 @@ abstract class AppLocalizations {
   /// No description provided for @paydayOther.
   ///
   /// In id, this message translates to:
-  /// **'lain…'**
+  /// **'lainnya'**
   String get paydayOther;
 
   /// No description provided for @paydayOtherLabel.

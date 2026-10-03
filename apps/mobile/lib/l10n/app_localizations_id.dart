@@ -1532,7 +1532,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get paydaySunday => 'minggu';
 
   @override
-  String get paydayOther => 'lain…';
+  String get paydayOther => 'lainnya';
 
   @override
   String get paydayOtherLabel => 'tanggal lain';
