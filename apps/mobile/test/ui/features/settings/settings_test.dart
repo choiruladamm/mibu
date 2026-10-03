@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mibu/data/database/app_database.dart';
+import 'package:mibu/domain/models/finance.dart';
 import 'package:mibu/domain/period.dart';
 import 'package:mibu/l10n/app_localizations.dart';
 import 'package:mibu/ui/core/clock.dart';
@@ -55,7 +56,10 @@ void main() {
           // Same wiring as MibuApp.
           builder: (_, child) => Consumer(
             builder: (_, ref, _) => AmountMask(
-              hidden: ref.watch(profileProvider).value?.hideAmounts ?? false,
+              hide:
+                  ref.watch(profileProvider).value?.hideAmounts ??
+                  HideAmounts.none,
+              peek: ref.watch(peekProvider),
               child: child!,
             ),
           ),
@@ -118,21 +122,53 @@ void main() {
     }
   });
 
-  testWidgets('02.4: sembunyiin nominal flips profile and masks the hero', (
+  testWidgets('99.5: sembunyiin nominal sheet, 3 modes, simpan + batalin', (
     tester,
   ) async {
     final db = await pump(tester);
+    Future<void> settle() async {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 50)),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    Future<HideAmounts> saved() async =>
+        (await tester.runAsync(() => db.select(db.profiles).getSingle()))!
+            .hideAmounts;
+
+    expect(find.text('nggak'), findsOneWidget); // row hint = the mode
+    await tester.tap(find.text('sembunyiin nominal'));
+    await settle();
+    expect(find.text('buat yang suka buka app di tempat rame'), findsOneWidget);
+    expect(find.text('oke'), findsOneWidget); // nothing changed yet
+    expect(find.text('+Rp20jt'), findsOneWidget);
+
+    // Live example: pemasukan aja hides the salary, not the spending.
+    await tester.tap(find.text('pemasukan aja'));
+    await tester.pumpAndSettle();
+    expect(find.text('+Rp•••'), findsOneWidget);
+    expect(find.text('-Rp25K'), findsOneWidget);
+    await tester.tap(find.text('simpan'));
+    await settle();
+    expect(await saved(), HideAmounts.income);
+    expect(find.text('pemasukan disembunyiin'), findsOneWidget);
+    expect(find.text('Rp8jt'), findsOneWidget); // budget isn't pemasukan
+
+    await tester.tap(find.text('batalin'));
+    await settle();
+    expect(await saved(), HideAmounts.none);
 
     await tester.tap(find.text('sembunyiin nominal'));
-    await tester.runAsync(
-      () => Future<void>.delayed(const Duration(milliseconds: 50)),
-    );
+    await settle();
+    await tester.tap(find.text('semua nominal'));
     await tester.pumpAndSettle();
-
-    final row = await tester.runAsync(() => db.select(db.profiles).getSingle());
-    expect(row!.hideAmounts, isTrue);
-    expect(find.text('Rp•••'), findsOneWidget);
+    expect(find.text('-Rp•••'), findsNWidgets(2));
+    await tester.tap(find.text('simpan'));
+    await settle();
+    expect(await saved(), HideAmounts.all);
     expect(find.text('Rp8jt'), findsNothing);
+    expect(find.text('Rp•••'), findsOneWidget);
   });
 
   testWidgets('02.4e–g tanggal gajian: row, sheet, simpan + batalin', (

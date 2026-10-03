@@ -2638,11 +2638,155 @@ abstract class AppLocalizations {
   /// **'sembunyiin nominal'**
   String get settingsHide;
 
-  /// No description provided for @settingsHideHint.
+  /// No description provided for @hideNone.
   ///
   /// In id, this message translates to:
-  /// **'tampil ••• sampai kamu tap'**
-  String get settingsHideHint;
+  /// **'nggak'**
+  String get hideNone;
+
+  /// No description provided for @hideIncome.
+  ///
+  /// In id, this message translates to:
+  /// **'pemasukan aja'**
+  String get hideIncome;
+
+  /// No description provided for @hideAll.
+  ///
+  /// In id, this message translates to:
+  /// **'semua nominal'**
+  String get hideAll;
+
+  /// No description provided for @hideSheetSub.
+  ///
+  /// In id, this message translates to:
+  /// **'buat yang suka buka app di tempat rame'**
+  String get hideSheetSub;
+
+  /// No description provided for @hideNoneSub.
+  ///
+  /// In id, this message translates to:
+  /// **'semua angka keliatan'**
+  String get hideNoneSub;
+
+  /// No description provided for @hideIncomeSub.
+  ///
+  /// In id, this message translates to:
+  /// **'gaji, bonus & sisa pemasukan jadi •••. pengeluaran & budget tetap keliatan'**
+  String get hideIncomeSub;
+
+  /// No description provided for @hideAllSub.
+  ///
+  /// In id, this message translates to:
+  /// **'semua angka jadi •••, termasuk budget & kepake'**
+  String get hideAllSub;
+
+  /// No description provided for @hideNew.
+  ///
+  /// In id, this message translates to:
+  /// **'baru'**
+  String get hideNew;
+
+  /// No description provided for @hideExample.
+  ///
+  /// In id, this message translates to:
+  /// **'contoh di transaksi'**
+  String get hideExample;
+
+  /// No description provided for @hideExSalary.
+  ///
+  /// In id, this message translates to:
+  /// **'gajian'**
+  String get hideExSalary;
+
+  /// No description provided for @hideExFood.
+  ///
+  /// In id, this message translates to:
+  /// **'makan'**
+  String get hideExFood;
+
+  /// No description provided for @hideExRide.
+  ///
+  /// In id, this message translates to:
+  /// **'ojol'**
+  String get hideExRide;
+
+  /// No description provided for @hidePeekNote.
+  ///
+  /// In id, this message translates to:
+  /// **'tap angka utama buat intip 5 detik, abis itu ketutup lagi'**
+  String get hidePeekNote;
+
+  /// No description provided for @hideLaterNote.
+  ///
+  /// In id, this message translates to:
+  /// **'bisa diubah kapan aja di pengaturan'**
+  String get hideLaterNote;
+
+  /// No description provided for @hideOk.
+  ///
+  /// In id, this message translates to:
+  /// **'oke'**
+  String get hideOk;
+
+  /// No description provided for @hideSave.
+  ///
+  /// In id, this message translates to:
+  /// **'simpan'**
+  String get hideSave;
+
+  /// No description provided for @hideToastNone.
+  ///
+  /// In id, this message translates to:
+  /// **'nggak disembunyiin'**
+  String get hideToastNone;
+
+  /// No description provided for @hideToastIncome.
+  ///
+  /// In id, this message translates to:
+  /// **'pemasukan disembunyiin'**
+  String get hideToastIncome;
+
+  /// No description provided for @hideToastAll.
+  ///
+  /// In id, this message translates to:
+  /// **'semua nominal disembunyiin'**
+  String get hideToastAll;
+
+  /// No description provided for @hideToastNoneSub.
+  ///
+  /// In id, this message translates to:
+  /// **'semua angka keliatan lagi'**
+  String get hideToastNoneSub;
+
+  /// No description provided for @hideToastIncomeSub.
+  ///
+  /// In id, this message translates to:
+  /// **'gaji & sisa pemasukan jadi •••'**
+  String get hideToastIncomeSub;
+
+  /// No description provided for @hideToastAllSub.
+  ///
+  /// In id, this message translates to:
+  /// **'tap angka utama buat intip 5 detik'**
+  String get hideToastAllSub;
+
+  /// No description provided for @peekOpen.
+  ///
+  /// In id, this message translates to:
+  /// **'intip 5 detik'**
+  String get peekOpen;
+
+  /// No description provided for @peekClose.
+  ///
+  /// In id, this message translates to:
+  /// **'tutup lagi'**
+  String get peekClose;
+
+  /// No description provided for @amountHidden.
+  ///
+  /// In id, this message translates to:
+  /// **'disembunyiin'**
+  String get amountHidden;
 
   /// No description provided for @settingsData.
   ///

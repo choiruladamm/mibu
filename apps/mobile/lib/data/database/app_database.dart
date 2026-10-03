@@ -28,7 +28,8 @@ mixin SyncColumns on Table {
 class Profiles extends Table with SyncColumns {
   IntColumn get payday =>
       integer()(); // 1–31, 31 = akhir; past month end = last day
-  BoolColumn get hideAmounts => boolean().withDefault(const Constant(false))();
+  IntColumn get hideAmounts =>
+      intEnum<HideAmounts>().withDefault(const Constant(0))(); // 0 = none
   DateTimeColumn get onboardedAt => dateTime().nullable()();
   TextColumn get recentSearches =>
       text().withDefault(const Constant(''))(); // newline-separated, ≤ 5

@@ -774,7 +774,7 @@ class FinanceRepository {
       );
 
   /// 02.4 sembunyiin nominal.
-  Future<void> setHideAmounts(bool hide) =>
+  Future<void> setHideAmounts(HideAmounts hide) =>
       (_db.update(_db.profiles)..where((p) => p.deletedAt.isNull())).write(
         ProfilesCompanion(
           hideAmounts: Value(hide),

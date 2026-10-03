@@ -25,7 +25,7 @@ class SettingsState {
   });
 
   final int? budget; // budget bulanan; null = not set
-  final bool hideAmounts;
+  final HideAmounts hideAmounts;
   final List<String> topIcons; // 3 most used buat apa, for the row's stack
   final int moreCategories; // the rest: "+8"
   final int limits; // those with a limit

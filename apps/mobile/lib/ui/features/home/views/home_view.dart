@@ -912,7 +912,9 @@ class _Recent extends ConsumerWidget {
               ),
               if (s.isCurrent)
                 Text(
-                  l.homeTodayTotal(context.rpSigned(s.todayNet)),
+                  l.homeTodayTotal(
+                    context.rpSigned(s.todayNet, income: s.todayIncome),
+                  ),
                   style: muted,
                 ),
             ],
@@ -1047,7 +1049,10 @@ class _DayHeader extends StatelessWidget {
           children: [
             Flexible(child: MetaLine(title, style: style)),
             if (group.rows.isNotEmpty)
-              Text(context.rpSigned(group.total), style: style),
+              Text(
+                context.rpSigned(group.total, income: group.income),
+                style: style,
+              ),
           ],
         ),
       ),

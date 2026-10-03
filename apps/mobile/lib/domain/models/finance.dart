@@ -36,13 +36,17 @@ class PeriodPoint {
   final int amount; // kepake: spent in that period, positive
 }
 
+/// 02.4 sembunyiin nominal (99.5): what turns into `Rp•••`. [income] =
+/// pemasukan and the figures it can be read back from; [all] = everything.
+enum HideAmounts { none, income, all }
+
 /// No saldo here: mibu is a ledger per payday period, so nothing carries
 /// over and there's no opening balance (docs/PERIOD_LEDGER_PLAN.md).
 class Profile {
   const Profile({
     required this.payday,
     this.monthlyBudget,
-    this.hideAmounts = false,
+    this.hideAmounts = HideAmounts.none,
     this.onboarded = false,
     this.onboardedAt,
     this.recentSearches = const [],
@@ -54,7 +58,7 @@ class Profile {
 
   final int payday; // 1–31, 31 = akhir (legacy 0 too)
   final int? monthlyBudget; // budget bulanan, set by the user; null = not set
-  final bool hideAmounts;
+  final HideAmounts hideAmounts;
   final bool onboarded; // 01.4 atur awal done (or skipped with "nanti aja")
   final DateTime? onboardedAt; // when: a payday change in that period is a fix
   final List<String> recentSearches; // 04.2b terakhir dicari, newest first

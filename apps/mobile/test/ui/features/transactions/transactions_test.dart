@@ -4,8 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mibu/data/database/app_database.dart';
+import 'package:mibu/domain/models/finance.dart';
 import 'package:mibu/l10n/app_localizations.dart';
 import 'package:mibu/ui/core/clock.dart';
+import 'package:mibu/ui/core/finance_providers.dart';
+import 'package:mibu/ui/core/money.dart';
 import 'package:mibu/ui/core/theme.dart';
 import 'package:mibu/ui/core/widgets/month_menu.dart';
 import 'package:mibu/ui/features/transactions/view_models/transactions_view_model.dart';
@@ -208,6 +211,86 @@ void main() {
     await settle();
     expect(find.text('oktober'), findsOneWidget);
     expect(find.textContaining('balik ke'), findsNothing);
+
+    await tester.pumpWidget(const SizedBox());
+    await db.close();
+  });
+
+  testWidgets('99.5c/d: pemasukan aja hides income figures, intip 5 detik', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final now = DateTime(2026, 10, 14, 14, 50);
+    final db = AppDatabase(
+      DatabaseConnection(
+        NativeDatabase.memory(),
+        closeStreamsSynchronously: true,
+      ),
+      () => now,
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          appDatabaseProvider.overrideWithValue(db),
+          clockProvider.overrideWithValue(() => now),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.light,
+          locale: const Locale('id'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          // Same wiring as MibuApp.
+          builder: (_, child) => Consumer(
+            builder: (_, ref, _) => AmountMask(
+              hide:
+                  ref.watch(profileProvider).value?.hideAmounts ??
+                  HideAmounts.none,
+              peek: ref.watch(peekProvider),
+              child: child!,
+            ),
+          ),
+          home: const TransactionsView(),
+        ),
+      ),
+    );
+    Future<void> settle() async {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 50)),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+    }
+
+    await tester.runAsync(
+      () => db
+          .update(db.profiles)
+          .write(
+            const ProfilesCompanion(hideAmounts: Value(HideAmounts.income)),
+          ),
+    );
+    await settle();
+    await tester.tap(find.text('sep'));
+    await settle();
+
+    // sisa pemasukan, pemasukan + both deltas hidden; pengeluaran stays.
+    expect(find.text('Rp5,89jt'), findsNothing);
+    expect(find.text('Rp8,5jt'), findsNothing);
+    expect(find.text('Rp•••'), findsNWidgets(2));
+    expect(find.text('disembunyiin'), findsNWidgets(2));
+    expect(find.text('Rp2,61jt'), findsOneWidget);
+    // The salary row and its day total.
+    expect(find.text('+Rp8,5jt'), findsNothing);
+    expect(find.text('+Rp•••'), findsNWidgets(2));
+
+    await tester.tap(find.text('intip 5 detik'));
+    await tester.pump();
+    expect(find.text('Rp5,89jt'), findsOneWidget);
+    expect(find.text('tutup lagi'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 5));
+    expect(find.text('Rp5,89jt'), findsNothing);
+    expect(find.text('intip 5 detik'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox());
     await db.close();

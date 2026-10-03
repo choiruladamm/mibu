@@ -438,10 +438,16 @@ class _Impact extends ConsumerWidget {
           : l.overAmount(rupiahCompact(-left));
     } else if (s.kind == CategoryKind.income) {
       final after = (totals?.income[period.key] ?? 0) + v;
-      prev = after <= 0 ? 0 : ((after - v) / after).clamp(0.0, 1.0);
-      add = after <= 0 ? 0 : (v / after).clamp(0.0, 1.0 - prev);
+      // 99.5f: what's being typed stays, the period total and its share don't.
+      if (context.hidesAmount(income: true)) {
+        prev = 1;
+        add = 0;
+      } else {
+        prev = after <= 0 ? 0 : ((after - v) / after).clamp(0.0, 1.0);
+        add = after <= 0 ? 0 : (v / after).clamp(0.0, 1.0 - prev);
+      }
       label = l.incomeAfter;
-      note = rupiahCompact(after);
+      note = context.rpCompact(after, income: true);
     } else if (budget != null && budget > 0) {
       final spent = totals?.spent[period.key] ?? 0;
       final left = budget - spent - v;

@@ -513,7 +513,8 @@ class _Summary extends StatelessWidget {
           ),
         )
         .toLowerCase();
-    String money(int v) => context.rpSigned(v);
+    // Any pemasukan in the hits: every figure here can give it away (99.5).
+    String money(int v) => context.rpSigned(v, income: s.income > 0);
 
     final right = s.count == 1
         ? day(s.byDay.keys.first)

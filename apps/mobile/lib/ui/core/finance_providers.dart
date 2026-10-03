@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/repositories/finance_repository.dart';
@@ -92,13 +94,29 @@ final pocketsProvider = StreamProvider<List<Pocket>>(
       .watchPockets(ref.watch(currentPeriodProvider)),
 );
 
-/// 02.4 sembunyiin nominal: tap a hero amount to peek; routing resets it.
+/// 02.4 sembunyiin nominal: tap a hero amount or "intip 5 detik" (99.5d) to
+/// peek; it closes after 5s, on another tap, or when routing resets it.
 class Peek extends Notifier<bool> {
-  @override
-  bool build() => false;
+  static const window = Duration(seconds: 5);
+  Timer? _timer;
 
-  void toggle() => state = !state;
-  void reset() => state = false;
+  @override
+  bool build() {
+    ref.onDispose(() => _timer?.cancel());
+    return false;
+  }
+
+  void toggle() => state ? reset() : _open();
+
+  void _open() {
+    state = true;
+    _timer = Timer(window, reset);
+  }
+
+  void reset() {
+    _timer?.cancel();
+    state = false;
+  }
 }
 
 final peekProvider = NotifierProvider<Peek, bool>(Peek.new);

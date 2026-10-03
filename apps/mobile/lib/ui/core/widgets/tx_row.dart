@@ -79,7 +79,10 @@ class TxRow extends StatelessWidget {
               alignment: Alignment.topCenter,
               child: Padding(
                 padding: const EdgeInsets.only(top: 12),
-                child: Text(context.rpSigned(tx.amount), style: _text),
+                child: Text(
+                  context.rpSigned(tx.amount, income: tx.amount > 0),
+                  style: _text,
+                ),
               ),
             ),
           ],

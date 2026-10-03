@@ -70,7 +70,13 @@ final firstMonthProvider = StreamProvider<DateTime?>(
       .watchFirstMonth(periods: ref.watch(periodsProvider)),
 );
 
-typedef DayGroup = ({DateTime day, int total, List<Transaction> rows});
+/// [income]: a pemasukan is in it, so [total] gives it away (99.5).
+typedef DayGroup = ({
+  DateTime day,
+  int total,
+  bool income,
+  List<Transaction> rows,
+});
 
 class TransactionsState {
   const TransactionsState({
@@ -123,9 +129,14 @@ List<DayGroup> groupByDay(List<Transaction> rows) {
     final day = dateOnly(t.at);
     if (groups.isNotEmpty && groups.last.day == day) {
       final g = groups.removeLast();
-      groups.add((day: day, total: g.total + t.amount, rows: [...g.rows, t]));
+      groups.add((
+        day: day,
+        total: g.total + t.amount,
+        income: g.income || t.amount > 0,
+        rows: [...g.rows, t],
+      ));
     } else {
-      groups.add((day: day, total: t.amount, rows: [t]));
+      groups.add((day: day, total: t.amount, income: t.amount > 0, rows: [t]));
     }
   }
   return groups;

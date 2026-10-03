@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:intl/intl.dart';
 
-import '../../../../data/repositories/finance_repository.dart';
 import '../../../../domain/models/finance.dart';
 import '../../../../domain/period.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -19,6 +18,7 @@ import '../../../core/widgets/tab_bar.dart';
 import '../../budget/views/budget_sheet.dart';
 import '../../categories/views/category_manage_sheet.dart';
 import '../view_models/settings_view_model.dart';
+import 'hide_sheet.dart';
 import 'payday_sheet.dart';
 
 final _payDay = DateFormat('EEE d MMM', 'id');
@@ -162,11 +162,8 @@ class SettingsView extends ConsumerWidget {
                     _Row(
                       icon: HugeIcons.strokeRoundedViewOffSlash,
                       title: l.settingsHide,
-                      hint: l.settingsHideHint,
-                      switchOn: s.hideAmounts,
-                      onTap: () => ref
-                          .read(financeRepositoryProvider)
-                          .setHideAmounts(!s.hideAmounts),
+                      hint: hideLabel(l, s.hideAmounts),
+                      onTap: () => editHideAmounts(context, ref),
                     ),
                   ]),
                   section(l.settingsData, [
@@ -375,8 +372,6 @@ Widget _chip(String label, VoidCallback onTap) => Semantics(
   ),
 );
 
-/// A 60px row in a group card: icon disc, title (+ hint), then a trailing
-/// value, chevron or switch ([switchOn] non-null).
 /// "buat apa aja" trailing: the 3 most used icons overlapping, then "+8".
 class _IconStack extends StatelessWidget {
   const _IconStack({required this.icons, required this.more});
@@ -429,6 +424,8 @@ class _IconStack extends StatelessWidget {
   }
 }
 
+/// A 60px row in a group card: icon disc, title (+ hint), then a trailing
+/// value and/or chevron.
 class _Row extends StatelessWidget {
   const _Row({
     required this.icon,
@@ -438,7 +435,6 @@ class _Row extends StatelessWidget {
     this.hintParts,
     this.trailing,
     this.chevron = true,
-    this.switchOn,
   });
 
   final List<List<dynamic>> icon;
@@ -447,15 +443,12 @@ class _Row extends StatelessWidget {
   final List<String>? hintParts; // hint as a MetaLine (dot-separated)
   final Widget? trailing;
   final bool chevron;
-  final bool? switchOn;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final on = switchOn;
     return Semantics(
-      button: on == null,
-      toggled: on,
+      button: true,
       label: title,
       excludeSemantics: true,
       onTap: onTap,
@@ -519,9 +512,7 @@ class _Row extends StatelessWidget {
                     ),
                     child: trailing!,
                   ),
-                if (on != null)
-                  _Switch(on: on)
-                else if (chevron)
+                if (chevron)
                   const HugeIcon(
                     icon: HugeIcons.strokeRoundedArrowRight01,
                     size: 18,
@@ -531,35 +522,6 @@ class _Row extends StatelessWidget {
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _Switch extends StatelessWidget {
-  const _Switch({required this.on});
-
-  final bool on;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: AppMotion.select,
-      width: 52,
-      height: 32,
-      padding: const EdgeInsets.all(3),
-      alignment: on ? Alignment.centerRight : Alignment.centerLeft,
-      decoration: BoxDecoration(
-        color: on ? AppColors.ink : AppColors.pressed,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Container(
-        width: 26,
-        height: 26,
-        decoration: const BoxDecoration(
-          color: AppColors.paper,
-          shape: BoxShape.circle,
         ),
       ),
     );

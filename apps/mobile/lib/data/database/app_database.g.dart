@@ -63,21 +63,16 @@ class $ProfilesTable extends Profiles
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _hideAmountsMeta = const VerificationMeta(
-    'hideAmounts',
-  );
   @override
-  late final GeneratedColumn<bool> hideAmounts = GeneratedColumn<bool>(
-    'hide_amounts',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("hide_amounts" IN (0, 1))',
-    ),
-    defaultValue: const Constant(false),
-  );
+  late final GeneratedColumnWithTypeConverter<HideAmounts, int> hideAmounts =
+      GeneratedColumn<int>(
+        'hide_amounts',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(0),
+      ).withConverter<HideAmounts>($ProfilesTable.$converterhideAmounts);
   static const VerificationMeta _onboardedAtMeta = const VerificationMeta(
     'onboardedAt',
   );
@@ -169,15 +164,6 @@ class $ProfilesTable extends Profiles
     } else if (isInserting) {
       context.missing(_paydayMeta);
     }
-    if (data.containsKey('hide_amounts')) {
-      context.handle(
-        _hideAmountsMeta,
-        hideAmounts.isAcceptableOrUnknown(
-          data['hide_amounts']!,
-          _hideAmountsMeta,
-        ),
-      );
-    }
     if (data.containsKey('onboarded_at')) {
       context.handle(
         _onboardedAtMeta,
@@ -234,10 +220,12 @@ class $ProfilesTable extends Profiles
         DriftSqlType.int,
         data['${effectivePrefix}payday'],
       )!,
-      hideAmounts: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}hide_amounts'],
-      )!,
+      hideAmounts: $ProfilesTable.$converterhideAmounts.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}hide_amounts'],
+        )!,
+      ),
       onboardedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}onboarded_at'],
@@ -257,6 +245,9 @@ class $ProfilesTable extends Profiles
   $ProfilesTable createAlias(String alias) {
     return $ProfilesTable(attachedDatabase, alias);
   }
+
+  static JsonTypeConverter2<HideAmounts, int, int> $converterhideAmounts =
+      const EnumIndexConverter<HideAmounts>(HideAmounts.values);
 }
 
 class ProfileRow extends DataClass implements Insertable<ProfileRow> {
@@ -265,7 +256,7 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
   final DateTime updatedAt;
   final DateTime? deletedAt;
   final int payday;
-  final bool hideAmounts;
+  final HideAmounts hideAmounts;
   final DateTime? onboardedAt;
   final String recentSearches;
   final bool pocketsIntroSeen;
@@ -290,7 +281,11 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
       map['deleted_at'] = Variable<DateTime>(deletedAt);
     }
     map['payday'] = Variable<int>(payday);
-    map['hide_amounts'] = Variable<bool>(hideAmounts);
+    {
+      map['hide_amounts'] = Variable<int>(
+        $ProfilesTable.$converterhideAmounts.toSql(hideAmounts),
+      );
+    }
     if (!nullToAbsent || onboardedAt != null) {
       map['onboarded_at'] = Variable<DateTime>(onboardedAt);
     }
@@ -328,7 +323,9 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
       payday: serializer.fromJson<int>(json['payday']),
-      hideAmounts: serializer.fromJson<bool>(json['hideAmounts']),
+      hideAmounts: $ProfilesTable.$converterhideAmounts.fromJson(
+        serializer.fromJson<int>(json['hideAmounts']),
+      ),
       onboardedAt: serializer.fromJson<DateTime?>(json['onboardedAt']),
       recentSearches: serializer.fromJson<String>(json['recentSearches']),
       pocketsIntroSeen: serializer.fromJson<bool>(json['pocketsIntroSeen']),
@@ -343,7 +340,9 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
       'payday': serializer.toJson<int>(payday),
-      'hideAmounts': serializer.toJson<bool>(hideAmounts),
+      'hideAmounts': serializer.toJson<int>(
+        $ProfilesTable.$converterhideAmounts.toJson(hideAmounts),
+      ),
       'onboardedAt': serializer.toJson<DateTime?>(onboardedAt),
       'recentSearches': serializer.toJson<String>(recentSearches),
       'pocketsIntroSeen': serializer.toJson<bool>(pocketsIntroSeen),
@@ -356,7 +355,7 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
     int? payday,
-    bool? hideAmounts,
+    HideAmounts? hideAmounts,
     Value<DateTime?> onboardedAt = const Value.absent(),
     String? recentSearches,
     bool? pocketsIntroSeen,
@@ -442,7 +441,7 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
   final Value<int> payday;
-  final Value<bool> hideAmounts;
+  final Value<HideAmounts> hideAmounts;
   final Value<DateTime?> onboardedAt;
   final Value<String> recentSearches;
   final Value<bool> pocketsIntroSeen;
@@ -477,7 +476,7 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
     Expression<int>? payday,
-    Expression<bool>? hideAmounts,
+    Expression<int>? hideAmounts,
     Expression<DateTime>? onboardedAt,
     Expression<String>? recentSearches,
     Expression<bool>? pocketsIntroSeen,
@@ -503,7 +502,7 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
     Value<int>? payday,
-    Value<bool>? hideAmounts,
+    Value<HideAmounts>? hideAmounts,
     Value<DateTime?>? onboardedAt,
     Value<String>? recentSearches,
     Value<bool>? pocketsIntroSeen,
@@ -542,7 +541,9 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
       map['payday'] = Variable<int>(payday.value);
     }
     if (hideAmounts.present) {
-      map['hide_amounts'] = Variable<bool>(hideAmounts.value);
+      map['hide_amounts'] = Variable<int>(
+        $ProfilesTable.$converterhideAmounts.toSql(hideAmounts.value),
+      );
     }
     if (onboardedAt.present) {
       map['onboarded_at'] = Variable<DateTime>(onboardedAt.value);
@@ -3265,7 +3266,7 @@ typedef $$ProfilesTableCreateCompanionBuilder = ProfilesCompanion Function({
   Value<DateTime> updatedAt,
   Value<DateTime?> deletedAt,
   required int payday,
-  Value<bool> hideAmounts,
+  Value<HideAmounts> hideAmounts,
   Value<DateTime?> onboardedAt,
   Value<String> recentSearches,
   Value<bool> pocketsIntroSeen,
@@ -3277,7 +3278,7 @@ typedef $$ProfilesTableUpdateCompanionBuilder = ProfilesCompanion Function({
   Value<DateTime> updatedAt,
   Value<DateTime?> deletedAt,
   Value<int> payday,
-  Value<bool> hideAmounts,
+  Value<HideAmounts> hideAmounts,
   Value<DateTime?> onboardedAt,
   Value<String> recentSearches,
   Value<bool> pocketsIntroSeen,
@@ -3318,9 +3319,10 @@ class $$ProfilesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<bool> get hideAmounts => $composableBuilder(
+  ColumnWithTypeConverterFilters<HideAmounts, HideAmounts, int>
+  get hideAmounts => $composableBuilder(
     column: $table.hideAmounts,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
   ColumnFilters<DateTime> get onboardedAt => $composableBuilder(
@@ -3373,7 +3375,7 @@ class $$ProfilesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<bool> get hideAmounts => $composableBuilder(
+  ColumnOrderings<int> get hideAmounts => $composableBuilder(
     column: $table.hideAmounts,
     builder: (column) => ColumnOrderings(column),
   );
@@ -3418,10 +3420,11 @@ class $$ProfilesTableAnnotationComposer
   GeneratedColumn<int> get payday =>
       $composableBuilder(column: $table.payday, builder: (column) => column);
 
-  GeneratedColumn<bool> get hideAmounts => $composableBuilder(
-    column: $table.hideAmounts,
-    builder: (column) => column,
-  );
+  GeneratedColumnWithTypeConverter<HideAmounts, int> get hideAmounts =>
+      $composableBuilder(
+        column: $table.hideAmounts,
+        builder: (column) => column,
+      );
 
   GeneratedColumn<DateTime> get onboardedAt => $composableBuilder(
     column: $table.onboardedAt,
@@ -3475,7 +3478,7 @@ class $$ProfilesTableTableManager
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
                 Value<int> payday = const Value.absent(),
-                Value<bool> hideAmounts = const Value.absent(),
+                Value<HideAmounts> hideAmounts = const Value.absent(),
                 Value<DateTime?> onboardedAt = const Value.absent(),
                 Value<String> recentSearches = const Value.absent(),
                 Value<bool> pocketsIntroSeen = const Value.absent(),
@@ -3499,7 +3502,7 @@ class $$ProfilesTableTableManager
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
                 required int payday,
-                Value<bool> hideAmounts = const Value.absent(),
+                Value<HideAmounts> hideAmounts = const Value.absent(),
                 Value<DateTime?> onboardedAt = const Value.absent(),
                 Value<String> recentSearches = const Value.absent(),
                 Value<bool> pocketsIntroSeen = const Value.absent(),

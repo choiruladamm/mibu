@@ -40,7 +40,7 @@ erDiagram
         int openingBalance
         datetime openingAt
         int payday "1-31, 31 = akhir"
-        bool hideAmounts
+        int hideAmounts "0 none, 1 income, 2 all"
         datetime onboardedAt "nullable"
     }
     categories {
@@ -93,7 +93,7 @@ profile
   openingBalance  int               -- saldo saat atur awal (rupiah)
   openingAt       datetime          -- sejak kapan transaksi dihitung ke saldo
   payday          int               -- 1–31, 31 = akhir; lewat panjang bulan = hari terakhir
-  hideAmounts     bool
+  hideAmounts     int               -- HideAmounts: 0 none · 1 income · 2 all (99.5)
   onboardedAt     datetime?
 
 categories
@@ -262,12 +262,12 @@ tahun:           kepake > limit → lewat budget
 
 ### Sembunyiin nominal
 
-Board nggak nentuin layar mana yang di-mask, jadi ini keputusan kita. `profile.hideAmounts` nyala → nominal tampil `Rp•••`, tap sekali buat intip (balik ke `•••` pas keluar layar):
+`profile.hideAmounts` = `none` · `income` · `all` (99.5, detail di [HIDE_INCOME_PLAN.md](HIDE_INCOME_PLAN.md)). Pengaturan 02.4 → sheet 3 pilihan + contoh live, simpan → toast + batalin.
 
-- saldo hero + chip aman jajan di 02.1
-- kepake / sisa di kantong 02.2
-- nominal di TxRow dan struk 04.3
-- hero budget di 02.4
+- `all`: semua nominal `Rp•••` (hero, kantong, TxRow, struk, budget, statistik).
+- `income` (pemasukan aja): pemasukan + yang bisa dipake ngitung gaji: TxRow / struk pemasukan, total hari yang ada pemasukan, kartu 04.1 (sisa pemasukan, pemasukan, selisihnya), ringkasan 04.2 kalau hasilnya ada pemasukan, bar "pemasukan periode ini jadi" di 03.1. Beranda, kantong, statistik, budget tetap keliatan.
+- Kode: `context.rp*(v, income: true)` buat angka sisi pemasukan.
+- Intip: tap angka utama (hero, struk) atau chip "intip 5 detik" di 04.1. Ketutup lagi abis 5 detik, tap lagi, atau pindah layar.
 
 Input (keypad) dan ekspor CSV nggak di-mask.
 

@@ -498,7 +498,11 @@ class _PeriodCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
     final s = state;
+    // 99.5: income-side figures hide under "pemasukan aja" too.
     final rp = context.rpCompact;
+    String rpIn(int v) => context.rpCompact(v, income: true);
+    final hideIn = context.hidesAmount(income: true);
+    final hideOut = context.hidesAmount();
     final hasPrev = s.hasPrev;
     final prev = hasPrev ? _name(s.months[s.selected - 1]) : '';
     final income = s.income, spent = -s.expense;
@@ -562,14 +566,20 @@ class _PeriodCard extends StatelessWidget {
           if (income > 0) ...[
             // "−Rp…" with a true minus, like the board.
             Text(
-              net < 0 ? '−${rp(-net)}' : rp(net),
+              hideIn
+                  ? rpIn(net.abs())
+                  : net < 0
+                  ? '−${rp(-net)}'
+                  : rp(net),
               style: big.copyWith(
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
             const SizedBox(height: 6),
             Text(
-              hasPrev
+              hideIn
+                  ? l.amountHidden
+                  : hasPrev
                   ? delta(net, s.prevIncome - s.prevExpense)
                   : l.txFirstPeriod,
               style: soft,
@@ -632,9 +642,11 @@ class _PeriodCard extends StatelessWidget {
             children: [
               side(
                 l.income,
-                income == 0 ? '—' : rp(income),
+                income == 0 ? '—' : rpIn(income),
                 income == 0
                     ? l.txNoneYet
+                    : hideIn
+                    ? l.amountHidden
                     : hasPrev
                     ? delta(income, s.prevIncome)
                     : '',
@@ -642,13 +654,72 @@ class _PeriodCard extends StatelessWidget {
               side(
                 l.expense,
                 rp(spent),
-                hasPrev ? delta(spent, s.prevExpense) : '',
+                hideOut
+                    ? l.amountHidden
+                    : hasPrev
+                    ? delta(spent, s.prevExpense)
+                    : '',
               ),
             ],
           ),
           const SizedBox(height: 14),
           Text(hasPrev ? l.txNoCarry(prev) : l.txNoCarryFirst, style: faint),
+          if ((context.amountMask?.hide ?? HideAmounts.none) !=
+              HideAmounts.none) ...[
+            const SizedBox(height: 12),
+            const _PeekChip(),
+          ],
         ],
+      ),
+    );
+  }
+}
+
+/// 99.5d "intip 5 detik" ⇄ "tutup lagi", on the ink card.
+class _PeekChip extends ConsumerWidget {
+  const _PeekChip();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context)!;
+    final peek = context.amountMask?.peek ?? false;
+    final fg = peek ? AppColors.ink : AppColors.onInk;
+    return Semantics(
+      button: true,
+      toggled: peek,
+      child: GestureDetector(
+        onTap: ref.read(peekProvider.notifier).toggle,
+        child: AnimatedContainer(
+          duration: AppMotion.select,
+          height: 36,
+          padding: const EdgeInsets.only(left: 10, right: 14),
+          decoration: BoxDecoration(
+            color: peek ? AppColors.paper : AppColors.onInk12,
+            borderRadius: BorderRadius.circular(AppRadius.pill),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 6,
+            children: [
+              HugeIcon(
+                icon: peek
+                    ? HugeIcons.strokeRoundedView
+                    : HugeIcons.strokeRoundedViewOff,
+                size: 18,
+                strokeWidth: AppStroke.icon,
+                color: fg,
+              ),
+              Text(
+                peek ? l.peekClose : l.peekOpen,
+                style: AppText.label.copyWith(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: fg,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -758,7 +829,7 @@ class _DayGroup extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  context.rpSigned(group.total),
+                  context.rpSigned(group.total, income: group.income),
                   style: AppText.caption.copyWith(color: AppColors.muted),
                 ),
               ],

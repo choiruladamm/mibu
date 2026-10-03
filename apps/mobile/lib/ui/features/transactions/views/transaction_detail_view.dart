@@ -14,6 +14,7 @@ import '../../../core/clock.dart';
 import '../../../core/dashed.dart';
 import '../../../core/dates.dart';
 import '../../../core/money.dart';
+import '../../../core/widgets/peek_tap.dart';
 import '../../../core/tokens.dart';
 import '../../../core/widgets/confirm_modal.dart';
 import '../../../core/widgets/nav_header.dart';
@@ -170,7 +171,7 @@ class TransactionDetailView extends ConsumerWidget {
       context,
       initial: (text: t.note, tags: t.tags),
       entryContext: [
-        context.rpSigned(t.amount),
+        context.rpSigned(t.amount, income: t.amount > 0),
         if (t.place.isNotEmpty) t.place,
         dayLabel(t.at),
       ],
@@ -206,7 +207,7 @@ Future<bool> confirmDeleteEntry(
     emoji: t.emoji,
     title: l.confirmDeleteTitle,
     body: l.confirmDeleteBody(
-      context.rp(t.amount),
+      context.rp(t.amount, income: t.amount > 0),
       t.place.isNotEmpty ? t.place : t.category ?? l.uncategorized,
       _headerDay.format(t.at).toLowerCase(),
     ),
@@ -228,7 +229,7 @@ Future<bool> confirmDeleteEntry(
     icon: ToastIcon.trash,
     title: l.entryDeletedToast,
     sub: pocket == null
-        ? '${context.rp(t.amount)} · ${dayLabel(t.at)}'
+        ? '${context.rp(t.amount, income: t.amount > 0)} · ${dayLabel(t.at)}'
         : l.entryDeletedPocket(
             pocket.name,
             context.rpCompact(pocket.left + cost),
@@ -336,28 +337,32 @@ class _Receipt extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 22),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: t.amount < 0 ? '-Rp' : '+Rp',
-                        style: AppText.inputXl.copyWith(
-                          fontSize: 26,
-                          letterSpacing: -0.52,
-                          color: AppColors.muted,
+              PeekTap(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: t.amount < 0 ? '-Rp' : '+Rp',
+                          style: AppText.inputXl.copyWith(
+                            fontSize: 26,
+                            letterSpacing: -0.52,
+                            color: AppColors.muted,
+                          ),
                         ),
-                      ),
-                      const WidgetSpan(child: SizedBox(width: 4)),
-                      TextSpan(
-                        text: context.rp(t.amount.abs()).substring(2),
-                        style: AppText.display.copyWith(
-                          letterSpacing: -1.68,
-                          height: 1,
+                        const WidgetSpan(child: SizedBox(width: 4)),
+                        TextSpan(
+                          text: context
+                              .rp(t.amount.abs(), income: t.amount > 0)
+                              .substring(2),
+                          style: AppText.display.copyWith(
+                            letterSpacing: -1.68,
+                            height: 1,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),

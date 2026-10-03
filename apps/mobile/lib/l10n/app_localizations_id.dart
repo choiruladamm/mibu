@@ -1619,7 +1619,81 @@ class AppLocalizationsId extends AppLocalizations {
   String get settingsHide => 'sembunyiin nominal';
 
   @override
-  String get settingsHideHint => 'tampil ••• sampai kamu tap';
+  String get hideNone => 'nggak';
+
+  @override
+  String get hideIncome => 'pemasukan aja';
+
+  @override
+  String get hideAll => 'semua nominal';
+
+  @override
+  String get hideSheetSub => 'buat yang suka buka app di tempat rame';
+
+  @override
+  String get hideNoneSub => 'semua angka keliatan';
+
+  @override
+  String get hideIncomeSub =>
+      'gaji, bonus & sisa pemasukan jadi •••. pengeluaran & budget tetap keliatan';
+
+  @override
+  String get hideAllSub => 'semua angka jadi •••, termasuk budget & kepake';
+
+  @override
+  String get hideNew => 'baru';
+
+  @override
+  String get hideExample => 'contoh di transaksi';
+
+  @override
+  String get hideExSalary => 'gajian';
+
+  @override
+  String get hideExFood => 'makan';
+
+  @override
+  String get hideExRide => 'ojol';
+
+  @override
+  String get hidePeekNote =>
+      'tap angka utama buat intip 5 detik, abis itu ketutup lagi';
+
+  @override
+  String get hideLaterNote => 'bisa diubah kapan aja di pengaturan';
+
+  @override
+  String get hideOk => 'oke';
+
+  @override
+  String get hideSave => 'simpan';
+
+  @override
+  String get hideToastNone => 'nggak disembunyiin';
+
+  @override
+  String get hideToastIncome => 'pemasukan disembunyiin';
+
+  @override
+  String get hideToastAll => 'semua nominal disembunyiin';
+
+  @override
+  String get hideToastNoneSub => 'semua angka keliatan lagi';
+
+  @override
+  String get hideToastIncomeSub => 'gaji & sisa pemasukan jadi •••';
+
+  @override
+  String get hideToastAllSub => 'tap angka utama buat intip 5 detik';
+
+  @override
+  String get peekOpen => 'intip 5 detik';
+
+  @override
+  String get peekClose => 'tutup lagi';
+
+  @override
+  String get amountHidden => 'disembunyiin';
 
   @override
   String get settingsData => 'data';

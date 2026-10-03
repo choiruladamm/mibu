@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mibu/domain/models/finance.dart';
 import 'package:mibu/ui/core/money.dart';
 
 void main() {
@@ -13,21 +14,29 @@ void main() {
   testWidgets('context formatters follow AmountMask, plain without one', (
     tester,
   ) async {
-    Widget probe(bool? hidden) {
+    Widget probe(AmountMask Function(Widget)? mask) {
       final text = Builder(
         builder: (c) => Text(
-          '${c.rpCompact(-450000)}|${c.rp(4530000)}',
+          '${c.rpCompact(-450000)}|${c.rp(4530000, income: true)}',
           textDirection: TextDirection.ltr,
         ),
       );
-      return hidden == null ? text : AmountMask(hidden: hidden, child: text);
+      return mask == null ? text : mask(text);
     }
+
+    AmountMask Function(Widget) mask(HideAmounts h, {bool peek = false}) =>
+        (child) => AmountMask(hide: h, peek: peek, child: child);
 
     await tester.pumpWidget(probe(null));
     expect(find.text('-Rp450K|Rp4.530.000'), findsOneWidget);
-    await tester.pumpWidget(probe(false));
+    await tester.pumpWidget(probe(mask(HideAmounts.none)));
     expect(find.text('-Rp450K|Rp4.530.000'), findsOneWidget);
-    await tester.pumpWidget(probe(true));
+    // 99.5 pemasukan aja: only figures flagged income.
+    await tester.pumpWidget(probe(mask(HideAmounts.income)));
+    expect(find.text('-Rp450K|Rp•••'), findsOneWidget);
+    await tester.pumpWidget(probe(mask(HideAmounts.all)));
     expect(find.text('-Rp•••|Rp•••'), findsOneWidget);
+    await tester.pumpWidget(probe(mask(HideAmounts.all, peek: true)));
+    expect(find.text('-Rp450K|Rp4.530.000'), findsOneWidget);
   });
 }

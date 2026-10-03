@@ -118,6 +118,9 @@ class HomeState {
   /// Net of today's entries; shown beside "baru aja".
   int get todayNet =>
       groups.where((g) => g.day == today).fold(0, (sum, g) => sum + g.total);
+
+  /// A pemasukan today: [todayNet] gives it away (99.5).
+  bool get todayIncome => groups.any((g) => g.day == today && g.income);
 }
 
 /// 02.1 beranda state. Errors come back as [AsyncError] so the view can
@@ -189,10 +192,10 @@ final homeProvider = Provider<AsyncValue<HomeState>>((ref) {
       if (left == 0) break;
       final shown = g.rows.take(left).toList();
       left -= shown.length;
-      groups.add((day: g.day, total: g.total, rows: shown));
+      groups.add((day: g.day, total: g.total, income: g.income, rows: shown));
     }
     if (isCurrent && !noEntries && !groups.any((g) => g.day == today)) {
-      groups.insert(0, (day: today, total: 0, rows: const []));
+      groups.insert(0, (day: today, total: 0, income: false, rows: const []));
     }
 
     // Aman jajan comes from the budget only, counted to the period's end.

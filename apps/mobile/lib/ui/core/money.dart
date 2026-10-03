@@ -1,6 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
+import '../../domain/models/finance.dart';
+
 final _full = NumberFormat('#,##0', 'id_ID');
 final _k = NumberFormat('#,##0.#', 'id_ID');
 final _jt = NumberFormat('#,##0.##', 'id_ID');
@@ -27,27 +29,48 @@ String rupiahSigned(int v) => v > 0 ? '+${rupiahCompact(v)}' : rupiahCompact(v);
 /// 02.4 sembunyiin nominal: digits (and K / jt) become •••, sign and Rp stay.
 String maskAmount(String s) => s.replaceAll(RegExp(r'\d[\d.,]*(K|jt)?'), '•••');
 
-/// Above the Navigator (MibuApp). [hidden] = profile.hideAmounts and not
-/// peeking; the context formatters read it, so a screen only needs a context.
+/// Above the Navigator (MibuApp). [hide] = profile.hideAmounts; [peek] = the
+/// user is peeking, nothing hidden. The context formatters read it, so a
+/// screen only needs a context.
 class AmountMask extends InheritedWidget {
-  const AmountMask({super.key, required this.hidden, required super.child});
+  const AmountMask({
+    super.key,
+    required this.hide,
+    this.peek = false,
+    required super.child,
+  });
 
-  final bool hidden;
+  final HideAmounts hide;
+  final bool peek;
 
   @override
-  bool updateShouldNotify(AmountMask old) => hidden != old.hidden;
+  bool updateShouldNotify(AmountMask old) =>
+      hide != old.hide || peek != old.peek;
 }
 
 /// `context.rp(v)` etc.: the formatters above, masked when 02.4 says so.
+/// [income]: the figure is pemasukan or gives it away (a day total with a
+/// salary in it), so "pemasukan aja" hides it too (99.5).
 /// Outside an [AmountMask] (tests) nothing is hidden.
 extension MoneyContext on BuildContext {
-  String _m(String s) =>
-      dependOnInheritedWidgetOfExactType<AmountMask>()?.hidden ?? false
-      ? maskAmount(s)
-      : s;
+  AmountMask? get amountMask =>
+      dependOnInheritedWidgetOfExactType<AmountMask>();
 
-  String rp(int v) => _m(rupiah(v));
-  String rpCompact(int v) => _m(rupiahCompact(v));
-  String rpSigned(int v) => _m(rupiahSigned(v));
-  String masked(String s) => _m(s);
+  bool hidesAmount({bool income = false}) {
+    final m = amountMask;
+    if (m == null || m.peek) return false;
+    return switch (m.hide) {
+      HideAmounts.none => false,
+      HideAmounts.income => income,
+      HideAmounts.all => true,
+    };
+  }
+
+  String _m(String s, bool income) =>
+      hidesAmount(income: income) ? maskAmount(s) : s;
+
+  String rp(int v, {bool income = false}) => _m(rupiah(v), income);
+  String rpCompact(int v, {bool income = false}) =>
+      _m(rupiahCompact(v), income);
+  String rpSigned(int v, {bool income = false}) => _m(rupiahSigned(v), income);
 }
