@@ -334,13 +334,14 @@ class _BudgetCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 18),
-          Wrap(
+          Row(
             spacing: 8,
-            runSpacing: 8,
             children: [
-              _chip(
-                l.settingsPeriod(periodRange(period.start, period.end)),
-                onPeriod,
+              Flexible(
+                child: _chip(
+                  l.settingsPeriod(periodRange(period.start, period.end)),
+                  onPeriod,
+                ),
               ),
               _chip(l.settingsLimits(limits), onLimits),
             ],
@@ -366,6 +367,8 @@ Widget _chip(String label, VoidCallback onTap) => Semantics(
       ),
       child: Text(
         label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: AppText.caption.copyWith(color: AppColors.onInk),
       ),
     ),
