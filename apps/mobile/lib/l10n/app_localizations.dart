@@ -430,18 +430,6 @@ abstract class AppLocalizations {
   /// **'sisa jajan (kantong)'**
   String get infoJarTitle;
 
-  /// No description provided for @pocketsBudgetOver.
-  ///
-  /// In id, this message translates to:
-  /// **'budget udah kelewat {amount}'**
-  String pocketsBudgetOver(String amount);
-
-  /// No description provided for @pocketsBudgetShort.
-  ///
-  /// In id, this message translates to:
-  /// **'sisa budget cuma {amount}'**
-  String pocketsBudgetShort(String amount);
-
   /// No description provided for @heroBudgetLeft.
   ///
   /// In id, this message translates to:
@@ -910,28 +898,76 @@ abstract class AppLocalizations {
   /// **'geser'**
   String get pocketsSwipe;
 
+  /// No description provided for @pocketsIntroTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'kantong = budget kamu, dipecah per toples'**
+  String get pocketsIntroTitle;
+
+  /// No description provided for @pocketsIntroBody.
+  ///
+  /// In id, this message translates to:
+  /// **'kayak amplop: makan Rp3jt, ngopi Rp600K, dst. biar ketauan bocornya di mana.'**
+  String get pocketsIntroBody;
+
+  /// No description provided for @pocketsIntroCount.
+  ///
+  /// In id, this message translates to:
+  /// **'{n} kantong {total}'**
+  String pocketsIntroCount(int n, String total);
+
+  /// No description provided for @pocketsIntroFree.
+  ///
+  /// In id, this message translates to:
+  /// **'{amount} belum dijatah'**
+  String pocketsIntroFree(String amount);
+
+  /// No description provided for @pocketsIntroOver.
+  ///
+  /// In id, this message translates to:
+  /// **'lebih {amount} dari budget'**
+  String pocketsIntroOver(String amount);
+
+  /// No description provided for @pocketsIntroNoBudget.
+  ///
+  /// In id, this message translates to:
+  /// **'belum pasang budget'**
+  String get pocketsIntroNoBudget;
+
+  /// No description provided for @pocketsIntroOk.
+  ///
+  /// In id, this message translates to:
+  /// **'oke'**
+  String get pocketsIntroOk;
+
+  /// No description provided for @infoPocketsLead.
+  ///
+  /// In id, this message translates to:
+  /// **'kantong = budget kamu, dipecah per toples.'**
+  String get infoPocketsLead;
+
+  /// No description provided for @infoPocketsBody.
+  ///
+  /// In id, this message translates to:
+  /// **'pasang limit ke makan, ngopi, ojol, mibu ngitung sisanya sampai gajian.'**
+  String get infoPocketsBody;
+
   /// No description provided for @pocketsNewJar.
   ///
   /// In id, this message translates to:
   /// **'pasang limit ke yang lain'**
   String get pocketsNewJar;
 
-  /// No description provided for @pocketsFirstTitle.
-  ///
-  /// In id, this message translates to:
-  /// **'pasang limit pertama'**
-  String get pocketsFirstTitle;
-
   /// No description provided for @pocketsFirstBody.
   ///
   /// In id, this message translates to:
-  /// **'misal makan, ngopi, ojol. mibu ngabarin pas mau abis.'**
+  /// **'kayak amplop: makan, ngopi, ojol. mibu ngabarin pas mau abis.'**
   String get pocketsFirstBody;
 
   /// No description provided for @pocketsFirstButton.
   ///
   /// In id, this message translates to:
-  /// **'pasang limit'**
+  /// **'+ pasang limit'**
   String get pocketsFirstButton;
 
   /// No description provided for @pocketsFreeTitle.
@@ -1039,7 +1075,7 @@ abstract class AppLocalizations {
   /// No description provided for @pocketDaily.
   ///
   /// In id, this message translates to:
-  /// **'≈ {amount}/hari sampai akhir bulan'**
+  /// **'≈ {amount}/hari sampai gajian'**
   String pocketDaily(String amount);
 
   /// No description provided for @pocketManage.

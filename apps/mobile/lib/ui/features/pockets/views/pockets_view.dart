@@ -114,12 +114,8 @@ class _PocketsViewState extends ConsumerState<PocketsView> {
                             style: muted,
                           ),
                         ),
-                        // "?" always; an ink "!" when sisa jajan promises more
-                        // than the budget has left.
-                        InfoDisc(
-                          alert: s.conflict,
-                          onTap: () => _info(context, s),
-                        ),
+                        // How sisa jajan and sisa budget differ: 02.2k.
+                        InfoDisc(onTap: () => _info(context, s)),
                         const Spacer(),
                         _DaysChip(l.pocketsDaysLeft(s.daysLeft)),
                       ],
@@ -137,38 +133,16 @@ class _PocketsViewState extends ConsumerState<PocketsView> {
                       ),
                     ),
                   ),
-                  if (s.conflict)
+                  // 02.2l kenalan kantong: once, until "oke".
+                  if (!s.introSeen && s.pockets.isNotEmpty)
                     gutter(
-                      GestureDetector(
-                        onTap: () => _info(context, s),
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 4),
-                          child: Row(
-                            spacing: 6,
-                            children: [
-                              const HugeIcon(
-                                icon: HugeIcons.strokeRoundedAlert02,
-                                size: 14,
-                                strokeWidth: 2,
-                                color: AppColors.ink,
-                              ),
-                              Flexible(
-                                child: Text(
-                                  (s.budgetLeft ?? 0) < 0
-                                      ? l.pocketsBudgetOver(
-                                          context.rpCompact(-s.budgetLeft!),
-                                        )
-                                      : l.pocketsBudgetShort(
-                                          context.rpCompact(s.budgetLeft ?? 0),
-                                        ),
-                                  style: AppText.caption.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.ink,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 14),
+                        child: _Intro(
+                          state: s,
+                          onOk: () => ref
+                              .read(financeRepositoryProvider)
+                              .markPocketsIntroSeen(),
                         ),
                       ),
                     ),
@@ -673,6 +647,148 @@ class _DashedBox extends CustomPainter {
 }
 
 /// 02.2d: no limits yet; the whole card opens "pasang limit ke…".
+/// 02.2l kenalan kantong: what a kantong is, the budget split into this
+/// user's kantong, and how much of it is still unassigned.
+class _Intro extends StatelessWidget {
+  const _Intro({required this.state, required this.onOk});
+
+  final PocketsState state;
+  final VoidCallback onOk;
+
+  static const _shades = [
+    AppColors.ink,
+    AppColors.muted,
+    AppColors.grey400,
+    AppColors.onInkMuted,
+    AppColors.line,
+    AppColors.pressed,
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    final s = state;
+    final budget = s.budget;
+    final total = s.limit;
+    final base = [budget ?? 0, total, 1].reduce((a, b) => a > b ? a : b);
+    final rp = context.rpCompact;
+    return Semantics(
+      container: true,
+      label: l.pocketsIntroTitle,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.mist,
+          borderRadius: BorderRadius.circular(AppRadius.groupCard),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              spacing: 10,
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  alignment: Alignment.center,
+                  decoration: const BoxDecoration(
+                    color: AppColors.paper,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const AppEmoji('🫙', size: 22),
+                ),
+                Expanded(
+                  child: Text(
+                    l.pocketsIntroTitle,
+                    style: AppText.label.copyWith(
+                      fontSize: 15,
+                      height: 1.3,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              l.pocketsIntroBody,
+              style: AppText.label.copyWith(
+                fontSize: 14,
+                height: 1.4,
+                color: AppColors.muted,
+              ),
+            ),
+            const SizedBox(height: 12),
+            // The budget split into kantong, in the jars' order.
+            ExcludeSemantics(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: Container(
+                  height: 8,
+                  color: AppColors.paper,
+                  child: Row(
+                    spacing: 2,
+                    children: [
+                      for (final (i, p) in s.pockets.indexed)
+                        Flexible(
+                          flex: (p.budget * 1000 ~/ base).clamp(1, 1000),
+                          child: Container(color: _shades[i % _shades.length]),
+                        ),
+                      if (base - total > 0)
+                        Spacer(
+                          flex: ((base - total) * 1000 ~/ base).clamp(1, 1000),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              spacing: 8,
+              children: [
+                Expanded(
+                  child: MetaLine([
+                    l.pocketsIntroCount(s.pockets.length, rp(total)),
+                    budget == null
+                        ? l.pocketsIntroNoBudget
+                        : total <= budget
+                        ? l.pocketsIntroFree(rp(budget - total))
+                        : l.pocketsIntroOver(rp(total - budget)),
+                  ], style: AppText.caption.copyWith(color: AppColors.muted)),
+                ),
+                Semantics(
+                  button: true,
+                  child: GestureDetector(
+                    onTap: onOk,
+                    child: Container(
+                      height: 32,
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: AppColors.ink,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Text(
+                        l.pocketsIntroOk,
+                        style: AppText.label.copyWith(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.paper,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _FirstPocket extends StatelessWidget {
   const _FirstPocket({required this.onTap});
 
@@ -736,12 +852,12 @@ class _FirstPocket extends StatelessWidget {
                     spacing: 6,
                     children: [
                       Text(
-                        l.pocketsFirstTitle,
+                        l.pocketsIntroTitle,
                         style: AppText.label.copyWith(
-                          fontSize: 20,
-                          height: 1.2,
+                          fontSize: 18,
+                          height: 1.25,
                           fontWeight: FontWeight.w600,
-                          letterSpacing: -0.2,
+                          letterSpacing: -0.18,
                         ),
                       ),
                       Text(

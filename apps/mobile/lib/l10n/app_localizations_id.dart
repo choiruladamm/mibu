@@ -210,16 +210,6 @@ class AppLocalizationsId extends AppLocalizations {
   String get infoJarTitle => 'sisa jajan (kantong)';
 
   @override
-  String pocketsBudgetOver(String amount) {
-    return 'budget udah kelewat $amount';
-  }
-
-  @override
-  String pocketsBudgetShort(String amount) {
-    return 'sisa budget cuma $amount';
-  }
-
-  @override
   String get heroBudgetLeft => 'sisa budget';
 
   @override
@@ -504,17 +494,49 @@ class AppLocalizationsId extends AppLocalizations {
   String get pocketsSwipe => 'geser';
 
   @override
+  String get pocketsIntroTitle => 'kantong = budget kamu, dipecah per toples';
+
+  @override
+  String get pocketsIntroBody =>
+      'kayak amplop: makan Rp3jt, ngopi Rp600K, dst. biar ketauan bocornya di mana.';
+
+  @override
+  String pocketsIntroCount(int n, String total) {
+    return '$n kantong $total';
+  }
+
+  @override
+  String pocketsIntroFree(String amount) {
+    return '$amount belum dijatah';
+  }
+
+  @override
+  String pocketsIntroOver(String amount) {
+    return 'lebih $amount dari budget';
+  }
+
+  @override
+  String get pocketsIntroNoBudget => 'belum pasang budget';
+
+  @override
+  String get pocketsIntroOk => 'oke';
+
+  @override
+  String get infoPocketsLead => 'kantong = budget kamu, dipecah per toples.';
+
+  @override
+  String get infoPocketsBody =>
+      'pasang limit ke makan, ngopi, ojol, mibu ngitung sisanya sampai gajian.';
+
+  @override
   String get pocketsNewJar => 'pasang limit ke yang lain';
 
   @override
-  String get pocketsFirstTitle => 'pasang limit pertama';
-
-  @override
   String get pocketsFirstBody =>
-      'misal makan, ngopi, ojol. mibu ngabarin pas mau abis.';
+      'kayak amplop: makan, ngopi, ojol. mibu ngabarin pas mau abis.';
 
   @override
-  String get pocketsFirstButton => 'pasang limit';
+  String get pocketsFirstButton => '+ pasang limit';
 
   @override
   String get pocketsFreeTitle => 'belum ada limit';
@@ -585,7 +607,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String pocketDaily(String amount) {
-    return '≈ $amount/hari sampai akhir bulan';
+    return '≈ $amount/hari sampai gajian';
   }
 
   @override

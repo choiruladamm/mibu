@@ -79,7 +79,7 @@ void main() {
     expect(find.text('hampir abis'), findsOneWidget);
     expect(find.text('Rp100K'), findsOneWidget);
     expect(findMeta(['jatah sisa', 'limit Rp1jt']), findsOneWidget);
-    expect(find.text('≈ Rp5,6K/hari sampai akhir bulan'), findsOneWidget);
+    expect(find.text('≈ Rp5,6K/hari sampai gajian'), findsOneWidget);
     expect(find.bySemanticsLabel('90% kepake'), findsOneWidget); // ring
     expect(find.text('atur limit'), findsOneWidget);
 
@@ -208,7 +208,8 @@ void main() {
     expect(find.text('budget per periode'), findsOneWidget);
 
     final handle =
-        tester.getTopLeft(find.text('budget per periode')) + const Offset(150, -30);
+        tester.getTopLeft(find.text('budget per periode')) +
+        const Offset(150, -30);
     await tester.dragFrom(handle, const Offset(0, 200));
     await tester.pumpAndSettle();
     expect(find.text('budget per periode'), findsNothing);
@@ -315,12 +316,15 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('pasang limit pertama'), findsOneWidget);
+    expect(
+      find.text('kantong = budget kamu, dipecah per toples'),
+      findsOneWidget,
+    );
     expect(find.text('geser'), findsNothing);
     // all five expense categories are now free: top 2 + "+3"
     expect(find.text('+3'), findsOneWidget);
 
-    await tester.tap(find.text('pasang limit pertama'));
+    await tester.tap(find.text('kantong = budget kamu, dipecah per toples'));
     await tester.pumpAndSettle();
     expect(find.text('pasang limit ke…'), findsOneWidget);
 
@@ -469,14 +473,21 @@ void main() {
     await db.close();
   });
 
-  testWidgets('"?" explains sisa jajan; "!" when the budget has less left', (
+  testWidgets('"?" from kantong: what a kantong is, then the three cards', (
     tester,
   ) async {
     final db = await pump(tester, const Size(390, 844));
-    // Budget Rp8jt: Rp3,94jt left, more than sisa jajan Rp1,64jt → quiet "?".
+    // No "!" any more: the sheet explains why the figures differ.
     expect(find.text('!'), findsNothing);
     await tester.tap(find.bySemanticsLabel('dari mana angkanya?'));
     await settle(tester);
+    expect(
+      find.textContaining(
+        'kantong = budget kamu, dipecah per toples.',
+        findRichText: true,
+      ),
+      findsOneWidget,
+    );
     // NumbersSheet 00.25, opened from kantong: its card is the ink one.
     expect(
       find.text('total limit Rp3,3jt − kepake di kantong Rp1,66jt'),
@@ -493,20 +504,48 @@ void main() {
     await tester.tap(find.text('oke, ngerti'));
     await settle(tester);
 
-    // Budget Rp5jt: Rp0,94jt left < sisa jajan → the "?" turns "!" + a line.
+    // Budget Rp5jt: Rp941K left, less than sisa jajan, still no "!".
     await tester.runAsync(() => setBudgetOf(db, 5000000));
     await settle(tester);
-    expect(find.text('!'), findsOneWidget);
-    expect(find.text('sisa budget cuma Rp941K'), findsOneWidget);
+    expect(find.text('!'), findsNothing);
     await tester.tap(find.bySemanticsLabel('dari mana angkanya?'));
     await settle(tester);
     expect(find.text('Rp941K'), findsOneWidget); // sisa budget card
-    await tester.tap(find.text('oke, ngerti'));
+  });
+
+  testWidgets('02.2l kenalan kantong: shown until oke, then never again', (
+    tester,
+  ) async {
+    final db = await pump(tester, const Size(390, 844));
+    expect(
+      find.text('kantong = budget kamu, dipecah per toples'),
+      findsNothing,
+    );
+    await tester.runAsync(
+      () => db
+          .update(db.profiles)
+          .write(const ProfilesCompanion(pocketsIntroSeen: Value(false))),
+    );
     await settle(tester);
 
-    // Budget gone: its own wording.
-    await tester.runAsync(() => setBudgetOf(db, 1500000));
+    expect(
+      find.text('kantong = budget kamu, dipecah per toples'),
+      findsOneWidget,
+    );
+    // 4 kantong Rp3,3jt of the Rp8jt budget.
+    expect(
+      findMeta(['4 kantong Rp3,3jt', 'Rp4,7jt belum dijatah']),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('oke'));
     await settle(tester);
-    expect(find.text('budget udah kelewat Rp2,56jt'), findsOneWidget);
+    expect(
+      find.text('kantong = budget kamu, dipecah per toples'),
+      findsNothing,
+    );
+    final p = (await tester.runAsync(
+      () => db.select(db.profiles).getSingle(),
+    ))!;
+    expect(p.pocketsIntroSeen, isTrue);
   });
 }

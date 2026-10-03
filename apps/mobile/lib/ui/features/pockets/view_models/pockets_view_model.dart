@@ -29,6 +29,7 @@ class PocketsState {
     required this.monthSpent,
     required this.free,
     required this.spentToday,
+    required this.introSeen,
   });
 
   final Period period;
@@ -40,6 +41,7 @@ class PocketsState {
   final int monthSpent; // every expense this month, pockets or not
   final List<FreeCategory> free; // tanpa kantong
   final int spentToday; // for aman jajan in "dari mana angkanya?"
+  final bool introSeen; // 02.2l kenalan kantong dismissed
 
   int get limit => pockets.fold(0, (sum, p) => sum + p.budget);
   int get spent => pockets.fold(0, (sum, p) => sum + p.spent);
@@ -48,18 +50,14 @@ class PocketsState {
 
   /// budget − every expense this month; negative = kelewat. Null without one.
   int? get budgetLeft => budget == null ? null : budget! - monthSpent;
-
-  /// "sisa jajan" promises more than the budget has left: the two figures
-  /// disagree, and the smaller one is the one to trust.
-  bool get conflict =>
-      pockets.isNotEmpty && budgetLeft != null && left > budgetLeft!;
 }
 
 /// 02.2 kantong state.
 final pocketsScreenProvider = Provider<AsyncValue<PocketsState>>((ref) {
   final now = ref.watch(nowProvider);
   final period = ref.watch(currentPeriodProvider);
-  final budget = ref.watch(profileProvider).value?.monthlyBudget;
+  final profile = ref.watch(profileProvider).value;
+  final budget = profile?.monthlyBudget;
   final free = ref.watch(freeCategoriesProvider(period));
   if (free.hasError) debugPrint('kantong: ${free.error}');
   return switch (ref.watch(pocketsProvider)) {
@@ -77,6 +75,7 @@ final pocketsScreenProvider = Provider<AsyncValue<PocketsState>>((ref) {
         monthSpent: ref.watch(totalsProvider).value?.spent[period.key] ?? 0,
         free: free.value!,
         spentToday: ref.watch(totalsProvider).value?.spentToday ?? 0,
+        introSeen: profile?.pocketsIntroSeen ?? true,
       ),
     ),
     AsyncError(:final error, :final stackTrace) => () {

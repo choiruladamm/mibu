@@ -101,6 +101,21 @@ class $ProfilesTable extends Profiles
     requiredDuringInsert: false,
     defaultValue: const Constant(''),
   );
+  static const VerificationMeta _pocketsIntroSeenMeta = const VerificationMeta(
+    'pocketsIntroSeen',
+  );
+  @override
+  late final GeneratedColumn<bool> pocketsIntroSeen = GeneratedColumn<bool>(
+    'pockets_intro_seen',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("pockets_intro_seen" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -111,6 +126,7 @@ class $ProfilesTable extends Profiles
     hideAmounts,
     onboardedAt,
     recentSearches,
+    pocketsIntroSeen,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -180,6 +196,15 @@ class $ProfilesTable extends Profiles
         ),
       );
     }
+    if (data.containsKey('pockets_intro_seen')) {
+      context.handle(
+        _pocketsIntroSeenMeta,
+        pocketsIntroSeen.isAcceptableOrUnknown(
+          data['pockets_intro_seen']!,
+          _pocketsIntroSeenMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -221,6 +246,10 @@ class $ProfilesTable extends Profiles
         DriftSqlType.string,
         data['${effectivePrefix}recent_searches'],
       )!,
+      pocketsIntroSeen: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}pockets_intro_seen'],
+      )!,
     );
   }
 
@@ -239,6 +268,7 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
   final bool hideAmounts;
   final DateTime? onboardedAt;
   final String recentSearches;
+  final bool pocketsIntroSeen;
   const ProfileRow({
     required this.id,
     required this.createdAt,
@@ -248,6 +278,7 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
     required this.hideAmounts,
     this.onboardedAt,
     required this.recentSearches,
+    required this.pocketsIntroSeen,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -264,6 +295,7 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
       map['onboarded_at'] = Variable<DateTime>(onboardedAt);
     }
     map['recent_searches'] = Variable<String>(recentSearches);
+    map['pockets_intro_seen'] = Variable<bool>(pocketsIntroSeen);
     return map;
   }
 
@@ -281,6 +313,7 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
           ? const Value.absent()
           : Value(onboardedAt),
       recentSearches: Value(recentSearches),
+      pocketsIntroSeen: Value(pocketsIntroSeen),
     );
   }
 
@@ -298,6 +331,7 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
       hideAmounts: serializer.fromJson<bool>(json['hideAmounts']),
       onboardedAt: serializer.fromJson<DateTime?>(json['onboardedAt']),
       recentSearches: serializer.fromJson<String>(json['recentSearches']),
+      pocketsIntroSeen: serializer.fromJson<bool>(json['pocketsIntroSeen']),
     );
   }
   @override
@@ -312,6 +346,7 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
       'hideAmounts': serializer.toJson<bool>(hideAmounts),
       'onboardedAt': serializer.toJson<DateTime?>(onboardedAt),
       'recentSearches': serializer.toJson<String>(recentSearches),
+      'pocketsIntroSeen': serializer.toJson<bool>(pocketsIntroSeen),
     };
   }
 
@@ -324,6 +359,7 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
     bool? hideAmounts,
     Value<DateTime?> onboardedAt = const Value.absent(),
     String? recentSearches,
+    bool? pocketsIntroSeen,
   }) => ProfileRow(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
@@ -333,6 +369,7 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
     hideAmounts: hideAmounts ?? this.hideAmounts,
     onboardedAt: onboardedAt.present ? onboardedAt.value : this.onboardedAt,
     recentSearches: recentSearches ?? this.recentSearches,
+    pocketsIntroSeen: pocketsIntroSeen ?? this.pocketsIntroSeen,
   );
   ProfileRow copyWithCompanion(ProfilesCompanion data) {
     return ProfileRow(
@@ -350,6 +387,9 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
       recentSearches: data.recentSearches.present
           ? data.recentSearches.value
           : this.recentSearches,
+      pocketsIntroSeen: data.pocketsIntroSeen.present
+          ? data.pocketsIntroSeen.value
+          : this.pocketsIntroSeen,
     );
   }
 
@@ -363,7 +403,8 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
           ..write('payday: $payday, ')
           ..write('hideAmounts: $hideAmounts, ')
           ..write('onboardedAt: $onboardedAt, ')
-          ..write('recentSearches: $recentSearches')
+          ..write('recentSearches: $recentSearches, ')
+          ..write('pocketsIntroSeen: $pocketsIntroSeen')
           ..write(')'))
         .toString();
   }
@@ -378,6 +419,7 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
     hideAmounts,
     onboardedAt,
     recentSearches,
+    pocketsIntroSeen,
   );
   @override
   bool operator ==(Object other) =>
@@ -390,7 +432,8 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
           other.payday == this.payday &&
           other.hideAmounts == this.hideAmounts &&
           other.onboardedAt == this.onboardedAt &&
-          other.recentSearches == this.recentSearches);
+          other.recentSearches == this.recentSearches &&
+          other.pocketsIntroSeen == this.pocketsIntroSeen);
 }
 
 class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
@@ -402,6 +445,7 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
   final Value<bool> hideAmounts;
   final Value<DateTime?> onboardedAt;
   final Value<String> recentSearches;
+  final Value<bool> pocketsIntroSeen;
   final Value<int> rowid;
   const ProfilesCompanion({
     this.id = const Value.absent(),
@@ -412,6 +456,7 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
     this.hideAmounts = const Value.absent(),
     this.onboardedAt = const Value.absent(),
     this.recentSearches = const Value.absent(),
+    this.pocketsIntroSeen = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ProfilesCompanion.insert({
@@ -423,6 +468,7 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
     this.hideAmounts = const Value.absent(),
     this.onboardedAt = const Value.absent(),
     this.recentSearches = const Value.absent(),
+    this.pocketsIntroSeen = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : payday = Value(payday);
   static Insertable<ProfileRow> custom({
@@ -434,6 +480,7 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
     Expression<bool>? hideAmounts,
     Expression<DateTime>? onboardedAt,
     Expression<String>? recentSearches,
+    Expression<bool>? pocketsIntroSeen,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -445,6 +492,7 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
       if (hideAmounts != null) 'hide_amounts': hideAmounts,
       if (onboardedAt != null) 'onboarded_at': onboardedAt,
       if (recentSearches != null) 'recent_searches': recentSearches,
+      if (pocketsIntroSeen != null) 'pockets_intro_seen': pocketsIntroSeen,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -458,6 +506,7 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
     Value<bool>? hideAmounts,
     Value<DateTime?>? onboardedAt,
     Value<String>? recentSearches,
+    Value<bool>? pocketsIntroSeen,
     Value<int>? rowid,
   }) {
     return ProfilesCompanion(
@@ -469,6 +518,7 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
       hideAmounts: hideAmounts ?? this.hideAmounts,
       onboardedAt: onboardedAt ?? this.onboardedAt,
       recentSearches: recentSearches ?? this.recentSearches,
+      pocketsIntroSeen: pocketsIntroSeen ?? this.pocketsIntroSeen,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -500,6 +550,9 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
     if (recentSearches.present) {
       map['recent_searches'] = Variable<String>(recentSearches.value);
     }
+    if (pocketsIntroSeen.present) {
+      map['pockets_intro_seen'] = Variable<bool>(pocketsIntroSeen.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -517,6 +570,7 @@ class ProfilesCompanion extends UpdateCompanion<ProfileRow> {
           ..write('hideAmounts: $hideAmounts, ')
           ..write('onboardedAt: $onboardedAt, ')
           ..write('recentSearches: $recentSearches, ')
+          ..write('pocketsIntroSeen: $pocketsIntroSeen, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3214,6 +3268,7 @@ typedef $$ProfilesTableCreateCompanionBuilder = ProfilesCompanion Function({
   Value<bool> hideAmounts,
   Value<DateTime?> onboardedAt,
   Value<String> recentSearches,
+  Value<bool> pocketsIntroSeen,
   Value<int> rowid,
 });
 typedef $$ProfilesTableUpdateCompanionBuilder = ProfilesCompanion Function({
@@ -3225,6 +3280,7 @@ typedef $$ProfilesTableUpdateCompanionBuilder = ProfilesCompanion Function({
   Value<bool> hideAmounts,
   Value<DateTime?> onboardedAt,
   Value<String> recentSearches,
+  Value<bool> pocketsIntroSeen,
   Value<int> rowid,
 });
 
@@ -3274,6 +3330,11 @@ class $$ProfilesTableFilterComposer
 
   ColumnFilters<String> get recentSearches => $composableBuilder(
     column: $table.recentSearches,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get pocketsIntroSeen => $composableBuilder(
+    column: $table.pocketsIntroSeen,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -3326,6 +3387,11 @@ class $$ProfilesTableOrderingComposer
     column: $table.recentSearches,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get pocketsIntroSeen => $composableBuilder(
+    column: $table.pocketsIntroSeen,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ProfilesTableAnnotationComposer
@@ -3364,6 +3430,11 @@ class $$ProfilesTableAnnotationComposer
 
   GeneratedColumn<String> get recentSearches => $composableBuilder(
     column: $table.recentSearches,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get pocketsIntroSeen => $composableBuilder(
+    column: $table.pocketsIntroSeen,
     builder: (column) => column,
   );
 }
@@ -3407,6 +3478,7 @@ class $$ProfilesTableTableManager
                 Value<bool> hideAmounts = const Value.absent(),
                 Value<DateTime?> onboardedAt = const Value.absent(),
                 Value<String> recentSearches = const Value.absent(),
+                Value<bool> pocketsIntroSeen = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ProfilesCompanion(
                 id: id,
@@ -3417,6 +3489,7 @@ class $$ProfilesTableTableManager
                 hideAmounts: hideAmounts,
                 onboardedAt: onboardedAt,
                 recentSearches: recentSearches,
+                pocketsIntroSeen: pocketsIntroSeen,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -3429,6 +3502,7 @@ class $$ProfilesTableTableManager
                 Value<bool> hideAmounts = const Value.absent(),
                 Value<DateTime?> onboardedAt = const Value.absent(),
                 Value<String> recentSearches = const Value.absent(),
+                Value<bool> pocketsIntroSeen = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ProfilesCompanion.insert(
                 id: id,
@@ -3439,6 +3513,7 @@ class $$ProfilesTableTableManager
                 hideAmounts: hideAmounts,
                 onboardedAt: onboardedAt,
                 recentSearches: recentSearches,
+                pocketsIntroSeen: pocketsIntroSeen,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

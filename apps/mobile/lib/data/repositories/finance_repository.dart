@@ -59,6 +59,7 @@ class FinanceRepository {
               recentSearches: r.recentSearches.isEmpty
                   ? const []
                   : r.recentSearches.split('\n'),
+              pocketsIntroSeen: r.pocketsIntroSeen,
             );
     });
   }
@@ -751,6 +752,15 @@ class FinanceRepository {
     await Future.sync(() => write(queued, from));
     return from;
   });
+
+  /// 02.2l kenalan kantong: "oke" retires the card for good.
+  Future<void> markPocketsIntroSeen() =>
+      (_db.update(_db.profiles)..where((p) => p.deletedAt.isNull())).write(
+        ProfilesCompanion(
+          pocketsIntroSeen: const Value(true),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
 
   /// 02.4 sembunyiin nominal.
   Future<void> setHideAmounts(bool hide) =>

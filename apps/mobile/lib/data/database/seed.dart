@@ -30,6 +30,7 @@ Future<void> seedFixture(AppDatabase db, DateTime now) async {
         // Set up when the sample data starts: a lived-in app, not its first
         // period (a payday change waits for the next one).
         onboardedAt: Value(DateTime(now.year, now.month - 3)),
+        pocketsIntroSeen: const Value(true),
       ),
     );
     // Budget + limits from the first seeded month, so past months have them.
@@ -343,7 +344,11 @@ Future<void> seedDemo(AppDatabase db, DateTime now) async {
   await db.batch((b) {
     b.insert(
       db.profiles,
-      ProfilesCompanion.insert(payday: 25, onboardedAt: Value(start)),
+      ProfilesCompanion.insert(
+        payday: 25,
+        onboardedAt: Value(start),
+        pocketsIntroSeen: const Value(true),
+      ),
     );
     // Stamped from the start of time like the payday rule, so the first
     // (partial) period has them too.

@@ -32,6 +32,9 @@ class Profiles extends Table with SyncColumns {
   DateTimeColumn get onboardedAt => dateTime().nullable()();
   TextColumn get recentSearches =>
       text().withDefault(const Constant(''))(); // newline-separated, ≤ 5
+  // 02.2l kenalan kantong: shown until "oke".
+  BoolColumn get pocketsIntroSeen =>
+      boolean().withDefault(const Constant(false))();
 }
 
 @DataClassName('CategoryRow')

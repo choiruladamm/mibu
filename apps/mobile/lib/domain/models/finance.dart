@@ -45,6 +45,7 @@ class Profile {
     this.hideAmounts = false,
     this.onboarded = false,
     this.recentSearches = const [],
+    this.pocketsIntroSeen = false,
   });
 
   /// Before 01.4 atur awal has run.
@@ -55,6 +56,7 @@ class Profile {
   final bool hideAmounts;
   final bool onboarded; // 01.4 atur awal done (or skipped with "nanti aja")
   final List<String> recentSearches; // 04.2b terakhir dicari, newest first
+  final bool pocketsIntroSeen; // 02.2l kenalan kantong dismissed with "oke"
 }
 
 /// 01.4b kantong pertama: presets with the board's monthly limits.

@@ -7,6 +7,7 @@ import '../../../l10n/app_localizations.dart';
 import '../dates.dart';
 import '../money.dart';
 import '../tokens.dart';
+import 'app_emoji.dart';
 import 'meta_line.dart';
 import 'sheet.dart';
 
@@ -39,6 +40,7 @@ Future<void> showNumbersInfo(
   return showAppSheet<void>(
     context,
     _NumbersInfo(
+      pockets: !hero,
       meta: [
         _monthFull.format(period.key).toLowerCase(),
         periodRange(period.start, period.end),
@@ -138,8 +140,13 @@ class InfoDisc extends StatelessWidget {
 }
 
 class _NumbersInfo extends StatelessWidget {
-  const _NumbersInfo({required this.meta, required this.cards});
+  const _NumbersInfo({
+    required this.pockets,
+    required this.meta,
+    required this.cards,
+  });
 
+  final bool pockets; // opened from kantong: one line on what a kantong is
   final List<String> meta;
   final List<_Card> cards;
 
@@ -176,6 +183,46 @@ class _NumbersInfo extends StatelessWidget {
             meta,
             style: AppText.label.copyWith(fontSize: 14, color: AppColors.muted),
           ),
+          if (pockets) ...[
+            const SizedBox(height: 16),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 10,
+              children: [
+                Container(
+                  width: 32,
+                  height: 32,
+                  alignment: Alignment.center,
+                  decoration: const BoxDecoration(
+                    color: AppColors.mist,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const AppEmoji('🫙', size: 20),
+                ),
+                Expanded(
+                  child: Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: l.infoPocketsLead,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.ink,
+                          ),
+                        ),
+                        TextSpan(text: ' ${l.infoPocketsBody}'),
+                      ],
+                    ),
+                    style: AppText.label.copyWith(
+                      fontSize: 14,
+                      height: 1.4,
+                      color: AppColors.muted,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: 18),
           for (final c in cards) ...[
             Container(
