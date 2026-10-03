@@ -1,6 +1,6 @@
 # mibu — ganti tanggal gajian: potongan periode
 
-Keputusan 2026-10-03, udah jalan. Board desain 00.24 / 00.25 belum disamain. Nambahin [PAYDAY_CYCLE_PLAN.md](PAYDAY_CYCLE_PLAN.md) (aturan 4: ganti gajian mulai periode berikutnya) dan [PERIOD_LEDGER_PLAN.md](PERIOD_LEDGER_PLAN.md) kasus 7. Di sana nama dobel ditulis "jarang, dibiarin dulu". Ternyata efeknya lebih dari sekadar nama.
+Keputusan 2026-10-03, udah jalan. Board 00.24, 00.25, 02.4e–g dan note baris 02 udah disamain. Nambahin [PAYDAY_CYCLE_PLAN.md](PAYDAY_CYCLE_PLAN.md) (aturan 4: ganti gajian mulai periode berikutnya) dan [PERIOD_LEDGER_PLAN.md](PERIOD_LEDGER_PLAN.md) kasus 7. Di sana nama dobel ditulis "jarang, dibiarin dulu". Ternyata efeknya lebih dari sekadar nama.
 
 ## Masalah
 
@@ -81,5 +81,6 @@ Catatan implementasi:
 - `Period.normalDays` (null = periode normal) dan `prorate(amount, period)` ada di `domain/period.dart`. Angka yang diproporsi: `budgetInPeriodProvider`, budget di kantong, dan `Pocket.budget`. Sheet edit (00.16, limit, form kategori, total limit di 02.4) tetap pakai angka yang di-set: `Profile.monthlyBudget` dan `Pocket.limit`.
 - `setPayday`: kalau udah ada aturan yang antri, aturan itu yang diupdate (tanggal mulainya nggak berubah). Habis digabung, `current.end` bisa lewat dari tanggal aturan itu, jadi kalau masih pakai `current.end` bakal kebikin aturan ketiga.
 - Kapan ganti gajian mulai berlaku diputusin `paydayChangeFrom` (domain), dipakai `setPayday` dan preview 00.24. Preview ngitung periode lewat `withPayday` + `SegmentedResolver`, jadi angkanya sama persis dengan yang kesimpen.
+- Preview 00.24 dua baris: "periode ini jadi 25 sep – 27 okt" (15/600), di bawahnya `MetaLine` "33 hari • budget Rp8,8jt" (13, abu).
 - Toast 00.24: kalau periode jalan berubah, bunyinya "periode ini jadi sampai sen 9 nov". Kalau nggak berubah, tetap "berlaku mulai …, periode ini selesai dulu".
 - 00.25: kartu sisa budget dapet catatan "periode peralihan n hari, budget dihitung n/30".

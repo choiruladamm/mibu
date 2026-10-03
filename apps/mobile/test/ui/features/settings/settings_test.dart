@@ -262,13 +262,13 @@ void main() {
     // 14 okt: the running period ("oktober", 25 sep – 22 okt) ends 23 okt.
     // The 10th's cycle there (9 okt – 9 nov) is "oktober" too, so it joins
     // the running period; the preview says so before saving.
-    final preview = find.byWidgetPredicate(
-      (w) =>
-          w is MetaLine &&
-          w.spans.first.toPlainText() == 'periode ini jadi 25 sep – 9 nov',
+    expect(find.text('periode ini jadi 25 sep – 9 nov'), findsOneWidget);
+    expect(
+      find.byWidgetPredicate(
+        (w) => w is MetaLine && w.spans.first.toPlainText() == '46 hari',
+      ),
+      findsOneWidget,
     );
-    expect(preview, findsOneWidget);
-    expect(tester.widget<MetaLine>(preview).spans[1].toPlainText(), '46 hari');
     await tester.tap(find.text('simpan tgl 10'));
     await settle();
 

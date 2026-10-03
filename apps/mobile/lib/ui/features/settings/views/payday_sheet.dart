@@ -229,14 +229,26 @@ class _PaydaySheetState extends ConsumerState<_PaydaySheet> {
             const SizedBox(height: 12),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: MetaLine([
-                l.paydayPreviewRange(periodRange(after.start, after.end)),
-                l.paydayPreviewDays(after.length),
-                if (budget != null)
-                  l.paydayPreviewBudget(
-                    context.rpCompact(prorate(budget, after)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 2,
+                children: [
+                  Text(
+                    l.paydayPreviewRange(periodRange(after.start, after.end)),
+                    style: AppText.label.copyWith(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-              ], style: AppText.label.copyWith(fontWeight: FontWeight.w500)),
+                  MetaLine([
+                    l.paydayPreviewDays(after.length),
+                    if (budget != null)
+                      l.paydayPreviewBudget(
+                        context.rpCompact(prorate(budget, after)),
+                      ),
+                  ], style: AppText.caption.copyWith(color: AppColors.muted)),
+                ],
+              ),
             ),
           ],
           const SizedBox(height: 12),
