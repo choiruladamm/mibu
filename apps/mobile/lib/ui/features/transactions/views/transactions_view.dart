@@ -549,21 +549,24 @@ class _PeriodCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
             spacing: 12,
             children: [
-              Expanded(child: Text(l.txLeftover, style: soft)),
-              Flexible(
-                child: Text(
-                  periodRange(s.period.start, s.period.end),
-                  textAlign: TextAlign.end,
-                  style: soft,
-                ),
-              ),
+              Flexible(child: Text(l.txLeftover, style: soft)),
+              Text(periodRange(s.period.start, s.period.end), style: soft),
             ],
           ),
           const SizedBox(height: 6),
           if (income > 0) ...[
-            Text(rp(net), style: big),
+            // "−Rp…" with a true minus, like the board.
+            Text(
+              net < 0 ? '−${rp(-net)}' : rp(net),
+              style: big.copyWith(
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
+            ),
             const SizedBox(height: 6),
             Text(
               hasPrev

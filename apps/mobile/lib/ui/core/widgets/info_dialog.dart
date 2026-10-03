@@ -98,11 +98,7 @@ typedef _Card = ({
 
 /// The "?" next to a figure that opens [showNumbersInfo].
 class InfoDisc extends StatelessWidget {
-  const InfoDisc({
-    super.key,
-    required this.onTap,
-    this.target = 32,
-  });
+  const InfoDisc({super.key, required this.onTap, this.target = 32});
 
   final VoidCallback onTap;
   final double target; // tap area around the 20px disc

@@ -106,19 +106,32 @@ class _PocketsViewState extends ConsumerState<PocketsView> {
                   const SizedBox(height: 22),
                   gutter(
                     Row(
+                      spacing: 12,
                       children: [
-                        Flexible(
-                          // Sisa budget, same figure as beranda; without a
-                          // budget, what's left in the jars.
-                          child: Text(switch (s.budgetLeft) {
-                            null => l.pocketsJarsTitle(month),
-                            < 0 => l.pocketsOverTitle(month),
-                            _ => l.pocketsBudgetTitle(month),
-                          }, style: muted),
+                        // Label + "?" take what's left after the chip, on one
+                        // line (a Spacer would split the room in half).
+                        Expanded(
+                          child: Row(
+                            children: [
+                              Flexible(
+                                // Sisa budget, same figure as beranda; without
+                                // a budget, what's left in the jars.
+                                child: Text(
+                                  switch (s.budgetLeft) {
+                                    null => l.pocketsJarsTitle(month),
+                                    < 0 => l.pocketsOverTitle(month),
+                                    _ => l.pocketsBudgetTitle(month),
+                                  },
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: muted,
+                                ),
+                              ),
+                              // How sisa jajan and sisa budget differ: 02.2k.
+                              InfoDisc(onTap: () => _info(context, s)),
+                            ],
+                          ),
                         ),
-                        // How sisa jajan and sisa budget differ: 02.2k.
-                        InfoDisc(onTap: () => _info(context, s)),
-                        const Spacer(),
                         _DaysChip(l.pocketsDaysLeft(s.daysLeft)),
                       ],
                     ),
@@ -276,7 +289,7 @@ class _BudgetLine extends StatelessWidget {
     final s = state;
     final budget = s.budget;
     final rp = context.rpCompact;
-    final muted = AppText.label.copyWith(fontSize: 14, color: AppColors.muted);
+    final muted = AppText.label.copyWith(fontSize: 13, color: AppColors.muted);
     // The jars promise more than the budget has left (02.2n): say so in
     // ink instead of the budget part; "?" explains why.
     final tight =
