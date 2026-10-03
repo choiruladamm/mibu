@@ -146,6 +146,21 @@ void main() {
     expect(find.text('pasang budget'), findsOneWidget);
     expect(find.text('aman'), findsNothing);
   });
+
+  // Budgets are per period: a past one keeps its own budget, not today's.
+  testWidgets('on track in a past period uses that period\'s budget', (
+    tester,
+  ) async {
+    final db = await pump(tester);
+    // Oktober gets Rp5jt; september still has the Rp8jt from july on.
+    await tester.runAsync(() => setBudgetOf(db, 5000000));
+    await settle(tester);
+    expect(findMeta(['budget Rp5jt', 'jatah sebulan']), findsOneWidget);
+
+    await tester.tap(find.bySemanticsLabel('periode sebelumnya'));
+    await settle(tester);
+    expect(findMeta(['budget Rp8jt', 'jatah sebulan']), findsOneWidget);
+  });
 }
 
 Future<void> settle(WidgetTester tester) async {

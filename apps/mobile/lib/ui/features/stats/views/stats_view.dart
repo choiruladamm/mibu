@@ -61,9 +61,26 @@ class _StatsViewState extends ConsumerState<StatsView> {
     final l = AppLocalizations.of(context)!;
     final now = ref.watch(nowProvider);
     final entries = ref.watch(allTransactionsProvider).value ?? const [];
-    final budget = ref.watch(profileProvider).value?.monthlyBudget;
     final periods = ref.watch(periodsProvider);
     final span = _span ?? spanOf(_period, now, periods: periods);
+    // The budget in force for the period being looked at, not today's: a
+    // past september keeps september's budget. Week = its Monday's period.
+    // ponytail: the year uses one period's budget × 12 (its latest one
+    // so far); sum each period's if budgets change a lot within a year.
+    final last = DateTime(span.end.year, span.end.month, span.end.day - 1);
+    final budget = ref
+        .watch(
+          budgetInPeriodProvider(
+            periods.periodOf(
+              _period != StatsPeriod.year
+                  ? span.start
+                  : now.isBefore(last)
+                  ? now
+                  : last,
+            ),
+          ),
+        )
+        .value;
     final s = Stats(
       entries,
       period: _period,
