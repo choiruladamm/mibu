@@ -134,7 +134,7 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
         name.isNotEmpty && !(expense && _pocket && _limit == 0) && !_saving;
     final others = [
       for (final p in ref.watch(pocketsProvider).value ?? const <Pocket>[])
-        if (p.id != _edit?.id) p.budget,
+        if (p.id != _edit?.id) p.limit,
     ].fold(0, (a, b) => a + b);
     final usage = _edit == null
         ? null

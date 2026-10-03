@@ -188,7 +188,7 @@ class _PocketsViewState extends ConsumerState<PocketsView> {
                             emoji: selected.emoji,
                             name: selected.name,
                             kind: CategoryKind.expense,
-                            monthlyLimit: selected.budget,
+                            monthlyLimit: selected.limit,
                           ),
                         ),
                         onRelease: () => releaseLimit(
@@ -197,7 +197,7 @@ class _PocketsViewState extends ConsumerState<PocketsView> {
                           id: selected.id,
                           emoji: selected.emoji,
                           name: selected.name,
-                          limit: selected.budget,
+                          limit: selected.limit,
                         ),
                       ),
                     ),

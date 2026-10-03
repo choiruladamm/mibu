@@ -66,9 +66,13 @@ final currentPeriodProvider = Provider<Period>(
   (ref) => ref.watch(periodsProvider).periodOf(ref.watch(nowProvider)),
 );
 
-/// The budget in force for [period] (any month; null = none).
+/// The budget for [period] (any month; null = none), prorated on a
+/// transition period. The budget as set is [Profile.monthlyBudget].
 final budgetInPeriodProvider = StreamProvider.family<int?, Period>(
-  (ref, period) => ref.watch(financeRepositoryProvider).watchBudget(period),
+  (ref, period) => ref
+      .watch(financeRepositoryProvider)
+      .watchBudget(period)
+      .map((b) => b == null ? null : prorate(b, period)),
 );
 
 /// Dates of logged gajian, for [paydayInfo] (cair duluan, telat).

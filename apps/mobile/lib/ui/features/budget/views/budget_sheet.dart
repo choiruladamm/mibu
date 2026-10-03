@@ -20,7 +20,7 @@ Future<void> editBudget(BuildContext context, WidgetRef ref) async {
   final period = ref.read(currentPeriodProvider);
   final prev = ref.read(profileProvider).value?.monthlyBudget;
   final total = [...?ref.read(pocketsProvider).value]
-      .fold(0, (sum, p) => sum + p.budget);
+      .fold(0, (sum, p) => sum + p.limit);
   // A hint from what was really spent, never from income.
   final last = ref.read(periodsProvider).prev(period).key;
   final lastSpent = ref.read(totalsProvider).value?.spent[last];

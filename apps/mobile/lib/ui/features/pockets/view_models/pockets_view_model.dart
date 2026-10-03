@@ -57,7 +57,8 @@ final pocketsScreenProvider = Provider<AsyncValue<PocketsState>>((ref) {
   final now = ref.watch(nowProvider);
   final period = ref.watch(currentPeriodProvider);
   final profile = ref.watch(profileProvider).value;
-  final budget = profile?.monthlyBudget;
+  final set = profile?.monthlyBudget;
+  final budget = set == null ? null : prorate(set, period);
   final free = ref.watch(freeCategoriesProvider(period));
   if (free.hasError) debugPrint('kantong: ${free.error}');
   return switch (ref.watch(pocketsProvider)) {

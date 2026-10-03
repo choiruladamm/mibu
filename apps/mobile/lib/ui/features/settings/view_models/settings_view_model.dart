@@ -56,7 +56,7 @@ final settingsProvider = Provider<AsyncValue<SettingsState>>((ref) {
       topIcons: [for (final c in byUse.take(3)) c.emoji],
       moreCategories: byUse.length > 3 ? byUse.length - 3 : 0,
       limits: limits.length,
-      limitTotal: limits.fold(0, (sum, p) => sum + p.budget),
+      limitTotal: limits.fold(0, (sum, p) => sum + p.limit),
       payday: profile.value!.payday == 0 ? 31 : profile.value!.payday,
       paydayInfo: paydayInfo(
         now: ref.watch(nowProvider),

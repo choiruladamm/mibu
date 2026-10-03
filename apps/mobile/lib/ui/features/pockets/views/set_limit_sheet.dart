@@ -146,7 +146,7 @@ class _SetLimitSheetState extends ConsumerState<SetLimitSheet> {
     final l = AppLocalizations.of(context)!;
     final others = [
       for (final p in ref.watch(pocketsProvider).value ?? const <Pocket>[])
-        p.budget,
+        p.limit,
     ].fold(0, (a, b) => a + b);
     final pct = _limit == 0 ? 100 : (f.spent * 100 / _limit).round();
     return SizedBox(

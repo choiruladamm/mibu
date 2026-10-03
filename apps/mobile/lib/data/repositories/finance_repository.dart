@@ -374,7 +374,8 @@ class FinanceRepository {
               id: cat.id,
               emoji: cat.emoji,
               name: cat.name,
-              budget: r.read(limit)!,
+              budget: prorate(r.read(limit)!, period),
+              limit: r.read(limit)!,
               spent: -(r.read(spent) ?? 0),
             ),
       ],
@@ -746,9 +747,12 @@ class FinanceRepository {
       return null;
     }
     // Otherwise from the end of the running period; a change already queued
-    // for that day is updated instead of stacked.
-    final from = current.end;
-    final queued = payday.where((r) => r.effectiveFrom == from).firstOrNull;
+    // is updated instead of stacked (its day stays: the running period can
+    // reach past it once merged with the sliver, see PAYDAY_CHANGE_PLAN).
+    final queued = payday
+        .where((r) => r.effectiveFrom.isAfter(today))
+        .lastOrNull;
+    final from = queued?.effectiveFrom ?? current.end;
     await Future.sync(() => write(queued, from));
     return from;
   });

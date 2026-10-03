@@ -74,6 +74,28 @@ void main() {
     },
   );
 
+  test(
+    'transition period: kantong limits prorated, as-set limit kept',
+    () async {
+      final oct = cal(now);
+      // 7 days around a payday change, against a 30-day cycle after it.
+      final t = Period(
+        oct.id,
+        oct.start,
+        DateTime(oct.start.year, oct.start.month, oct.start.day + 7),
+        normalDays: 30,
+      );
+      final normal = {
+        for (final p in await repo.watchPockets(oct).first) p.id: p,
+      };
+      expect(normal, isNotEmpty);
+    for (final p in await repo.watchPockets(t).first) {
+        expect(p.limit, normal[p.id]!.budget, reason: p.name);
+        expect(p.budget, (p.limit * 7 / 30).round(), reason: p.name);
+      }
+    },
+  );
+
   test('gajian is the payday category (seed + atur awal)', () async {
     final payday = await (db.select(
       db.categories,

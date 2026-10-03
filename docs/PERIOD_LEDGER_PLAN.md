@@ -116,7 +116,7 @@ Freelance naikin sisa pemasukan, **nggak nyentuh budget** kecuali user naikin se
 | 4 | Gaji cair duluan | Aturan `paydayEarlyDays` tetap: periode mulai di tanggal gaji dicatat, pemasukannya ikut periode baru. |
 | 5 | Catat mundur sebelum install / sebelum gajian pertama | Tetap punya periode lewat `periodsFromStart`, masuk riwayat dan statistik. Nggak perlu hint khusus lagi. |
 | 6 | Budget kosong, aman jajan | Ajakan atur budget, nggak ada angka. |
-| 7 | Ganti tanggal gajian di tengah periode | Aturan lama: berlaku periode berikutnya (langsung kalau masih periode setup). |
+| 7 | Ganti tanggal gajian di tengah periode | Aturan lama: berlaku periode berikutnya (langsung kalau masih periode setup). Potongan periode di titik pergantian + budget proporsi: [PAYDAY_CHANGE_PLAN.md](PAYDAY_CHANGE_PLAN.md). |
 | 8 | Data lama (punya saldo awal) | Kolom dibuang, saldo nggak dihitung. Pre-release, jadi cukup `make fresh` / `make reset`. |
 
 ## Urutan kerja

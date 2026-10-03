@@ -79,10 +79,12 @@ class Pocket {
     required this.name,
     required this.budget,
     required this.spent,
-  });
+    int? limit,
+  }) : limit = limit ?? budget;
 
   final String id, emoji, name;
-  final int budget, spent;
+  final int budget, spent; // budget = the limit for this period (prorated)
+  final int limit; // as set: what limit sheets edit and add up against
 
   int get usedPct => budget == 0 ? 0 : (spent * 100 / budget).round();
   int get left => budget - spent; // negative = over

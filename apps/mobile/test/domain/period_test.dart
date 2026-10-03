@@ -114,7 +114,8 @@ void main() {
     expect(r.next(first).start, DateTime(2026, 11, 25));
     tiles(r);
 
-    // Payday day changed later: the running cycle ends at the new anchor.
+    // Payday day changed later: the sliver to the new anchor would also be
+    // "november", so it joins the running cycle (docs/PAYDAY_CHANGE_PLAN.md).
     final changed = SegmentedResolver([
       (
         effectiveFrom: DateTime(2020),
@@ -130,8 +131,83 @@ void main() {
       ),
     ]);
     final p = changed.periodOf(DateTime(2026, 11, 1));
-    expect((p.start, p.end), (DateTime(2026, 10, 25), DateTime(2026, 11, 10)));
+    expect((p.start, p.end), (DateTime(2026, 10, 25), DateTime(2026, 12, 10)));
     tiles(changed);
+  });
+
+  test('payday change: slivers merge or stand alone, transitions prorate', () {
+    PeriodRule pay(DateTime from, int day) => (
+      effectiveFrom: from,
+      mode: PeriodMode.payday,
+      paydayDay: day,
+      shift: PaydayShift.none,
+    );
+    DateTime d(int m, int day) => DateTime(2026, m, day);
+    // Saved mid-oktober: the new day applies from the running period's end.
+    // (from → to, transition period: id, start, end, normalDays)
+    final cases = [
+      (25, 1, '2026-10', d(9, 25), d(11, 1), 30), // merged, 37 days
+      (25, 10, '2026-10', d(9, 25), d(11, 10), 30), // merged, 46
+      (28, 15, '2026-10', d(9, 28), d(11, 15), 30), // merged, 48
+      (16, 15, '2026-11', d(10, 16), d(12, 15), 31), // merged, 60
+      (31, 1, '2026-10', d(9, 30), d(11, 1), 30), // merged, 32
+      (25, 20, '2026-11', d(10, 25), d(11, 20), 30), // sliver, 26
+      (15, 16, '2026-11', d(11, 15), d(11, 16), 30), // sliver, 1
+      (10, 25, '2026-11', d(11, 10), d(11, 25), 30), // sliver, 15
+      (1, 25, '2026-11', d(11, 1), d(11, 25), 30), // sliver, 24
+    ];
+    for (final (a, b, id, start, end, normal) in cases) {
+      final why = '$a → $b';
+      final running = SegmentedResolver([
+        calendarBase,
+        pay(periodsFromStart, a),
+      ]).periodOf(d(10, 20));
+      final r = SegmentedResolver([
+        calendarBase,
+        pay(periodsFromStart, a),
+        pay(running.end, b),
+      ]);
+      final t = r.periodOf(DateTime(end.year, end.month, end.day - 1));
+      expect((t.id, t.start, t.end), (id, start, end), reason: why);
+      expect(t.normalDays, normal, reason: why);
+      expect(r.periodOf(start), t, reason: why);
+      // Around it: normal periods, one per month name, no month skipped.
+      expect(r.prev(t).normalDays, isNull, reason: why);
+      expect(r.next(t).normalDays, isNull, reason: why);
+      expect(r.next(t).length, normal, reason: why);
+      var p = r.periodOf(d(6, 1));
+      for (var i = 0; i < 10; i++) {
+        final n = r.next(p);
+        expect(n.key, DateTime(p.key.year, p.key.month + 1), reason: why);
+        expect(r.periodForMonth(n.key), n, reason: why);
+        p = n;
+      }
+      tiles(r);
+    }
+  });
+
+  test('prorate: transitions scale by length ÷ normal, others untouched', () {
+    final normal = Period(
+      '2026-10',
+      DateTime(2026, 9, 25),
+      DateTime(2026, 10, 25),
+    );
+    expect(prorate(3000000, normal), 3000000);
+    final short = Period(
+      '2026-11',
+      DateTime(2026, 11, 15),
+      DateTime(2026, 11, 16),
+      normalDays: 30,
+    );
+    expect(prorate(3000000, short), 100000);
+    final long = Period(
+      '2026-10',
+      DateTime(2026, 9, 25),
+      DateTime(2026, 11, 1),
+      normalDays: 30,
+    );
+    expect(prorate(3000000, long), 3700000);
+    expect(prorate(1000, long), 1233); // whole rupiah
   });
 
   test('named after the month most of its days fall in', () {
