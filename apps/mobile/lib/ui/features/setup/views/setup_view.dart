@@ -643,7 +643,9 @@ class _PocketTile extends StatelessWidget {
               width: AppStroke.outline,
             ),
           ),
+          // The tick sits 4px into the right padding: don't clip it.
           child: Stack(
+            clipBehavior: Clip.none,
             children: [
               Row(
                 spacing: 10,
