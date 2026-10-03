@@ -135,6 +135,8 @@ periodRules                         -- append-only, v1 kosong (kalender)
 
 ### Turunan (query `watch()`, bukan kolom)
 
+> **Direncanakan diganti (2026-10-03, belum dikerjain):** saldo kumulatif, `openingBalance` / `openingAt`, dan sisi saldo di aman jajan dibuang. Angka jadi murni per periode gajian: sisa budget di hero, sisa pemasukan di statistik. Lihat [PERIOD_LEDGER_PLAN.md](PERIOD_LEDGER_PLAN.md).
+
 - **Saldo** = `openingBalance` + Σ`amount` transaksi dengan `at ≥ openingAt` dan `deletedAt` null.
 - **Kepake** (sisa budget, kantong, statistik) = semua pengeluaran di periode itu yang `deletedAt`-nya null, **nggak peduli** `openingAt`. Pengeluaran bertanggal sebelum saldo awal diisi (mis. kos tgl 25 yang dicatat belakangan) tetap ngurangin budget, tapi nggak ngubah saldo karena saldo awal udah termasuk itu.
 - **Kepake per kantong** = Σ pengeluaran kategori itu di bulan berjalan.
@@ -159,6 +161,8 @@ Id nggak perlu diubah.
 ## Aturan bisnis
 
 ### Aman jajan hari ini
+
+> **Direncanakan diganti (2026-10-03, belum dikerjain):** saldo kumulatif, `openingBalance` / `openingAt`, dan sisi saldo di aman jajan dibuang. Angka jadi murni per periode gajian: sisa budget di hero, sisa pemasukan di statistik. Lihat [PERIOD_LEDGER_PLAN.md](PERIOD_LEDGER_PLAN.md).
 
 ```
 gajian   = tanggal gajian terdekat berikutnya

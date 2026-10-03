@@ -24,10 +24,14 @@ Tanda: **[diupdate]** = aturan/perilaku berubah dari design, **[perlu design]** 
 
 ## 01.4 · Atur awal
 
+> **Direncanakan diganti (2026-10-03, belum dikerjain):** 01.4 nggak nanya saldo lagi (tanggal gajian + budget opsional, nggak ada yang wajib), hero cuma sisa budget tanpa toggle, grafik saldo + prediksi diganti. Lihat [PERIOD_LEDGER_PLAN.md](PERIOD_LEDGER_PLAN.md).
+
 - [ ] **01.4 saldo + gajian** — input saldo (maks 12 digit, font mengecil), chip cepat 500K/1jt/2,5jt/5jt, tanggal gajian (1, 10, 15, 25, 28, akhir). Preview live "aman jajan per hari" = saldo ÷ hari sampai gajian. `nanti aja` → beranda.
 - [ ] **01.4b kantong pertama** — "mau mulai pasang limit ke apa?": multi-select preset (makan, ngopi, ojol, tagihan, hiburan, belanja, anabul, liburan) dengan limit bulanan, "N dikasih limit", "ringkasan limit". Ringkasan total vs saldo ("sisa bebas …" / "lebih … dari saldo").
 
 ## 02 · Tab utama
+
+> **Direncanakan diganti (2026-10-03, belum dikerjain):** 01.4 nggak nanya saldo lagi (tanggal gajian + budget opsional, nggak ada yang wajib), hero cuma sisa budget tanpa toggle, grafik saldo + prediksi diganti. Lihat [PERIOD_LEDGER_PLAN.md](PERIOD_LEDGER_PLAN.md).
 
 - [ ] **02.1 beranda**
   - Header: logo, MonthPicker, tombol cari → 04.2.
