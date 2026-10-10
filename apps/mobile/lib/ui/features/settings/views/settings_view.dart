@@ -24,7 +24,7 @@ import 'payday_sheet.dart';
 
 final _payDay = DateFormat('EEE d MMM', 'id');
 
-/// 02.4 pengaturan. Reminder, rekap, face id, mode and backup are post-MVP.
+/// 05.1 pengaturan. Reminder, rekap, face id, mode and backup are post-MVP.
 class SettingsView extends ConsumerWidget {
   const SettingsView({super.key});
 
@@ -235,7 +235,7 @@ class SettingsView extends ConsumerWidget {
 }
 
 /// Ink card: budget per periode + pencil → 00.16; chips: the running
-/// period → tanggal gajian 00.24 (it sets the period), n kantong → 02.2.
+/// period → tanggal gajian 00.24 (it sets the period), n kantong → 03.1.
 class _BudgetCard extends StatelessWidget {
   const _BudgetCard({
     required this.budget,

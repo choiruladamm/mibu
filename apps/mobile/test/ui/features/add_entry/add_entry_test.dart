@@ -224,7 +224,7 @@ void main() {
     await tester.tap(find.text('gojek'));
     await settle();
     expect(find.text('cari atau bikin…'), findsNothing); // sheet closed
-    expect(find.text('gojek'), findsOneWidget); // chip on 03.1
+    expect(find.text('gojek'), findsOneWidget); // chip on 06.1
 
     // Reopen: gojek is prefilled; picking ngopi drops it.
     await tester.tap(find.text('gojek'));

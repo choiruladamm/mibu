@@ -39,7 +39,7 @@ Pocket? pocketOf(WidgetRef ref, Transaction t) => ref
 final _time = DateFormat.Hm('id');
 final _headerDay = DateFormat('EEE d MMM', 'id');
 
-/// 04.3 struk, with 04.3b confirm and 04.3c dihapus + batalin.
+/// 08.2 struk, with 08.2b confirm and 08.2c dihapus + batalin.
 class TransactionDetailView extends ConsumerWidget {
   const TransactionDetailView({super.key, required this.id});
 
@@ -192,7 +192,7 @@ class TransactionDetailView extends ConsumerWidget {
   }
 }
 
-/// 04.3b → 04.3c, shared with 04.4. True = deleted.
+/// 08.2b → 08.2c, shared with 08.3. True = deleted.
 Future<bool> confirmDeleteEntry(
   BuildContext context,
   WidgetRef ref,

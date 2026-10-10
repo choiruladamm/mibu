@@ -1,6 +1,6 @@
 # mibu — buku catatan per periode gajian
 
-Keputusan 2026-10-03. Logic sama UI sementaranya udah jalan, desain final nyusul (lihat [Status](#status)). Gantiin model "saldo kumulatif" (saldo awal + semua catatan) yang ada di [MVP_PLAN.md](MVP_PLAN.md) dan hero toggle di [FEATURES.md](FEATURES.md). Dasar periodenya tetap [PAYDAY_CYCLE_PLAN.md](PAYDAY_CYCLE_PLAN.md).
+Keputusan 2026-10-03. Logic sama UI sementaranya udah jalan, desain final nyusul (lihat [Status](#status)). Gantiin model "saldo kumulatif" (saldo awal + semua catatan) yang ada di [mvp.md](mvp.md) dan hero toggle di [features.md](features.md). Dasar periodenya tetap [payday-cycle.md](payday-cycle.md).
 
 ## Ringkasan
 
@@ -21,10 +21,10 @@ Logic + desain final (canvas 2026-10-03) udah masuk:
 | Setup | 01.4 / 01.4c / 01.4d | tanggal gajian dulu + kartu "periode sekarang", budget opsional tanpa chip cepat, preview aman jajan cuma kalau diisi; 01.4b "/periode", tanpa budget "total limit per periode" |
 | Sheet budget | 00.16 | "budget per periode", "periode lalu kepake Rp…", "Rp… / periode" |
 | Sheet gajian | 00.24 | tanpa baris aman jajan, catatan "tgl 25 jatuh hari minggu → dihitung jumat" |
-| Catat | 03.1b–d | "sisa budget abis ini" / "pemasukan periode ini jadi" / bar ilang tanpa budget |
-| 04.1 | 04.1 / 04.1d | range di bawah judul, kartu ink sisa pemasukan + naik/turun, pemasukan & pengeluaran vs periode lalu, "—" + "catat gajian dulu" |
+| Catat | 06.1b–d | "sisa budget abis ini" / "pemasukan periode ini jadi" / bar ilang tanpa budget |
+| 09.1 | 09.1 / 09.1d | range di bawah judul, kartu ink sisa pemasukan + naik/turun, pemasukan & pengeluaran vs periode lalu, "—" + "catat gajian dulu" |
 
-Belum: nama user di judul 01.4 (app belum punya nama), toast budget versi beranda ("budget Rp… kepasang"), dan MVP_PLAN / FEATURES ditulis ulang (masih nunjuk ke sini).
+Belum: nama user di judul 01.4 (app belum punya nama), toast budget versi beranda ("budget Rp… kepasang"), dan mvp.md / features.md ditulis ulang (masih nunjuk ke sini).
 
 Ganti tanggal gajian tetap berlaku **mulai periode berikutnya** (kecuali masih di periode setup), diputusin 2026-10-03 dan catatan di sheet 00.24 udah disamain. Alasannya: kalau langsung, periode yang lagi jalan ganti panjang di tengah jalan, catatan pindah periode, dan budget periode itu bisa kepake dobel (25 → 10 tgl 16 okt: periode lama tutup 9 okt, periode baru dapet budget penuh lagi).
 
@@ -60,7 +60,7 @@ pemasukan(P)      = Σ amount transaksi pemasukan di P
 kepake(P)         = Σ pengeluaran di P
 sisaPemasukan(P)  = pemasukan(P) − kepake(P)              -- analitik
 sisaBudget(P)     = budget yang berlaku di P − kepake(P)
-sisaJajan(P)      = Σ limit kantong − kepake di kantong   -- 02.2, nggak berubah
+sisaJajan(P)      = Σ limit kantong − kepake di kantong   -- 03.1, nggak berubah
 
 aman = floor((sisaBudget + pengeluaranHariIni) / hariSisaPeriode) − pengeluaranHariIni
 ```
@@ -84,7 +84,7 @@ Freelance naikin sisa pemasukan, **nggak nyentuh budget** kecuali user naikin se
 - Hero toggle saldo ⇄ sisa budget: `BalanceMode`, `profiles.heroMode`, `profiles.heroHintSeen`, hint "tap buat liat sisa budget".
 - Sisi saldo di aman jajan (`safeShare` jadi budget aja).
 - Prediksi saldo bulan depan (butuh saldo kumulatif).
-- Catatan "saldo tetap cuma ngitung sejak saldo awal" di MVP_PLAN.
+- Catatan "saldo tetap cuma ngitung sejak saldo awal" di mvp.md.
 
 ## Perubahan per area
 
@@ -97,14 +97,14 @@ Freelance naikin sisa pemasukan, **nggak nyentuh budget** kecuali user naikin se
 | Info dialog | Isi diganti: sisa budget, aman jajan (sisa budget ÷ hari sisa), sisa jajan kantong. Nggak ada lagi penjelasan "saldo". |
 | Setup 01.4 | Tanggal gajian (25 udah kepilih) + budget per periode **opsional** (boleh kosong). Nggak ada saldo. `nanti aja` tetap. 01.4b kantong tetap, opsional. |
 | Ringkasan 01.4b | "belum dijatah … dari saldo" / "lebih … dari saldo" dibandingin ke budget (kalau diisi), tanpa budget cuma total limit. |
-| Bar dampak 03.1 | "saldo abis ini" (pengeluaran non-kantong + pemasukan) diganti: pengeluaran → "sisa budget abis ini", pemasukan → "pemasukan periode ini jadi Rp…". Tanpa budget: bar disembunyiin. |
+| Bar dampak 06.1 | "saldo abis ini" (pengeluaran non-kantong + pemasukan) diganti: pengeluaran → "sisa budget abis ini", pemasukan → "pemasukan periode ini jadi Rp…". Tanpa budget: bar disembunyiin. |
 | Copy (`app_id.arb`) | 16 key yang nyebut "saldo" (`balanceLabel`, `homeMonthlyBalance`, `infoSaldo*`, `infoSafeBody*`, `heroModeSaldo`, `homeBalanceEnd`, `balanceAfter`, `setupBalance*`, `setupFree`, `setupOver`, `setupBack`, …) dibuang atau ditulis ulang. |
-| Sheet budget (02.4) | Petunjuk "periode lalu kepake Rp…" kalau periode sebelumnya punya pengeluaran. Teks aja, nggak ngisi otomatis. |
-| Sheet tanggal gajian (02.4e–g) | Kartu "aman jajan sebelum → sesudah" bergantung saldo. Usulan: sisain tanggal berikutnya + "N hari lagi", buang before/after (sisi budget hampir nggak gerak). |
-| Statistik 04.1 | Kartu per periode: pemasukan, pengeluaran, sisa pemasukan, dibanding periode sebelumnya. |
+| Sheet budget (05.1) | Petunjuk "periode lalu kepake Rp…" kalau periode sebelumnya punya pengeluaran. Teks aja, nggak ngisi otomatis. |
+| Sheet tanggal gajian (05.1e–g) | Kartu "aman jajan sebelum → sesudah" bergantung saldo. Usulan: sisain tanggal berikutnya + "N hari lagi", buang before/after (sisi budget hampir nggak gerak). |
+| Statistik 09.1 | Kartu per periode: pemasukan, pengeluaran, sisa pemasukan, dibanding periode sebelumnya. |
 | Grafik 02.1 | Grafik "saldo per bulan" nggak punya basis. Usulan: grafik pindah ke statistik jadi sisa pemasukan per periode; posisinya di beranda diputusin bareng desain. |
 | Seed & test | `seedFixture` / `seedDemo` tanpa saldo awal. Test yang nge-assert saldo ditulis ulang (hero fixture "design numbers" ikut berubah, desainnya diupdate dulu). |
-| Docs | MVP_PLAN (Turunan, Aman jajan), FEATURES (01.4, 02.1), memory. |
+| Docs | mvp.md (Turunan, Aman jajan), features.md (01.4, 02.1), memory. |
 
 ## Edge case
 
@@ -116,7 +116,7 @@ Freelance naikin sisa pemasukan, **nggak nyentuh budget** kecuali user naikin se
 | 4 | Gaji cair duluan | Aturan `paydayEarlyDays` tetap: periode mulai di tanggal gaji dicatat, pemasukannya ikut periode baru. |
 | 5 | Catat mundur sebelum install / sebelum gajian pertama | Tetap punya periode lewat `periodsFromStart`, masuk riwayat dan statistik. Nggak perlu hint khusus lagi. |
 | 6 | Budget kosong, aman jajan | Ajakan atur budget, nggak ada angka. |
-| 7 | Ganti tanggal gajian di tengah periode | Aturan lama: berlaku periode berikutnya (langsung kalau masih periode setup). Potongan periode di titik pergantian + budget proporsi: [PAYDAY_CHANGE_PLAN.md](PAYDAY_CHANGE_PLAN.md). |
+| 7 | Ganti tanggal gajian di tengah periode | Aturan lama: berlaku periode berikutnya (langsung kalau masih periode setup). Potongan periode di titik pergantian + budget proporsi: [payday-change.md](payday-change.md). |
 | 8 | Data lama (punya saldo awal) | Kolom dibuang, saldo nggak dihitung. Pre-release, jadi cukup `make fresh` / `make reset`. |
 
 ## Urutan kerja
@@ -127,15 +127,15 @@ Freelance naikin sisa pemasukan, **nggak nyentuh budget** kecuali user naikin se
 4. **Hero + chip + info dialog:** sisa budget, state budget kosong.
 5. **Setup 01.4:** tanggal gajian + budget opsional.
 6. **Sheet budget:** petunjuk periode lalu.
-7. **Kantong 02.2:** cuma copy dialog yang nyebut saldo. Perilaku kantong nggak diubah (lihat [Ditunda](#ditunda)).
+7. **Kantong 03.1:** cuma copy dialog yang nyebut saldo. Perilaku kantong nggak diubah (lihat [Ditunda](#ditunda)).
 8. **Sheet tanggal gajian:** sederhanain preview.
 9. **Statistik:** kartu sisa pemasukan + banding.
 10. **Grafik beranda:** setelah desain.
-11. **Docs:** sinkronin MVP_PLAN, FEATURES, hapus catatan lama.
+11. **Docs:** sinkronin mvp.md, features.md, hapus catatan lama.
 
 ## Ditunda
 
-**Kantong (02.2) nggak ikut dirombak** di putaran ini, fiturnya belakangan. Yang tetap: kantong = kategori yang punya limit, seksi "belum ada limit", dan "!" waktu sisa jajan > sisa budget. Entri lain-lain (tanpa kategori) tetap cuma ngurangin sisa budget dan belum tampil di 02.2.
+**Kantong (03.1) nggak ikut dirombak** di putaran ini, fiturnya belakangan. Yang tetap: kantong = kategori yang punya limit, seksi "belum ada limit", dan "!" waktu sisa jajan > sisa budget. Entri lain-lain (tanpa kategori) tetap cuma ngurangin sisa budget dan belum tampil di 03.1.
 
 Ide yang diparkir buat nanti:
 
@@ -151,4 +151,4 @@ Hero tanpa toggle + state budget kosong · 01.4 baru · petunjuk di sheet budget
 - **Grafik beranda:** pindah ke statistik, diganti pengeluaran vs budget per periode, atau dibuang.
 - **Preview sheet tanggal gajian:** setuju dibuang jadi tanggal + "N hari lagi"?
 - **Petunjuk "periode lalu kepake":** teks aja, atau bisa di-tap buat ngisi angkanya.
-- **Label range tanggal** ("25 sep – 24 okt") di menu bulan / 04.1 / statistik, masih utang dari periode gajian.
+- **Label range tanggal** ("25 sep – 24 okt") di menu bulan / 09.1 / statistik, masih utang dari periode gajian.

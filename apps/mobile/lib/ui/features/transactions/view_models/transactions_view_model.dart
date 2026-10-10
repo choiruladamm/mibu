@@ -10,7 +10,7 @@ import '../../../core/finance_providers.dart';
 
 enum TxFilter { all, expenses, income }
 
-/// Month shown in 04.1; starts at [initial] (a deep link from 02.1) or the
+/// Month shown in 09.1; starts at [initial] (a deep link from 02.1) or the
 /// current month.
 class TxMonth extends Notifier<DateTime> {
   TxMonth([this.initial]);
@@ -48,7 +48,7 @@ final txFilterProvider =
       dependencies: const [],
     );
 
-/// 04.2 "liat N lagi": 04.1 narrowed to a search term (and one day of the
+/// 08.1 "liat N lagi": 09.1 narrowed to a search term (and one day of the
 /// month); null = no search.
 typedef TxSearch = ({String q, int? day});
 
@@ -70,7 +70,7 @@ final firstMonthProvider = StreamProvider<DateTime?>(
       .watchFirstMonth(periods: ref.watch(periodsProvider)),
 );
 
-/// [income]: a pemasukan is in it, so [total] gives it away (02.4h).
+/// [income]: a pemasukan is in it, so [total] gives it away (05.1h).
 typedef DayGroup = ({
   DateTime day,
   int total,
@@ -142,7 +142,7 @@ List<DayGroup> groupByDay(List<Transaction> rows) {
   return groups;
 }
 
-/// 04.1 semua transaksi.
+/// 09.1 semua transaksi.
 final transactionsProvider =
     Provider.autoDispose<AsyncValue<TransactionsState>>(
       dependencies: [txMonthProvider, txFilterProvider, txSearchProvider],

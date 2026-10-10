@@ -20,11 +20,11 @@ import '../view_models/add_entry_view_model.dart';
 import 'category_picker_sheet.dart';
 import '../../../core/widgets/app_emoji.dart';
 
-/// 03.1 catat — opened from + on every tab; pops on close / save.
+/// 06.1 catat — opened from + on every tab; pops on close / save.
 class AddEntryView extends ConsumerStatefulWidget {
   const AddEntryView({super.key, this.again, this.salary = false});
 
-  /// "catat lagi" (04.3): start with this entry's kind, category and place.
+  /// "catat lagi" (08.2): start with this entry's kind, category and place.
   final Transaction? again;
 
   /// "catat gajian" (02.1): a pemasukan under gajian, last salary suggested.
@@ -438,7 +438,7 @@ class _Impact extends ConsumerWidget {
           : l.overAmount(rupiahCompact(-left));
     } else if (s.kind == CategoryKind.income) {
       final after = (totals?.income[period.key] ?? 0) + v;
-      // 03.1e: what's being typed stays, the period total and its share don't.
+      // 06.1e: what's being typed stays, the period total and its share don't.
       if (context.hidesAmount(income: true)) {
         prev = 1;
         add = 0;

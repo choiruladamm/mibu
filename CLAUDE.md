@@ -17,11 +17,11 @@ After changing Drift tables: `fvm dart run build_runner build`.
 
 Riverpod providers are written by hand (no `riverpod_generator`), declared next to the class they expose. Pin time via `clockProvider` (`ui/core/clock.dart`; `nowProvider` = app-start now for queries); in tests override `appDatabaseProvider` with `AppDatabase(DatabaseConnection(NativeDatabase.memory(), closeStreamsSynchronously: true), () => now)` — the clock positions the debug seed, keep it equal to the pinned clock.
 
-## MVP scope (see `docs/MVP_PLAN.md`, features in `docs/FEATURES.md`)
+## MVP scope (see `docs/mvp.md`, features in `docs/features.md`)
 
 - Fully local Drift, no login, no backend. Skip auth (01.2) and deferred features listed in the plan unless asked.
 - Every table: UUID text `id`, `createdAt`, `updatedAt`, `deletedAt` (soft delete, powers undo + future sync). No autoincrement ids.
-- Never store derived values (saldo, kepake, month balances) — compute from `transactions`. Pocket = category with `monthlyLimit` (UI: "buat apa" + "limit"; see MVP_PLAN › Buat apa, limit, kantong).
+- Never store derived values (saldo, kepake, month balances) — compute from `transactions`. Pocket = category with `monthlyLimit` (UI: "buat apa" + "limit"; see mvp.md › Buat apa, limit, kantong).
 - Business math (aman jajan, stats, CSV) = pure functions in `domain/`, unit-tested. Formulas live in the plan; don't reinvent.
 
 ## Structure (`apps/mobile/lib`)
@@ -37,7 +37,7 @@ Riverpod providers are written by hand (no `riverpod_generator`), declared next 
 
 ## Design
 
-Source: Claude Design artifact "mibu" (https://claude.ai/artifact/25RLRcYScmmPDzjBvg9Zz8). Screen ids (02.1, 03.4 …) come from board titles; use them in comments/tickets.
+Source: Claude Design artifact "mibu" (https://claude.ai/artifact/25RLRcYScmmPDzjBvg9Zz8). Screen ids (02.1, 07.2 …) come from board titles; use them in comments/tickets.
 
 - Use only tokens from `ui/core/tokens.dart` (board 00.1) — no new colors/sizes.
 - Light theme only (ink on paper).

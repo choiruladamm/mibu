@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../data/repositories/finance_repository.dart';
 import '../../../core/clock.dart';
 
-/// Live entries without a buat apa: the "lain-lain" tile in 03.3.
+/// Live entries without a buat apa: the "lain-lain" tile in 07.1.
 // ponytail: counts the full entry list in Dart, like stats and search do.
 final uncategorizedCountProvider = Provider<int>(
   (ref) => [

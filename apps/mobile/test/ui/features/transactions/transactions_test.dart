@@ -17,7 +17,7 @@ import 'package:mibu/ui/features/transactions/views/transactions_view.dart';
 import '../../../meta.dart';
 
 void main() {
-  testWidgets('04.1: period card, day groups, filter, month switch', (
+  testWidgets('09.1: period card, day groups, filter, month switch', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(390, 844);
@@ -92,7 +92,7 @@ void main() {
     await db.close();
   });
 
-  testWidgets('04.1 opens on the month from a 02.1 deep link', (tester) async {
+  testWidgets('09.1 opens on the month from a 02.1 deep link', (tester) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -133,7 +133,7 @@ void main() {
     await db.close();
   });
 
-  testWidgets('04.1b/c: title opens the month menu, chip goes back to now', (
+  testWidgets('09.1b/c: title opens the month menu, chip goes back to now', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(390, 844);
@@ -216,7 +216,7 @@ void main() {
     await db.close();
   });
 
-  testWidgets('04.1f/g: pemasukan aja hides income figures, intip 5 detik', (
+  testWidgets('09.1f/g: pemasukan aja hides income figures, intip 5 detik', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(390, 844);

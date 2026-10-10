@@ -10,7 +10,7 @@ import 'app_emoji.dart';
 
 /// 00.4 TxRow — always 64 tall, two symmetric columns. Left: buat apa + tag
 /// chip (first tag + "+n") over tempat • catatan. Right: nominal over jam.
-/// Tap opens 04.3 detail, tap the tag chip opens 04.2 on that tag.
+/// Tap opens 08.2 detail, tap the tag chip opens 08.1 on that tag.
 class TxRow extends StatelessWidget {
   const TxRow({
     super.key,

@@ -13,7 +13,7 @@ part 'app_database.g.dart';
 const _uuid = Uuid();
 
 /// UUID id + timestamps on every table so a backend can sync rows later
-/// (upload where updatedAt > lastSync, deletedAt included). See MVP_PLAN.md.
+/// (upload where updatedAt > lastSync, deletedAt included). See mvp.md.
 mixin SyncColumns on Table {
   TextColumn get id => text().clientDefault(_uuid.v4)();
   DateTimeColumn get createdAt => dateTime().clientDefault(DateTime.now)();
@@ -33,7 +33,7 @@ class Profiles extends Table with SyncColumns {
   DateTimeColumn get onboardedAt => dateTime().nullable()();
   TextColumn get recentSearches =>
       text().withDefault(const Constant(''))(); // newline-separated, ≤ 5
-  // 02.2l kenalan kantong: shown until "oke".
+  // 03.1l kenalan kantong: shown until "oke".
   BoolColumn get pocketsIntroSeen =>
       boolean().withDefault(const Constant(false))();
 }

@@ -12,7 +12,7 @@ import 'package:mibu/ui/features/add_entry/views/add_entry_view.dart';
 import '../../../meta.dart';
 
 void main() {
-  testWidgets('03.3 from the picker: usage and the income note', (
+  testWidgets('07.1 from the picker: usage and the income note', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(390, 844);
@@ -84,7 +84,7 @@ void main() {
     await tester.tap(findEmojiText('pakai 🧋 boba'));
     await settle();
     expect(find.text('ikon ngopi diganti'), findsOneWidget);
-    expect(find.text('buat apa aja'), findsOneWidget); // 03.3 stays open
+    expect(find.text('buat apa aja'), findsOneWidget); // 07.1 stays open
     expect(await tester.runAsync(ngopi), '🧋');
     await tester.tap(find.text('batalin'));
     await settle();
@@ -103,7 +103,7 @@ void main() {
     );
     expect(find.bySemanticsLabel('dikunci'), findsOneWidget);
 
-    // Mode hapus 03.3d: − on each, gajian + lain-lain locked, no baru.
+    // Mode hapus 07.1d: − on each, gajian + lain-lain locked, no baru.
     await tester.tap(find.bySemanticsLabel('hapus buat apa'));
     await settle();
     expect(find.text('hapus yang mana?'), findsOneWidget);
@@ -115,17 +115,17 @@ void main() {
     expect(find.bySemanticsLabel('hapus gajian'), findsNothing);
     expect(find.bySemanticsLabel('dikunci'), findsNWidgets(2));
     expect(find.bySemanticsLabel('ganti ikon anabul'), findsNothing);
-    expect(find.text('baru'), findsOneWidget); // only 03.2's, behind 03.3
+    expect(find.text('baru'), findsOneWidget); // only 06.2's, behind 07.1
     expect(
       find.textContaining('lain-lain & gajian nggak bisa dihapus'),
       findsOneWidget,
     );
 
-    // tap − → 03.6, which stays open on top of 03.3.
+    // tap − → 07.4, which stays open on top of 07.1.
     await tester.tap(find.bySemanticsLabel('hapus anabul'));
     await settle();
     expect(find.bySemanticsLabel('tahan buat hapus anabul'), findsOneWidget);
-    await tester.tapAt(const Offset(195, 40)); // scrim: back to 03.3d
+    await tester.tapAt(const Offset(195, 40)); // scrim: back to 07.1d
     await settle();
     expect(find.text('hapus yang mana?'), findsOneWidget);
 
@@ -133,7 +133,7 @@ void main() {
     await settle();
     expect(find.text('buat apa aja'), findsOneWidget);
     expect(find.bySemanticsLabel('ganti ikon anabul'), findsOneWidget);
-    expect(find.text('baru'), findsNWidgets(2)); // 03.3's + 03.2's
+    expect(find.text('baru'), findsNWidgets(2)); // 07.1's + 06.2's
 
     // ponytail: tahan & geser is checked by hand on device; after a
     // simulated drag the next frame never returns under flutter_test.

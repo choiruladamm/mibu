@@ -9,7 +9,7 @@ import '../measure.dart';
 import '../money.dart';
 import '../tokens.dart';
 
-/// 00.15 PocketLimit — type, slide or pick a preset. Rules in MVP_PLAN.md
+/// 00.15 PocketLimit — type, slide or pick a preset. Rules in mvp.md
 /// (Batas kantong); the scale comes from [pocketLimitScale].
 class PocketLimit extends StatefulWidget {
   const PocketLimit({

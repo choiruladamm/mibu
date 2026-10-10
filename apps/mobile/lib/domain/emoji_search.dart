@@ -64,7 +64,7 @@ String? emojiRetry(String query) {
   return null;
 }
 
-/// 03.4 saran: [n] icons for a category name, any word counting
+/// 07.2 saran: [n] icons for a category name, any word counting
 /// ("makan siang" → 🍜 …); padded with ✨ 🧾 📦.
 List<String> suggestEmoji(String name, {int n = 3}) {
   final score = <CatalogEmoji, int>{};

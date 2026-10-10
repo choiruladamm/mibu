@@ -517,7 +517,7 @@ void main() {
     expect(find.text('Rp941K'), findsOneWidget); // sisa budget card
   });
 
-  testWidgets('02.2l kenalan kantong: shown until oke, then never again', (
+  testWidgets('03.1l kenalan kantong: shown until oke, then never again', (
     tester,
   ) async {
     final db = await pump(tester, const Size(390, 844));
@@ -553,7 +553,7 @@ void main() {
     expect(p.pocketsIntroSeen, isTrue);
   });
 
-  testWidgets('header: tight, kelewat, no budget (02.2n / m / b / o)', (
+  testWidgets('header: tight, kelewat, no budget (03.1n / m / b / o)', (
     tester,
   ) async {
     final db = await pump(tester, const Size(390, 844));

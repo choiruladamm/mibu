@@ -36,7 +36,7 @@ Future<int?> limitOf(AppDatabase db, String name, [DateTime? now]) async {
   return row?.amount;
 }
 
-/// Sets [name]'s limit from [now]'s period on, like 02.2 / 03.5 do.
+/// Sets [name]'s limit from [now]'s period on, like 03.1 / 07.3 do.
 Future<void> setLimitOf(
   AppDatabase db,
   String name,

@@ -19,12 +19,12 @@ import '../../../core/widgets/meta_line.dart';
 import '../../../core/widgets/app_emoji.dart';
 import '../../../core/widgets/icon_sheet.dart';
 
-/// Where a new category is made from (03.4 / 03.4b / 03.4c / 03.4d).
+/// Where a new category is made from (07.2 / 07.2b / 07.2c / 07.2d).
 enum CategoryOrigin { catat, kantong, atur }
 
-/// 03.4 bikin baru (no [category]) / 03.5 edit. Saves and pops the
-/// saved category, or null on batal. Copot limit keeps it open. [origin] picks the 03.4
-/// variant; [CategoryOrigin.kantong] always has a limit (03.4b), the others
+/// 07.2 bikin baru (no [category]) / 07.3 edit. Saves and pops the
+/// saved category, or null on batal. Copot limit keeps it open. [origin] picks the 07.2
+/// variant; [CategoryOrigin.kantong] always has a limit (07.2b), the others
 /// start without one.
 Future<Category?> showCategoryForm(
   BuildContext context, {
@@ -349,7 +349,7 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
                               ))
                                 Center(
                                   // Below the sheet's messenger, so the toast
-                                  // floats over 03.5 (which stays open).
+                                  // floats over 07.3 (which stays open).
                                   child: Builder(
                                     builder: (context) => TextButton(
                                       onPressed: () async {
@@ -469,7 +469,7 @@ class _TrashButton extends StatelessWidget {
   }
 }
 
-/// 03.4 hero: tap to open 00.21; pencil badge says so.
+/// 07.2 hero: tap to open 00.21; pencil badge says so.
 class _EmojiDisc extends StatelessWidget {
   const _EmojiDisc(this.emoji, {required this.label, required this.onTap});
 

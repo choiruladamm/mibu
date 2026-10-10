@@ -9,9 +9,9 @@ const _undoWindow = Duration(seconds: 5);
 
 enum ToastIcon { trash, check }
 
-/// 00.18 UndoToast, floating at the bottom (02.2, 02.4c/d, 04.3c). With
+/// 00.18 UndoToast, floating at the bottom (03.1, 05.1c/d, 08.2c). With
 /// [onUndo] it gets "batalin" and a 5s timer bar. Gone after 5s either way.
-/// [bottom] lifts it over a screen's own bottom link (04.3c).
+/// [bottom] lifts it over a screen's own bottom link (08.2c).
 void showToast(
   BuildContext context, {
   required ToastIcon icon,

@@ -1,6 +1,6 @@
 import 'models/finance.dart';
 
-/// 04.2 cari: entries whose category, place, note or a tag contains [term]
+/// 08.1 cari: entries whose category, place, note or a tag contains [term]
 /// (case-insensitive), newest first. [kind] null = semua. Empty term = none.
 List<Transaction> searchEntries(
   List<Transaction> all,
@@ -23,14 +23,14 @@ List<Transaction> searchEntries(
   ]..sort((a, b) => b.at.compareTo(a.at));
 }
 
-/// 04.2b "terakhir dicari": [q] moved to the front, at most 5.
+/// 08.1b "terakhir dicari": [q] moved to the front, at most 5.
 List<String> rememberSearch(List<String> recent, String q) {
   final t = q.trim();
   if (t.isEmpty) return recent;
   return [t, ...recent.where((r) => r != t)].take(5).toList();
 }
 
-/// 04.2b "coba cari": the 3 most-used places (one per category), then the
+/// 08.1b "coba cari": the 3 most-used places (one per category), then the
 /// 3 most-used categories not already covered. Expenses in [month] only.
 List<({String emoji, String label})> searchIdeas(List<Transaction> month) {
   final places = <String, ({int n, String emoji, String? cat})>{};
@@ -71,7 +71,7 @@ List<({String emoji, String label})> searchIdeas(List<Transaction> month) {
   ];
 }
 
-/// 04.2c "maksud kamu …?": the closest category name or place word in
+/// 08.1c "maksud kamu …?": the closest category name or place word in
 /// [entries] within 2 edits of [term] (3+ letters), or null.
 String? didYouMean(List<Transaction> entries, String term) {
   final q = term.trim().toLowerCase();
@@ -114,7 +114,7 @@ typedef SearchDay = ({int count, int sum, int income, int expense});
 /// The line under the total in the summary card.
 enum SearchInsight { mixed, daily, single, busiest, biggest }
 
-/// What the 04.2 summary card (00.14 SearchSummary) shows for [hits]
+/// What the 08.1 summary card (00.14 SearchSummary) shows for [hits]
 /// (non-empty, all in one period). Days are numbered from 1 at the period's
 /// [start] (a payday period crosses two months; without [start] = the day of
 /// the month). [today] = the day number the card counts up to (the last for

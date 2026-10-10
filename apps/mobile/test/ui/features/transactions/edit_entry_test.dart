@@ -12,7 +12,7 @@ import 'package:mibu/ui/features/transactions/views/edit_entry_view.dart';
 import '../../../meta.dart';
 
 void main() {
-  testWidgets('04.4: diubah badges, batalin, simpan, hapus', (tester) async {
+  testWidgets('08.3: diubah badges, batalin, simpan, hapus', (tester) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);

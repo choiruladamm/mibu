@@ -12,7 +12,7 @@ import 'package:mibu/ui/features/pockets/views/pockets_view.dart';
 import '../../../meta.dart';
 
 void main() {
-  testWidgets('03.6 from 03.5: move to makan, hold, batalin, then beres', (
+  testWidgets('07.4 from 07.3: move to makan, hold, batalin, then beres', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(390, 844);

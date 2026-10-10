@@ -479,7 +479,7 @@ void main() {
         expect(find.text('oktober'), findsWidgets); // still "oktober"
       });
 
-      testWidgets('04.1 oktober includes the 27 sep entry', (tester) async {
+      testWidgets('09.1 oktober includes the 27 sep entry', (tester) async {
         final db = await paydayDb(tester);
         await pump(tester, db);
         final rows = (await tester.runAsync(() async {

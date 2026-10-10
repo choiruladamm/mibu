@@ -34,7 +34,7 @@ class SettingsState {
   final PaydayInfo paydayInfo; // "gajian lagi n hari" / hari ini / telat
 }
 
-/// 02.4 pengaturan state.
+/// 05.1 pengaturan state.
 final settingsProvider = Provider<AsyncValue<SettingsState>>((ref) {
   final profile = ref.watch(profileProvider);
   final categories = ref.watch(categoriesProvider);
@@ -72,7 +72,7 @@ final appVersionProvider = FutureProvider<String>(
   (ref) async => (await PackageInfo.fromPlatform()).version,
 );
 
-/// 02.4 ekspor ke csv: every live entry → share sheet as `mibu-yyyyMMdd.csv`.
+/// 05.1 ekspor ke csv: every live entry → share sheet as `mibu-yyyyMMdd.csv`.
 Future<void> exportCsv(WidgetRef ref) async {
   final entries = await ref.read(financeRepositoryProvider).allTransactions();
   final bytes = Uint8List.fromList(utf8.encode(transactionsCsv(entries)));

@@ -24,7 +24,7 @@ import '../../../core/widgets/info_dialog.dart';
 import '../../../core/widgets/meta_line.dart';
 import '../../../core/widgets/app_emoji.dart';
 
-/// 02.2 kantong. Isi ulang and impian are post-MVP.
+/// 03.1 kantong. Isi ulang and impian are post-MVP.
 class PocketsView extends ConsumerStatefulWidget {
   const PocketsView({super.key, this.initial});
 
@@ -127,7 +127,7 @@ class _PocketsViewState extends ConsumerState<PocketsView> {
                                   style: muted,
                                 ),
                               ),
-                              // How sisa jajan and sisa budget differ: 02.2k.
+                              // How sisa jajan and sisa budget differ: 03.1k.
                               InfoDisc(onTap: () => _info(context, s)),
                             ],
                           ),
@@ -150,7 +150,7 @@ class _PocketsViewState extends ConsumerState<PocketsView> {
                       ),
                     ),
                   ),
-                  // 02.2l kenalan kantong: once, until "oke".
+                  // 03.1l kenalan kantong: once, until "oke".
                   if (!s.introSeen && s.pockets.isNotEmpty)
                     gutter(
                       Padding(
@@ -290,7 +290,7 @@ class _BudgetLine extends StatelessWidget {
     final budget = s.budget;
     final rp = context.rpCompact;
     final muted = AppText.label.copyWith(fontSize: 13, color: AppColors.muted);
-    // The jars promise more than the budget has left (02.2n): say so in
+    // The jars promise more than the budget has left (03.1n): say so in
     // ink instead of the budget part; "?" explains why.
     final tight =
         s.pockets.isNotEmpty &&
@@ -683,8 +683,8 @@ class _DashedBox extends CustomPainter {
   bool shouldRepaint(_DashedBox old) => old.radius != radius;
 }
 
-/// 02.2d: no limits yet; the whole card opens "pasang limit ke…".
-/// 02.2l kenalan kantong: what a kantong is, the budget split into this
+/// 03.1d: no limits yet; the whole card opens "pasang limit ke…".
+/// 03.1l kenalan kantong: what a kantong is, the budget split into this
 /// user's kantong, and how much of it is still unassigned.
 class _Intro extends StatelessWidget {
   const _Intro({required this.state, required this.onOk});
@@ -964,7 +964,7 @@ class _FreeSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: 10,
         children: [
-          // Section title: title left, tappable info right (→ 03.3).
+          // Section title: title left, tappable info right (→ 07.1).
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -1205,7 +1205,7 @@ class _Detail extends StatelessWidget {
 
   final Pocket pocket;
   final int daysLeft;
-  final VoidCallback onManage; // atur / naikin limit → 03.5
+  final VoidCallback onManage; // atur / naikin limit → 07.3
   final VoidCallback onRelease; // copot limit
 
   @override

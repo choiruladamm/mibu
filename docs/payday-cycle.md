@@ -111,12 +111,12 @@ Screen yang perlu disentuh pas fase 2. Kalau fase 0 rapi, sebagian besar cuma ga
 | board | yang berubah |
 |---|---|
 | 01.4 atur awal | setelah pilih tanggal gajian: "hitung budget per bulan atau per gajian?" (default bulan) |
-| 02.4 pengaturan | row baru "periode · per bulan / per gajian tgl 25" + sheet pilih + opsi cair duluan kalau libur |
+| 05.1 pengaturan | row baru "periode · per bulan / per gajian tgl 25" + sheet pilih + opsi cair duluan kalau libur |
 | 02.1 beranda | HeroSaldo: sisa budget "akhir siklus", baris kecil "gajian lagi n hari" udah ada |
 | 00.7 month picker / 00.8 MonthMenu | item "oktober" + sub "25 okt – 24 nov" |
-| 02.2 kantong | "sisa jajan oktober" + "15 hari lagi" dari `period.end` |
-| 02.3 statistik | tab "bulan" = periode, judul range tanggal, minggu tetap sen–min |
-| 04.1 semua transaksi | grup per periode, header range tanggal |
+| 03.1 kantong | "sisa jajan oktober" + "15 hari lagi" dari `period.end` |
+| 04.1 statistik | tab "bulan" = periode, judul range tanggal, minggu tetap sen–min |
+| 09.1 semua transaksi | grup per periode, header range tanggal |
 | 00.16 BudgetSheet | copy "budget per gajian" kalau mode siklus |
 
 Testing matrix (unit test resolver, jalan di CI):
@@ -157,7 +157,7 @@ Risiko — nomor 1–5 masuk fase 0, wajib di v1 (struktur data + copy). Sisanya
 
 ## Penyesuaian di repo
 
-Fase 0 dikerjain dengan penyesuaian ini, biar cocok sama aturan repo (CLAUDE.md, [MVP_PLAN.md](MVP_PLAN.md)):
+Fase 0 dikerjain dengan penyesuaian ini, biar cocok sama aturan repo (CLAUDE.md, [mvp.md](mvp.md)):
 
 1. **Semua tabel baru pakai `SyncColumns`**: UUID `id`, `createdAt`, `updatedAt`, `deletedAt`. Undo tetap jalan.
 2. **Lookup budget/limit**: baris dengan range persis, kalau nggak ada = baris terakhir sebelumnya. Baris cuma dibikin pas user nyimpen, bukan pas baca (baca nggak pernah nulis). Hasilnya sama kayak "salin dari baris terakhir".
@@ -168,9 +168,9 @@ Fase 0 dikerjain dengan penyesuaian ini, biar cocok sama aturan repo (CLAUDE.md,
 7. **Tanda "gajian"**: kolom `categories.isPayday` (bool); seed gajian = true. Belum ada UI.
 8. **`periodRules` kosong = kalender**: repository selalu naruh aturan dasar kalender paling awal, jadi v1 nggak nulis baris apa-apa.
 9. **"CI grep" = test** yang nolak literal "bulan ini" di `lib/ui` (copy tinggal di `app_id.arb`, jadi arb dikecualiin).
-10. **Jendela yang tetap kalender**: DateSheet, DayStrip, grid MonthMenu, grafik saldo per bulan + prediksi (saldo nggak punya periode), minggu & tahun di statistik, "Rp… tahun ini" di 03.5.
+10. **Jendela yang tetap kalender**: DateSheet, DayStrip, grid MonthMenu, grafik saldo per bulan + prediksi (saldo nggak punya periode), minggu & tahun di statistik, "Rp… tahun ini" di 07.3.
 
-Di v1 (di luar fase 0) tanggal gajian udah dipakai buat aman jajan: weekend digeser ke jumat sebelumnya otomatis (`previousWorkday`, tanpa tanggal merah), gaji dicatat ≤ 3 hari sebelum gajian = udah gajian, state hari-H / telat lihat MVP_PLAN › Aman jajan. Toggle "cair duluan kalau libur" + tanggal merah tetap fase 2.
+Di v1 (di luar fase 0) tanggal gajian udah dipakai buat aman jajan: weekend digeser ke jumat sebelumnya otomatis (`previousWorkday`, tanpa tanggal merah), gaji dicatat ≤ 3 hari sebelum gajian = udah gajian, state hari-H / telat lihat mvp.md › Aman jajan. Toggle "cair duluan kalau libur" + tanggal merah tetap fase 2.
 
 **Periode gajian jadi default (dipromosikan dari fase 2, 2026-10-03):** dipakai langsung karena budget per bulan kalender nggak cocok sama gajian tgl 25 (kos dan tagihan wajib kebayar tgl 26–30 masuk "bulan lalu"), dan aman jajan nyampur dua cakrawala (saldo ÷ hari sampai gajian, budget ÷ hari sampai akhir bulan). Keputusan yang diambil:
 
@@ -179,7 +179,7 @@ Di v1 (di luar fase 0) tanggal gajian udah dipakai buat aman jajan: weekend dige
 3. **"Bulan" di seluruh UI = periode**, termasuk grafik saldo dan prediksi. Bulan depan tetap cuma intip.
 4. **Aturan berlaku dari awal waktu** (bukan dari tanggal install): periode sebelum install tetap siklus gajian, jadi entri yang di-back-fill ke hari sebelum install jatuh di periode yang sama, bukan potongan bulan kalender. **Ganti tanggal gajian:** mulai periode berikutnya (langsung kalau masih di periode tempat app di-setup). Label "siklus pertama" dibuang.
 
-Yang belum: label range tanggal ("25 sep – 24 okt") di menu bulan / 04.1 / statistik, dan label "siklus pertama". Gajian diganti di tengah jalan bikin potongan periode (nama dobel / periode pendek): ditangani di [PAYDAY_CHANGE_PLAN.md](PAYDAY_CHANGE_PLAN.md).
+Yang belum: label range tanggal ("25 sep – 24 okt") di menu bulan / 09.1 / statistik, dan label "siklus pertama". Gajian diganti di tengah jalan bikin potongan periode (nama dobel / periode pendek): ditangani di [payday-change.md](payday-change.md).
 
 Status fase 0:
 
@@ -194,6 +194,6 @@ Status fase 0:
 
 Masih asumsi bulan kalender (aman di v1, dibenerin pas fase 2 bareng labelnya):
 
-- Navigasi bulan (MonthMenu beranda, carousel 04.1, cari 04.2) masih pakai awal bulan sebagai kunci, lalu diubah ke `Period` lewat `periodOf`. Datanya udah per periode; label & lompat antar periode belum.
-- Ringkasan cari 04.2 (tick per tanggal 1–31, "liat bulan lain").
+- Navigasi bulan (MonthMenu beranda, carousel 09.1, cari 08.1) masih pakai awal bulan sebagai kunci, lalu diubah ke `Period` lewat `periodOf`. Datanya udah per periode; label & lompat antar periode belum.
+- Ringkasan cari 08.1 (tick per tanggal 1–31, "liat bulan lain").
 - `monthLeft` beranda bulan lalu (`Totals.spent` per bulan kalender). Diganti hero sisa budget 02.1p.

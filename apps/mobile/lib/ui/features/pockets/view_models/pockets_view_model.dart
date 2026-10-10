@@ -7,7 +7,7 @@ import '../../../../domain/period.dart';
 import '../../../core/clock.dart';
 import '../../../core/finance_providers.dart';
 
-/// Jar tapped in 02.2; null = first pocket.
+/// Jar tapped in 03.1; null = first pocket.
 class SelectedPocket extends Notifier<String?> {
   @override
   String? build() => null;
@@ -41,7 +41,7 @@ class PocketsState {
   final int monthSpent; // every expense this month, pockets or not
   final List<FreeCategory> free; // tanpa kantong
   final int spentToday; // for aman jajan in "dari mana angkanya?"
-  final bool introSeen; // 02.2l kenalan kantong dismissed
+  final bool introSeen; // 03.1l kenalan kantong dismissed
 
   int get limit => pockets.fold(0, (sum, p) => sum + p.budget);
   int get spent => pockets.fold(0, (sum, p) => sum + p.spent);
@@ -52,7 +52,7 @@ class PocketsState {
   int? get budgetLeft => budget == null ? null : budget! - monthSpent;
 }
 
-/// 02.2 kantong state.
+/// 03.1 kantong state.
 final pocketsScreenProvider = Provider<AsyncValue<PocketsState>>((ref) {
   final now = ref.watch(nowProvider);
   final period = ref.watch(currentPeriodProvider);

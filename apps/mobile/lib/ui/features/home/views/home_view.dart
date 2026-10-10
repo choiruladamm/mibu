@@ -343,7 +343,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
 
   /// What the hero shows for [s]: label, amount, the small line under it and
   /// the chip (02.1p, 00.23b). Sisa budget; without a budget, what's been
-  /// spent and a nudge to set one (docs/PERIOD_LEDGER_PLAN.md).
+  /// spent and a nudge to set one (docs/period-ledger.md).
   _HeroData _hero(HomeState s, AppLocalizations l) {
     final month = _name(s.month);
     final left = s.budgetLeft;
@@ -885,7 +885,7 @@ class _PocketPills extends StatelessWidget {
 }
 
 /// "baru aja" / "terakhir di {bulan}": latest 5 entries by day, then the
-/// way into 04.1.
+/// way into 09.1.
 class _Recent extends ConsumerWidget {
   const _Recent({required this.state});
 

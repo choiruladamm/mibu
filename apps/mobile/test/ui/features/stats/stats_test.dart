@@ -50,7 +50,7 @@ void main() {
     return db;
   }
 
-  testWidgets('02.3b bulan: total, delta, sekilas, on track, larinya', (
+  testWidgets('04.1b bulan: total, delta, sekilas, on track, larinya', (
     tester,
   ) async {
     await pump(tester);
@@ -71,7 +71,7 @@ void main() {
     expect(find.text('+ ngopi 4%'), findsOneWidget); // 5th of 5
   });
 
-  testWidgets('02.3a minggu, then ‹ to last week', (tester) async {
+  testWidgets('04.1a minggu, then ‹ to last week', (tester) async {
     await pump(tester);
     await tester.tap(find.text('minggu'));
     await settle(tester);
@@ -89,7 +89,7 @@ void main() {
     expect(find.text('lewat budget'), findsOneWidget); // > Rp1,81jt
   });
 
-  testWidgets('02.3c tahun: amount chip isn\'t squeezed to the bar column', (
+  testWidgets('04.1c tahun: amount chip isn\'t squeezed to the bar column', (
     tester,
   ) async {
     await pump(tester);
@@ -163,7 +163,7 @@ void main() {
     expect(emoji.dy - card.top, closeTo(27, 0.5));
   });
 
-  testWidgets('02.3d no budget: pasang budget card', (tester) async {
+  testWidgets('04.1d no budget: pasang budget card', (tester) async {
     final db = await pump(tester);
     await tester.runAsync(() => setBudgetOf(db, null));
     await settle(tester);

@@ -12,8 +12,8 @@ import '../../../core/widgets/sheet.dart';
 /// "sering dicatat": this many entries this month gets the ink warning card.
 const busyEntries = 10;
 
-/// LimitOffSheet — "copot limit X?" before a limit is dropped (02.2 kartu
-/// detail, 03.5). True = copot.
+/// LimitOffSheet — "copot limit X?" before a limit is dropped (03.1 kartu
+/// detail, 07.3). True = copot.
 Future<bool> showLimitOff(
   BuildContext context, {
   required String emoji,

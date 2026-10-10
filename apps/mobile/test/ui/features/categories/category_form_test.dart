@@ -53,7 +53,7 @@ void main() {
 
   final nameField = find.byType(TextField).first;
 
-  testWidgets('03.4 from kantong: emoji follows the name, limit, saved', (
+  testWidgets('07.2 from kantong: emoji follows the name, limit, saved', (
     tester,
   ) async {
     final db = await pump(tester, const PocketsView());
@@ -62,7 +62,7 @@ void main() {
     await tester.tap(find.text('bikin baru')); // bottom of the sheet
     await settle(tester);
     await settle(tester);
-    // 03.4b: always has a limit, no kind / switch rows.
+    // 07.2b: always has a limit, no kind / switch rows.
     expect(find.text('bikin baru'), findsOneWidget);
     expect(find.text('jenis'), findsNothing);
     expect(find.text('limit bulanan'), findsNothing);
@@ -112,7 +112,7 @@ void main() {
     await db.close();
   });
 
-  testWidgets('03.5 via atur limit: usage, switch to income drops limit', (
+  testWidgets('07.3 via atur limit: usage, switch to income drops limit', (
     tester,
   ) async {
     final db = await pump(tester, const PocketsView());
@@ -136,7 +136,7 @@ void main() {
     await db.close();
   });
 
-  testWidgets('03.5 copot limit: asks, saved at once, stays open, batalin', (
+  testWidgets('07.3 copot limit: asks, saved at once, stays open, batalin', (
     tester,
   ) async {
     final db = await pump(tester, const PocketsView());
@@ -151,7 +151,7 @@ void main() {
     await settle(tester);
     await settle(tester);
 
-    expect(find.text('edit'), findsOneWidget); // 03.5 stays open
+    expect(find.text('edit'), findsOneWidget); // 07.3 stays open
     expect(await limitOf(db, 'anabul'), isNull);
     expect(find.text('limit anabul dicopot'), findsOneWidget);
     expect(find.text('opsional, bisa nanti'), findsOneWidget); // switch off
@@ -164,7 +164,7 @@ void main() {
     await db.close();
   });
 
-  testWidgets('03.5: gajian has no hapus (it counts the payday)', (
+  testWidgets('07.3: gajian has no hapus (it counts the payday)', (
     tester,
   ) async {
     final db = await pump(tester, const PocketsView());
@@ -188,7 +188,7 @@ void main() {
     await db.close();
   });
 
-  testWidgets('03.2 bikin "gym" comes back picked', (tester) async {
+  testWidgets('06.2 bikin "gym" comes back picked', (tester) async {
     final db = await pump(tester, const AddEntryView());
     await tester.tap(find.text('buat apa?'));
     await settle(tester);
@@ -217,7 +217,7 @@ void main() {
     await db.close();
   });
 
-  testWidgets('03.4: tap the icon → 00.21 → picked icon comes back', (
+  testWidgets('07.2: tap the icon → 00.21 → picked icon comes back', (
     tester,
   ) async {
     final db = await pump(
