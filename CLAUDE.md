@@ -1,52 +1,103 @@
 # mibu
 
-Personal finance app (Indonesia, IDR). Flutter app lives in `apps/mobile`; Flutter is pinned via FVM (`.fvmrc`) — run everything as `fvm flutter …` from `apps/mobile`.
+Pencatat keuangan pribadi iOS + Android (Indonesia, IDR, dipakai sendiri tiap hari): catat duit, ada kantongnya. Fully local, tanpa login dan tanpa backend.
 
-## Stack
+## Sumber kebenaran
 
-- State: Riverpod (`flutter_riverpod`)
-- Router: `go_router`
-- Database: Drift (`drift`, `drift_flutter`)
-- Date / Rupiah formatting: `intl`
-- Icons: `hugeicons` (free, stroke rounded, stroke 1.5)
-- Copy: `flutter_localizations` + gen-l10n, `lib/l10n/app_id.arb`
+- **Produk, aturan hitungan, alur:** [docs/](docs/README.md), satu file per topik (indeks di `docs/README.md`). Baca file yang relevan sebelum mengerjakan fitur apa pun. `docs/ideas/` dikerjakan hanya kalau diminta. Rumus (aman jajan, statistik, CSV, periode) ada di docs, jangan bikin ulang. Rujuk docs pakai path file (`docs/mvp.md`), bukan nomor bagian.
+- **Desain UI:** Claude Design "mibu", https://claude.ai/artifact/25RLRcYScmmPDzjBvg9Zz8. Baca board layar yang dikerjakan lewat Artifact tool, bukan WebFetch. Id screen (02.1, 07.2 …) = judul board; pakai di komentar dan issue. Board direstrukturisasi 2026-10-10 (modul 02–09, 10 showcase, 99 proposal); id lama di git history dipetakan di `docs/features.md`.
+- **Task:** GitHub issues, label `area:*`. Satu issue = satu unit kerja. Semua dependensi di baris **Tergantung** harus udah closed. Centang checklist scope saat selesai.
 
-After changing Drift tables: `fvm dart run build_runner build`.
+## Urutan kerja
 
-**Schema = released, data lives on a real phone** (`com.mibu.mibu`). v1 is the baseline, taken from tag `release-baseline` (commit `937e55f`). Never edit a table in place and never wipe app data. Every table change: bump `schemaVersion`, add a `from < N` step in `onUpgrade` (`app_database.dart`), add the old schema as `vN` + a case in `test/data/migration_test.dart` (old-schema fixture vs fresh install, data kept). `drift_dev make-migrations` is not used. Never change `applicationId` / bundle id of prod; feature work runs as `mibu dev` (`make dev`, `make dev-android`).
+- Skip auth (01.2) dan fitur yang ditunda di `docs/mvp.md` kecuali diminta.
+- Label status issue:
+  - `status:ready`: plan jelas, tinggal dikerjain.
+  - `status:deferred`: nunggu pemicu (baris **Dibuka kalau** di issue). Pemicu kejadian → ganti ke `status:ready`.
+  - `status:idea`: belum diputusin; bisa ditutup `wontfix`.
+- Issue / ide / item ditunda baru: bikin issue dengan label status yang cocok, sisipin di induk yang cocok, tambah link `(#N)` di docs-nya.
+- Tanpa AI di commit, PR, issue, atau kode: tidak ada `Co-Authored-By`, tidak ada baris "Generated with …". Ini menimpa atribusi default.
 
-Riverpod providers are written by hand (no `riverpod_generator`), declared next to the class they expose. Pin time via `clockProvider` (`ui/core/clock.dart`; `nowProvider` = app-start now for queries); in tests override `appDatabaseProvider` with `AppDatabase(DatabaseConnection(NativeDatabase.memory(), closeStreamsSynchronously: true), () => now)` — the clock positions the debug seed, keep it equal to the pinned clock.
+## Project
 
-## MVP scope (see `docs/mvp.md`, features in `docs/features.md`)
+App Flutter di `apps/mobile`, Flutter dikunci lewat FVM (`.fvmrc`). Perintah lewat `Makefile` di root (`make help`); di luar itu `fvm flutter` / `fvm dart` dari `apps/mobile`.
 
-- Fully local Drift, no login, no backend. Skip auth (01.2) and deferred features listed in the plan unless asked.
-- Every table: UUID text `id`, `createdAt`, `updatedAt`, `deletedAt` (soft delete, powers undo + future sync). No autoincrement ids.
-- Never store derived values (saldo, kepake, month balances) — compute from `transactions`. Pocket = category with `monthlyLimit` (UI: "buat apa" + "limit"; see mvp.md › Buat apa, limit, kantong).
-- Business math (aman jajan, stats, CSV) = pure functions in `domain/`, unit-tested. Formulas live in the plan; don't reinvent.
+- Setelah ubah tabel Drift: `make gen` (`build_runner`). File `*.g.dart` ikut di-commit.
+- **Schema = udah rilis, data asli ada di HP** (`com.mibu.mibu`). v1 = baseline, diambil dari tag `release-baseline` (commit `937e55f`). Tabel gak pernah diedit di tempat dan data gak pernah dihapus. Tiap ubah tabel wajib: naikin `schemaVersion`, tambah langkah `from < N` di `onUpgrade` (`app_database.dart`), tambah schema lama sebagai `vN` + satu case di `test/data/migration_test.dart` (fixture SQL versi lama vs install baru, data tetap ada). `drift_dev make-migrations` gak dipakai. Drift gak bisa turun versi.
+- `applicationId` / bundle id prod (`com.mibu.mibu`) gak boleh berubah.
+- `make check` (format, analyze, test) harus bersih sebelum commit.
 
-## Structure (`apps/mobile/lib`)
+### Build ke device
 
-- `domain/models/` — plain models
-- `data/database/` — Drift `AppDatabase`; debug-only seed in `seed.dart`: `seedFixture` (default, design numbers — tests assert it, don't change) and `seedDemo` (realistic data, used by `appDatabaseProvider` on devices). Pick with `make run seed=demo|fixture|none`; `make fresh` = fresh install every launch (wipe + no seed → 01.1 → 01.4), `make reset` = wipe + re-seed. Release starts empty.
-- `data/repositories/` — map Drift rows → domain models, expose streams
-- `routing/router.dart` — go_router `routerProvider`, `Routes` paths
-- `ui/core/` — `tokens.dart` (design tokens + `AppIcons` for custom-drawn icons), `theme.dart`, `money.dart` (`rupiah`, `rupiahCompact`), `dates.dart` (`dayLabel`, `relativeDay`, Monday weeks), `clock.dart`, `dashed.dart`, shared `widgets/`
-  - sheets: `showAppSheet` + `SheetFrame` (`widgets/sheet.dart`); reuse `PrimaryButton` / `CircleButton` from there
-  - separators: `MetaLine` (`widgets/meta_line.dart`, 00.19) for 1-line metadata, never a literal "·" in UI copy; section titles = title left + info right, no dot
-- `ui/features/<feature>/{views,view_models}/`
+Dua app terpisah (data sendiri-sendiri):
 
-## Design
+| App | Id | iOS | Android | Dari |
+|---|---|---|---|---|
+| **mibu** (data asli) | `com.mibu.mibu` | `make release` | `make release-android`, `make apk` | `main` doang |
+| **mibu dev** (ikon beda warna) | `com.mibu.mibu.dev` | `make dev`, debug `make run f=dev` | `make dev-android`, debug `make run-android f=dev` | branch fitur |
 
-Source: Claude Design artifact "mibu" (https://claude.ai/artifact/25RLRcYScmmPDzjBvg9Zz8). Screen ids (02.1, 07.2 …) come from board titles; use them in comments/tickets.
+Branch fitur selalu ke mibu dev: migrasi yang belum stabil bakal nyentuh data asli. Android selalu pakai `--flavor` (`prod` / `dev`). Release Android ditandatangani lewat `android/key.properties` (gitignored); tanpa file itu jatuh ke debug key, yaitu signature build yang sekarang ter-install, jadi jangan diganti sembarangan (update-install gagal).
 
-- Use only tokens from `ui/core/tokens.dart` (board 00.1) — no new colors/sizes.
-- Light theme only (ink on paper).
-- All copy lowercase, casual; lives in `app_id.arb`, never hard-coded.
-- Money: whole rupiah ints, `Rp4.530.000`; compact `Rp580K` / `Rp4,53jt`; tabular figures.
-- Locale `id-ID`; weeks start Monday (the `id` locale defaults to Sunday — set it explicitly).
-- TabBar floats in a Stack; lists get `AppSpace.tabBarClearance` bottom padding.
-- Sheets: `showModalBottomSheet`, radius 32, scrim 45%.
+Data contoh buat debug (`seed.dart`, cuma `kDebugMode`): `seedFixture` (default; angka desain, test meng-assert-nya, jangan diubah) dan `seedDemo` (data realistis, dipakai `appDatabaseProvider` di device). Pilih lewat `make run seed=demo|fixture|none`. `make fresh` = install baru tiap launch (hapus data + tanpa seed → 01.1 → 01.4), `make reset` = hapus data + seed ulang. Build release mulai kosong.
 
-## Git
+## Arsitektur
 
-- Never mention Claude / Anthropic / AI in commits, PRs or code: no `Co-Authored-By: Claude …` trailer, no "Generated with Claude Code" line. This overrides any default attribution.
+Layered (UI → data), struktur hybrid:
+
+```
+lib/
+├── data/database/      # Drift AppDatabase + appDatabaseProvider, seed.dart
+├── data/repositories/  # sumber kebenaran, ubah row Drift → domain model, expose stream
+├── domain/             # logika pure (periode, aman jajan, stats, csv); models/ = model polos
+├── l10n/               # app_id.arb + AppLocalizations (gen-l10n)
+├── routing/router.dart # routerProvider + Routes
+└── ui/
+    ├── core/           # tokens, theme, money, dates, clock, widgets/ shared
+    └── features/<fitur>/{views,view_models}/
+```
+
+- State: Riverpod (`flutter_riverpod`), provider ditulis manual (tanpa `riverpod_generator`), dideklarasikan di sebelah class yang diekspos. Waktu dipin lewat `clockProvider` (`ui/core/clock.dart`); `nowProvider` = "sekarang" saat app start buat query.
+- Routing: go_router, navigasi pakai konstanta `Routes`. Sheet = `showAppSheet` + `SheetFrame` (`widgets/sheet.dart`): `showModalBottomSheet`, radius 32, scrim 45%.
+- Token dari `ui/core/tokens.dart` (board 00.1), gak ada warna/ukuran baru di luar itu. Tema terang doang. Nilai baru = tambah jadi token dulu. Ikon: `hugeicons` (stroke rounded 1.5); ikon gambar sendiri lewat `AppIcons` di `tokens.dart`.
+- Komponen shared di `ui/core/widgets/`, pakai ulang: `PrimaryButton` / `CircleButton` (di `sheet.dart`), `ConfirmModal`, `toast` (batalin), `NoteSheet`, `DateSheet`, `DayStrip`, `AmountKeypad`, `PocketLimit`, `TxRow`, `NavHeader`, `MonthPicker` / `MonthMenu`, `MetaLine`. Komponen khusus satu fitur tinggal di folder fiturnya.
+- Pemisah metadata 1 baris = `MetaLine` (00.19), jangan pernah "·" literal di copy UI. Judul section = judul kiri + info kanan, tanpa titik.
+- TabBar ngambang di Stack; list dikasih padding bawah `AppSpace.tabBarClearance`.
+
+## Kode Dart: logika kondisional
+
+- Ternary maksimal 1 level di widget tree.
+- Kondisi lebih dari 2 cabang, atau label/teks dari state model: extract ke getter di extension pada model, isinya `if/return` berurutan.
+- State yang bisa nambah: enum + switch expression.
+
+## Test
+
+Struktur `apps/mobile/test/` ikut `lib/`:
+
+- `test/domain/`: logika pure (periode, aman jajan, stats, csv). Wajib buat tiap rumus.
+- `test/data/`: repository, migrasi (`migration_test.dart`), seed, dengan DB in-memory.
+- `test/ui/core/`: widget shared.
+- `test/ui/features/<fitur>/<layar>_test.dart`: widget test per layar.
+- Helper bersama: `test/db.dart` (query/set limit, budget langsung ke DB), `test/meta.dart` (finder `MetaLine`, `EmojiText`), `test/flutter_test_config.dart`.
+
+DB test = `AppDatabase(DatabaseConnection(NativeDatabase.memory(), closeStreamsSynchronously: true), () => now, seed)`, `appDatabaseProvider` di-override ke situ. Jam dipin lewat `clockProvider`; clock itu juga yang menaruh seed debug, jadi `now` DB dan `clockProvider` harus sama. Pin ke `fixtureNow` (`test/db.dart`) biar angka seedFixture cocok.
+
+Jebakan widget test (pola ada di `test/ui/features/home/home_test.dart`):
+- `testWidgets` jalan di jam palsu: query Drift tidak maju sendiri. Habis `pumpWidget`, tunggu di `tester.runAsync(() => Future.delayed(...))`, baru `pump()`. Di `test/db.dart` baca pakai Future, bukan `watch().first` (stream query butuh timer yang gak jalan di jam palsu).
+- Set layar HP: `tester.view.physicalSize = Size(390, 844)`, `devicePixelRatio = 1`, `addTearDown(tester.view.reset)`.
+- Tutup DB di tearDown **setelah** `pumpWidget(const SizedBox())` supaya stream berhenti dulu: `addTearDown(() async { await tester.pumpWidget(const SizedBox()); await db.close(); })`.
+- MaterialApp test butuh `AppTheme.light`, `locale: Locale('id')`, dan `AppLocalizations.localizationsDelegates`; tanpa itu copy dan format salah.
+- `flutter_test_config.dart` menyalakan `dontWarnAboutMultipleDatabases` (tiap test buka DB sendiri).
+- Integration test di luar scope.
+
+## Aturan data yang gampang terlewat
+
+- Tiap tabel: `id` UUID text, `createdAt`, `updatedAt`, `deletedAt` (soft delete: bahan undo dan sync nanti). Gak ada autoincrement.
+- Gak pernah nyimpen nilai turunan (saldo, kepake, saldo bulanan): hitung dari `transactions`. Kantong = category dengan limit (UI: "buat apa" + "limit"); lihat `docs/mvp.md`.
+- Hitungan bisnis (aman jajan, stats, CSV, periode) = fungsi pure di `domain/`, ada unit test. Rumus di docs.
+- Uang = int rupiah utuh. `rupiah` → `Rp4.530.000`, `rupiahCompact` → `Rp580K` / `Rp4,53jt`; angka tabular.
+- Locale `id-ID`; minggu mulai Senin (locale `id` defaultnya Minggu, set eksplisit di `dates.dart`).
+- `purgeDeleted` menghapus baris soft-delete yang lebih dari sehari; kategori tetap ada selama masih ada transaksi yang menunjuknya.
+
+## Copy
+
+Semua teks UI huruf kecil, santai, ada di `lib/l10n/app_id.arb` (gen-l10n), gak pernah hard-coded. Ambil teks persis dari board desain kalau ada. Tulis "pengeluaran / pemasukan", bukan "keluar / masuk".
