@@ -13,7 +13,7 @@ User mibu itu casual. Impor harus **satu tap, nol keputusan**. Yang bisa ditebak
 | **A. CSV mibu sendiri** (round-trip ekspor) | kecil | format udah fix ([mvp.md › Ekspor CSV](mvp.md#ekspor-csv)), parser = kebalikan `transactionsCsv` |
 | B. CSV app lain (Money Lover, Spendee, Wallet) | sedang | tiap app beda kolom, perlu mapping kolom / preset per app |
 | C. mutasi bank (BCA/Mandiri PDF/CSV) | besar | format berantakan, kategori harus ditebak dari deskripsi. skip |
-| D. backup penuh (JSON semua tabel) | sedang | ikut budget, limit, period rules, profile. ini fitur "backup & pulihin" yang ditunda |
+| D. backup penuh (JSON semua tabel, #13) | sedang | ikut budget, limit, period rules, profile. ini fitur "backup & pulihin" yang ditunda |
 
 **Pilih A dulu.**
 

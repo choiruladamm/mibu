@@ -24,7 +24,7 @@ Logic + desain final (canvas 2026-10-03) udah masuk:
 | Catat | 06.1b–d | "sisa budget abis ini" / "pemasukan periode ini jadi" / bar ilang tanpa budget |
 | 09.1 | 09.1 / 09.1d | range di bawah judul, kartu ink sisa pemasukan + naik/turun, pemasukan & pengeluaran vs periode lalu, "—" + "catat gajian dulu" |
 
-Belum: nama user di judul 01.4 (app belum punya nama), toast budget versi beranda ("budget Rp… kepasang"), dan mvp.md / features.md ditulis ulang (masih nunjuk ke sini).
+Belum (toast budget: #22): nama user di judul 01.4 (app belum punya nama), toast budget versi beranda ("budget Rp… kepasang"), dan mvp.md / features.md ditulis ulang (masih nunjuk ke sini).
 
 Ganti tanggal gajian tetap berlaku **mulai periode berikutnya** (kecuali masih di periode setup), diputusin 2026-10-03 dan catatan di sheet 00.24 udah disamain. Alasannya: kalau langsung, periode yang lagi jalan ganti panjang di tengah jalan, catatan pindah periode, dan budget periode itu bisa kepake dobel (25 → 10 tgl 16 okt: periode lama tutup 9 okt, periode baru dapet budget penuh lagi).
 

@@ -1,6 +1,6 @@
 # mibu — kebutuhan vs keinginan
 
-**Draft ide, belum fix.** Belum masuk [mvp.md](../mvp.md), belum ada board design, belum ada kode. Kalau udah fix mau dieksekusi, baru di-mention di sana.
+**Draft ide, belum fix (#8).** Belum masuk [mvp.md](../mvp.md), belum ada board design, belum ada kode. Kalau udah fix mau dieksekusi, baru di-mention di sana.
 
 ## Ide
 

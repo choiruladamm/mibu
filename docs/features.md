@@ -144,9 +144,9 @@ Tanda: **[diupdate]** = aturan/perilaku berubah dari design, **[perlu design]** 
 | 99.1 | Duit periode ini: DuitCard (00.27) + AlurSheet (00.28) di beranda |
 | 99.2 | Akses transaksi dari beranda: ikon di header (A) / "kepake ›" di hero (B) / C pembanding |
 | 99.3 | Catatan + tag di detail transaksi (A bawah rincian, B di header), ubah via NoteSheet |
-| 99.4 | Tag: daftar, bikin, ganti nama, gabung, hapus + batalin, tag cepat di NoteSheet, TagManage |
+| 99.4 | (#4, #5) Tag: daftar, bikin, ganti nama, gabung, hapus + batalin, tag cepat di NoteSheet, TagManage |
 | 99.6 | Label budget di grafik yang ketutup pill (opsi A / B / C) |
-| 99.10 | Kunci app: Face ID / sidik jari + PIN, layar kunci, salah 5 kali ditahan 30 detik, PinPad (00.31) |
+| 99.10 | (#3) Kunci app: Face ID / sidik jari + PIN, layar kunci, salah 5 kali ditahan 30 detik, PinPad (00.31) |
 
 ## Entitas
 

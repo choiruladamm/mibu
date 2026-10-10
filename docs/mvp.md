@@ -315,4 +315,4 @@ Balikin file ekspor mibu sendiri (05.1l–o, ImportSheet 00.30). Aturan dobel, b
 
 ## Pasca-MVP
 
-Login + sync backend, backup & pulihin, pengingat harian, face id, transaksi berulang, impian, patungan, foto struk, dark mode, SearchSummary interaktif.
+Login + sync backend (#12), backup & pulihin (#13, pengingat export #11), pengingat harian (#10), face id / kunci app (#3), transaksi berulang (#14), impian (#18), isi ulang (#19), patungan (#17), foto struk (#16), dark mode (#15), SearchSummary interaktif. Catat hari berikutnya: #9. Tag: #4, #5. Kebutuhan vs keinginan: #8.

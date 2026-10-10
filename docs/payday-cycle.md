@@ -83,7 +83,7 @@ Fondasi masuk v1, siklus gajian baru dibuka kalau datanya dukung.
 | 0 · fondasi | masuk v1, sekarang | `Period` + resolver, query pakai range, budget per periode | semua query lewat resolver, test hijau |
 | 1 · validasi | v1.x, setelah rilis | ukur tgl gajian user, tandai pemasukan sebagai gajian | cukup user gajian bukan tgl 1 |
 | 2 · fitur | di balik flag | `PaydayCycleResolver`, row di pengaturan, label range tanggal | beta tanpa selisih angka antar screen |
-| 3 · rollout | semua user | buka flag bertahap, auto-detect tgl dari pemasukan | — |
+| 3 · rollout (#21) | semua user | buka flag bertahap, auto-detect tgl dari pemasukan | — |
 
 Cuma fase 0 yang punya jadwal (masuk v1). Fase 1–3 jalan kalau gate sebelumnya lolos, dan bisa berhenti di fase 1 kalau datanya nunjukin hampir semua user gajian tgl 1.
 
@@ -179,7 +179,7 @@ Di v1 (di luar fase 0) tanggal gajian udah dipakai buat aman jajan: weekend dige
 3. **"Bulan" di seluruh UI = periode**, termasuk grafik saldo dan prediksi. Bulan depan tetap cuma intip.
 4. **Aturan berlaku dari awal waktu** (bukan dari tanggal install): periode sebelum install tetap siklus gajian, jadi entri yang di-back-fill ke hari sebelum install jatuh di periode yang sama, bukan potongan bulan kalender. **Ganti tanggal gajian:** mulai periode berikutnya (langsung kalau masih di periode tempat app di-setup). Label "siklus pertama" dibuang.
 
-Yang belum: label range tanggal ("25 sep – 24 okt") di menu bulan / 09.1 / statistik, dan label "siklus pertama". Gajian diganti di tengah jalan bikin potongan periode (nama dobel / periode pendek): ditangani di [payday-change.md](payday-change.md).
+Yang belum (#20): label range tanggal ("25 sep – 24 okt") di menu bulan / 09.1 / statistik, dan label "siklus pertama". Gajian diganti di tengah jalan bikin potongan periode (nama dobel / periode pendek): ditangani di [payday-change.md](payday-change.md).
 
 Status fase 0:
 
