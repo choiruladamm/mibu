@@ -5,11 +5,13 @@
 </p>
 
 <div align="center">
-  <img src="docs/images/showcase-1.png" alt="Beranda sisa budget, kantong, catat, dan statistik" width="100%">
+  <img src="docs/images/showcase-4.png" alt="Grid layar mibu: beranda, catat, kantong, statistik" width="100%">
 
 <details>
 <summary>Intip showcase lainnya</summary>
 <br>
+  <img src="docs/images/showcase-1.png" alt="Beranda sisa budget, kantong, catat, dan statistik" width="100%">
+  <br><br>
   <img src="docs/images/showcase-2.png" alt="Alur catat: keypad, buat apa, struk" width="100%">
   <br><br>
   <img src="docs/images/showcase-3.png" alt="Transaksi, pengaturan, dan kantong" width="100%">
