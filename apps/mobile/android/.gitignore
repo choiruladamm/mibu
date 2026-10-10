@@ -13,3 +13,8 @@ key.properties
 **/*.keystore
 **/*.jks
 /.kotlin/
+
+# release signing
+key.properties
+*.jks
+*.keystore
