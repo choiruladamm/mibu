@@ -116,7 +116,9 @@ class AppDatabase extends _$AppDatabase {
   // Debug: wipe every row on open, then seed again (MIBU_RESET below).
   final bool _reset;
 
-  // Pre-release: schema edited in place; wipe app data on dev devices.
+  // Released (data on real phones): v1 is the baseline (tag release-baseline).
+  // Change a table = bump this, add a `from < N` step in onUpgrade, add the
+  // old schema + a case in test/data/migration_test.dart. Never edit in place.
   @override
   int get schemaVersion => 1;
 
@@ -146,6 +148,9 @@ class AppDatabase extends _$AppDatabase {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
+    onUpgrade: (m, from, to) async {
+      // if (from < 2) await m.addColumn(table, table.column);
+    },
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
       if (!details.wasCreated) await purgeDeleted();

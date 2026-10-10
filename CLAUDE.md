@@ -11,7 +11,9 @@ Personal finance app (Indonesia, IDR). Flutter app lives in `apps/mobile`; Flutt
 - Icons: `hugeicons` (free, stroke rounded, stroke 1.5)
 - Copy: `flutter_localizations` + gen-l10n, `lib/l10n/app_id.arb`
 
-After changing Drift tables: `fvm dart run build_runner build`. Pre-release: edit schema in place at `schemaVersion` 1 (wipe app data on dev devices); after first release bump it + add a migration.
+After changing Drift tables: `fvm dart run build_runner build`.
+
+**Schema = released, data lives on a real phone** (`com.mibu.mibu`). v1 is the baseline, taken from tag `release-baseline` (commit `937e55f`). Never edit a table in place and never wipe app data. Every table change: bump `schemaVersion`, add a `from < N` step in `onUpgrade` (`app_database.dart`), add the old schema as `vN` + a case in `test/data/migration_test.dart` (old-schema fixture vs fresh install, data kept). `drift_dev make-migrations` is not used. Never change `applicationId` / bundle id of prod; feature work runs as `mibu dev` (`make dev`, `make dev-android`).
 
 Riverpod providers are written by hand (no `riverpod_generator`), declared next to the class they expose. Pin time via `clockProvider` (`ui/core/clock.dart`; `nowProvider` = app-start now for queries); in tests override `appDatabaseProvider` with `AppDatabase(DatabaseConnection(NativeDatabase.memory(), closeStreamsSynchronously: true), () => now)` — the clock positions the debug seed, keep it equal to the pinned clock.
 
