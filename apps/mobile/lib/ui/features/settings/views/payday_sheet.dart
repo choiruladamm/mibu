@@ -21,8 +21,8 @@ final _nextDay = DateFormat('EEE d MMM', 'id');
 
 typedef _Pick = ({int day, PaydayShift shift});
 
-/// 02.4e–k tanggal gajian: PaydaySheet (00.24), the day and what a weekend
-/// payday does (docs/PAYDAY_WEEKEND_PLAN.md); save → toast with batalin.
+/// 05.1e–k tanggal gajian: PaydaySheet (00.24), the day and what a weekend
+/// payday does (docs/payday-weekend.md); save → toast with batalin.
 Future<void> editPayday(BuildContext context, WidgetRef ref) async {
   final repo = ref.read(financeRepositoryProvider);
   final saved = _normal(ref.read(profileProvider).value?.payday ?? 25);
@@ -77,7 +77,7 @@ Future<void> editPayday(BuildContext context, WidgetRef ref) async {
 }
 
 /// The running period if [day] were saved now, when that changes it (a
-/// sliver merged in, docs/PAYDAY_CHANGE_PLAN.md); null = it stays, or the
+/// sliver merged in, docs/payday-change.md); null = it stays, or the
 /// change applies at once. [get] = ref.watch in build, ref.read otherwise.
 Period? _runningAfter(
   T Function<T>(ProviderListenable<T>) get,

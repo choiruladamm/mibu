@@ -24,14 +24,14 @@ final _dayTitle = DateFormat('EEE d MMM', 'id');
 String _name(DateTime m) => _monthName.format(m).toLowerCase();
 String _short(DateTime m) => _monthShort.format(m).toLowerCase();
 
-/// 04.1 semua transaksi.
+/// 09.1 semua transaksi.
 class TransactionsView extends ConsumerStatefulWidget {
   const TransactionsView({super.key, this.onOpen, this.onSearch});
 
-  /// Row tap → 04.3 struk.
+  /// Row tap → 08.2 struk.
   final ValueChanged<Transaction>? onOpen;
 
-  /// Search button → 04.2 cari in the month being viewed.
+  /// Search button → 08.1 cari in the month being viewed.
   final ValueChanged<DateTime>? onSearch;
 
   @override
@@ -43,7 +43,7 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
   /// doesn't blank (and lose its scroll position) between months.
   TransactionsState? _last;
 
-  /// 04.1b: 00.8 MonthMenu under the month title.
+  /// 09.1b: 00.8 MonthMenu under the month title.
   bool _menuOpen = false;
   final _titleLink = LayerLink();
 
@@ -445,7 +445,7 @@ class _Title extends StatelessWidget {
   }
 }
 
-/// 04.1c: "balik ke okt 2026 ›" when not on the current month.
+/// 09.1c: "balik ke okt 2026 ›" when not on the current month.
 class _BackToNow extends StatelessWidget {
   const _BackToNow({required this.label, required this.onTap});
 
@@ -491,9 +491,9 @@ class _BackToNow extends StatelessWidget {
   }
 }
 
-/// 04.1 kartu periode (ink): sisa pemasukan = income − spending, against
+/// 09.1 kartu periode (ink): sisa pemasukan = income − spending, against
 /// the period before; nothing carries over. No income yet → "—" and a nudge
-/// to log the salary (04.1d).
+/// to log the salary (09.1d).
 class _PeriodCard extends StatelessWidget {
   const _PeriodCard({required this.state});
 
@@ -503,7 +503,7 @@ class _PeriodCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
     final s = state;
-    // 04.1f: income-side figures hide under "pemasukan aja" too.
+    // 09.1f: income-side figures hide under "pemasukan aja" too.
     final rp = context.rpCompact;
     String rpIn(int v) => context.rpCompact(v, income: true);
     final hideIn = context.hidesAmount(income: true);
@@ -680,7 +680,7 @@ class _PeriodCard extends StatelessWidget {
   }
 }
 
-/// 04.1g "intip 5 detik" ⇄ "tutup lagi", on the ink card.
+/// 09.1g "intip 5 detik" ⇄ "tutup lagi", on the ink card.
 class _PeekChip extends ConsumerWidget {
   const _PeekChip();
 

@@ -20,9 +20,9 @@ import 'limit_off_sheet.dart';
 import '../../../core/widgets/meta_line.dart';
 import '../../../core/widgets/app_emoji.dart';
 
-/// 02.2 "pasang limit ke…". With [pick] it opens straight on its limit step
+/// 03.1 "pasang limit ke…". With [pick] it opens straight on its limit step
 /// (the "belum ada limit" chips). Saves, selects the jar and shows the toast
-/// with batalin; "bikin kategori baru" hands over to 03.4 (from kantong).
+/// with batalin; "bikin kategori baru" hands over to 07.2 (from kantong).
 Future<void> showSetLimit(
   BuildContext context,
   WidgetRef ref, {
@@ -52,7 +52,7 @@ Future<void> showSetLimit(
   );
 }
 
-/// Copot limit (02.2 kartu detail, 03.5): LimitOffSheet first; on copot
+/// Copot limit (03.1 kartu detail, 07.3): LimitOffSheet first; on copot
 /// clears it right away, toast with batalin puts [limit] back (then runs
 /// [onUndo]). False = nggak jadi, nothing changed.
 Future<bool> releaseLimit(

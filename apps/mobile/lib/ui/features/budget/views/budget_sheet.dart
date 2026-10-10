@@ -13,7 +13,7 @@ import '../../../core/widgets/toast.dart';
 import '../../../core/finance_providers.dart';
 
 /// Opens 00.16 and applies the result: saved → toast, hapus → toast with
-/// batalin. Entry points: 02.2 hero, 00.15 PocketLimit, 02.3, 02.4.
+/// batalin. Entry points: 03.1 hero, 00.15 PocketLimit, 04.1, 05.1.
 Future<void> editBudget(BuildContext context, WidgetRef ref) async {
   final l = AppLocalizations.of(context)!;
   final repo = ref.read(financeRepositoryProvider);

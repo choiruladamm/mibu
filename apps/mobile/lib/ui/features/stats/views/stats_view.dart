@@ -37,7 +37,7 @@ String _range(Span s) {
       : '${_lower(_dayMonth, s.start)} – ${_lower(_dayMonth, last)}';
 }
 
-/// 02.3 statistik: minggu / bulan / tahun, ‹ › through periods, bars,
+/// 04.1 statistik: minggu / bulan / tahun, ‹ › through periods, bars,
 /// sekilas, on track nggak? (ritme budget) and larinya ke mana.
 class StatsView extends ConsumerStatefulWidget {
   const StatsView({super.key});
@@ -1167,7 +1167,7 @@ class _Stripes extends CustomPainter {
   bool shouldRepaint(_Stripes old) => false;
 }
 
-/// 02.3d no budget: dashed card → 00.16 BudgetSheet.
+/// 04.1d no budget: dashed card → 00.16 BudgetSheet.
 class _NoBudget extends StatelessWidget {
   const _NoBudget({required this.onTap});
 

@@ -1,6 +1,6 @@
 # mibu — kebutuhan vs keinginan
 
-**Draft ide, belum fix.** Belum masuk [MVP_PLAN.md](MVP_PLAN.md), belum ada board design, belum ada kode. Kalau udah fix mau dieksekusi, baru di-mention di sana.
+**Draft ide, belum fix (#8).** Belum masuk [mvp.md](../mvp.md), belum ada board design, belum ada kode. Kalau udah fix mau dieksekusi, baru di-mention di sana.
 
 ## Ide
 
@@ -24,14 +24,14 @@ Dua chip tetap di paling atas NoteSheet 00.13, sebelum tag cepet. Tap = pilih, t
 
 ## Analisis (nanti)
 
-- Kartu di statistik 02.3: kebutuhan vs keinginan per periode (persen dan rupiah), dipecah per buat apa, dibanding periode lalu. "Belum dilabel" ditampilin terpisah.
+- Kartu di statistik 04.1: kebutuhan vs keinginan per periode (persen dan rupiah), dipecah per buat apa, dibanding periode lalu. "Belum dilabel" ditampilin terpisah.
 - Hitungannya fungsi murni di `domain/` dan di-unit-test, sesuai aturan proyek. Nggak nyimpen angka turunan.
-- Sebelum kartunya ada: cari "keinginan" di 04.2 udah nyocokin tag, jadi total sementara bisa diintip dari sana.
+- Sebelum kartunya ada: cari "keinginan" di 08.1 udah nyocokin tag, jadi total sementara bisa diintip dari sana.
 - Kartunya dinamain **"keinginan"**, bukan "impulsif". Keinginan belum tentu impulsif. Ngukur impulsif butuh sinyal lain.
 
 ## Data lama
 
-Catatan lama dari app lain masuk lewat [import CSV](IMPORT_PLAN.md). Kolom `tag` diisi `kebutuhan` atau `keinginan` dari data asalnya, jadi analisis langsung punya riwayat.
+Catatan lama dari app lain masuk lewat [import CSV](../import.md). Kolom `tag` diisi `kebutuhan` atau `keinginan` dari data asalnya, jadi analisis langsung punya riwayat.
 
 ## Kalau pindah ke kolom
 
@@ -42,6 +42,6 @@ Pindah kalau pengecualian tag di atas jadi banyak dan ngerepotin (rename, gabung
 ## Pertanyaan terbuka
 
 - Board design buat dua chip di NoteSheet belum ada.
-- Chip juga di layar catat 03.1 langsung, atau cukup di NoteSheet?
+- Chip juga di layar catat 06.1 langsung, atau cukup di NoteSheet?
 - Draft 99.4 (CRUD tag) perlu catatan pengecualian buat dua tag ini.
 - Import: kalau satu baris CSV punya dua-duanya, ambil yang mana?

@@ -14,7 +14,7 @@ import '../../categories/views/category_form_sheet.dart';
 import '../../categories/views/category_manage_sheet.dart';
 import '../../../core/widgets/app_emoji.dart';
 
-/// 03.2 buat apa? — resolves to the category + place, or null.
+/// 06.2 buat apa? — resolves to the category + place, or null.
 Future<RecentPick?> showCategoryPicker(
   BuildContext context, {
   required CategoryKind kind,
@@ -59,7 +59,7 @@ class _CategoryPickerState extends ConsumerState<_CategoryPicker> {
     super.dispose();
   }
 
-  /// 03.4 from the grid; the new category comes back picked.
+  /// 07.2 from the grid; the new category comes back picked.
   Future<void> _create(String term) async {
     final c = await showCategoryForm(context, kind: widget.kind, name: term);
     if (c == null || !mounted || c.kind != widget.kind) return;
@@ -88,7 +88,7 @@ class _CategoryPickerState extends ConsumerState<_CategoryPicker> {
       for (final p in ref.watch(pocketsProvider).value ?? const <Pocket>[])
         p.id: p,
     };
-    // Fresh copy, in case 03.3 renamed it.
+    // Fresh copy, in case 07.1 renamed it.
     final picked = [...?ref.watch(categoriesProvider).value]
         .where((c) => c.id == _picked?.id)
         .firstOrNull;

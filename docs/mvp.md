@@ -1,6 +1,6 @@
 # mibu — rencana MVP
 
-Status: disepakati 2026-10-01. Daftar fitur lengkap ada di [FEATURES.md](FEATURES.md). Nomor screen (02.1, 03.4, …) mengikuti canvas Claude Design.
+Status: disepakati 2026-10-01. Daftar fitur lengkap ada di [features.md](features.md). Nomor screen (02.1, 07.2, …) mengikuti canvas Claude Design.
 
 ## Prinsip
 
@@ -15,15 +15,15 @@ Status: disepakati 2026-10-01. Daftar fitur lengkap ada di [FEATURES.md](FEATURE
 | onboarding 01.1 (view udah ada) | login apple/google (01.2), sync, backup cloud |
 | atur awal 01.4 + 01.4b, gantiin login | impian, isi ulang, patungan, foto struk |
 | beranda 02.1 | transaksi berulang |
-| kantong 02.2, tanpa impian dan isi ulang | pengingat harian |
-| catat 03.1 + DayStrip / DateSheet / NoteSheet | kunci face id |
-| kategori 03.2–03.6 | dark mode (palet gelap belum ada di design) |
-| semua transaksi 04.1 | SearchSummary interaktif (drag per hari) |
-| struk 04.3 + hapus & undo (04.3b/c) | |
-| edit catatan 04.4, tanpa field berulang | |
-| statistik 02.3 | |
-| cari 04.2, versi simpel | |
-| pengaturan 02.4: kartu budget → 00.16, buat apa aja, limit bulanan, sembunyiin nominal, **ekspor csv**, **import csv** (02.4l–o), versi | reminder harian, rekap mingguan, kunci face id, mode terang/gelap, backup & pulihin, chip `mulai tgl 1` |
+| kantong 03.1, tanpa impian dan isi ulang | pengingat harian |
+| catat 06.1 + DayStrip / DateSheet / NoteSheet | kunci face id |
+| kategori 06.2–07.4 | dark mode (palet gelap belum ada di design) |
+| semua transaksi 09.1 | SearchSummary interaktif (drag per hari) |
+| struk 08.2 + hapus & undo (08.2b/c) | |
+| edit catatan 08.3, tanpa field berulang | |
+| statistik 04.1 | |
+| cari 08.1, versi simpel | |
+| pengaturan 05.1: kartu budget → 00.16, buat apa aja, limit bulanan, sembunyiin nominal, **ekspor csv**, **import csv** (05.1l–o), versi | reminder harian, rekap mingguan, kunci face id, mode terang/gelap, backup & pulihin, chip `mulai tgl 1` |
 
 Alur first-run: onboarding 01.1 → atur awal 01.4 → kantong pertama 01.4b → beranda 02.1. Layar login dilewati.
 
@@ -85,7 +85,7 @@ erDiagram
 
 `profile` berdiri sendiri, cuma satu baris. Satu kategori bisa punya banyak transaksi. Transaksi boleh tanpa kategori.
 
-Budget dan limit disimpan **per periode** (fase 0 siklus gajian, [PAYDAY_CYCLE_PLAN.md](PAYDAY_CYCLE_PLAN.md)): yang berlaku buat sebuah periode = baris dengan `periodStart` paling akhir ≤ awal periode itu. Periode tanpa baris sendiri ngelanjutin baris terakhir; ngubah nilai nulis baris periode yang lagi jalan, jadi periode lama nggak pernah berubah. Baca nggak pernah nulis. `periodRules` kosong = bulan kalender (v1).
+Budget dan limit disimpan **per periode** (fase 0 siklus gajian, [payday-cycle.md](payday-cycle.md)): yang berlaku buat sebuah periode = baris dengan `periodStart` paling akhir ≤ awal periode itu. Periode tanpa baris sendiri ngelanjutin baris terakhir; ngubah nilai nulis baris periode yang lagi jalan, jadi periode lama nggak pernah berubah. Baca nggak pernah nulis. `periodRules` kosong = bulan kalender (v1).
 
 ```
 profile
@@ -93,7 +93,7 @@ profile
   openingBalance  int               -- saldo saat atur awal (rupiah)
   openingAt       datetime          -- sejak kapan transaksi dihitung ke saldo
   payday          int               -- 1–31, 31 = akhir; lewat panjang bulan = hari terakhir
-  hideAmounts     int               -- HideAmounts: 0 none · 1 income · 2 all (02.4h)
+  hideAmounts     int               -- HideAmounts: 0 none · 1 income · 2 all (05.1h)
   onboardedAt     datetime?
 
 categories
@@ -135,7 +135,7 @@ periodRules                         -- append-only, v1 kosong (kalender)
 
 ### Turunan (query `watch()`, bukan kolom)
 
-> **Diganti (2026-10-03, logic udah, desain final nyusul):** saldo kumulatif, `openingBalance` / `openingAt`, dan sisi saldo di aman jajan dibuang. Angka jadi murni per periode gajian: sisa budget di hero, sisa pemasukan di statistik. Lihat [PERIOD_LEDGER_PLAN.md](PERIOD_LEDGER_PLAN.md).
+> **Diganti (2026-10-03, logic udah, desain final nyusul):** saldo kumulatif, `openingBalance` / `openingAt`, dan sisi saldo di aman jajan dibuang. Angka jadi murni per periode gajian: sisa budget di hero, sisa pemasukan di statistik. Lihat [period-ledger.md](period-ledger.md).
 
 - **Saldo** = `openingBalance` + Σ`amount` transaksi dengan `at ≥ openingAt` dan `deletedAt` null.
 - **Kepake** (sisa budget, kantong, statistik) = semua pengeluaran di periode itu yang `deletedAt`-nya null, **nggak peduli** `openingAt`. Pengeluaran bertanggal sebelum saldo awal diisi (mis. kos tgl 25 yang dicatat belakangan) tetap ngurangin budget, tapi nggak ngubah saldo karena saldo awal udah termasuk itu.
@@ -162,7 +162,7 @@ Id nggak perlu diubah.
 
 ### Aman jajan hari ini
 
-> **Diganti (2026-10-03, logic udah, desain final nyusul):** saldo kumulatif, `openingBalance` / `openingAt`, dan sisi saldo di aman jajan dibuang. Angka jadi murni per periode gajian: sisa budget di hero, sisa pemasukan di statistik. Lihat [PERIOD_LEDGER_PLAN.md](PERIOD_LEDGER_PLAN.md).
+> **Diganti (2026-10-03, logic udah, desain final nyusul):** saldo kumulatif, `openingBalance` / `openingAt`, dan sisi saldo di aman jajan dibuang. Angka jadi murni per periode gajian: sisa budget di hero, sisa pemasukan di statistik. Lihat [period-ledger.md](period-ledger.md).
 
 ```
 gajian   = tanggal gajian terdekat berikutnya
@@ -174,7 +174,7 @@ aman = floor((saldo + pengeluaranHariIni) / hariSisa) − pengeluaranHariIni
 ```
 
 - **Versi ketat (ada budget):** `aman = min(rumus saldo di atas, rumus budget)`, rumus budget = `floor((sisaBudget + pengeluaranHariIni) / hariSisaPeriode) − pengeluaranHariIni` dengan `sisaBudget = budget − kepake periode ini` (`hariSisaPeriode` = hari sampai akhir periode, hari ini ikut). Jadi chip nggak ngajak lewat budget yang user pasang sendiri. Tanpa budget: rumus saldo aja. Contoh fixture 14 okt: saldo ÷ 9 = Rp479K, budget (Rp8jt − Rp4,059jt) ÷ 18 = Rp193K → chip Rp193K.
-- Dua angka "sisa" yang sengaja beda: **sisa jajan** (02.2) = Σ limit − kepake kantong, **sisa budget** (02.1) = budget − semua pengeluaran. Di 02.1 dan 02.2 ada "?" yang ngejelasin ini dengan angka user (`safeShare` jadi satu sumber hitungan chip dan dialog); 02.2 nunjukin "!" kalau sisa jajan > sisa budget.
+- Dua angka "sisa" yang sengaja beda: **sisa jajan** (03.1) = Σ limit − kepake kantong, **sisa budget** (02.1) = budget − semua pengeluaran. Di 02.1 dan 03.1 ada "?" yang ngejelasin ini dengan angka user (`safeShare` jadi satu sumber hitungan chip dan dialog); 03.1 nunjukin "!" kalau sisa jajan > sisa budget.
 - Budget kelewat (`sisaBudget < 0`) → chip jadi "rem dulu ya · N hari lagi" (outline), bukan aman jajan.
 - Gaji (kategori `gajian`) yang dicatat ≤ 3 hari sebelum gajian dianggap gajian itu udah masuk: hariSisa dihitung sampai gajian berikutnya lagi (`paydayInfo`, `paydayEarlyDays`).
 - Hari gajian, gaji belum dicatat → status "hari ini"; lewat gajian dan pernah nyatet gaji → "telat N hari" (maks 7). Di dua state ini hariSisa = 0, jadi beranda ganti chip aman jajan dengan ajakan catat gajian (02.1p o–q), nggak ada pembagian nol.
@@ -188,18 +188,18 @@ aman = floor((saldo + pengeluaranHariIni) / hariSisa) − pengeluaranHariIni
 
 Satu konsep aja: **buat apa** (= baris `categories`). Kantong bukan benda sendiri.
 
-- Pas catat user cuma milih "buat apa?" (03.2). Boleh dilewati: transaksi tanpa kategori tetap sah, kehitung di total kepake/budget, nggak masuk kantong mana pun. Benerinnya lewat 04.4.
+- Pas catat user cuma milih "buat apa?" (06.2). Boleh dilewati: transaksi tanpa kategori tetap sah, kehitung di total kepake/budget, nggak masuk kantong mana pun. Benerinnya lewat 08.3.
 - **Limit bulanan** = atribut opsional (`monthlyLimit`), cuma buat pengeluaran. Yang pakai limit jadi toples di tab "kantong".
 - "kantong" cuma nama tab + visual toples. Copy pakai "limit": `pasang limit` · `atur limit` · `copot limit`. Sisa per buat apa = "jatah X".
-- `+ pasang limit` (02.2) nggak bikin kategori baru: pilih buat apa yang belum pakai limit, urut paling kepake bulan ini → PocketLimit → simpan. Catatan bulan ini langsung keitung karena kepake dihitung dari transaksi. `bikin kategori baru` ada di bawah sheet.
+- `+ pasang limit` (03.1) nggak bikin kategori baru: pilih buat apa yang belum pakai limit, urut paling kepake bulan ini → PocketLimit → simpan. Catatan bulan ini langsung keitung karena kepake dihitung dari transaksi. `bikin kategori baru` ada di bawah sheet.
 - Default limit di sheet = maks(Rp300K, ceil(kepake bulan ini × 1,4 ÷ 100K) × 100K).
-- `copot limit` = sheet konfirmasi (LimitOffSheet) dulu, lalu baris `limits` periode ini `amount` null, langsung kesimpan + toast `batalin`. Buat apa + catatannya utuh. Beda dari hapus (03.6).
-- Gabungin duplikat = 03.6 hapus + pindahin catatan. Nggak ada fitur gabung terpisah.
-- Buat apa baru dari 03.2 / 03.3 default tanpa limit; dari 02.2 selalu pakai limit.
+- `copot limit` = sheet konfirmasi (LimitOffSheet) dulu, lalu baris `limits` periode ini `amount` null, langsung kesimpan + toast `batalin`. Buat apa + catatannya utuh. Beda dari hapus (07.4).
+- Gabungin duplikat = 07.4 hapus + pindahin catatan. Nggak ada fitur gabung terpisah.
+- Buat apa baru dari 06.2 / 07.1 default tanpa limit; dari 03.1 selalu pakai limit.
 
 ### Budget & kantong
 
-> **Periode = dari satu gajian ke gajian berikutnya**, dan itu satu-satunya periode di seluruh app: budget, limit, kantong, sisa budget, aman jajan, statistik "bulan", 04.1, cari, menu bulan, dan titik grafik saldo. Gajian tgl 1 = sama dengan bulan kalender. Detail dan alasan di [PAYDAY_CYCLE_PLAN.md](PAYDAY_CYCLE_PLAN.md).
+> **Periode = dari satu gajian ke gajian berikutnya**, dan itu satu-satunya periode di seluruh app: budget, limit, kantong, sisa budget, aman jajan, statistik "bulan", 09.1, cari, menu bulan, dan titik grafik saldo. Gajian tgl 1 = sama dengan bulan kalender. Detail dan alasan di [payday-cycle.md](payday-cycle.md).
 >
 > - **Nama periode** = bulan yang paling banyak harinya: gajian tgl ≥ 16 → bulan tempat periode berakhir ("oktober" = 25 sep – 24 okt), gajian ≤ 15 → bulan mulai. Selalu satu nama per bulan, berurutan. UI tetap milih "bulan"; label itu dipetakan ke periodenya (`periodForMonth`).
 > - **Gaji cair duluan:** pemasukan gajian yang dicatat ≤ 3 hari sebelum jadwal memulai periode baru di tanggal itu. Gaji telat nggak memperpanjang periode.
@@ -207,10 +207,10 @@ Satu konsep aja: **buat apa** (= baris `categories`). Kantong bukan benda sendir
 > - Sebelum ada aturan periode (data contoh `seedFixture`) periode = bulan kalender.
 
 - Budget bulanan = baris `budgets` yang berlaku (di kode: `Profile.monthlyBudget`), diisi user, bukan turunan. Boleh beda dari Σ `monthlyLimit`. **[diupdate]**
-  - Diisi lewat BudgetSheet 00.16 **[perlu design]**, dibuka dari PocketLimit 00.15 + hero 02.2 (M3), kartu 02.4 + ritme budget 02.3 (M6).
+  - Diisi lewat BudgetSheet 00.16 **[perlu design]**, dibuka dari PocketLimit 00.15 + hero 03.1 (M3), kartu 05.1 + ritme budget 04.1 (M6).
   - Kosong → prefill Σ limit kantong dibulatin ke atas per Rp500K. `hapus budget` = balik ke null. Maks 12 digit.
   - Atur awal 01.4 nggak nanya budget; default null.
-- Sisa jajan (02.2) = Σ limit − Σ kepake semua kantong bulan ini.
+- Sisa jajan (03.1) = Σ limit − Σ kepake semua kantong bulan ini.
 - Persen kepake = round(kepake ÷ limit × 100).
 - Status kantong:
   - `lewat limit` kalau persen kepake > 100% (100% pas tetap `hampir abis`)
@@ -219,7 +219,7 @@ Satu konsep aja: **buat apa** (= baris `categories`). Kantong bukan benda sendir
   - selain itu `aman`
 - "kira-kira Rp… sehari" = sisa ÷ sisa hari di bulan ini.
 
-### Limit kantong (PocketLimit 00.15, di 02.2 sheet / 03.4 / 03.5)
+### Limit kantong (PocketLimit 00.15, di 03.1 sheet / 07.2 / 07.3)
 
 ```
 free = budget − Σ limit kantong lain   (pas edit, kantong ini nggak ikut)
@@ -262,12 +262,12 @@ tahun:           kepake > limit → lewat budget
 
 ### Sembunyiin nominal
 
-`profile.hideAmounts` = `none` · `income` · `all` (02.4h–i, detail di [HIDE_INCOME_PLAN.md](HIDE_INCOME_PLAN.md)). Pengaturan 02.4 → sheet 3 pilihan + contoh live, simpan → toast + batalin.
+`profile.hideAmounts` = `none` · `income` · `all` (05.1h–i, detail di [hide-income.md](hide-income.md)). Pengaturan 05.1 → sheet 3 pilihan + contoh live, simpan → toast + batalin.
 
 - `all`: semua nominal `Rp•••` (hero, kantong, TxRow, struk, budget, statistik).
-- `income` (pemasukan aja): pemasukan + yang bisa dipake ngitung gaji: TxRow / struk pemasukan, total hari yang ada pemasukan, kartu 04.1 (sisa pemasukan, pemasukan, selisihnya), ringkasan 04.2 kalau hasilnya ada pemasukan, bar "pemasukan periode ini jadi" di 03.1. Beranda, kantong, statistik, budget tetap keliatan.
+- `income` (pemasukan aja): pemasukan + yang bisa dipake ngitung gaji: TxRow / struk pemasukan, total hari yang ada pemasukan, kartu 09.1 (sisa pemasukan, pemasukan, selisihnya), ringkasan 08.1 kalau hasilnya ada pemasukan, bar "pemasukan periode ini jadi" di 06.1. Beranda, kantong, statistik, budget tetap keliatan.
 - Kode: `context.rp*(v, income: true)` buat angka sisi pemasukan.
-- Intip: tap angka utama (hero, struk) atau chip "intip 5 detik" di 04.1. Ketutup lagi abis 5 detik, tap lagi, atau pindah layar.
+- Intip: tap angka utama (hero, struk) atau chip "intip 5 detik" di 09.1. Ketutup lagi abis 5 detik, tap lagi, atau pindah layar.
 
 Input (keypad) dan ekspor CSV nggak di-mask.
 
@@ -286,7 +286,7 @@ Input (keypad) dan ekspor CSV nggak di-mask.
 
 ## Import CSV
 
-Balikin file ekspor mibu sendiri (02.4l–o, ImportSheet 00.30). Aturan dobel, buat apa baru, batalin: [IMPORT_PLAN.md](IMPORT_PLAN.md). Dependency baru: `file_picker`.
+Balikin file ekspor mibu sendiri (05.1l–o, ImportSheet 00.30). Aturan dobel, buat apa baru, batalin: [import.md](import.md). Dependency baru: `file_picker`.
 
 ## Arsitektur
 
@@ -302,11 +302,11 @@ Balikin file ekspor mibu sendiri (02.4l–o, ImportSheet 00.30). Aturan dobel, b
 | # | Isi | Selesai kalau |
 |---|---|---|
 | M1 | rombak skema + repository + query turunan + test | beranda 02.1 baca dari skema baru |
-| M2 | catat 03.1, pilih kategori 03.2, DayStrip, DateSheet, NoteSheet | catat → beranda langsung update. Inti app, udah bisa dipakai sendiri |
-| M3 | kantong 02.2 (tanpa isi ulang & impian) + atur / baru / edit / hapus kategori 03.3–03.6 + PocketLimit 00.15 + kolom `monthlyBudget` + BudgetSheet 00.16 (nunggu design) | kantong dan kategori bisa diatur penuh |
-| M4 | semua transaksi 04.1, struk 04.3 + hapus & undo, edit 04.4 | catatan bisa dilihat, diubah, dihapus |
+| M2 | catat 06.1, pilih kategori 06.2, DayStrip, DateSheet, NoteSheet | catat → beranda langsung update. Inti app, udah bisa dipakai sendiri |
+| M3 | kantong 03.1 (tanpa isi ulang & impian) + atur / baru / edit / hapus kategori 07.1–07.4 + PocketLimit 00.15 + kolom `monthlyBudget` + BudgetSheet 00.16 (nunggu design) | kantong dan kategori bisa diatur penuh |
+| M4 | semua transaksi 09.1, struk 08.2 + hapus & undo, edit 08.3 | catatan bisa dilihat, diubah, dihapus |
 | M5 | go_router + first-run (01.1 → 01.4 → 01.4b) | instal baru langsung jalan tanpa seed |
-| M6 | statistik 02.3 (ritme budget pakai `monthlyBudget`), pengaturan 02.4 (kartu budget → 00.16), cari 04.2, ekspor CSV | **MVP selesai** |
+| M6 | statistik 04.1 (ritme budget pakai `monthlyBudget`), pengaturan 05.1 (kartu budget → 00.16), cari 08.1, ekspor CSV | **MVP selesai** |
 
 ## Risiko
 
@@ -315,4 +315,4 @@ Balikin file ekspor mibu sendiri (02.4l–o, ImportSheet 00.30). Aturan dobel, b
 
 ## Pasca-MVP
 
-Login + sync backend, backup & pulihin, pengingat harian, face id, transaksi berulang, impian, patungan, foto struk, dark mode, SearchSummary interaktif.
+Login + sync backend (#12), backup & pulihin (#13, pengingat export #11), pengingat harian (#10), face id / kunci app (#3), transaksi berulang (#14), impian (#18), isi ulang (#19), patungan (#17), foto struk (#16), dark mode (#15), SearchSummary interaktif. Catat hari berikutnya: #9. Tag: #4, #5. Kebutuhan vs keinginan: #8.

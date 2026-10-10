@@ -115,7 +115,7 @@ void main() {
     tiles(r);
 
     // Payday day changed later: the sliver to the new anchor would also be
-    // "november", so it joins the running cycle (docs/PAYDAY_CHANGE_PLAN.md).
+    // "november", so it joins the running cycle (docs/payday-change.md).
     final changed = SegmentedResolver([
       (
         effectiveFrom: DateTime(2020),

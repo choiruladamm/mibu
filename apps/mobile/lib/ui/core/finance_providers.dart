@@ -81,7 +81,7 @@ final paydayShiftProvider = Provider<PaydayShift>(
 );
 
 /// The month label of the budget period now falls in ("oktober" while it's
-/// 25 sep – 24 okt): what the beranda, 04.1 and the menus start on.
+/// 25 sep – 24 okt): what the beranda, 09.1 and the menus start on.
 final currentMonthProvider = Provider<DateTime>(
   (ref) => ref.watch(currentPeriodProvider).key,
 );
@@ -116,7 +116,7 @@ final pocketsProvider = StreamProvider<List<Pocket>>(
       .watchPockets(ref.watch(currentPeriodProvider)),
 );
 
-/// 02.4 sembunyiin nominal: tap a hero amount or "intip 5 detik" (04.1g) to
+/// 05.1 sembunyiin nominal: tap a hero amount or "intip 5 detik" (09.1g) to
 /// peek; it closes after 5s, on another tap, or when routing resets it.
 class Peek extends Notifier<bool> {
   static const window = Duration(seconds: 5);

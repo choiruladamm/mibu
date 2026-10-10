@@ -1,6 +1,6 @@
 # mibu — impor data
 
-**Udah dieksekusi 3 okt 2026** (02.4l–o, ImportSheet 00.30). Masuk [MVP_PLAN.md](MVP_PLAN.md#import-csv).
+**Udah dieksekusi 3 okt 2026** (05.1l–o, ImportSheet 00.30). Masuk [mvp.md](mvp.md#import-csv).
 
 ## Prinsip
 
@@ -10,10 +10,10 @@ User mibu itu casual. Impor harus **satu tap, nol keputusan**. Yang bisa ditebak
 
 | opsi | effort | catatan |
 |---|---|---|
-| **A. CSV mibu sendiri** (round-trip ekspor) | kecil | format udah fix ([MVP_PLAN › Ekspor CSV](MVP_PLAN.md#ekspor-csv)), parser = kebalikan `transactionsCsv` |
+| **A. CSV mibu sendiri** (round-trip ekspor) | kecil | format udah fix ([mvp.md › Ekspor CSV](mvp.md#ekspor-csv)), parser = kebalikan `transactionsCsv` |
 | B. CSV app lain (Money Lover, Spendee, Wallet) | sedang | tiap app beda kolom, perlu mapping kolom / preset per app |
 | C. mutasi bank (BCA/Mandiri PDF/CSV) | besar | format berantakan, kategori harus ditebak dari deskripsi. skip |
-| D. backup penuh (JSON semua tabel) | sedang | ikut budget, limit, period rules, profile. ini fitur "backup & pulihin" yang ditunda |
+| D. backup penuh (JSON semua tabel, #13) | sedang | ikut budget, limit, period rules, profile. ini fitur "backup & pulihin" yang ditunda |
 
 **Pilih A dulu.**
 
@@ -23,7 +23,7 @@ User mibu itu casual. Impor harus **satu tap, nol keputusan**. Yang bisa ditebak
 
 ## Flow
 
-`pengaturan 02.4 → impor dari csv → pilih file → sheet ringkasan → impor → toast "142 masuk" + batalin`
+`pengaturan 05.1 → impor dari csv → pilih file → sheet ringkasan → impor → toast "142 masuk" + batalin`
 
 1. Tile `impor dari csv` di bawah `ekspor ke csv`.
 2. File picker → parse.
@@ -66,7 +66,7 @@ Fungsi murni `parseTransactionsCsv` di `domain/csv.dart`.
 ## Yang nggak ikut
 
 - Budget, limit, period rules, profile. CSV cuma transaksi.
-- Saldo tetap dihitung dari transaksi ([PERIOD_LEDGER_PLAN.md](PERIOD_LEDGER_PLAN.md)), jadi pemasukan yang diimpor otomatis kebaca di periodenya.
+- Saldo tetap dihitung dari transaksi ([period-ledger.md](period-ledger.md)), jadi pemasukan yang diimpor otomatis kebaca di periodenya.
 
 ## Undo
 
@@ -76,12 +76,12 @@ Simpen ID transaksi + kategori baru di memori. `batalin` = soft delete ID itu. P
 
 - `domain/csv.dart`: `parseTransactionsCsv` (null = header beda) + `planImport` (dobel, buat apa baru).
 - Repo: `importCsv(plan)` → ID yang ditulis; `undoImport` = soft delete.
-- UI: `settings/views/import_sheet.dart` (`importCsv`, ImportSheet 00.30), baris di 02.4.
+- UI: `settings/views/import_sheet.dart` (`importCsv`, ImportSheet 00.30), baris di 05.1.
 - Dep: `file_picker` (`FilePicker.pickFile`, filter `.csv`).
 
 ## Design brief: 99.7 import dari csv
 
-Draft di artifact "mibu", baris 99 proposal: 99.7a alur, 99.7b–d state sheet, 99.7e `ImportSheet` (calon komponen 00.30). Copy ngikut app: "import dari csv" (pasangan "export ke csv"). Kalau acc: pindah ke baris 02.4 (02.4l–o), hapus [DRAFT]. Gaya sheet 02.4h (sembunyiin nominal). Pakai komponen yang ada: `SheetFrame`, `PrimaryButton`, `AppEmoji`, `MetaLine` 00.19, toast 00.18. Tile `impor dari csv` di section data, di bawah ekspor (ikon upload). Copy di bawah cuma draft.
+Draft di artifact "mibu", baris 99 proposal: 99.7a alur, 99.7b–d state sheet, 99.7e `ImportSheet` (calon komponen 00.30). Copy ngikut app: "import dari csv" (pasangan "export ke csv"). Kalau acc: pindah ke baris 05.1 (05.1l–o), hapus [DRAFT]. Gaya sheet 05.1h (sembunyiin nominal). Pakai komponen yang ada: `SheetFrame`, `PrimaryButton`, `AppEmoji`, `MetaLine` 00.19, toast 00.18. Tile `impor dari csv` di section data, di bawah ekspor (ikon upload). Copy di bawah cuma draft.
 
 | state | isi | tombol |
 |---|---|---|

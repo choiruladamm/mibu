@@ -52,7 +52,7 @@ class AddEntryState {
   );
 }
 
-/// 03.1 catat.
+/// 06.1 catat.
 class AddEntry extends Notifier<AddEntryState> {
   @override
   AddEntryState build() => AddEntryState(

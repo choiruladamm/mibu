@@ -74,7 +74,7 @@ void main() {
     return db;
   }
 
-  testWidgets('02.4: budget hero, group rows, version; no deferred rows', (
+  testWidgets('05.1: budget hero, group rows, version; no deferred rows', (
     tester,
   ) async {
     await pump(tester);
@@ -122,7 +122,7 @@ void main() {
     }
   });
 
-  testWidgets('02.4h–i: sembunyiin nominal sheet, 3 modes, simpan + batalin', (
+  testWidgets('05.1h–i: sembunyiin nominal sheet, 3 modes, simpan + batalin', (
     tester,
   ) async {
     final db = await pump(tester);
@@ -171,7 +171,7 @@ void main() {
     expect(find.text('Rp•••'), findsOneWidget);
   });
 
-  testWidgets('02.4e–g tanggal gajian: row, sheet, simpan + batalin', (
+  testWidgets('05.1e–g tanggal gajian: row, sheet, simpan + batalin', (
     tester,
   ) async {
     final db = await pump(tester);
@@ -340,7 +340,7 @@ void main() {
     await db.close();
   });
 
-  testWidgets('tanggal gajian: weekend tetap tanggalnya (02.4j–k)', (
+  testWidgets('tanggal gajian: weekend tetap tanggalnya (05.1j–k)', (
     tester,
   ) async {
     final db = await pump(tester);

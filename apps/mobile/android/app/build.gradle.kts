@@ -1,7 +1,16 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+}
+
+// key.properties (gitignored) = release keystore. Tanpa itu release jatuh ke
+// debug key, sama seperti build yang sekarang ter-install di HP (jangan ganti
+// signature sembarangan: update-install gagal, data hilang).
+val keyProps = Properties().apply {
+    rootProject.file("key.properties").takeIf { it.exists() }?.inputStream()?.use { load(it) }
 }
 
 android {
@@ -29,11 +38,38 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        if (keyProps.isNotEmpty()) {
+            create("release") {
+                storeFile = file(keyProps.getProperty("storeFile"))
+                storePassword = keyProps.getProperty("storePassword")
+                keyAlias = keyProps.getProperty("keyAlias")
+                keyPassword = keyProps.getProperty("keyPassword")
+            }
+        }
+    }
+
+    buildFeatures {
+        resValues = true
+    }
+
+    // Dua app: mibu (prod, data asli) dan mibu dev (id, data & ikon terpisah).
+    flavorDimensions += "env"
+    productFlavors {
+        create("prod") {
+            dimension = "env"
+            resValue("string", "app_name", "mibu")
+        }
+        create("dev") {
+            dimension = "env"
+            applicationIdSuffix = ".dev"
+            resValue("string", "app_name", "mibu dev")
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
     }
 }

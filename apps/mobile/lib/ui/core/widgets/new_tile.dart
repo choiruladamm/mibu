@@ -4,7 +4,7 @@ import 'package:hugeicons/hugeicons.dart';
 import '../dashed.dart';
 import '../tokens.dart';
 
-/// Dashed "+" disc closing a category grid (03.2, 03.3): "baru" / "bikin “x”".
+/// Dashed "+" disc closing a category grid (06.2, 07.1): "baru" / "bikin “x”".
 class NewCategoryTile extends StatelessWidget {
   const NewCategoryTile({super.key, required this.label, required this.onTap});
 

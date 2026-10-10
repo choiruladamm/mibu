@@ -9,7 +9,7 @@ import '../database/app_database.dart';
 
 /// Balance-related sums; everything derived from `transactions`.
 /// Per budget period, keyed by its month label. No saldo: nothing carries
-/// over between periods (docs/PERIOD_LEDGER_PLAN.md).
+/// over between periods (docs/period-ledger.md).
 class Totals {
   const Totals({
     required this.income,
@@ -29,7 +29,7 @@ class Totals {
 }
 
 /// An expense category without a limit, with this month's spending and
-/// entry count ("belum ada limit" + "pasang limit ke…" in 02.2).
+/// entry count ("belum ada limit" + "pasang limit ke…" in 03.1).
 typedef FreeCategory = ({Category category, int spent, int count});
 
 const _uuid = Uuid();
@@ -384,7 +384,7 @@ class FinanceRepository {
     );
   }
 
-  /// "belum ada limit" (02.2): expense categories without a limit plus their
+  /// "belum ada limit" (03.1): expense categories without a limit plus their
   /// spending and entry count in [period], most spent (then most used)
   /// first. Income never shows up here.
   Stream<List<FreeCategory>> watchFreeCategories(Period period) {
@@ -458,13 +458,13 @@ class FinanceRepository {
     _tx.deletedAt.isNull(),
   )..limit(limit)).watch().map((rows) => rows.map(_transaction).toList());
 
-  /// 04.1 / 04.2: every entry in [period].
+  /// 09.1 / 08.1: every entry in [period].
   Stream<List<Transaction>> watchPeriod(Period period) =>
       _joined(_tx.deletedAt.isNull() & _inPeriod(period))
           .watch()
           .map((rows) => rows.map(_transaction).toList());
 
-  /// 04.2 cari di semua bulan: every live entry, newest first.
+  /// 08.1 cari di semua bulan: every live entry, newest first.
   Stream<List<Transaction>> watchAll() =>
       _joined(_tx.deletedAt.isNull())
           .watch()
@@ -474,13 +474,13 @@ class FinanceRepository {
   Future<List<Transaction>> allTransactions() async =>
       (await _joined(_tx.deletedAt.isNull()).get()).map(_transaction).toList();
 
-  /// 04.3: one entry, soft-deleted included (stamped "dihapus" + batalin).
+  /// 08.2: one entry, soft-deleted included (stamped "dihapus" + batalin).
   Stream<Transaction?> watchTransaction(String id) =>
       _joined(_tx.id.equals(id))
           .watchSingleOrNull()
           .map((r) => r == null ? null : _transaction(r));
 
-  /// First month with an entry (04.1 carousel start); null = none yet.
+  /// First month with an entry (09.1 carousel start); null = none yet.
   Stream<DateTime?> watchFirstMonth({
     PeriodResolver periods = const CalendarMonthResolver(),
   }) {
@@ -554,7 +554,7 @@ class FinanceRepository {
     return q.watch().map((rows) => [for (final r in rows) r.read(_tx.at)!]);
   }
 
-  /// Latest distinct category + place combos ("terakhir" in 03.2).
+  /// Latest distinct category + place combos ("terakhir" in 06.2).
   Stream<List<RecentPick>> watchRecentPicks(Period period, {int limit = 6}) {
     final c = _db.categories;
     final last = _tx.at.max();
@@ -641,7 +641,7 @@ class FinanceRepository {
         ),
       );
 
-  /// 04.4: kind stays; [amount] is signed. [tags] null = keep.
+  /// 08.3: kind stays; [amount] is signed. [tags] null = keep.
   Future<void> updateTransaction(
     String id, {
     required int amount,
@@ -662,7 +662,7 @@ class FinanceRepository {
     ),
   );
 
-  /// 04.3b soft delete; [restoreTransaction] is its batalin.
+  /// 08.2b soft delete; [restoreTransaction] is its batalin.
   Future<void> deleteTransaction(String id) => _setDeleted(id, DateTime.now());
 
   Future<void> restoreTransaction(String id) => _setDeleted(id, null);
@@ -675,7 +675,7 @@ class FinanceRepository {
         ),
       );
 
-  /// 02.4l import dari csv: makes [plan]'s new buat apa (no limit, at the
+  /// 05.1l import dari csv: makes [plan]'s new buat apa (no limit, at the
   /// end of the list), then adds its entries, in one go. Returns what it
   /// wrote, for [undoImport].
   Future<({List<String> txIds, List<String> categoryIds})> importCsv(
@@ -769,7 +769,7 @@ class FinanceRepository {
         .map((r) => r?.amount);
   }
 
-  /// 02.4 tanggal gajian (00.24): 1–31, 31 = akhir. Periods already lived
+  /// 05.1 tanggal gajian (00.24): 1–31, 31 = akhir. Periods already lived
   /// stay as they were: the new day starts with the next period. Right after
   /// 01.4 (still in the first period, or no payday rule yet) it applies at
   /// once, so a wrong pick at setup is a one-tap fix. Returns the date it
@@ -839,7 +839,7 @@ class FinanceRepository {
     return from;
   });
 
-  /// 02.2l kenalan kantong: "oke" retires the card for good.
+  /// 03.1l kenalan kantong: "oke" retires the card for good.
   Future<void> markPocketsIntroSeen() =>
       (_db.update(_db.profiles)..where((p) => p.deletedAt.isNull())).write(
         ProfilesCompanion(
@@ -848,7 +848,7 @@ class FinanceRepository {
         ),
       );
 
-  /// 02.4 sembunyiin nominal.
+  /// 05.1 sembunyiin nominal.
   Future<void> setHideAmounts(HideAmounts hide) =>
       (_db.update(_db.profiles)..where((p) => p.deletedAt.isNull())).write(
         ProfilesCompanion(
@@ -857,7 +857,7 @@ class FinanceRepository {
         ),
       );
 
-  /// 04.2b terakhir dicari.
+  /// 08.1b terakhir dicari.
   Future<void> setRecentSearches(List<String> recent) =>
       (_db.update(_db.profiles)..where((p) => p.deletedAt.isNull())).write(
         ProfilesCompanion(
@@ -884,7 +884,7 @@ class FinanceRepository {
   }
 
   /// Per category: entries (all time) and expense this year, positive.
-  /// "12 catatan · Rp840K tahun ini" in 03.3 / 03.5 / 03.6.
+  /// "12 catatan · Rp840K tahun ini" in 07.1 / 07.3 / 07.4.
   Stream<Map<String, ({int count, int spentThisYear})>> watchCategoryUsage(
     DateTime now,
   ) {
@@ -960,7 +960,7 @@ class FinanceRepository {
     }
   });
 
-  /// Pasang / atur / copot limit (02.2, 03.5) from [period] on; null =
+  /// Pasang / atur / copot limit (03.1, 07.3) from [period] on; null =
   /// copot. Income categories are left alone.
   Future<void> setLimit(String id, int? limit, Period period) async {
     final c = await (_db.select(
@@ -974,7 +974,7 @@ class FinanceRepository {
   static int? _limitFor(CategoryKind kind, int? limit) =>
       kind == CategoryKind.income ? null : limit;
 
-  /// 03.3 "tahan & geser": [ids] in their new order.
+  /// 07.1 "tahan & geser": [ids] in their new order.
   Future<void> reorderCategories(List<String> ids) => _db.batch((b) {
     final now = DateTime.now();
     for (final (i, id) in ids.indexed) {
@@ -986,7 +986,7 @@ class FinanceRepository {
     }
   });
 
-  /// 03.6: moves the category's entries to [moveTo] (null = tanpa kategori),
+  /// 07.4: moves the category's entries to [moveTo] (null = tanpa kategori),
   /// then soft-deletes it. Returns the moved entry ids for [undoDeleteCategory].
   Future<List<String>> deleteCategory(String id, {required String? moveTo}) =>
       _db.transaction(() async {
@@ -1006,7 +1006,7 @@ class FinanceRepository {
         return [for (final t in moved) t.id];
       });
 
-  /// "batalin" on 03.6: restores the category and moves [txIds] back.
+  /// "batalin" on 07.4: restores the category and moves [txIds] back.
   Future<void> undoDeleteCategory(String id, List<String> txIds) =>
       _db.transaction(() async {
         final now = DateTime.now();

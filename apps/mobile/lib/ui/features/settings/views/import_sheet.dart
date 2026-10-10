@@ -18,8 +18,8 @@ import '../../../core/widgets/toast.dart';
 
 final _day = DateFormat('d MMM y', 'id');
 
-/// 02.4l import dari csv: pick a file → ImportSheet 00.30 (ringkasan 02.4m,
-/// semua udah ada 02.4n, bukan dari mibu 02.4o) → import → toast + batalin.
+/// 05.1l import dari csv: pick a file → ImportSheet 00.30 (ringkasan 05.1m,
+/// semua udah ada 05.1n, bukan dari mibu 05.1o) → import → toast + batalin.
 Future<void> importCsv(BuildContext context, WidgetRef ref) async {
   final repo = ref.read(financeRepositoryProvider);
   while (true) {
@@ -77,8 +77,8 @@ String _range(List<CsvEntry> entries) {
   return '${_day.format(days.first)} – ${_day.format(days.last)}'.toLowerCase();
 }
 
-/// ImportSheet 00.30. [plan] null = not a mibu export (02.4o); no entries
-/// left = all [total] are in mibu already (02.4n); else ringkasan (02.4m).
+/// ImportSheet 00.30. [plan] null = not a mibu export (05.1o); no entries
+/// left = all [total] are in mibu already (05.1n); else ringkasan (05.1m).
 class _ImportSheet extends StatelessWidget {
   const _ImportSheet({
     required this.fileName,
@@ -232,7 +232,7 @@ class _ImportSheet extends StatelessWidget {
   }
 }
 
-/// 02.4n / 02.4o: mist disc + title + sub, one button popping [result].
+/// 05.1n / 05.1o: mist disc + title + sub, one button popping [result].
 class _Message extends StatelessWidget {
   const _Message({
     required this.fileName,

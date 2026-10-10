@@ -20,7 +20,7 @@ import '../../../core/widgets/icon_sheet.dart';
 import '../../../core/widgets/toast.dart';
 import '../../../core/finance_providers.dart';
 
-/// 03.3 buat apa aja — from 03.2 "atur" and 02.4. Its own messenger, so
+/// 07.1 buat apa aja — from 06.2 "atur" and 05.1. Its own messenger, so
 /// "ikon diganti" floats over the sheet instead of behind it.
 Future<void> showCategoryManage(BuildContext context) => showAppSheet(
   context,
@@ -47,7 +47,7 @@ class CategoryManageSheet extends ConsumerStatefulWidget {
 
 class _CategoryManageSheetState extends ConsumerState<CategoryManageSheet>
     with SingleTickerProviderStateMixin {
-  // Mode hapus (03.3d): tiles wiggle ±2°, out of phase by column. Only runs
+  // Mode hapus (07.1d): tiles wiggle ±2°, out of phase by column. Only runs
   // while deleting, so normal mode has no endless animation.
   late final _wiggle = AnimationController(
     vsync: this,
@@ -315,8 +315,8 @@ class _DoneButton extends StatelessWidget {
 }
 
 /// Tahan & geser: long-press picks a tile up; hovering another moves it
-/// there; dropping saves the order. Tap ikon = IconSheet, tap nama = 03.5.
-/// In mode hapus ([del]) tiles wiggle, can't be dragged, and tap − = 03.6;
+/// there; dropping saves the order. Tap ikon = IconSheet, tap nama = 07.3.
+/// In mode hapus ([del]) tiles wiggle, can't be dragged, and tap − = 07.4;
 /// gajian is locked there.
 class _DraggableTile extends StatelessWidget {
   const _DraggableTile({

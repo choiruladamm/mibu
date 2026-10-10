@@ -32,7 +32,7 @@ void main() {
     db.transactions,
   )..where((t) => t.place.equals('petshop'))).getSingle();
 
-  testWidgets('04.3: struk, pocket impact, hapus → dihapus → batalin', (
+  testWidgets('08.2: struk, pocket impact, hapus → dihapus → batalin', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(390, 844);

@@ -46,7 +46,7 @@ const _byEmoji = <String, List<String>>{
   '💻': ['klien', 'upwork'],
 };
 
-/// Examples for the "di mana" hint (03.2 / 04.4): the user's own latest
+/// Examples for the "di mana" hint (06.2 / 08.3): the user's own latest
 /// places for this category first, then the icon's defaults; null = generic.
 List<String>? placeExamples(String? emoji, Iterable<String> recent) {
   final own = recent.toSet().take(2).toList();

@@ -5,7 +5,7 @@ import '../../../l10n/app_localizations.dart';
 import '../tokens.dart';
 
 enum KeypadVariant {
-  entry, // 03.1: "+" adds another amount
+  entry, // 06.1: "+" adds another amount
   budget, // 00.16: "00" instead of "+"
 }
 

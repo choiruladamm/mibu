@@ -23,7 +23,7 @@ import '../../../core/finance_providers.dart';
 final _dots = NumberFormat('#,##0', 'id_ID');
 final _headerDay = DateFormat('EEE d MMM', 'id');
 
-/// 04.4 edit catatan. Kind stays; tags are kept (no field for them here).
+/// 08.3 edit catatan. Kind stays; tags are kept (no field for them here).
 class EditEntryView extends ConsumerWidget {
   const EditEntryView({super.key, required this.id});
 
@@ -128,7 +128,7 @@ class _EditFormState extends ConsumerState<_EditForm> {
 
   Future<void> _delete() async {
     final pocket = _o.amount < 0 ? pocketOf(ref, _o) : null;
-    // Lands back on 04.3, toast above its "balik ke transaksi".
+    // Lands back on 08.2, toast above its "balik ke transaksi".
     final gone = await confirmDeleteEntry(
       context,
       ref,

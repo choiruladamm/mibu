@@ -41,7 +41,7 @@ class SheetFrame extends StatelessWidget {
   final List<Widget> actions;
   final Widget child;
 
-  /// Replaces the close disc, e.g. 03.3's "beres".
+  /// Replaces the close disc, e.g. 07.1's "beres".
   final Widget? close;
 
   /// Swipe down on the handle closes; pair with `enableDrag: false`.

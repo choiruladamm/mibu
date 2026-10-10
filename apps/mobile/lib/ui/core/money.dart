@@ -26,7 +26,7 @@ String rupiahCompact(int v) {
 /// +Rp8,5jt · -Rp450K · Rp0 — compact with the sign spelled out.
 String rupiahSigned(int v) => v > 0 ? '+${rupiahCompact(v)}' : rupiahCompact(v);
 
-/// 02.4 sembunyiin nominal: digits (and K / jt) become •••, sign and Rp stay.
+/// 05.1 sembunyiin nominal: digits (and K / jt) become •••, sign and Rp stay.
 String maskAmount(String s) => s.replaceAll(RegExp(r'\d[\d.,]*(K|jt)?'), '•••');
 
 /// Above the Navigator (MibuApp). [hide] = profile.hideAmounts; [peek] = the
@@ -48,9 +48,9 @@ class AmountMask extends InheritedWidget {
       hide != old.hide || peek != old.peek;
 }
 
-/// `context.rp(v)` etc.: the formatters above, masked when 02.4 says so.
+/// `context.rp(v)` etc.: the formatters above, masked when 05.1 says so.
 /// [income]: the figure is pemasukan or gives it away (a day total with a
-/// salary in it), so "pemasukan aja" hides it too (02.4h).
+/// salary in it), so "pemasukan aja" hides it too (05.1h).
 /// Outside an [AmountMask] (tests) nothing is hidden.
 extension MoneyContext on BuildContext {
   AmountMask? get amountMask =>

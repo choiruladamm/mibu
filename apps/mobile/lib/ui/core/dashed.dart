@@ -13,7 +13,7 @@ Path dashPath(Path source, {double dash = 4, double gap = 5}) {
   return out;
 }
 
-/// Dashed ink outline of a rounded card (02.1 belum ada catatan, 04.2b2).
+/// Dashed ink outline of a rounded card (02.1 belum ada catatan, 08.1b2).
 class DashedCardPainter extends CustomPainter {
   const DashedCardPainter(this.radius);
 

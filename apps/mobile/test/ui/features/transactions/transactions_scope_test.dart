@@ -13,9 +13,9 @@ import 'package:mibu/ui/features/transactions/views/transactions_view.dart';
 import '../../../meta.dart';
 
 void main() {
-  // The router wraps 04.1 in its own ProviderScope to pass the deep link's
+  // The router wraps 09.1 in its own ProviderScope to pass the deep link's
   // month; the month must still be switchable inside it.
-  testWidgets('04.1 switches month inside the router scope', (tester) async {
+  testWidgets('09.1 switches month inside the router scope', (tester) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -67,7 +67,7 @@ void main() {
     await db.close();
   });
 
-  testWidgets('04.1 narrowed to a search from 04.2 "liat N lagi"', (
+  testWidgets('09.1 narrowed to a search from 08.1 "liat N lagi"', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(390, 844);

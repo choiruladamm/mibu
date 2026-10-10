@@ -14,7 +14,7 @@ String _field(String s) =>
     s.contains(RegExp('[",\r\n]')) ? '"${s.replaceAll('"', '""')}"' : s;
 
 /// Ekspor CSV: UTF-8 BOM (so Excel reads the emoji), CRLF rows, [entries]
-/// as given (callers pass newest first). See MVP_PLAN.md › Ekspor CSV.
+/// as given (callers pass newest first). See mvp.md › Ekspor CSV.
 String transactionsCsv(List<Transaction> entries) {
   final date = DateFormat('yyyy-MM-dd');
   final time = DateFormat('HH:mm');
@@ -36,7 +36,7 @@ String transactionsCsv(List<Transaction> entries) {
   return '﻿${rows.join('\r\n')}\r\n';
 }
 
-/// One row of a mibu export, read back (import dari csv, 02.4l). [category]
+/// One row of a mibu export, read back (import dari csv, 05.1l). [category]
 /// empty = tanpa kategori; [amount] signed like [Transaction.amount].
 typedef CsvEntry = ({
   DateTime at,
@@ -172,7 +172,7 @@ typedef CsvNewCategory = ({
   int count,
 });
 
-/// What 02.4m shows and the import writes: rows not in mibu yet ([entries]),
+/// What 05.1m shows and the import writes: rows not in mibu yet ([entries]),
 /// ones already there ([dupes], skipped) and buat apa to make.
 class CsvImport {
   const CsvImport({

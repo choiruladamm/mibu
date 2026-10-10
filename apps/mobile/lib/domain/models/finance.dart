@@ -20,7 +20,7 @@ class Category {
   final bool isPayday; // gajian: can't be deleted, counts the payday
 }
 
-/// "terakhir" in 03.2: a category + place logged recently.
+/// "terakhir" in 06.2: a category + place logged recently.
 class RecentPick {
   const RecentPick({required this.category, required this.place});
 
@@ -36,12 +36,12 @@ class PeriodPoint {
   final int amount; // kepake: spent in that period, positive
 }
 
-/// 02.4 sembunyiin nominal (02.4h): what turns into `Rp•••`. [income] =
+/// 05.1 sembunyiin nominal (05.1h): what turns into `Rp•••`. [income] =
 /// pemasukan and the figures it can be read back from; [all] = everything.
 enum HideAmounts { none, income, all }
 
 /// No saldo here: mibu is a ledger per payday period, so nothing carries
-/// over and there's no opening balance (docs/PERIOD_LEDGER_PLAN.md).
+/// over and there's no opening balance (docs/period-ledger.md).
 class Profile {
   const Profile({
     required this.payday,
@@ -61,8 +61,8 @@ class Profile {
   final HideAmounts hideAmounts;
   final bool onboarded; // 01.4 atur awal done (or skipped with "nanti aja")
   final DateTime? onboardedAt; // when: a payday change in that period is a fix
-  final List<String> recentSearches; // 04.2b terakhir dicari, newest first
-  final bool pocketsIntroSeen; // 02.2l kenalan kantong dismissed with "oke"
+  final List<String> recentSearches; // 08.1b terakhir dicari, newest first
+  final bool pocketsIntroSeen; // 03.1l kenalan kantong dismissed with "oke"
 }
 
 /// 01.4b kantong pertama: presets with the board's monthly limits.
@@ -127,7 +127,7 @@ int suggestedLimit(int spent) {
 
 /// PocketLimit 00.15 slider scale. [budget] = monthly budget (null = not
 /// set), [others] = Σ limits of the other pockets. [free] = room left in the
-/// budget ("sisa budget"), null when there's no budget. See MVP_PLAN.md.
+/// budget ("sisa budget"), null when there's no budget. See mvp.md.
 ({int max, int step, int? free}) pocketLimitScale({
   required int? budget,
   required int others,
@@ -169,7 +169,7 @@ class Transaction {
   final DateTime at;
   final int amount; // negative = pengeluaran
   final List<String> tags;
-  final bool deleted; // soft-deleted, still shown stamped on 04.3
+  final bool deleted; // soft-deleted, still shown stamped on 08.2
 
   CategoryKind get kind =>
       amount < 0 ? CategoryKind.expense : CategoryKind.income;
@@ -195,7 +195,7 @@ typedef PaydayInfo = ({
 
 /// [payday] 1–31 (31 = akhir; a day past the month's end = its last day). A
 /// payday on Saturday / Sunday is paid the Friday before, unless [shift] is
-/// none (tetap tanggalnya, docs/PAYDAY_WEEKEND_PLAN.md). [salaries] = dates
+/// none (tetap tanggalnya, docs/payday-weekend.md). [salaries] = dates
 /// of live gajian income (any order): one logged up to [paydayEarlyDays]
 /// early starts the cycle that day, so the money lasts until the next one.
 /// On the scheduled day or after it with no salary logged yet: today / late;
@@ -270,7 +270,7 @@ int? safeShare({
 /// "aman jajan hari ini": today's [safeShare] minus what's already spent
 /// today ([budgetLeft] = budget − spent this period, [days] = days left in
 /// the period). Negative = overspent today; null without a budget. See
-/// MVP_PLAN.md.
+/// mvp.md.
 int? safeToSpendToday({
   required int? budgetLeft,
   required int spentToday,

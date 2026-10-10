@@ -27,9 +27,9 @@ final _monthName = DateFormat('MMMM', 'id');
 
 String _name(DateTime m) => _monthName.format(m).toLowerCase();
 
-/// 04.2 cari: category / place / note / tag in one month (or all months),
-/// the 00.14 summary card and the first 3 hits. Idle (04.2b): terakhir
-/// dicari + coba cari; nothing found (04.2c): ways out.
+/// 08.1 cari: category / place / note / tag in one month (or all months),
+/// the 00.14 summary card and the first 3 hits. Idle (08.1b): terakhir
+/// dicari + coba cari; nothing found (08.1c): ways out.
 class SearchView extends ConsumerStatefulWidget {
   const SearchView({super.key, this.month, this.initialQuery});
 
@@ -516,7 +516,7 @@ class _Summary extends StatelessWidget {
           ),
         )
         .toLowerCase();
-    // Any pemasukan in the hits: every figure here can give it away (02.4h).
+    // Any pemasukan in the hits: every figure here can give it away (05.1h).
     String money(int v) => context.rpSigned(v, income: s.income > 0);
 
     final right = s.count == 1
@@ -885,7 +885,7 @@ class _MoreButton extends StatelessWidget {
 
 typedef _Way = ({String pre, String em, String post, VoidCallback onTap});
 
-/// 04.2c nggak ketemu: search glyph, the line, where it looked, and the
+/// 08.1c nggak ketemu: search glyph, the line, where it looked, and the
 /// ways out (maksud kamu …? / ada N di september / ada N di pemasukan).
 class _None extends StatelessWidget {
   const _None({required this.title, required this.sub, required this.ways});
@@ -1012,7 +1012,7 @@ class _SectionTitle extends StatelessWidget {
   }
 }
 
-/// 04.2b terakhir dicari: tap = search again, × = forget it.
+/// 08.1b terakhir dicari: tap = search again, × = forget it.
 class _Recent extends StatelessWidget {
   const _Recent({
     required this.recent,
@@ -1116,7 +1116,7 @@ class _Recent extends StatelessWidget {
   }
 }
 
-/// 04.2b coba cari: most-used places and categories this month.
+/// 08.1b coba cari: most-used places and categories this month.
 class _Ideas extends StatelessWidget {
   const _Ideas({required this.ideas, required this.onPick});
 
@@ -1184,7 +1184,7 @@ class _Ideas extends StatelessWidget {
   }
 }
 
-/// 04.2b2 user baru: nothing to search yet → catat.
+/// 08.1b2 user baru: nothing to search yet → catat.
 class _Empty extends StatelessWidget {
   const _Empty({required this.onTap});
 

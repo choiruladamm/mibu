@@ -60,7 +60,7 @@ class Period {
 
 /// [amount] (budget, kantong limit: set per normal period) for [p]: a
 /// transition period gets length ÷ [Period.normalDays] of it, so aman jajan
-/// per day stays what a normal period gives. See docs/PAYDAY_CHANGE_PLAN.md.
+/// per day stays what a normal period gives. See docs/payday-change.md.
 int prorate(int amount, Period p) =>
     p.normalDays == null ? amount : (amount * p.length / p.normalDays!).round();
 
@@ -267,7 +267,7 @@ class SegmentedResolver extends PeriodResolver {
   }
 }
 
-/// When a payday change made on [today] starts (02.4 tanggal gajian). Null =
+/// When a payday change made on [today] starts (05.1 tanggal gajian). Null =
 /// at once: no payday rule yet, or still in the period the app was set up in
 /// ([setUpOn]), so a wrong pick at setup is a one-tap fix. Else the change
 /// already queued (updated, not stacked: merged with its sliver the running

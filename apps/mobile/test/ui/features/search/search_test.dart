@@ -75,7 +75,7 @@ void main() {
     await settle(tester);
   }
 
-  testWidgets('04.2b idle: coba cari, no type pills; a hit shows summary', (
+  testWidgets('08.1b idle: coba cari, no type pills; a hit shows summary', (
     tester,
   ) async {
     await pump(tester);
@@ -103,7 +103,7 @@ void main() {
     expect(find.text('-Rp450K'), findsNWidgets(2)); // summary total + row
   });
 
-  testWidgets('04.2b2 user baru: nothing to search yet → catat', (
+  testWidgets('08.1b2 user baru: nothing to search yet → catat', (
     tester,
   ) async {
     await pump(tester, seed: (_, _) async {});
@@ -113,7 +113,7 @@ void main() {
     expect(find.text('→ /catat'), findsOneWidget);
   });
 
-  testWidgets('04.2c nggak ketemu: typo fix, other kind, other months', (
+  testWidgets('08.1c nggak ketemu: typo fix, other kind, other months', (
     tester,
   ) async {
     await pump(tester);
@@ -143,7 +143,7 @@ void main() {
     expect(find.text('coba cari'), findsOneWidget);
   });
 
-  testWidgets('04.2b terakhir dicari: saved on submit, tap ×, hapus semua', (
+  testWidgets('08.1b terakhir dicari: saved on submit, tap ×, hapus semua', (
     tester,
   ) async {
     await pump(tester);
@@ -185,7 +185,7 @@ void main() {
     expect(find.text('semua hari'), findsNothing);
   });
 
-  testWidgets('04.2: "liat N lagi" opens 04.1 narrowed to the search', (
+  testWidgets('08.1: "liat N lagi" opens 09.1 narrowed to the search', (
     tester,
   ) async {
     await pump(tester);
@@ -198,7 +198,7 @@ void main() {
     );
   });
 
-  testWidgets('04.2: × in the field clears the query and the filter', (
+  testWidgets('08.1: × in the field clears the query and the filter', (
     tester,
   ) async {
     await pump(tester);

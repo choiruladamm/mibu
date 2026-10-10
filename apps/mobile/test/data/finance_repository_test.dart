@@ -213,7 +213,7 @@ void main() {
       // ...and so does sisa budget.
       expect(await r.watchBudget(oct).first, 4500000);
       // Salary back-filled to 25 sep is still this period's income: no
-      // opening date cuts it off (docs/PERIOD_LEDGER_PLAN.md).
+      // opening date cuts it off (docs/period-ledger.md).
       await r.addTransaction(
         amount: 9000000,
         categoryId: null,
@@ -565,7 +565,7 @@ void main() {
 
     await repo.deleteTransaction(warteg.id);
     t = (await repo.watchTransaction(warteg.id).first)!;
-    expect(t.deleted, isTrue); // still readable for the 04.3c stamp
+    expect(t.deleted, isTrue); // still readable for the 08.2c stamp
     oct = await repo.watchPeriod(cal(DateTime(2026, 10))).first;
     expect(oct, hasLength(6));
 

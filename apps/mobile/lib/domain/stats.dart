@@ -1,7 +1,7 @@
 import 'models/finance.dart';
 import 'period.dart';
 
-/// 02.3 statistik toggle.
+/// 04.1 statistik toggle.
 enum StatsPeriod { week, month, year }
 
 /// Half-open window [start, end), local midnights.
@@ -93,14 +93,14 @@ int spentIn(List<Transaction> entries, Span s) => entries
     .where((t) => !t.deleted && t.amount < 0 && _inside(t.at, s))
     .fold(0, (sum, t) => sum - t.amount);
 
-/// ritme budget (on track nggak?), see MVP_PLAN › Statistik.
+/// ritme budget (on track nggak?), see mvp.md › Statistik.
 enum BudgetPace { over, near, under, fine }
 
 /// One expense category in "larinya ke mana"; [category] null = tanpa
 /// kategori.
 typedef StatsCategory = ({String? category, String emoji, int spent});
 
-/// What 02.3 shows for [span] of [period] (today = [today]).
+/// What 04.1 shows for [span] of [period] (today = [today]).
 class Stats {
   Stats(
     List<Transaction> entries, {

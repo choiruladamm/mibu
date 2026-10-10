@@ -39,7 +39,7 @@ abstract final class Routes {
     },
   ).toString();
 
-  /// 04.2 on this month, opened by tapping a tag chip on a TxRow (00.4b).
+  /// 08.1 on this month, opened by tapping a tag chip on a TxRow (00.4b).
   static String searchFor(String q) =>
       Uri(path: search, queryParameters: {'q': q}).toString();
   static const addEntry = '/catat';
@@ -47,7 +47,7 @@ abstract final class Routes {
   static String transactionsIn(DateTime month) =>
       '$transactions?month=${month.year}-${month.month.toString().padLeft(2, '0')}';
 
-  /// 04.2 "liat N lagi": 04.1 in [month] narrowed to the search.
+  /// 08.1 "liat N lagi": 09.1 in [month] narrowed to the search.
   static String transactionsFound(
     DateTime month,
     String q, {
@@ -139,7 +139,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: Routes.search,
-        // ?month=2026-09 from 04.1: search the month being viewed.
+        // ?month=2026-09 from 09.1: search the month being viewed.
         // &q=%23kantor from a TxRow tag chip: opens already searched.
         builder: (_, state) => SearchView(
           month: _monthParam(state.uri.queryParameters['month']),
@@ -148,7 +148,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: Routes.addEntry,
-        // extra: an entry to "catat lagi" from (04.3), or
+        // extra: an entry to "catat lagi" from (08.2), or
         // [AddEntryStart.salary] from the beranda chip.
         builder: (_, state) => AddEntryView(
           again: state.extra is Transaction ? state.extra as Transaction : null,
@@ -159,7 +159,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: Routes.transactions,
         builder: (context, state) => ProviderScope(
           // ?month=2026-09 from 02.1 "liat semua di september";
-          // &q=kopi&filter=expenses&day=13 from 04.2 "liat N lagi".
+          // &q=kopi&filter=expenses&day=13 from 08.1 "liat N lagi".
           overrides: [
             txMonthProvider.overrideWith(
               () => TxMonth(_monthParam(state.uri.queryParameters['month'])),
