@@ -53,8 +53,8 @@ reset: ## run with data wiped + re-seeded each launch (seed=demo|fixture, defaul
 profile: ## run app in profile mode, real perf (pass device: make profile d=<id>)
 	$(FLUTTER) run --profile $(if $(d),-d $(d))
 
-test: ## run tests (one file: make test t=test/data)
-	$(FLUTTER) test $(t)
+test: ## run tests, 30s cap per test so a hang fails fast (one file: make test t=test/data)
+	$(FLUTTER) test --timeout 30s $(t)
 
 analyze: ## static analysis
 	$(FLUTTER) analyze

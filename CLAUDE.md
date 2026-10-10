@@ -73,7 +73,7 @@ lib/
 
 Struktur `apps/mobile/test/` ikut `lib/`:
 
-- `test/domain/`: logika pure (periode, aman jajan, stats, csv). Wajib buat tiap rumus.
+- `test/domain/`: logika pure (periode, aman jajan, stats, csv, search, emoji). Wajib buat tiap rumus. `lib/domain/use_cases/` kosong, jangan dipakai.
 - `test/data/`: repository, migrasi (`migration_test.dart`), seed, dengan DB in-memory.
 - `test/ui/core/`: widget shared.
 - `test/ui/features/<fitur>/<layar>_test.dart`: widget test per layar.
@@ -81,11 +81,15 @@ Struktur `apps/mobile/test/` ikut `lib/`:
 
 DB test = `AppDatabase(DatabaseConnection(NativeDatabase.memory(), closeStreamsSynchronously: true), () => now, seed)`, `appDatabaseProvider` di-override ke situ. Jam dipin lewat `clockProvider`; clock itu juga yang menaruh seed debug, jadi `now` DB dan `clockProvider` harus sama. Pin ke `fixtureNow` (`test/db.dart`) biar angka seedFixture cocok.
 
-Jebakan widget test (pola ada di `test/ui/features/home/home_test.dart`):
-- `testWidgets` jalan di jam palsu: query Drift tidak maju sendiri. Habis `pumpWidget`, tunggu di `tester.runAsync(() => Future.delayed(...))`, baru `pump()`. Di `test/db.dart` baca pakai Future, bukan `watch().first` (stream query butuh timer yang gak jalan di jam palsu).
-- Set layar HP: `tester.view.physicalSize = Size(390, 844)`, `devicePixelRatio = 1`, `addTearDown(tester.view.reset)`.
+Jebakan widget test (pola lengkap di `test/ui/features/home/home_test.dart` dan `settings_test.dart`):
+- `testWidgets` jalan di jam palsu: query Drift gak maju sendiri. Habis `pumpWidget` dan habis tiap aksi yang nyentuh DB, tunggu di event loop asli lalu pump: `await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50))); await tester.pumpAndSettle();` (dibungkus helper `settle()` di tiap file). Baca DB di tengah test juga lewat `tester.runAsync(() => db.select(...))`; di `test/db.dart` dan test repository pakai Future, bukan `watch().first`.
+- Font test = Ahem (1em per glyph), teks jadi lebih lebar dari font asli. Layar HP 390 × 844 cukup buat beranda; layar padat (Pengaturan) pakai `Size(900, 1400)`. Selalu `devicePixelRatio = 1` + `addTearDown(tester.view.reset)`. Overflow di test = layout test, bukan bug, kecuali test-nya sengaja ngecek (`expect(tester.takeException(), isNull)`, lihat `tx_row_test.dart`).
 - Tutup DB di tearDown **setelah** `pumpWidget(const SizedBox())` supaya stream berhenti dulu: `addTearDown(() async { await tester.pumpWidget(const SizedBox()); await db.close(); })`.
-- MaterialApp test butuh `AppTheme.light`, `locale: Locale('id')`, dan `AppLocalizations.localizationsDelegates`; tanpa itu copy dan format salah.
+- MaterialApp test butuh `AppTheme.light`, `locale: Locale('id')`, dan `AppLocalizations.localizationsDelegates`; tanpa itu copy dan format salah. Buka layar lewat view-nya langsung (`home: const HomeView()`), router gak ikut kecuali test-nya soal navigasi.
+- Plugin platform harus di-mock: `PackageInfo.setMockInitialValues(...)` buat Pengaturan (versi di footer). Item di bawah lipatan: `tester.ensureVisible(finder)` sebelum `tap`.
+- Teks yang tampil lewat `MetaLine` / `EmojiText` dicari pakai `findMeta` / `findEmojiText` di `test/meta.dart`, bukan `find.text`.
+- `test/ui/copy_guard_test.dart` baca `lib/ui` lewat path relatif, jadi test harus jalan dari `apps/mobile` (`make test` udah begitu). Jangan nulis string literal "bulan ini" di `lib/ui`; copy periode di `app_id.arb`.
+- `make test` pakai `--timeout 30s`: test yang nyangkut gagal, gak macet. Test nyangkut biasanya nunggu event loop asli (lihat poin pertama) atau lupa override `appDatabaseProvider` di layar baru.
 - `flutter_test_config.dart` menyalakan `dontWarnAboutMultipleDatabases` (tiap test buka DB sendiri).
 - Integration test di luar scope.
 
