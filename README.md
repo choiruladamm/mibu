@@ -49,11 +49,3 @@ Data contoh untuk debug: `make run seed=demo|fixture|none`. `make fresh` = insta
 Build ke device: `make dev` / `make dev-android` (mibu dev, id `com.mibu.mibu.dev`, data terpisah, branch apa saja), `make release` / `make release-android` / `make apk` (mibu, `com.mibu.mibu`, hanya dari `main`).
 
 Signing release Android: buat `apps/mobile/android/key.properties` (gitignored) berisi `storeFile`, `storePassword`, `keyAlias`, `keyPassword`. Tanpa file itu build release memakai debug key. Ganti signature berarti app yang sudah ter-install tidak bisa di-update, jadi jangan diganti kalau datanya masih dipakai.
-
-## Docs
-
-Keputusan produk, aturan hitungan, dan alur ada di [docs/](docs/README.md).
-
-## Status
-
-mibu v1.0.0, dipakai harian. Skema database v1 adalah baseline rilis, perubahan tabel lewat migrasi.
