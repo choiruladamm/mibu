@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../data/screen_secure.dart';
-import '../../../../l10n/app_localizations.dart';
 import '../../../core/app_lock_providers.dart';
 import '../../../core/tokens.dart';
 import 'lock_screen.dart';
@@ -72,19 +71,22 @@ class _AppLockGateState extends ConsumerState<AppLockGate> {
   }
 }
 
-/// The wordmark on paper: what the app switcher shows. Needs its own Material:
-/// this sits above the Navigator, and a bare Text there falls back to Flutter's
-/// red text with a yellow underline.
+/// What the app switcher shows: the native splash (ink, white mark + wordmark,
+/// `flutter_native_splash` in pubspec) so it looks like the app closing, and
+/// no notes in the snapshot. 512 px drawn at 4x density = 128.
 class _Cover extends StatelessWidget {
   const _Cover();
 
   @override
-  Widget build(BuildContext context) => Material(
-    color: AppColors.paper,
+  Widget build(BuildContext context) => const ColoredBox(
+    key: Key('lock-cover'),
+    color: AppColors.ink,
     child: Center(
-      child: Text(
-        AppLocalizations.of(context)!.appTitle,
-        style: AppText.wordmark(34),
+      child: Image(
+        image: AssetImage('assets/branding/splash_ios.png'),
+        width: 128,
+        height: 128,
+        excludeFromSemantics: true,
       ),
     ),
   );

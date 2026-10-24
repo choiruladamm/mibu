@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mibu/ui/core/app_lock_providers.dart';
+import 'package:mibu/ui/core/tokens.dart';
 import 'package:mibu/ui/features/lock/views/app_lock_gate.dart';
 
 import '../../../lock.dart';
@@ -143,17 +144,21 @@ void main() {
       await unlock(tester);
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
       await tester.pump();
-      expect(find.text('mibu'), findsOne); // the wordmark, over the app
-
-      // Plain wordmark: no red text with a yellow underline (Flutter's look
-      // for a Text with no Material above it).
-      final style = DefaultTextStyle.of(tester.element(find.text('mibu')));
-      expect(style.style.decoration, isNot(TextDecoration.underline));
-      expect(style.style.color, isNot(const Color(0xFFFF0000)));
+      // The splash picture on ink, over the app.
+      final cover = find.byKey(const Key('lock-cover'));
+      expect(cover, findsOne);
+      expect(tester.widget<ColoredBox>(cover).color, AppColors.ink);
+      final image = tester.widget<Image>(
+        find.descendant(of: cover, matching: find.byType(Image)),
+      );
+      expect(
+        (image.image as AssetImage).assetName,
+        'assets/branding/splash_ios.png', // the native splash's picture
+      );
 
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
       await tester.pump();
-      expect(find.text('mibu'), findsNothing);
+      expect(find.byKey(const Key('lock-cover')), findsNothing);
     });
 
     testWidgets('off: nothing covers it', (tester) async {
@@ -161,14 +166,14 @@ void main() {
       await unlock(tester);
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
       await tester.pump();
-      expect(find.text('mibu'), findsNothing);
+      expect(find.byKey(const Key('lock-cover')), findsNothing);
     });
 
     testWidgets('lock off: nothing covers it', (tester) async {
       await open(tester, on: false);
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
       await tester.pump();
-      expect(find.text('mibu'), findsNothing);
+      expect(find.byKey(const Key('lock-cover')), findsNothing);
     });
   });
 

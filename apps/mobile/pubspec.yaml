@@ -41,6 +41,7 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/branding/splash_ios.png # blur cover, same picture as the native splash
     - assets/emoji/ # Fluent Emoji 3D subset, tool/emoji/fetch.py
 
   fonts:
