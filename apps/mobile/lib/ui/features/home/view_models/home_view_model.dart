@@ -17,9 +17,10 @@ class HomeMonth extends Notifier<HomeMonthSelection> {
   /// The month label of the budget period we're in now.
   DateTime get _now => ref.read(currentMonthProvider);
 
+  /// Watches the current month: a new period resets the pick to it.
   @override
   HomeMonthSelection build() {
-    final now = _now;
+    final now = ref.watch(currentMonthProvider);
     return (selected: now, start: DateTime(now.year, now.month - 5));
   }
 

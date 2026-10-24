@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/misc.dart' show Override;
 import 'domain/models/finance.dart';
 import 'l10n/app_localizations.dart';
 import 'routing/router.dart';
+import 'ui/core/clock.dart';
+import 'ui/core/dates.dart';
 import 'ui/core/finance_providers.dart';
 import 'ui/core/money.dart';
 import 'ui/features/home/view_models/home_view_model.dart';
@@ -37,11 +39,31 @@ Future<ProviderContainer> bootstrap({
   return container;
 }
 
-class MibuApp extends ConsumerWidget {
+class MibuApp extends ConsumerStatefulWidget {
   const MibuApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MibuApp> createState() => _MibuAppState();
+}
+
+class _MibuAppState extends ConsumerState<MibuApp> {
+  late final _lifecycle = AppLifecycleListener(onResume: _refreshNow);
+
+  /// The app can outlive a day (and a period): re-read "now" on resume, only
+  /// when the date moved so queries don't re-subscribe for nothing.
+  void _refreshNow() {
+    final today = dateOnly(ref.read(clockProvider)());
+    if (today != dateOnly(ref.read(nowProvider))) ref.invalidate(nowProvider);
+  }
+
+  @override
+  void dispose() {
+    _lifecycle.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return TapOutsideUnfocus(
       child: MaterialApp.router(
         onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
