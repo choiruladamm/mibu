@@ -1743,5 +1743,48 @@
     }
   },
   "pinPadBioFace": "pakai face id",
-  "pinPadBioFinger": "pakai sidik jari"
+  "pinPadBioFinger": "pakai sidik jari",
+  "lockTitle": "buka mibu",
+  "lockHintBio": "pakai {bio} atau pin",
+  "@lockHintBio": {
+    "placeholders": {
+      "bio": {
+        "type": "String"
+      }
+    }
+  },
+  "lockHintPin": "masukin pin kamu",
+  "lockBioFace": "face id",
+  "lockBioFinger": "sidik jari",
+  "lockBioReason": "buka mibu",
+  "lockWrong": "pin salah · {n}× lagi sebelum ditahan sebentar",
+  "@lockWrong": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "lockHeld": "kebanyakan salah · coba lagi {time}",
+  "@lockHeld": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "lockHeldAgain": "salah lagi · coba lagi {time}",
+  "@lockHeldAgain": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "lockForgot": "lupa pin?",
+  "lockForgotTitle": "pin nggak bisa direset",
+  "lockForgotLocal": "mibu cuma nyimpen data di hp ini",
+  "lockForgotReinstall": "jalan satu-satunya: instal ulang mibu",
+  "lockForgotExport": "catatan cuma bisa balik kalau kamu punya file export csv",
+  "lockForgotOk": "ngerti"
 }

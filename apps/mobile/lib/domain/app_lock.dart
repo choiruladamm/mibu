@@ -50,3 +50,10 @@ bool shouldLock({
   if (leftAt == null || now.isBefore(leftAt)) return true;
   return now.difference(leftAt) >= after;
 }
+
+/// "0:30", "15:00": a hold counting down, a part of a second counts as a
+/// whole one.
+String holdClock(Duration left) {
+  final s = (left.inMilliseconds / 1000).ceil();
+  return '${s ~/ 60}:${(s % 60).toString().padLeft(2, '0')}';
+}

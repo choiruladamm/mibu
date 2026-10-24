@@ -1,7 +1,7 @@
 /// Kunci app (99.10) as the UI sees it. The pin hash never leaves the
 /// repository.
-class LockState {
-  const LockState({
+class AppLockState {
+  const AppLockState({
     this.enabled = false,
     this.bio = false,
     this.bioChanged = false,
@@ -12,7 +12,7 @@ class LockState {
   });
 
   /// Kunci mati: nothing stored.
-  static const off = LockState();
+  static const off = AppLockState();
 
   final bool enabled;
 
@@ -45,3 +45,6 @@ class LockState {
 
 /// What a pin attempt did.
 enum PinOutcome { ok, wrong, held }
+
+/// Which biometric this phone has for the lock (none = unavailable).
+enum BioKind { none, face, finger }

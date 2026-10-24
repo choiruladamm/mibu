@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mibu/domain/models/app_lock.dart';
 import 'package:mibu/l10n/app_localizations.dart';
 import 'package:mibu/ui/core/theme.dart';
 import 'package:mibu/ui/core/widgets/pin_pad.dart';
@@ -27,7 +28,7 @@ void main() {
     String message = '',
     bool error = false,
     PinPadState state = PinPadState.normal,
-    PinBio bio = PinBio.none,
+    BioKind bio = BioKind.none,
   }) => PinPad(
     filled: filled,
     message: message,
@@ -95,7 +96,7 @@ void main() {
   group('biometric key', () {
     testWidgets('face id: shown and wired', (tester) async {
       final handle = tester.ensureSemantics();
-      await tester.pumpWidget(_app(pad(bio: PinBio.face)));
+      await tester.pumpWidget(_app(pad(bio: BioKind.face)));
       await tester.tap(find.bySemanticsLabel('pakai face id'));
       expect(bios, 1);
       handle.dispose();
@@ -103,7 +104,7 @@ void main() {
 
     testWidgets('sidik jari: its own label', (tester) async {
       final handle = tester.ensureSemantics();
-      await tester.pumpWidget(_app(pad(bio: PinBio.finger)));
+      await tester.pumpWidget(_app(pad(bio: BioKind.finger)));
       expect(find.bySemanticsLabel('pakai sidik jari'), findsOne);
       expect(find.bySemanticsLabel('pakai face id'), findsNothing);
       handle.dispose();
@@ -114,7 +115,7 @@ void main() {
       await tester.pumpWidget(_app(pad()));
       expect(find.bySemanticsLabel('pakai face id'), findsNothing);
       await tester.pumpWidget(
-        _app(pad(bio: PinBio.face, state: PinPadState.bioHidden)),
+        _app(pad(bio: BioKind.face, state: PinPadState.bioHidden)),
       );
       expect(find.bySemanticsLabel('pakai face id'), findsNothing);
       handle.dispose();
@@ -126,7 +127,7 @@ void main() {
   ) async {
     final handle = tester.ensureSemantics();
     await tester.pumpWidget(
-      _app(pad(state: PinPadState.locked, bio: PinBio.face)),
+      _app(pad(state: PinPadState.locked, bio: BioKind.face)),
     );
     await tester.tap(find.text('5'));
     await tester.tap(find.bySemanticsLabel('hapus satu angka'));

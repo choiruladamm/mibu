@@ -2237,4 +2237,58 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get pinPadBioFinger => 'pakai sidik jari';
+
+  @override
+  String get lockTitle => 'buka mibu';
+
+  @override
+  String lockHintBio(String bio) {
+    return 'pakai $bio atau pin';
+  }
+
+  @override
+  String get lockHintPin => 'masukin pin kamu';
+
+  @override
+  String get lockBioFace => 'face id';
+
+  @override
+  String get lockBioFinger => 'sidik jari';
+
+  @override
+  String get lockBioReason => 'buka mibu';
+
+  @override
+  String lockWrong(int n) {
+    return 'pin salah · $n× lagi sebelum ditahan sebentar';
+  }
+
+  @override
+  String lockHeld(String time) {
+    return 'kebanyakan salah · coba lagi $time';
+  }
+
+  @override
+  String lockHeldAgain(String time) {
+    return 'salah lagi · coba lagi $time';
+  }
+
+  @override
+  String get lockForgot => 'lupa pin?';
+
+  @override
+  String get lockForgotTitle => 'pin nggak bisa direset';
+
+  @override
+  String get lockForgotLocal => 'mibu cuma nyimpen data di hp ini';
+
+  @override
+  String get lockForgotReinstall => 'jalan satu-satunya: instal ulang mibu';
+
+  @override
+  String get lockForgotExport =>
+      'catatan cuma bisa balik kalau kamu punya file export csv';
+
+  @override
+  String get lockForgotOk => 'ngerti';
 }

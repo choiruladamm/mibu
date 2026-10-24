@@ -70,15 +70,15 @@ class AppLockRepository {
     }
   }
 
-  Future<LockState> _write(Map<String, Object?> m) async {
+  Future<AppLockState> _write(Map<String, Object?> m) async {
     await _store.write(_key, jsonEncode(m));
     return _state(m);
   }
 
-  LockState _state(Map<String, Object?> m) {
-    if (m['hash'] == null) return LockState.off;
+  AppLockState _state(Map<String, Object?> m) {
+    if (m['hash'] == null) return AppLockState.off;
     final until = m['heldUntil'] as int?;
-    return LockState(
+    return AppLockState(
       enabled: true,
       bio: m['bio'] == true,
       bioChanged: m['bioChanged'] == true,
@@ -91,28 +91,28 @@ class AppLockRepository {
     );
   }
 
-  Future<LockState> load() async => _state(await _read());
+  Future<AppLockState> load() async => _state(await _read());
 
   /// Turns the lock on with a fresh pin (settings back to their defaults).
-  Future<LockState> enable(String pin, {required bool bio}) async =>
+  Future<AppLockState> enable(String pin, {required bool bio}) async =>
       _write({..._hashed(pin), 'bio': bio});
 
   /// Kunci mati: everything stored goes, settings included.
-  Future<LockState> disable() async {
+  Future<AppLockState> disable() async {
     await _store.delete(_key);
-    return LockState.off;
+    return AppLockState.off;
   }
 
   /// Every lock value, for a fresh install that found a leftover keychain.
   Future<void> wipe() => _store.clear();
 
-  Future<LockState> changePin(String pin) async {
+  Future<AppLockState> changePin(String pin) async {
     final m = await _read();
     _need(m);
     return _write({...m, ..._hashed(pin), 'tries': 0, 'heldUntil': null});
   }
 
-  Future<LockState> setBio(bool on) async {
+  Future<AppLockState> setBio(bool on) async {
     final m = await _read();
     _need(m);
     return _write({...m, 'bio': on, if (on) 'bioChanged': false});
@@ -120,19 +120,19 @@ class AppLockRepository {
 
   /// A new face / fingerprint was enrolled: biometrics off until the pin
   /// turns them back on.
-  Future<LockState> markBioChanged() async {
+  Future<AppLockState> markBioChanged() async {
     final m = await _read();
     _need(m);
     return _write({...m, 'bio': false, 'bioChanged': true});
   }
 
-  Future<LockState> setAfter(Duration after) async {
+  Future<AppLockState> setAfter(Duration after) async {
     final m = await _read();
     _need(m);
     return _write({...m, 'afterMin': after.inMinutes});
   }
 
-  Future<LockState> setBlur(bool on) async {
+  Future<AppLockState> setBlur(bool on) async {
     final m = await _read();
     _need(m);
     return _write({...m, 'blur': on});
@@ -140,7 +140,7 @@ class AppLockRepository {
 
   /// Checks [pin] at [now]. While held nothing is checked or counted; a right
   /// pin clears the count, a wrong one adds to it (and may start a hold).
-  Future<({PinOutcome outcome, LockState state})> verifyPin(
+  Future<({PinOutcome outcome, AppLockState state})> verifyPin(
     String pin,
     DateTime now,
   ) async {
@@ -164,13 +164,13 @@ class AppLockRepository {
   }
 
   /// Face id / sidik jari worked: same as a right pin for the count.
-  Future<LockState> bioSucceeded() async {
+  Future<AppLockState> bioSucceeded() async {
     final m = await _read();
     _need(m);
     return _clearTries(m);
   }
 
-  Future<LockState> _clearTries(Map<String, Object?> m) =>
+  Future<AppLockState> _clearTries(Map<String, Object?> m) =>
       (m['tries'] as int? ?? 0) == 0 && m['heldUntil'] == null
       ? Future.value(_state(m))
       : _write({...m, 'tries': 0, 'heldUntil': null});

@@ -3633,6 +3633,96 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'pakai sidik jari'**
   String get pinPadBioFinger;
+
+  /// No description provided for @lockTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'buka mibu'**
+  String get lockTitle;
+
+  /// No description provided for @lockHintBio.
+  ///
+  /// In id, this message translates to:
+  /// **'pakai {bio} atau pin'**
+  String lockHintBio(String bio);
+
+  /// No description provided for @lockHintPin.
+  ///
+  /// In id, this message translates to:
+  /// **'masukin pin kamu'**
+  String get lockHintPin;
+
+  /// No description provided for @lockBioFace.
+  ///
+  /// In id, this message translates to:
+  /// **'face id'**
+  String get lockBioFace;
+
+  /// No description provided for @lockBioFinger.
+  ///
+  /// In id, this message translates to:
+  /// **'sidik jari'**
+  String get lockBioFinger;
+
+  /// No description provided for @lockBioReason.
+  ///
+  /// In id, this message translates to:
+  /// **'buka mibu'**
+  String get lockBioReason;
+
+  /// No description provided for @lockWrong.
+  ///
+  /// In id, this message translates to:
+  /// **'pin salah · {n}× lagi sebelum ditahan sebentar'**
+  String lockWrong(int n);
+
+  /// No description provided for @lockHeld.
+  ///
+  /// In id, this message translates to:
+  /// **'kebanyakan salah · coba lagi {time}'**
+  String lockHeld(String time);
+
+  /// No description provided for @lockHeldAgain.
+  ///
+  /// In id, this message translates to:
+  /// **'salah lagi · coba lagi {time}'**
+  String lockHeldAgain(String time);
+
+  /// No description provided for @lockForgot.
+  ///
+  /// In id, this message translates to:
+  /// **'lupa pin?'**
+  String get lockForgot;
+
+  /// No description provided for @lockForgotTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'pin nggak bisa direset'**
+  String get lockForgotTitle;
+
+  /// No description provided for @lockForgotLocal.
+  ///
+  /// In id, this message translates to:
+  /// **'mibu cuma nyimpen data di hp ini'**
+  String get lockForgotLocal;
+
+  /// No description provided for @lockForgotReinstall.
+  ///
+  /// In id, this message translates to:
+  /// **'jalan satu-satunya: instal ulang mibu'**
+  String get lockForgotReinstall;
+
+  /// No description provided for @lockForgotExport.
+  ///
+  /// In id, this message translates to:
+  /// **'catatan cuma bisa balik kalau kamu punya file export csv'**
+  String get lockForgotExport;
+
+  /// No description provided for @lockForgotOk.
+  ///
+  /// In id, this message translates to:
+  /// **'ngerti'**
+  String get lockForgotOk;
 }
 
 class _AppLocalizationsDelegate

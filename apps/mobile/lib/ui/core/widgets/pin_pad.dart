@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 
 import '../../../domain/app_lock.dart';
+import '../../../domain/models/app_lock.dart';
 import '../../../l10n/app_localizations.dart';
 import '../tokens.dart';
 
@@ -17,9 +18,6 @@ enum PinPadState {
   bioHidden,
 }
 
-/// Which biometric the bottom-left key calls (none = an empty slot).
-enum PinBio { none, face, finger }
-
 /// 00.31 PinPad — 6 dots over a 3×4 keypad: digits, a biometric key where the
 /// "000" of AmountKeypad would be, ⌫. Shows [message] under the dots; [error]
 /// shakes them once.
@@ -32,7 +30,7 @@ class PinPad extends StatefulWidget {
     this.message = '',
     this.error = false,
     this.state = PinPadState.normal,
-    this.bio = PinBio.none,
+    this.bio = BioKind.none,
     this.onBio,
   });
 
@@ -43,7 +41,7 @@ class PinPad extends StatefulWidget {
   final String message;
   final bool error;
   final PinPadState state;
-  final PinBio bio;
+  final BioKind bio;
   final ValueChanged<String> onKey;
   final VoidCallback onBackspace;
   final VoidCallback? onBio;
@@ -103,7 +101,7 @@ class _PinPadState extends State<PinPad> with SingleTickerProviderStateMixin {
     );
 
     final bioShown =
-        widget.bio != PinBio.none && widget.state != PinPadState.bioHidden;
+        widget.bio != BioKind.none && widget.state != PinPadState.bioHidden;
 
     return Semantics(
       container: true,
@@ -174,13 +172,13 @@ class _PinPadState extends State<PinPad> with SingleTickerProviderStateMixin {
                   row([
                     if (bioShown)
                       _Key(
-                        label: widget.bio == PinBio.face
+                        label: widget.bio == BioKind.face
                             ? l.pinPadBioFace
                             : l.pinPadBioFinger,
                         outline: AppColors.ink,
                         onTap: widget.onBio,
                         child: HugeIcon(
-                          icon: widget.bio == PinBio.face
+                          icon: widget.bio == BioKind.face
                               ? AppIcons.faceId
                               : AppIcons.fingerprint,
                           size: 26,

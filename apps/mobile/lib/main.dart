@@ -13,6 +13,7 @@ import 'ui/core/dates.dart';
 import 'ui/core/finance_providers.dart';
 import 'ui/core/money.dart';
 import 'ui/features/home/view_models/home_view_model.dart';
+import 'ui/features/lock/views/app_lock_gate.dart';
 import 'ui/core/theme.dart';
 import 'ui/core/widgets/app_emoji.dart';
 import 'ui/core/widgets/tap_outside_unfocus.dart';
@@ -57,7 +58,15 @@ class MibuApp extends ConsumerStatefulWidget {
 }
 
 class _MibuAppState extends ConsumerState<MibuApp> {
-  late final _lifecycle = AppLifecycleListener(onResume: _refreshNow);
+  late final AppLifecycleListener _lifecycle;
+
+  @override
+  void initState() {
+    super.initState();
+    // Built here: a `late final` initializer only runs when first read, which
+    // was dispose, so the listener never existed while the app ran.
+    _lifecycle = AppLifecycleListener(onResume: _refreshNow);
+  }
 
   /// The app can outlive a day (and a period): re-read "now" on resume, only
   /// when the date moved so queries don't re-subscribe for nothing.
@@ -79,11 +88,14 @@ class _MibuAppState extends ConsumerState<MibuApp> {
         onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
         theme: AppTheme.light,
         routerConfig: ref.watch(routerProvider),
-        builder: (_, child) => AmountMask(
-          hide:
-              ref.watch(profileProvider).value?.hideAmounts ?? HideAmounts.none,
-          peek: ref.watch(peekProvider),
-          child: child!,
+        builder: (_, child) => AppLockGate(
+          child: AmountMask(
+            hide:
+                ref.watch(profileProvider).value?.hideAmounts ??
+                HideAmounts.none,
+            peek: ref.watch(peekProvider),
+            child: child!,
+          ),
         ),
         locale: const Locale('id', 'ID'),
         supportedLocales: AppLocalizations.supportedLocales,

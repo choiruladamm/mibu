@@ -79,17 +79,25 @@ void main() {
     });
   });
 
-  group('LockState.holdLeft', () {
+  test('holdClock counts down as m:ss, rounding up', () {
+    expect(holdClock(const Duration(seconds: 30)), '0:30');
+    expect(holdClock(const Duration(milliseconds: 29200)), '0:30');
+    expect(holdClock(const Duration(minutes: 1)), '1:00');
+    expect(holdClock(const Duration(minutes: 15)), '15:00');
+    expect(holdClock(const Duration(seconds: 59, milliseconds: 1)), '1:00');
+  });
+
+  group('AppLockState.holdLeft', () {
     final now = DateTime(2026, 10, 24, 12);
 
     test('time remaining while held, null once over', () {
-      final s = LockState(
+      final s = AppLockState(
         enabled: true,
         heldUntil: now.add(const Duration(seconds: 30)),
       );
       expect(s.holdLeft(now), const Duration(seconds: 30));
       expect(s.holdLeft(now.add(const Duration(seconds: 30))), isNull);
-      expect(const LockState(enabled: true).holdLeft(now), isNull);
+      expect(const AppLockState(enabled: true).holdLeft(now), isNull);
     });
   });
 }
