@@ -3673,19 +3673,19 @@ abstract class AppLocalizations {
   /// No description provided for @lockWrong.
   ///
   /// In id, this message translates to:
-  /// **'pin salah · {n}× lagi sebelum ditahan sebentar'**
+  /// **'pin salah, {n}× lagi sebelum ditahan sebentar'**
   String lockWrong(int n);
 
   /// No description provided for @lockHeld.
   ///
   /// In id, this message translates to:
-  /// **'kebanyakan salah · coba lagi {time}'**
+  /// **'kebanyakan salah, coba lagi {time}'**
   String lockHeld(String time);
 
   /// No description provided for @lockHeldAgain.
   ///
   /// In id, this message translates to:
-  /// **'salah lagi · coba lagi {time}'**
+  /// **'salah lagi, coba lagi {time}'**
   String lockHeldAgain(String time);
 
   /// No description provided for @lockForgot.

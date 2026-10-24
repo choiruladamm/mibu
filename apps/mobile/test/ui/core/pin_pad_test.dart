@@ -70,9 +70,9 @@ void main() {
 
   testWidgets('the message shows under the dots', (tester) async {
     await tester.pumpWidget(
-      _app(pad(message: 'pin salah · 2× lagi sebelum ditahan sebentar')),
+      _app(pad(message: 'pin salah, 2× lagi sebelum ditahan sebentar')),
     );
-    expect(find.text('pin salah · 2× lagi sebelum ditahan sebentar'), findsOne);
+    expect(find.text('pin salah, 2× lagi sebelum ditahan sebentar'), findsOne);
   });
 
   testWidgets('the pad is announced with how many digits are in', (

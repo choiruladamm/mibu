@@ -1757,7 +1757,7 @@
   "lockBioFace": "face id",
   "lockBioFinger": "sidik jari",
   "lockBioReason": "buka mibu",
-  "lockWrong": "pin salah · {n}× lagi sebelum ditahan sebentar",
+  "lockWrong": "pin salah, {n}× lagi sebelum ditahan sebentar",
   "@lockWrong": {
     "placeholders": {
       "n": {
@@ -1765,7 +1765,7 @@
       }
     }
   },
-  "lockHeld": "kebanyakan salah · coba lagi {time}",
+  "lockHeld": "kebanyakan salah, coba lagi {time}",
   "@lockHeld": {
     "placeholders": {
       "time": {
@@ -1773,7 +1773,7 @@
       }
     }
   },
-  "lockHeldAgain": "salah lagi · coba lagi {time}",
+  "lockHeldAgain": "salah lagi, coba lagi {time}",
   "@lockHeldAgain": {
     "placeholders": {
       "time": {

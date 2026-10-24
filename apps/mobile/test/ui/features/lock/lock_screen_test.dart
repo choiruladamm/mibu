@@ -55,12 +55,12 @@ void main() {
   ) async {
     await open(tester);
     await wrong(tester, 1);
-    expect(find.text('pin salah · 4× lagi sebelum ditahan sebentar'), findsOne);
+    expect(find.text('pin salah, 4× lagi sebelum ditahan sebentar'), findsOne);
     expect(h.locked, isTrue);
     expect(h.lock.wrongTries, 1);
 
     await wrong(tester, 3);
-    expect(find.text('pin salah · 1× lagi sebelum ditahan sebentar'), findsOne);
+    expect(find.text('pin salah, 1× lagi sebelum ditahan sebentar'), findsOne);
 
     // typing again clears the message
     await tester.tap(find.text('4'));
@@ -73,7 +73,7 @@ void main() {
   ) async {
     await open(tester);
     await wrong(tester, 5);
-    expect(find.text('kebanyakan salah · coba lagi 0:30'), findsOne);
+    expect(find.text('kebanyakan salah, coba lagi 0:30'), findsOne);
 
     // held: digits do nothing, even the right pin
     await typePin(tester, lockPin);
@@ -82,7 +82,7 @@ void main() {
 
     h.now = h.now.add(const Duration(seconds: 10));
     await tester.pump(const Duration(seconds: 10));
-    expect(find.text('kebanyakan salah · coba lagi 0:20'), findsOne);
+    expect(find.text('kebanyakan salah, coba lagi 0:20'), findsOne);
 
     h.now = h.now.add(const Duration(seconds: 20));
     await tester.pump(const Duration(seconds: 20));
@@ -103,7 +103,7 @@ void main() {
     expect(find.textContaining('coba lagi'), findsNothing);
 
     await wrong(tester, 5);
-    expect(find.text('salah lagi · coba lagi 1:00'), findsOne);
+    expect(find.text('salah lagi, coba lagi 1:00'), findsOne);
   });
 
   group('face id / sidik jari', () {

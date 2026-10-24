@@ -262,7 +262,7 @@ void main() {
 
       await type(tester, '000001');
       expect(
-        find.text('pin salah · 4× lagi sebelum ditahan sebentar'),
+        find.text('pin salah, 4× lagi sebelum ditahan sebentar'),
         findsOne,
       );
       expect(h.lock.enabled, isTrue);
@@ -283,7 +283,7 @@ void main() {
         await typePin(tester, '000001');
         await tester.pump();
       }
-      expect(find.text('kebanyakan salah · coba lagi 0:30'), findsOne);
+      expect(find.text('kebanyakan salah, coba lagi 0:30'), findsOne);
 
       await typePin(tester, lockPin);
       await tester.pump();
@@ -336,7 +336,7 @@ void main() {
       await type(tester, '000001');
       expect(find.text('pin lama'), findsOne);
       expect(
-        find.text('pin salah · 4× lagi sebelum ditahan sebentar'),
+        find.text('pin salah, 4× lagi sebelum ditahan sebentar'),
         findsOne,
       );
     });
@@ -390,7 +390,7 @@ void main() {
         await typePin(tester, '000001');
         await tester.pump();
       }
-      expect(find.text('kebanyakan salah · coba lagi 0:30'), findsOne);
+      expect(find.text('kebanyakan salah, coba lagi 0:30'), findsOne);
       expect(h.lock.bio, isFalse);
     });
   });

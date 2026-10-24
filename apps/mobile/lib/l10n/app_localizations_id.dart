@@ -2260,17 +2260,17 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String lockWrong(int n) {
-    return 'pin salah · $n× lagi sebelum ditahan sebentar';
+    return 'pin salah, $n× lagi sebelum ditahan sebentar';
   }
 
   @override
   String lockHeld(String time) {
-    return 'kebanyakan salah · coba lagi $time';
+    return 'kebanyakan salah, coba lagi $time';
   }
 
   @override
   String lockHeldAgain(String time) {
-    return 'salah lagi · coba lagi $time';
+    return 'salah lagi, coba lagi $time';
   }
 
   @override
