@@ -7,6 +7,7 @@ import 'package:mibu/data/database/app_database.dart';
 import 'package:mibu/domain/models/finance.dart';
 import 'package:mibu/domain/period.dart';
 import 'package:mibu/l10n/app_localizations.dart';
+import 'package:mibu/data/repositories/app_lock_repository.dart';
 import 'package:mibu/ui/core/clock.dart';
 import 'package:mibu/ui/core/finance_providers.dart';
 import 'package:mibu/ui/core/money.dart';
@@ -17,6 +18,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:mibu/ui/core/widgets/meta_line.dart';
 
+import '../../../lock_store.dart';
 import '../../../meta.dart';
 
 void main() {
@@ -47,6 +49,7 @@ void main() {
         overrides: [
           appDatabaseProvider.overrideWithValue(db),
           clockProvider.overrideWithValue(() => now),
+          lockStoreProvider.overrideWithValue(MemoryLockStore()),
         ],
         child: MaterialApp(
           theme: AppTheme.light,
@@ -100,6 +103,9 @@ void main() {
     expect(find.text('buat apa aja'), findsOneWidget);
     expect(find.text('limit kantong'), findsOneWidget);
     expect(find.text('sembunyiin nominal'), findsOneWidget);
+    // 99.10a: kunci app, its hint = how it opens (here: off).
+    expect(find.text('kunci app'), findsOneWidget);
+    expect(find.text('mati'), findsOneWidget);
     expect(find.text('export ke csv'), findsOneWidget);
     expect(findMeta(['versi 0.2.0', 'lisensi']), findsOneWidget);
     // Fluent Emoji (MIT) is credited on the licenses page behind it.

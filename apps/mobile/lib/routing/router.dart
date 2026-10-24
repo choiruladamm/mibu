@@ -7,6 +7,7 @@ import '../ui/core/tokens.dart';
 import '../ui/core/widgets/tab_bar.dart';
 import '../ui/features/add_entry/views/add_entry_view.dart';
 import '../ui/features/home/views/home_view.dart';
+import '../ui/features/lock/views/lock_settings_view.dart';
 import '../ui/features/onboarding/views/onboarding_view.dart';
 import '../ui/features/pockets/views/pockets_view.dart';
 import '../ui/features/settings/views/settings_view.dart';
@@ -30,6 +31,7 @@ abstract final class Routes {
   static String pocketsAt(String id) => '$pockets?pocket=$id';
   static const stats = '/statistik';
   static const settings = '/pengaturan';
+  static const lock = '/pengaturan/kunci';
   static const search = '/cari';
   static String searchIn(DateTime month, {String? q}) => Uri(
     path: search,
@@ -137,6 +139,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         pageBuilder: (_, state) =>
             NoTransitionPage(key: state.pageKey, child: const SettingsView()),
       ),
+      GoRoute(path: Routes.lock, builder: (_, _) => const LockSettingsView()),
       GoRoute(
         path: Routes.search,
         // ?month=2026-09 from 09.1: search the month being viewed.

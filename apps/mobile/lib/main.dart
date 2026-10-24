@@ -3,14 +3,17 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 
+import 'data/repositories/app_lock_repository.dart';
 import 'domain/models/finance.dart';
 import 'l10n/app_localizations.dart';
 import 'routing/router.dart';
+import 'ui/core/app_lock_providers.dart';
 import 'ui/core/clock.dart';
 import 'ui/core/dates.dart';
 import 'ui/core/finance_providers.dart';
 import 'ui/core/money.dart';
 import 'ui/features/home/view_models/home_view_model.dart';
+import 'ui/features/lock/views/app_lock_gate.dart';
 import 'ui/core/theme.dart';
 import 'ui/core/widgets/app_emoji.dart';
 import 'ui/core/widgets/tap_outside_unfocus.dart';
@@ -35,7 +38,15 @@ Future<ProviderContainer> bootstrap({
   container.listen(homeProvider, (_, _) {});
   // The router picks onboarding vs beranda from it (native splash still up).
   container.listen(profileProvider, (_, _) {});
-  await container.read(profileProvider.future);
+  final profile = await container.read(profileProvider.future);
+  // The keychain outlives an uninstall; the database doesn't. A fresh install
+  // (not onboarded) must not inherit an old pin.
+  if (!profile.onboarded) {
+    await container.read(appLockRepositoryProvider).wipe();
+  }
+  // Load the lock before the first frame, so beranda never shows through it.
+  container.listen(appLockProvider, (_, _) {});
+  await container.read(appLockProvider.future);
   return container;
 }
 
@@ -47,7 +58,15 @@ class MibuApp extends ConsumerStatefulWidget {
 }
 
 class _MibuAppState extends ConsumerState<MibuApp> {
-  late final _lifecycle = AppLifecycleListener(onResume: _refreshNow);
+  late final AppLifecycleListener _lifecycle;
+
+  @override
+  void initState() {
+    super.initState();
+    // Built here: a `late final` initializer only runs when first read, which
+    // was dispose, so the listener never existed while the app ran.
+    _lifecycle = AppLifecycleListener(onResume: _refreshNow);
+  }
 
   /// The app can outlive a day (and a period): re-read "now" on resume, only
   /// when the date moved so queries don't re-subscribe for nothing.
@@ -69,11 +88,14 @@ class _MibuAppState extends ConsumerState<MibuApp> {
         onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
         theme: AppTheme.light,
         routerConfig: ref.watch(routerProvider),
-        builder: (_, child) => AmountMask(
-          hide:
-              ref.watch(profileProvider).value?.hideAmounts ?? HideAmounts.none,
-          peek: ref.watch(peekProvider),
-          child: child!,
+        builder: (_, child) => AppLockGate(
+          child: AmountMask(
+            hide:
+                ref.watch(profileProvider).value?.hideAmounts ??
+                HideAmounts.none,
+            peek: ref.watch(peekProvider),
+            child: child!,
+          ),
         ),
         locale: const Locale('id', 'ID'),
         supportedLocales: AppLocalizations.supportedLocales,
