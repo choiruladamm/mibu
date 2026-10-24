@@ -4,6 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// moment (e.g. stamping a saved entry).
 final clockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
 
-/// "Now" as of app start, for queries and screens.
-// ponytail: not refreshed past midnight; tick it if the app lives that long.
+/// "Now" as of app start, for queries and screens. `MibuApp` invalidates it on
+/// resume once the date has changed.
 final nowProvider = Provider<DateTime>((ref) => ref.watch(clockProvider)());
