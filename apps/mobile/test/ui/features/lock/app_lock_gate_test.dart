@@ -145,6 +145,12 @@ void main() {
       await tester.pump();
       expect(find.text('mibu'), findsOne); // the wordmark, over the app
 
+      // Plain wordmark: no red text with a yellow underline (Flutter's look
+      // for a Text with no Material above it).
+      final style = DefaultTextStyle.of(tester.element(find.text('mibu')));
+      expect(style.style.decoration, isNot(TextDecoration.underline));
+      expect(style.style.color, isNot(const Color(0xFFFF0000)));
+
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
       await tester.pump();
       expect(find.text('mibu'), findsNothing);

@@ -72,12 +72,14 @@ class _AppLockGateState extends ConsumerState<AppLockGate> {
   }
 }
 
-/// The wordmark on paper: what the app switcher shows.
+/// The wordmark on paper: what the app switcher shows. Needs its own Material:
+/// this sits above the Navigator, and a bare Text there falls back to Flutter's
+/// red text with a yellow underline.
 class _Cover extends StatelessWidget {
   const _Cover();
 
   @override
-  Widget build(BuildContext context) => ColoredBox(
+  Widget build(BuildContext context) => Material(
     color: AppColors.paper,
     child: Center(
       child: Text(
