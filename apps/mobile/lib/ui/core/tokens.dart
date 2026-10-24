@@ -209,4 +209,28 @@ abstract final class AppIcons {
       {'key': '1', 'd': 'M12.5 9.5l5 5M17.5 9.5l-5 5', ..._stroke},
     ],
   ];
+
+  /// Face id (99.10, 00.31 PinPad).
+  static const faceId = [
+    [
+      'path',
+      {
+        'key': '0',
+        'd': 'M7 3H5a2 2 0 0 0-2 2v2M17 3h2a2 2 0 0 1 2 2v2M7 21H5a2 2 0 0 1-2-2v-2M17 21h2a2 2 0 0 0 2-2v-2M9 9v1.5M15 9v1.5M12 9v4.5h-1M9 16.5c1.8 1.4 4.2 1.4 6 0',
+        ..._stroke,
+      },
+    ],
+  ];
+
+  /// Sidik jari (99.10, 00.31 PinPad).
+  static const fingerprint = [
+    [
+      'path',
+      {
+        'key': '0',
+        'd': 'M12 11v4.5M8.5 9.5A3.5 3.5 0 0 1 15.5 11v1.5M8.5 13v-1.5M15.5 15.5c0 1.5-.5 3-1.3 4.5M8.5 16.5c.4 1.3 1 2.5 1.8 3.5M5.5 15V11a6.5 6.5 0 0 1 11-4.7M18.5 10.5V15M6.5 6.5A8.5 8.5 0 0 1 12 3.5',
+        ..._stroke,
+      },
+    ],
+  ];
 }

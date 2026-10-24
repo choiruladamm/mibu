@@ -1733,5 +1733,15 @@
   "searchInsOnly": "satu-satunya bulan ini",
   "searchTickHeight": "tinggi = nominal",
   "searchTickWidth": "tebal = jumlah",
-  "searchTickWhen": "kapan kejadiannya"
+  "searchTickWhen": "kapan kejadiannya",
+  "pinPadLabel": "masukin pin, {filled} dari 6 angka",
+  "@pinPadLabel": {
+    "placeholders": {
+      "filled": {
+        "type": "int"
+      }
+    }
+  },
+  "pinPadBioFace": "pakai face id",
+  "pinPadBioFinger": "pakai sidik jari"
 }

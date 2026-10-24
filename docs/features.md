@@ -136,6 +136,7 @@ Tanda: **[diupdate]** = aturan/perilaku berubah dari design, **[perlu design]** 
 | 00.26 | PeriodBars | kepake per periode |
 | 00.29 | HideSheet | sembunyiin nominal, [hide-income.md](hide-income.md) |
 | 00.30 | ImportSheet | import dari csv, [import.md](import.md) |
+| 00.31 | PinPad | 6 titik + keypad 3×4, slot kiri bawah = biometrik (kosong kalau pin aja). `state`: normal / locked (digit + hapus redup 35%, biometrik tetap aktif) / bioHidden. Dipakai kunci app (#3) |
 
 ## 99 · Proposal (board drafting, belum diputusin)
 

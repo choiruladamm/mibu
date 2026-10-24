@@ -2226,4 +2226,15 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get searchTickWhen => 'kapan kejadiannya';
+
+  @override
+  String pinPadLabel(int filled) {
+    return 'masukin pin, $filled dari 6 angka';
+  }
+
+  @override
+  String get pinPadBioFace => 'pakai face id';
+
+  @override
+  String get pinPadBioFinger => 'pakai sidik jari';
 }

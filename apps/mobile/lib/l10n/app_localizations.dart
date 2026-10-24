@@ -3615,6 +3615,24 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'kapan kejadiannya'**
   String get searchTickWhen;
+
+  /// No description provided for @pinPadLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'masukin pin, {filled} dari 6 angka'**
+  String pinPadLabel(int filled);
+
+  /// No description provided for @pinPadBioFace.
+  ///
+  /// In id, this message translates to:
+  /// **'pakai face id'**
+  String get pinPadBioFace;
+
+  /// No description provided for @pinPadBioFinger.
+  ///
+  /// In id, this message translates to:
+  /// **'pakai sidik jari'**
+  String get pinPadBioFinger;
 }
 
 class _AppLocalizationsDelegate
