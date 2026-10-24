@@ -86,6 +86,7 @@ void main() {
       expect(h.lock.enabled, isTrue);
       expect(h.lock.bio, isTrue);
       expect(h.bio.prompts, 1);
+      expect(h.bio.snapshots, 1); // the faces enrolled now are the trusted ones
       expect(find.text('kunci nyala'), findsOne);
       expect(find.text('buka pakai face id atau pin'), findsOne);
       expect((await h.repo.verifyPin(lockPin, h.now)).outcome, PinOutcome.ok);
@@ -213,6 +214,7 @@ void main() {
       await tapSwitch(tester, 1);
       expect(h.bio.prompts, 1);
       expect(h.lock.bio, isTrue);
+      expect(h.bio.snapshots, 1);
     });
 
     testWidgets('face id switch on stays off when the system says no', (
@@ -373,6 +375,7 @@ void main() {
       await type(tester, lockPin);
       expect(h.lock.bio, isTrue);
       expect(h.lock.bioChanged, isFalse);
+      expect(h.bio.snapshots, 1); // the new face is trusted from here on
       expect(find.text('face id nyala lagi'), findsOne);
       expect(find.text('buka pakai face id atau pin'), findsOne);
       expect(

@@ -165,4 +165,35 @@ void main() {
       expect(find.text('mibu'), findsNothing);
     });
   });
+
+  group('FLAG_SECURE (Android)', () {
+    testWidgets('on while the lock and blur are on', (tester) async {
+      await open(tester);
+      expect(h.secure.on, isTrue);
+    });
+
+    testWidgets('off with blur off', (tester) async {
+      await open(tester, blur: false);
+      expect(h.secure.on, isFalse);
+    });
+
+    testWidgets('off with the lock off', (tester) async {
+      await open(tester, on: false);
+      expect(h.secure.on, isFalse);
+    });
+
+    testWidgets('follows the settings while the app runs', (tester) async {
+      await open(tester);
+      await unlock(tester);
+      await h.container.read(appLockProvider.notifier).setBlur(false);
+      await tester.pump();
+      expect(h.secure.on, isFalse);
+      await h.container.read(appLockProvider.notifier).setBlur(true);
+      await tester.pump();
+      expect(h.secure.on, isTrue);
+      await h.container.read(appLockProvider.notifier).disable();
+      await tester.pump();
+      expect(h.secure.on, isFalse);
+    });
+  });
 }

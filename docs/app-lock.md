@@ -38,7 +38,16 @@ Rumus ada di `lib/domain/app_lock.dart` (tes: `test/domain/app_lock_test.dart`).
 - **Nyalain biometrik lagi** (setelah berubah): masukin pin dulu.
 - **Layar kunci:** biometrik langsung muncul, gagal / batal pindah ke pin pad. Link "lupa pin?" buka sheet penjelasan (digambar di tempat, layar kunci ada di atas Navigator).
 
-## Belum
+## Native
 
-- Deteksi face id / sidik jari baru ke-enroll (butuh kode native: iOS `evaluatedPolicyDomainState`, Android key Keystore). Repository dan UI-nya udah siap (`markBioChanged`), pemicunya belum ada.
-- Android `FLAG_SECURE` buat blur di daftar app dan blokir screenshot. Android belum dicek di device.
+Satu method channel `com.mibu/lock` (Dart: `lockChannel` di `lib/data/biometrics.dart`), sisi native di `ios/Runner/AppDelegate.swift` dan `android/.../MainActivity.kt`:
+
+| method | iOS | Android |
+|---|---|---|
+| `snapshot` | simpan `evaluatedPolicyDomainState` di UserDefaults | bikin key Keystore AES yang di-invalidate kalau ada biometrik baru (`setInvalidatedByBiometricEnrollment`) |
+| `enrollmentChanged` | bandingin domain state sekarang vs simpanan | `Cipher.init` pakai key itu; `KeyPermanentlyInvalidatedException` = berubah |
+| `secure(bool)` | nggak ngapa-ngapain | `FLAG_SECURE` nyala selama kunci + blur nyala |
+
+`snapshot` dipanggil tiap biometrik dinyalain (`AppLockController.enable` / `setBio(true)`), `enrollmentChanged` tiap layar kunci muncul sebelum prompt otomatis. Belum ada baseline = dianggap nggak berubah. Error native = dianggap nggak berubah / nggak ngapa-ngapain.
+
+Swift udah dicek tipe-nya lawan header Flutter (`swiftc -typecheck`). Kotlin dan perilaku di device belum pernah dijalanin: cek manualnya ada di #30.

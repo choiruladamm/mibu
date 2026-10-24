@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mibu/data/biometrics.dart';
 import 'package:mibu/data/repositories/app_lock_repository.dart';
+import 'package:mibu/data/screen_secure.dart';
 import 'package:mibu/domain/models/app_lock.dart';
 import 'package:mibu/l10n/app_localizations.dart';
 import 'package:mibu/ui/core/app_lock_providers.dart';
@@ -23,6 +24,10 @@ class FakeBiometrics implements Biometrics {
   bool passes;
   int prompts = 0;
 
+  /// Pretend a face / fingerprint was enrolled since the last snapshot.
+  bool changed = false;
+  int snapshots = 0;
+
   @override
   Future<BioKind> kind() async => has;
 
@@ -31,6 +36,23 @@ class FakeBiometrics implements Biometrics {
     prompts++;
     return passes;
   }
+
+  @override
+  Future<void> snapshot() async {
+    snapshots++;
+    changed = false;
+  }
+
+  @override
+  Future<bool> enrollmentChanged() async => changed;
+}
+
+/// Records what the gate asks of the window (Android FLAG_SECURE).
+class FakeScreenSecure implements ScreenSecure {
+  bool? on;
+
+  @override
+  Future<void> set(bool value) async => on = value;
 }
 
 /// A lock in memory: store, repository, pinned clock, fake biometrics.
@@ -39,6 +61,7 @@ class LockHarness {
 
   final store = MemoryLockStore();
   final FakeBiometrics bio;
+  final secure = FakeScreenSecure();
   DateTime now = DateTime(2026, 10, 24, 12);
 
   late final repo = AppLockRepository(store);
@@ -46,6 +69,7 @@ class LockHarness {
     overrides: <Override>[
       lockStoreProvider.overrideWithValue(store),
       biometricsProvider.overrideWithValue(bio),
+      screenSecureProvider.overrideWithValue(secure),
       clockProvider.overrideWithValue(() => now),
     ],
   );

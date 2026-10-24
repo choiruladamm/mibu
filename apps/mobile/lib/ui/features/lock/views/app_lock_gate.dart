@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../data/screen_secure.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../core/app_lock_providers.dart';
 import '../../../core/tokens.dart';
@@ -22,6 +25,7 @@ class AppLockGate extends ConsumerStatefulWidget {
 
 class _AppLockGateState extends ConsumerState<AppLockGate> {
   var _covered = false;
+  bool? _secure; // last FLAG_SECURE sent, so the channel is not hit per frame
 
   late final AppLifecycleListener _lifecycle;
 
@@ -49,6 +53,12 @@ class _AppLockGateState extends ConsumerState<AppLockGate> {
   @override
   Widget build(BuildContext context) {
     final lock = ref.watch(appLockProvider).value;
+    // Android: no screenshots, no content in the app list (iOS: no-op).
+    final secure = (lock?.enabled ?? false) && (lock?.blur ?? false);
+    if (secure != _secure) {
+      _secure = secure;
+      unawaited(ref.read(screenSecureProvider).set(secure));
+    }
     final locked = ref.watch(lockSessionProvider) && (lock?.enabled ?? false);
     final cover = _covered && !locked && (lock?.enabled ?? false) && lock!.blur;
     return Stack(

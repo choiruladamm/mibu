@@ -179,6 +179,44 @@ void main() {
       handle.dispose();
     });
 
+    testWidgets('a face / fingerprint enrolled since: pin only, flagged', (
+      tester,
+    ) async {
+      final handle = tester.ensureSemantics();
+      h = LockHarness(bio: BioKind.face)..bio.changed = true;
+      tester.view
+        ..physicalSize = const Size(390, 844)
+        ..devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      addTearDown(() async {
+        await tester.pumpWidget(const SizedBox());
+        h.dispose();
+      });
+      await h.repo.enable(lockPin, bio: true);
+      await h.load();
+      await tester.pumpWidget(h.app(const LockScreen()));
+      await tester.pump();
+
+      expect(h.bio.prompts, 0); // no prompt for a face we have not met
+      expect(h.lock.bio, isFalse);
+      expect(h.lock.bioChanged, isTrue);
+      expect(find.text('masukin pin kamu'), findsOne);
+      expect(find.bySemanticsLabel('pakai face id'), findsNothing);
+
+      await typePin(tester, lockPin); // the pin still opens it
+      await tester.pump();
+      expect(h.locked, isFalse);
+      handle.dispose();
+    });
+
+    testWidgets('nothing enrolled since: face id comes up as usual', (
+      tester,
+    ) async {
+      await open(tester, bio: BioKind.face, useBio: true);
+      expect(h.bio.prompts, 1);
+      expect(h.lock.bioChanged, isFalse);
+    });
+
     testWidgets('a phone without it: pin only', (tester) async {
       final handle = tester.ensureSemantics();
       await open(tester, useBio: true); // the lock wants it, the phone has none

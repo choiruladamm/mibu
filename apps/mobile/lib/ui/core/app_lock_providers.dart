@@ -14,16 +14,21 @@ class AppLockController extends AsyncNotifier<AppLockState> {
   @override
   Future<AppLockState> build() => _repo.load();
 
-  Future<void> enable(String pin, {required bool bio}) async =>
-      state = AsyncData(await _repo.enable(pin, bio: bio));
+  Future<void> enable(String pin, {required bool bio}) async {
+    state = AsyncData(await _repo.enable(pin, bio: bio));
+    if (bio) await ref.read(biometricsProvider).snapshot();
+  }
 
   Future<void> disable() async => state = AsyncData(await _repo.disable());
 
   Future<void> changePin(String pin) async =>
       state = AsyncData(await _repo.changePin(pin));
 
-  Future<void> setBio(bool on) async =>
-      state = AsyncData(await _repo.setBio(on));
+  Future<void> setBio(bool on) async {
+    state = AsyncData(await _repo.setBio(on));
+    // From now on, a new face / fingerprint is a change.
+    if (on) await ref.read(biometricsProvider).snapshot();
+  }
 
   Future<void> markBioChanged() async =>
       state = AsyncData(await _repo.markBioChanged());

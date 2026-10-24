@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:local_auth/local_auth.dart';
 
@@ -12,7 +13,18 @@ abstract interface class Biometrics {
 
   /// Shows the system prompt; false on failure, cancel or anything odd.
   Future<bool> authenticate(String reason);
+
+  /// Remembers the biometrics enrolled now, as the ones the lock trusts.
+  Future<void> snapshot();
+
+  /// Whether a face / fingerprint was enrolled since [snapshot]. False when
+  /// there is nothing to compare with, or it cannot be told.
+  Future<bool> enrollmentChanged();
 }
+
+/// Native side in AppDelegate.swift and MainActivity.kt: `local_auth` does not
+/// expose enrollment changes, nor FLAG_SECURE.
+const lockChannel = MethodChannel('com.mibu/lock');
 
 class LocalAuthBiometrics implements Biometrics {
   final _auth = LocalAuthentication();
@@ -41,6 +53,24 @@ class LocalAuthBiometrics implements Biometrics {
         localizedReason: reason,
         biometricOnly: true,
       );
+    } on Exception {
+      return false;
+    }
+  }
+
+  @override
+  Future<void> snapshot() async {
+    try {
+      await lockChannel.invokeMethod<void>('snapshot');
+    } on Exception {
+      // no native side (tests, unsupported platform): nothing to remember
+    }
+  }
+
+  @override
+  Future<bool> enrollmentChanged() async {
+    try {
+      return await lockChannel.invokeMethod<bool>('enrollmentChanged') ?? false;
     } on Exception {
       return false;
     }

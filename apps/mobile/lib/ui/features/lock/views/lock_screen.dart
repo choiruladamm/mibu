@@ -46,6 +46,13 @@ class _LockScreenState extends ConsumerState<LockScreen> with HoldClock {
     if (!mounted) return;
     setState(() => _kind = kind);
     syncHold(onEnd: () => _wrong = false);
+    // A new face / fingerprint since face id was switched on: pin only until
+    // the pin turns it back on (99.10s).
+    final bio = ref.read(biometricsProvider);
+    if (_bioUsable && await bio.enrollmentChanged()) {
+      await ref.read(appLockProvider.notifier).markBioChanged();
+      if (!mounted) return;
+    }
     if (_bioUsable) await _tryBio();
   }
 
