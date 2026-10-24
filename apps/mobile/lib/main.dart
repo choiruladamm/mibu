@@ -3,9 +3,11 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 
+import 'data/repositories/app_lock_repository.dart';
 import 'domain/models/finance.dart';
 import 'l10n/app_localizations.dart';
 import 'routing/router.dart';
+import 'ui/core/app_lock_providers.dart';
 import 'ui/core/clock.dart';
 import 'ui/core/dates.dart';
 import 'ui/core/finance_providers.dart';
@@ -35,7 +37,15 @@ Future<ProviderContainer> bootstrap({
   container.listen(homeProvider, (_, _) {});
   // The router picks onboarding vs beranda from it (native splash still up).
   container.listen(profileProvider, (_, _) {});
-  await container.read(profileProvider.future);
+  final profile = await container.read(profileProvider.future);
+  // The keychain outlives an uninstall; the database doesn't. A fresh install
+  // (not onboarded) must not inherit an old pin.
+  if (!profile.onboarded) {
+    await container.read(appLockRepositoryProvider).wipe();
+  }
+  // Load the lock before the first frame, so beranda never shows through it.
+  container.listen(appLockProvider, (_, _) {});
+  await container.read(appLockProvider.future);
   return container;
 }
 
