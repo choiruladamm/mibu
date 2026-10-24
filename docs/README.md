@@ -15,6 +15,7 @@
 | [period-ledger.md](period-ledger.md) | Saldo = pemasukan − pengeluaran per periode gajian, tanpa carryover |
 | [hide-income.md](hide-income.md) | Sembunyiin nominal pemasukan |
 | [import.md](import.md) | Import CSV (mibu sendiri + Excel) |
+| [app-lock.md](app-lock.md) | Kunci app: pin 6 digit + face id / sidik jari, penahanan, penyimpanan |
 | [ideas/need-want.md](ideas/need-want.md) | Draft: kebutuhan vs keinginan |
 
 Aturan docs: satu file per topik, nama kecil dengan tanda hubung. Ide belum fix masuk `ideas/`, pindah ke root `docs/` setelah diputusin. Nomor screen mengikuti board (direstrukturisasi 2026-10-10).

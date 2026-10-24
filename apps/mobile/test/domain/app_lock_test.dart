@@ -15,7 +15,15 @@ void main() {
 
   group('isWeakPin', () {
     test('same digit and straight runs are weak', () {
-      for (final p in ['111111', '000000', '123456', '234567', '654321']) {
+      for (final p in [
+        '111111',
+        '000000',
+        '123456',
+        '234567',
+        '654321',
+        '890123', // wraps past 9
+        '098765',
+      ]) {
         expect(isWeakPin(p), isTrue, reason: p);
       }
     });

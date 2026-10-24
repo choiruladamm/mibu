@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/biometrics.dart';
 import '../../data/repositories/app_lock_repository.dart';
 import '../../domain/app_lock.dart';
 import '../../domain/models/app_lock.dart';
@@ -76,4 +77,9 @@ class LockSession extends Notifier<bool> {
 
 final lockSessionProvider = NotifierProvider<LockSession, bool>(
   LockSession.new,
+);
+
+/// Which biometric the phone can use right now.
+final bioKindProvider = FutureProvider<BioKind>(
+  (ref) => ref.watch(biometricsProvider).kind(),
 );

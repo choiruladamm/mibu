@@ -30,6 +30,7 @@ class SheetFrame extends StatelessWidget {
     this.actions = const [],
     this.titleSize = 22,
     this.sub,
+    this.eyebrow,
     this.scrollable = true,
     this.close,
     this.handleDrag = false,
@@ -37,6 +38,7 @@ class SheetFrame extends StatelessWidget {
 
   final String title;
   final String? sub; // muted line under the title, inside the header
+  final String? eyebrow; // small muted line over the title ("1 dari 3")
   final double height, titleSize;
   final List<Widget> actions;
   final Widget child;
@@ -78,6 +80,14 @@ class SheetFrame extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       spacing: 4,
                       children: [
+                        if (eyebrow != null && eyebrow!.isNotEmpty)
+                          Text(
+                            eyebrow!,
+                            style: AppText.caption.copyWith(
+                              fontSize: 12,
+                              color: AppColors.muted,
+                            ),
+                          ),
                         Semantics(
                           header: true,
                           child: Text(

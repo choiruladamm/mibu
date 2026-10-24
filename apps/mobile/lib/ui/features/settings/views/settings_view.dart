@@ -4,10 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../domain/models/app_lock.dart';
 import '../../../../domain/models/finance.dart';
 import '../../../../domain/period.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../routing/router.dart';
+import '../../../core/app_lock_providers.dart';
 import '../../../core/dates.dart';
 import '../../../core/finance_providers.dart';
 import '../../../core/money.dart';
@@ -17,6 +19,7 @@ import '../../../core/widgets/meta_line.dart';
 import '../../../core/widgets/tab_bar.dart';
 import '../../budget/views/budget_sheet.dart';
 import '../../categories/views/category_manage_sheet.dart';
+import '../../lock/view_models/lock_labels.dart';
 import '../view_models/settings_view_model.dart';
 import 'hide_sheet.dart';
 import 'import_sheet.dart';
@@ -24,7 +27,7 @@ import 'payday_sheet.dart';
 
 final _payDay = DateFormat('EEE d MMM', 'id');
 
-/// 05.1 pengaturan. Reminder, rekap, face id, mode and backup are post-MVP.
+/// 05.1 pengaturan. Reminder, rekap, mode and backup are post-MVP.
 class SettingsView extends ConsumerWidget {
   const SettingsView({super.key});
 
@@ -34,6 +37,8 @@ class SettingsView extends ConsumerWidget {
     if (s == null) return const Scaffold();
     final l = AppLocalizations.of(context)!;
     final version = ref.watch(appVersionProvider).value;
+    final lock = ref.watch(appLockProvider).value;
+    final bioKind = ref.watch(bioKindProvider).value ?? BioKind.none;
 
     Widget section(String title, List<Widget> rows) => Padding(
       padding: const EdgeInsets.only(
@@ -165,6 +170,12 @@ class SettingsView extends ConsumerWidget {
                       title: l.settingsHide,
                       hint: hideLabel(l, s.hideAmounts),
                       onTap: () => editHideAmounts(context, ref),
+                    ),
+                    _Row(
+                      icon: HugeIcons.strokeRoundedLock,
+                      title: l.settingsLock,
+                      hint: lock?.modeLabel(l, bioKind),
+                      onTap: () => context.push(Routes.lock),
                     ),
                   ]),
                   section(l.settingsData, [

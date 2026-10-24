@@ -16,15 +16,15 @@ const _holds = [
 
 bool isValidPin(String pin) => RegExp('^\\d{$pinLength}\$').hasMatch(pin);
 
-/// Same digit all through, or a straight run up or down (111111, 123456,
-/// 654321): turned down when making a pin.
+/// Same digit all through, or a straight run up or down that may wrap past
+/// 9 (111111, 123456, 654321, 890123): turned down when making a pin.
 bool isWeakPin(String pin) {
   final d = pin.codeUnits;
   if (d.length < 2) return true;
-  final step = d[1] - d[0];
-  if (step.abs() > 1) return false;
+  final step = (d[1] - d[0] + 10) % 10;
+  if (step != 0 && step != 1 && step != 9) return false;
   for (var i = 1; i < d.length; i++) {
-    if (d[i] - d[i - 1] != step) return false;
+    if ((d[i] - d[i - 1] + 10) % 10 != step) return false;
   }
   return true;
 }

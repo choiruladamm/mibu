@@ -1786,5 +1786,178 @@
   "lockForgotLocal": "mibu cuma nyimpen data di hp ini",
   "lockForgotReinstall": "jalan satu-satunya: instal ulang mibu",
   "lockForgotExport": "catatan cuma bisa balik kalau kamu punya file export csv",
-  "lockForgotOk": "ngerti"
+  "lockForgotOk": "ngerti",
+  "settingsLock": "kunci app",
+  "lockModeOff": "mati",
+  "lockModeBio": "{bio} + pin",
+  "@lockModeBio": {
+    "placeholders": {
+      "bio": {
+        "type": "String"
+      }
+    }
+  },
+  "lockModePin": "pin aja",
+  "lockMain": "kunci mibu",
+  "lockMainOn": "minta {how} tiap buka",
+  "@lockMainOn": {
+    "placeholders": {
+      "how": {
+        "type": "String"
+      }
+    }
+  },
+  "lockHowBio": "{bio} atau pin",
+  "@lockHowBio": {
+    "placeholders": {
+      "bio": {
+        "type": "String"
+      }
+    }
+  },
+  "lockHowPin": "pin",
+  "lockOffNote": "biar orang lain yang pegang hp kamu nggak bisa buka catatan & nominal di mibu.",
+  "lockSectionOpen": "cara buka",
+  "lockUseBio": "pakai {bio}",
+  "@lockUseBio": {
+    "placeholders": {
+      "bio": {
+        "type": "String"
+      }
+    }
+  },
+  "lockUseBioSub": "pin tetap bisa dipakai",
+  "lockNoBio": "hp ini belum ada face id / sidik jari yang aktif. nyalain dulu di pengaturan hp, nanti pilihannya muncul di sini.",
+  "lockBioChanged": "{bio} berubah, masukin pin buat nyalain lagi",
+  "@lockBioChanged": {
+    "placeholders": {
+      "bio": {
+        "type": "String"
+      }
+    }
+  },
+  "lockChangePin": "ganti pin",
+  "lockSectionAfter": "kunci lagi setelah ditinggal",
+  "lockAfterNow": "langsung",
+  "lockAfterMin": "{n} menit",
+  "@lockAfterMin": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "lockBlur": "blur pas pindah app",
+  "lockBlurSubIos": "isi mibu nggak keliatan di daftar app",
+  "lockBlurSubAndroid": "isi mibu nggak keliatan di daftar app, screenshot juga diblokir",
+  "lockCardBody": "semua catatan mibu cuma disimpen di hp ini. kalau lupa pin{or}, mibu harus diinstal ulang dan catatan cuma bisa balik dari file export.",
+  "@lockCardBody": {
+    "placeholders": {
+      "or": {
+        "type": "String"
+      }
+    }
+  },
+  "lockCardOr": " dan {bio} lagi nggak bisa",
+  "@lockCardOr": {
+    "placeholders": {
+      "bio": {
+        "type": "String"
+      }
+    }
+  },
+  "lockCardExport": "export ke csv sekarang",
+  "lockStep": "{n} dari {total}",
+  "@lockStep": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "lockMakeTitle": "bikin pin",
+  "lockMakeSub": "6 angka, jangan sama kayak pin hp",
+  "lockAgainTitle": "ketik sekali lagi",
+  "lockAgainSub": "biar yakin nggak salah ketik",
+  "lockBioTitle": "pakai {bio} juga?",
+  "@lockBioTitle": {
+    "placeholders": {
+      "bio": {
+        "type": "String"
+      }
+    }
+  },
+  "lockOffTitle": "matiin kunci?",
+  "lockVerifySub": "masukin pin dulu",
+  "lockBioAgainTitle": "nyalain {bio} lagi?",
+  "@lockBioAgainTitle": {
+    "placeholders": {
+      "bio": {
+        "type": "String"
+      }
+    }
+  },
+  "lockChangeEyebrow": "ganti pin",
+  "lockOldTitle": "pin lama",
+  "lockOldSub": "masukin pin yang sekarang",
+  "lockNewTitle": "pin baru",
+  "lockNewSub": "6 angka",
+  "lockNewAgainTitle": "ketik pin baru lagi",
+  "lockPadMismatch": "pin nggak sama, ulang dari awal ya",
+  "lockPadWeak": "pin ini gampang ketebak, coba yang lain",
+  "lockPadKeep": "pin nggak bisa direset, simpen baik-baik",
+  "lockBioBody": "buka mibu lebih cepet. kalau {bio} gagal, tinggal pakai pin.{ios}",
+  "@lockBioBody": {
+    "placeholders": {
+      "bio": {
+        "type": "String"
+      },
+      "ios": {
+        "type": "String"
+      }
+    }
+  },
+  "lockBioIosNote": " abis ini iOS bakal minta izin sekali.",
+  "lockBioYes": "pakai {bio}",
+  "@lockBioYes": {
+    "placeholders": {
+      "bio": {
+        "type": "String"
+      }
+    }
+  },
+  "lockBioNo": "nanti aja, pin aja",
+  "lockToastOn": "kunci nyala",
+  "lockToastOnBio": "buka pakai {bio} atau pin",
+  "@lockToastOnBio": {
+    "placeholders": {
+      "bio": {
+        "type": "String"
+      }
+    }
+  },
+  "lockToastOnPin": "buka mibu pakai pin",
+  "lockToastOnLater": "buka pakai pin, {bio} bisa dinyalain nanti",
+  "@lockToastOnLater": {
+    "placeholders": {
+      "bio": {
+        "type": "String"
+      }
+    }
+  },
+  "lockToastOff": "kunci mati",
+  "lockToastOffSub": "mibu kebuka tanpa pin",
+  "lockToastChanged": "pin diganti",
+  "lockToastChangedSub": "pakai pin baru mulai sekarang",
+  "lockToastBioOn": "{bio} nyala lagi",
+  "@lockToastBioOn": {
+    "placeholders": {
+      "bio": {
+        "type": "String"
+      }
+    }
+  }
 }

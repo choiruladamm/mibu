@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -9,10 +7,10 @@ import '../../../../domain/app_lock.dart';
 import '../../../../domain/models/app_lock.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../core/app_lock_providers.dart';
-import '../../../core/clock.dart';
 import '../../../core/tokens.dart';
 import '../../../core/widgets/pin_pad.dart';
 import '../../../core/widgets/sheet.dart';
+import '../hold_clock.dart';
 
 /// 99.10j–n: what stands between the app and its notes. Face id / sidik jari
 /// comes up by itself; a miss or a cancel leaves the pin pad. Five wrong pins
@@ -27,14 +25,12 @@ class LockScreen extends ConsumerStatefulWidget {
   ConsumerState<LockScreen> createState() => _LockScreenState();
 }
 
-class _LockScreenState extends ConsumerState<LockScreen> {
+class _LockScreenState extends ConsumerState<LockScreen> with HoldClock {
   var _pin = '';
   var _wrong = false; // the last pin was wrong
   var _busy = false; // a pin is being checked, or the system prompt is up
   var _forgot = false;
   var _kind = BioKind.none;
-  late var _now = ref.read(clockProvider)();
-  Timer? _tick;
 
   @override
   void initState() {
@@ -42,44 +38,15 @@ class _LockScreenState extends ConsumerState<LockScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _start());
   }
 
-  @override
-  void dispose() {
-    _tick?.cancel();
-    super.dispose();
-  }
-
-  AppLockState get _lock => ref.read(appLockProvider).value ?? AppLockState.off;
-
   bool get _bioUsable =>
-      _lock.bio && !_lock.bioChanged && _kind != BioKind.none;
+      lockNow.bio && !lockNow.bioChanged && _kind != BioKind.none;
 
   Future<void> _start() async {
     final kind = await ref.read(biometricsProvider).kind();
     if (!mounted) return;
     setState(() => _kind = kind);
-    _syncTick();
+    syncHold(onEnd: () => _wrong = false);
     if (_bioUsable) await _tryBio();
-  }
-
-  /// One tick a second while the pad is held, none otherwise.
-  void _syncTick() {
-    final held = _lock.holdLeft(_now) != null;
-    if (held && _tick == null) {
-      _tick = Timer.periodic(const Duration(seconds: 1), (_) {
-        if (!mounted) return;
-        setState(() {
-          _now = ref.read(clockProvider)();
-          if (_lock.holdLeft(_now) == null) {
-            _wrong = false;
-            _tick?.cancel();
-            _tick = null;
-          }
-        });
-      });
-    } else if (!held) {
-      _tick?.cancel();
-      _tick = null;
-    }
   }
 
   Future<void> _tryBio() async {
@@ -95,7 +62,7 @@ class _LockScreenState extends ConsumerState<LockScreen> {
   }
 
   Future<void> _key(String k) async {
-    if (_busy || _lock.holdLeft(_now) != null) return;
+    if (_busy || lockNow.holdLeft(holdNow) != null) return;
     setState(() {
       _pin += k;
       _wrong = false;
@@ -113,9 +80,8 @@ class _LockScreenState extends ConsumerState<LockScreen> {
     setState(() {
       _pin = '';
       _wrong = outcome == PinOutcome.wrong;
-      _now = ref.read(clockProvider)();
     });
-    _syncTick();
+    syncHold(onEnd: () => _wrong = false);
   }
 
   void _back() {
@@ -130,7 +96,7 @@ class _LockScreenState extends ConsumerState<LockScreen> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
     final lock = ref.watch(appLockProvider).value ?? AppLockState.off;
-    final left = lock.holdLeft(_now);
+    final left = lock.holdLeft(holdNow);
     final bioName = _kind == BioKind.face ? l.lockBioFace : l.lockBioFinger;
     final message = left != null
         ? (lock.wrongTries <= triesPerHold

@@ -2291,4 +2291,204 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get lockForgotOk => 'ngerti';
+
+  @override
+  String get settingsLock => 'kunci app';
+
+  @override
+  String get lockModeOff => 'mati';
+
+  @override
+  String lockModeBio(String bio) {
+    return '$bio + pin';
+  }
+
+  @override
+  String get lockModePin => 'pin aja';
+
+  @override
+  String get lockMain => 'kunci mibu';
+
+  @override
+  String lockMainOn(String how) {
+    return 'minta $how tiap buka';
+  }
+
+  @override
+  String lockHowBio(String bio) {
+    return '$bio atau pin';
+  }
+
+  @override
+  String get lockHowPin => 'pin';
+
+  @override
+  String get lockOffNote =>
+      'biar orang lain yang pegang hp kamu nggak bisa buka catatan & nominal di mibu.';
+
+  @override
+  String get lockSectionOpen => 'cara buka';
+
+  @override
+  String lockUseBio(String bio) {
+    return 'pakai $bio';
+  }
+
+  @override
+  String get lockUseBioSub => 'pin tetap bisa dipakai';
+
+  @override
+  String get lockNoBio =>
+      'hp ini belum ada face id / sidik jari yang aktif. nyalain dulu di pengaturan hp, nanti pilihannya muncul di sini.';
+
+  @override
+  String lockBioChanged(String bio) {
+    return '$bio berubah, masukin pin buat nyalain lagi';
+  }
+
+  @override
+  String get lockChangePin => 'ganti pin';
+
+  @override
+  String get lockSectionAfter => 'kunci lagi setelah ditinggal';
+
+  @override
+  String get lockAfterNow => 'langsung';
+
+  @override
+  String lockAfterMin(int n) {
+    return '$n menit';
+  }
+
+  @override
+  String get lockBlur => 'blur pas pindah app';
+
+  @override
+  String get lockBlurSubIos => 'isi mibu nggak keliatan di daftar app';
+
+  @override
+  String get lockBlurSubAndroid =>
+      'isi mibu nggak keliatan di daftar app, screenshot juga diblokir';
+
+  @override
+  String lockCardBody(String or) {
+    return 'semua catatan mibu cuma disimpen di hp ini. kalau lupa pin$or, mibu harus diinstal ulang dan catatan cuma bisa balik dari file export.';
+  }
+
+  @override
+  String lockCardOr(String bio) {
+    return ' dan $bio lagi nggak bisa';
+  }
+
+  @override
+  String get lockCardExport => 'export ke csv sekarang';
+
+  @override
+  String lockStep(int n, int total) {
+    return '$n dari $total';
+  }
+
+  @override
+  String get lockMakeTitle => 'bikin pin';
+
+  @override
+  String get lockMakeSub => '6 angka, jangan sama kayak pin hp';
+
+  @override
+  String get lockAgainTitle => 'ketik sekali lagi';
+
+  @override
+  String get lockAgainSub => 'biar yakin nggak salah ketik';
+
+  @override
+  String lockBioTitle(String bio) {
+    return 'pakai $bio juga?';
+  }
+
+  @override
+  String get lockOffTitle => 'matiin kunci?';
+
+  @override
+  String get lockVerifySub => 'masukin pin dulu';
+
+  @override
+  String lockBioAgainTitle(String bio) {
+    return 'nyalain $bio lagi?';
+  }
+
+  @override
+  String get lockChangeEyebrow => 'ganti pin';
+
+  @override
+  String get lockOldTitle => 'pin lama';
+
+  @override
+  String get lockOldSub => 'masukin pin yang sekarang';
+
+  @override
+  String get lockNewTitle => 'pin baru';
+
+  @override
+  String get lockNewSub => '6 angka';
+
+  @override
+  String get lockNewAgainTitle => 'ketik pin baru lagi';
+
+  @override
+  String get lockPadMismatch => 'pin nggak sama, ulang dari awal ya';
+
+  @override
+  String get lockPadWeak => 'pin ini gampang ketebak, coba yang lain';
+
+  @override
+  String get lockPadKeep => 'pin nggak bisa direset, simpen baik-baik';
+
+  @override
+  String lockBioBody(String bio, String ios) {
+    return 'buka mibu lebih cepet. kalau $bio gagal, tinggal pakai pin.$ios';
+  }
+
+  @override
+  String get lockBioIosNote => ' abis ini iOS bakal minta izin sekali.';
+
+  @override
+  String lockBioYes(String bio) {
+    return 'pakai $bio';
+  }
+
+  @override
+  String get lockBioNo => 'nanti aja, pin aja';
+
+  @override
+  String get lockToastOn => 'kunci nyala';
+
+  @override
+  String lockToastOnBio(String bio) {
+    return 'buka pakai $bio atau pin';
+  }
+
+  @override
+  String get lockToastOnPin => 'buka mibu pakai pin';
+
+  @override
+  String lockToastOnLater(String bio) {
+    return 'buka pakai pin, $bio bisa dinyalain nanti';
+  }
+
+  @override
+  String get lockToastOff => 'kunci mati';
+
+  @override
+  String get lockToastOffSub => 'mibu kebuka tanpa pin';
+
+  @override
+  String get lockToastChanged => 'pin diganti';
+
+  @override
+  String get lockToastChangedSub => 'pakai pin baru mulai sekarang';
+
+  @override
+  String lockToastBioOn(String bio) {
+    return '$bio nyala lagi';
+  }
 }

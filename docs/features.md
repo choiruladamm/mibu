@@ -72,7 +72,7 @@ Tanda: **[diupdate]** = aturan/perilaku berubah dari design, **[perlu design]** 
   - duit: `buat apa aja · nama, ikon & limit` + tumpukan 3 ikon paling sering dipakai (+n sisanya) → 07.1 (ganti ikon = 2 tap), `limit bulanan` → 03.1.
   - `tanggal gajian` · "jum 23 okt • 9 hari lagi" (tanggal yang beneran dihitung, biar gajian weekend yang digeser nggak keliatan salah hitung) / "gajian hari ini" / "gajian telat n hari" · "tiap tgl 25" → PaydaySheet 00.24 (05.1e–g): chip 1 · 10 · 15 · 25 (tag "umum") · 28 · akhir · lain… (grid 1–31), kartu ink "gajian berikutnya rab 28 okt · 14 hari lagi" + "aman jajan jadi Rp… → Rp…/hari", catatan "budget & limit tetap per bulan, 1–31", `simpan tgl 28` → toast "gajian jadi tgl 28 · batalin". Tanggal gajian jatuh sabtu / minggu dihitung jumat sebelumnya; opsi "cair duluan kalau libur" + tanggal merah fase 2.
   - kebiasaan: `pengingat harian` (21.00, switch), `rekap mingguan` (switch). **[ditunda]**
-  - privasi: `sembunyiin nominal` (tampil ••• sampai di-tap). `kunci pakai face id` **[ditunda]**.
+  - privasi: `sembunyiin nominal` (tampil ••• sampai di-tap). `kunci app ›` (99.10, sub = mode: face id + pin / sidik jari + pin / pin aja / mati), [app-lock.md](app-lock.md).
   - tampilan: `mode` terang / gelap / auto. **[ditunda]** (light only)
   - data: `ekspor ke csv` (board nulis "export"), `import dari csv` (05.1l–o, [import.md](import.md)). `backup & pulihin` (iCloud) **[ditunda]**.
   - Footer versi.
@@ -147,7 +147,7 @@ Tanda: **[diupdate]** = aturan/perilaku berubah dari design, **[perlu design]** 
 | 99.3 | Catatan + tag di detail transaksi (A bawah rincian, B di header), ubah via NoteSheet |
 | 99.4 | (#4, #5) Tag: daftar, bikin, ganti nama, gabung, hapus + batalin, tag cepat di NoteSheet, TagManage |
 | 99.6 | Label budget di grafik yang ketutup pill (opsi A / B / C) |
-| 99.10 | (#3) Kunci app: Face ID / sidik jari + PIN, layar kunci, salah 5 kali ditahan 30 detik, PinPad (00.31) |
+| 99.10 | (#3) Kunci app: Face ID / sidik jari + PIN, layar kunci, ditahan 30 dtk → 15 mnt, PinPad (00.31), [app-lock.md](app-lock.md) |
 
 ## Entitas
 
@@ -156,7 +156,7 @@ Tanda: **[diupdate]** = aturan/perilaku berubah dari design, **[perlu design]** 
 - **Category** — emoji, nama, jenis (pengeluaran/pemasukan), `monthlyLimit` (null = cuma dicatat), urutan. Di UI namanya "buat apa"; yang pakai limit = toples di tab kantong. Lihat mvp.md › Buat apa, limit, kantong.
 - **Transaction** — tipe, nominal (int IDR), kategori, tempat, tanggal + jam, catatan (≤80), tag (≤3), berulang, foto struk, no. struk. Perlu soft delete buat undo.
 - **Goal (impian)** — field belum jelas.
-- **Settings** — pengingat + jam, rekap mingguan, kunci biometrik, sembunyiin nominal, tema.
+- **Settings** — pengingat + jam, rekap mingguan, sembunyiin nominal, kunci app (#3), tema.
 
 ## Belum jelas / belum didesain
 

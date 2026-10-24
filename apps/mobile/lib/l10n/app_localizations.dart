@@ -3723,6 +3723,336 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'ngerti'**
   String get lockForgotOk;
+
+  /// No description provided for @settingsLock.
+  ///
+  /// In id, this message translates to:
+  /// **'kunci app'**
+  String get settingsLock;
+
+  /// No description provided for @lockModeOff.
+  ///
+  /// In id, this message translates to:
+  /// **'mati'**
+  String get lockModeOff;
+
+  /// No description provided for @lockModeBio.
+  ///
+  /// In id, this message translates to:
+  /// **'{bio} + pin'**
+  String lockModeBio(String bio);
+
+  /// No description provided for @lockModePin.
+  ///
+  /// In id, this message translates to:
+  /// **'pin aja'**
+  String get lockModePin;
+
+  /// No description provided for @lockMain.
+  ///
+  /// In id, this message translates to:
+  /// **'kunci mibu'**
+  String get lockMain;
+
+  /// No description provided for @lockMainOn.
+  ///
+  /// In id, this message translates to:
+  /// **'minta {how} tiap buka'**
+  String lockMainOn(String how);
+
+  /// No description provided for @lockHowBio.
+  ///
+  /// In id, this message translates to:
+  /// **'{bio} atau pin'**
+  String lockHowBio(String bio);
+
+  /// No description provided for @lockHowPin.
+  ///
+  /// In id, this message translates to:
+  /// **'pin'**
+  String get lockHowPin;
+
+  /// No description provided for @lockOffNote.
+  ///
+  /// In id, this message translates to:
+  /// **'biar orang lain yang pegang hp kamu nggak bisa buka catatan & nominal di mibu.'**
+  String get lockOffNote;
+
+  /// No description provided for @lockSectionOpen.
+  ///
+  /// In id, this message translates to:
+  /// **'cara buka'**
+  String get lockSectionOpen;
+
+  /// No description provided for @lockUseBio.
+  ///
+  /// In id, this message translates to:
+  /// **'pakai {bio}'**
+  String lockUseBio(String bio);
+
+  /// No description provided for @lockUseBioSub.
+  ///
+  /// In id, this message translates to:
+  /// **'pin tetap bisa dipakai'**
+  String get lockUseBioSub;
+
+  /// No description provided for @lockNoBio.
+  ///
+  /// In id, this message translates to:
+  /// **'hp ini belum ada face id / sidik jari yang aktif. nyalain dulu di pengaturan hp, nanti pilihannya muncul di sini.'**
+  String get lockNoBio;
+
+  /// No description provided for @lockBioChanged.
+  ///
+  /// In id, this message translates to:
+  /// **'{bio} berubah, masukin pin buat nyalain lagi'**
+  String lockBioChanged(String bio);
+
+  /// No description provided for @lockChangePin.
+  ///
+  /// In id, this message translates to:
+  /// **'ganti pin'**
+  String get lockChangePin;
+
+  /// No description provided for @lockSectionAfter.
+  ///
+  /// In id, this message translates to:
+  /// **'kunci lagi setelah ditinggal'**
+  String get lockSectionAfter;
+
+  /// No description provided for @lockAfterNow.
+  ///
+  /// In id, this message translates to:
+  /// **'langsung'**
+  String get lockAfterNow;
+
+  /// No description provided for @lockAfterMin.
+  ///
+  /// In id, this message translates to:
+  /// **'{n} menit'**
+  String lockAfterMin(int n);
+
+  /// No description provided for @lockBlur.
+  ///
+  /// In id, this message translates to:
+  /// **'blur pas pindah app'**
+  String get lockBlur;
+
+  /// No description provided for @lockBlurSubIos.
+  ///
+  /// In id, this message translates to:
+  /// **'isi mibu nggak keliatan di daftar app'**
+  String get lockBlurSubIos;
+
+  /// No description provided for @lockBlurSubAndroid.
+  ///
+  /// In id, this message translates to:
+  /// **'isi mibu nggak keliatan di daftar app, screenshot juga diblokir'**
+  String get lockBlurSubAndroid;
+
+  /// No description provided for @lockCardBody.
+  ///
+  /// In id, this message translates to:
+  /// **'semua catatan mibu cuma disimpen di hp ini. kalau lupa pin{or}, mibu harus diinstal ulang dan catatan cuma bisa balik dari file export.'**
+  String lockCardBody(String or);
+
+  /// No description provided for @lockCardOr.
+  ///
+  /// In id, this message translates to:
+  /// **' dan {bio} lagi nggak bisa'**
+  String lockCardOr(String bio);
+
+  /// No description provided for @lockCardExport.
+  ///
+  /// In id, this message translates to:
+  /// **'export ke csv sekarang'**
+  String get lockCardExport;
+
+  /// No description provided for @lockStep.
+  ///
+  /// In id, this message translates to:
+  /// **'{n} dari {total}'**
+  String lockStep(int n, int total);
+
+  /// No description provided for @lockMakeTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'bikin pin'**
+  String get lockMakeTitle;
+
+  /// No description provided for @lockMakeSub.
+  ///
+  /// In id, this message translates to:
+  /// **'6 angka, jangan sama kayak pin hp'**
+  String get lockMakeSub;
+
+  /// No description provided for @lockAgainTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'ketik sekali lagi'**
+  String get lockAgainTitle;
+
+  /// No description provided for @lockAgainSub.
+  ///
+  /// In id, this message translates to:
+  /// **'biar yakin nggak salah ketik'**
+  String get lockAgainSub;
+
+  /// No description provided for @lockBioTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'pakai {bio} juga?'**
+  String lockBioTitle(String bio);
+
+  /// No description provided for @lockOffTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'matiin kunci?'**
+  String get lockOffTitle;
+
+  /// No description provided for @lockVerifySub.
+  ///
+  /// In id, this message translates to:
+  /// **'masukin pin dulu'**
+  String get lockVerifySub;
+
+  /// No description provided for @lockBioAgainTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'nyalain {bio} lagi?'**
+  String lockBioAgainTitle(String bio);
+
+  /// No description provided for @lockChangeEyebrow.
+  ///
+  /// In id, this message translates to:
+  /// **'ganti pin'**
+  String get lockChangeEyebrow;
+
+  /// No description provided for @lockOldTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'pin lama'**
+  String get lockOldTitle;
+
+  /// No description provided for @lockOldSub.
+  ///
+  /// In id, this message translates to:
+  /// **'masukin pin yang sekarang'**
+  String get lockOldSub;
+
+  /// No description provided for @lockNewTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'pin baru'**
+  String get lockNewTitle;
+
+  /// No description provided for @lockNewSub.
+  ///
+  /// In id, this message translates to:
+  /// **'6 angka'**
+  String get lockNewSub;
+
+  /// No description provided for @lockNewAgainTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'ketik pin baru lagi'**
+  String get lockNewAgainTitle;
+
+  /// No description provided for @lockPadMismatch.
+  ///
+  /// In id, this message translates to:
+  /// **'pin nggak sama, ulang dari awal ya'**
+  String get lockPadMismatch;
+
+  /// No description provided for @lockPadWeak.
+  ///
+  /// In id, this message translates to:
+  /// **'pin ini gampang ketebak, coba yang lain'**
+  String get lockPadWeak;
+
+  /// No description provided for @lockPadKeep.
+  ///
+  /// In id, this message translates to:
+  /// **'pin nggak bisa direset, simpen baik-baik'**
+  String get lockPadKeep;
+
+  /// No description provided for @lockBioBody.
+  ///
+  /// In id, this message translates to:
+  /// **'buka mibu lebih cepet. kalau {bio} gagal, tinggal pakai pin.{ios}'**
+  String lockBioBody(String bio, String ios);
+
+  /// No description provided for @lockBioIosNote.
+  ///
+  /// In id, this message translates to:
+  /// **' abis ini iOS bakal minta izin sekali.'**
+  String get lockBioIosNote;
+
+  /// No description provided for @lockBioYes.
+  ///
+  /// In id, this message translates to:
+  /// **'pakai {bio}'**
+  String lockBioYes(String bio);
+
+  /// No description provided for @lockBioNo.
+  ///
+  /// In id, this message translates to:
+  /// **'nanti aja, pin aja'**
+  String get lockBioNo;
+
+  /// No description provided for @lockToastOn.
+  ///
+  /// In id, this message translates to:
+  /// **'kunci nyala'**
+  String get lockToastOn;
+
+  /// No description provided for @lockToastOnBio.
+  ///
+  /// In id, this message translates to:
+  /// **'buka pakai {bio} atau pin'**
+  String lockToastOnBio(String bio);
+
+  /// No description provided for @lockToastOnPin.
+  ///
+  /// In id, this message translates to:
+  /// **'buka mibu pakai pin'**
+  String get lockToastOnPin;
+
+  /// No description provided for @lockToastOnLater.
+  ///
+  /// In id, this message translates to:
+  /// **'buka pakai pin, {bio} bisa dinyalain nanti'**
+  String lockToastOnLater(String bio);
+
+  /// No description provided for @lockToastOff.
+  ///
+  /// In id, this message translates to:
+  /// **'kunci mati'**
+  String get lockToastOff;
+
+  /// No description provided for @lockToastOffSub.
+  ///
+  /// In id, this message translates to:
+  /// **'mibu kebuka tanpa pin'**
+  String get lockToastOffSub;
+
+  /// No description provided for @lockToastChanged.
+  ///
+  /// In id, this message translates to:
+  /// **'pin diganti'**
+  String get lockToastChanged;
+
+  /// No description provided for @lockToastChangedSub.
+  ///
+  /// In id, this message translates to:
+  /// **'pakai pin baru mulai sekarang'**
+  String get lockToastChangedSub;
+
+  /// No description provided for @lockToastBioOn.
+  ///
+  /// In id, this message translates to:
+  /// **'{bio} nyala lagi'**
+  String lockToastBioOn(String bio);
 }
 
 class _AppLocalizationsDelegate
