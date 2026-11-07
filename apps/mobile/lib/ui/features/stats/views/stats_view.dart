@@ -66,21 +66,8 @@ class _StatsViewState extends ConsumerState<StatsView> {
     final span = _span ?? spanOf(_period, now, periods: periods);
     // The budget in force for the period being looked at, not today's: a
     // past september keeps september's budget. Week = its Monday's period.
-    // ponytail: the year uses one period's budget × 12 (its latest one
-    // so far); sum each period's if budgets change a lot within a year.
-    final last = DateTime(span.end.year, span.end.month, span.end.day - 1);
     final budget = ref
-        .watch(
-          budgetInPeriodProvider(
-            periods.periodOf(
-              _period != StatsPeriod.year
-                  ? span.start
-                  : now.isBefore(last)
-                  ? now
-                  : last,
-            ),
-          ),
-        )
+        .watch(budgetInPeriodProvider(periods.periodOf(span.start)))
         .value;
     // tahun: each of its 12 periods' own budget, summed into "jatah setahun".
     final yearBudgets = _period != StatsPeriod.year
@@ -262,7 +249,7 @@ class _Hero extends StatelessWidget {
       StatsPeriod.month => periodRange(s.span.start, s.span.end),
       StatsPeriod.year =>
         '${_lower(_monthShort, DateTime(2000))} – '
-            '${_lower(_monthShort, DateTime(2000, 12))} ${s.span.start.year}',
+            '${_lower(_monthShort, DateTime(2000, 12))} ${s.year}',
     };
     final String delta;
     if (s.period == StatsPeriod.year) {
@@ -704,7 +691,7 @@ String _barName(Stats s, int i) {
     StatsPeriod.week => _lower(_weekdayFull, b.start),
     StatsPeriod.month =>
       '${b.start.day}–${_lower(_dayMonth, DateTime(b.end.year, b.end.month, b.end.day - 1))}',
-    StatsPeriod.year => _lower(_monthFull, b.start),
+    StatsPeriod.year => _lower(_monthFull, DateTime(2000, i + 1)),
   };
 }
 
@@ -968,14 +955,14 @@ class _Pace extends StatelessWidget {
         ? switch (s.period) {
             StatsPeriod.week => l.statsScopeWeek,
             StatsPeriod.month => l.statsScopeMonth,
-            StatsPeriod.year => '${s.span.start.year}',
+            StatsPeriod.year => '${s.year}',
           }
         : switch (s.period) {
             StatsPeriod.week => _range(s.span),
             StatsPeriod.month => l.statsScopePeriod(
               _lower(_monthFull, s.monthKey),
             ),
-            StatsPeriod.year => '${s.span.start.year}',
+            StatsPeriod.year => '${s.year}',
           };
     final headline = switch (pace) {
       BudgetPace.over => l.statsOverBy(context.rpCompact(-rest), scope),
@@ -983,7 +970,7 @@ class _Pace extends StatelessWidget {
       BudgetPace.near => l.statsNearLeft(context.rpCompact(rest), s.left),
       _ when s.period == StatsPeriod.year => l.statsYearLeft(
         context.rpCompact(rest),
-        '${s.span.start.year}',
+        '${s.year}',
       ),
       _ => l.statsLeft(context.rpCompact(rest), s.left),
     };

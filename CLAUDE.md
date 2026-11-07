@@ -25,7 +25,11 @@ App Flutter di `apps/mobile`, Flutter dikunci lewat FVM (`.fvmrc`). Perintah lew
 - Setelah ubah tabel Drift: `make gen` (`build_runner`). File `*.g.dart` ikut di-commit.
 - **Schema = udah rilis, data asli ada di HP** (`com.mibu.mibu`). v1 = baseline, diambil dari tag `release-baseline` (commit `937e55f`). Tabel gak pernah diedit di tempat dan data gak pernah dihapus. Tiap ubah tabel wajib: naikin `schemaVersion`, tambah langkah `from < N` di `onUpgrade` (`app_database.dart`), tambah schema lama sebagai `vN` + satu case di `test/data/migration_test.dart` (fixture SQL versi lama vs install baru, data tetap ada). `drift_dev make-migrations` gak dipakai. Drift gak bisa turun versi.
 - `applicationId` / bundle id prod (`com.mibu.mibu`) gak boleh berubah.
-- `make check` (format, analyze, test) harus bersih sebelum commit.
+- **Run only the tests relevant to what you changed.** The suite is large and slow and keeps growing. Do not run the whole suite by default.
+  - Small fixes, tweaks, and features that do not touch other features: run `dart format` and `dart analyze` on the touched files, plus only the tests that cover the changed code (`fvm flutter test <test files or dirs> --timeout 30s`, e.g. `test/ui/features/<feature>`, `test/ui/core/<widget>_test.dart`, `test/data/<repo>_test.dart`).
+  - Run full `make check` (format, analyze, all tests) only for major or wide changes: Drift schema/migrations, models/codegen, shared widgets used across features, routing/theme, or many features at once.
+  - Never re-run the full suite just to re-confirm a small follow-up fix.
+  - Commit only when the checks you ran exit 0 (never chain a commit behind `grep` or `;`). State in the hand-off which checks ran and that the full suite was not run.
 
 ### Build ke device
 

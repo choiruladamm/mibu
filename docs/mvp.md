@@ -235,7 +235,9 @@ step = 50K (budget ≤ 5jt) · 100K (≤ 20jt) · 250K (di atasnya)
 
 ### Statistik
 
-- Rata-rata dihitung dari periode yang udah lewat aja.
+- Rata-rata dihitung dari bar yang udah lewat aja (bar yang lagi jalan baru ikut kalau dia satu-satunya), dan bar sebelum catatan pertama nggak dihitung (bukan "kepake 0").
+- Bar bulan = per 7 hari dari hari pertama periode; sisa 1–3 hari digabung ke bar terakhir (bar terakhir 7–9 hari), nggak ada bar sliver.
+- Tahun = 12 periode bernama Januari … Desember (Januari mulai di desember kalau gajian ≥ 16): label tahun dan nama bar ikut nama periode, bukan tanggal mulainya. Limit tahun = Σ budget tiap periode yang ada datanya; periode tanpa budget pakai budget terdekat.
 - Ritme budget **[diupdate]** pakai `monthlyBudget` (B) aja, tanpa fallback ke Σ limit: total kepake ngitung semua pengeluaran, termasuk tanpa kategori & non-kantong, jadi Σ limit bukan pembanding yang adil.
 
 ```

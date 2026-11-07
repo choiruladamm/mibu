@@ -42,9 +42,15 @@ void main() {
       '10/1–10/8', // from the period's first day, not Monday weeks
       '10/8–10/15',
       '10/15–10/22',
-      '10/22–10/29',
-      '10/29–11/1', // 31 days → a short 5th
+      '10/22–11/1', // 31 days: the 3-day tail folds into the last bar
     ]);
+    expect(
+      barsOf(
+        StatsPeriod.month,
+        spanOf(StatsPeriod.month, DateTime(2026, 9)),
+      ).map(span),
+      ['9/1–9/8', '9/8–9/15', '9/15–9/22', '9/22–10/1'], // 30 days
+    );
     expect(
       barsOf(StatsPeriod.week, spanOf(StatsPeriod.week, today)),
       hasLength(7),
@@ -77,8 +83,8 @@ void main() {
       today: today,
     );
     expect(s.spent, [12000, 209000, 15000, 0, 9000, null, null]);
-    expect((s.total, s.current, s.counted), (245000, 4, 5));
-    expect(s.average, 49000);
+    expect((s.total, s.current, s.counted), (245000, 4, 4));
+    expect(s.average, 59000); // finished days only, today still growing
     expect((s.peak, s.low), (1, 3));
     expect((s.peakTop!.category, s.peakTop!.emoji), ('anabul', '🐶'));
     expect((s.elapsed, s.left), (5, 2));
@@ -116,7 +122,10 @@ void main() {
 
   test('pace: week limit from its monday month, near ≥ 85%, year under', () {
     Stats of(StatsPeriod p, int spent, {DateTime? at}) => Stats(
-      [tx(at ?? DateTime(2026, 10, 12), -spent)],
+      [
+        tx(DateTime(2026, 1, 2), 1), // data since january
+        tx(at ?? DateTime(2026, 10, 12), -spent),
+      ],
       period: p,
       span: spanOf(p, today),
       today: today,
@@ -180,10 +189,39 @@ void main() {
       yearBudgets: b,
       periods: p25,
     );
+    // Periods before the first budget borrow the nearest one: their
+    // spending is in the total too.
     expect(
       of([...List.filled(6, null), ...List.filled(6, 8000000)]).limit,
-      48000000,
+      96000000,
     );
     expect(of(List.filled(12, null)).limit, isNull);
+  });
+
+  test('year: label year, no data before the first entry', () {
+    final p25 = SegmentedResolver([
+      (
+        effectiveFrom: DateTime(2020),
+        mode: PeriodMode.payday,
+        paydayDay: 25,
+        shift: PaydayShift.none,
+      ),
+    ]);
+    final s = Stats(
+      [
+        tx(DateTime(2026, 8, 3), -500000), // "agustus" (25 jul – 24 agu)
+        tx(DateTime(2026, 9, 3), -300000), // "september"
+      ],
+      period: StatsPeriod.year,
+      span: spanOf(StatsPeriod.year, today, periods: p25),
+      today: today,
+      yearBudgets: List.filled(12, 8000000),
+      periods: p25,
+    );
+    expect(s.span.start.year, 2025); // starts 25 des 2025 …
+    expect(s.year, 2026); // … but is 2026
+    expect(s.limit, 8000000 * 5); // ago … des; jan–jul had no data
+    expect((s.peak, s.low), (7, 8)); // agustus boros, september hemat
+    expect(s.average, 400000); // 2 finished months, not 9
   });
 }
