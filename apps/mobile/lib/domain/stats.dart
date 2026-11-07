@@ -51,7 +51,7 @@ Span shiftSpan(
 }
 
 /// One bar per day (week), per 7 days from the period's first day (month:
-/// 25 sep, 2 okt … — 29–31 days make a short 5th), per budget period
+/// 25 sep, 2 okt … — the last one runs 7–9 days), per budget period
 /// (year: januari … desember).
 List<Span> barsOf(
   StatsPeriod p,
@@ -75,6 +75,16 @@ List<Span> barsOf(
     if (b.isAfter(s.end)) b = s.end;
     bars.add((start: a, end: b));
     a = b;
+  }
+  // A 29–31 day period leaves a 1–3 day tail: fold it into the last full
+  // bar, a sliver would skew rata², paling boros and paling hemat.
+  if (p == StatsPeriod.month && bars.length > 1) {
+    final tail = bars.last;
+    if (_days(tail.start, tail.end) < 4) {
+      bars
+        ..removeLast()
+        ..add((start: bars.removeLast().start, end: tail.end));
+    }
   }
   return bars;
 }
@@ -122,6 +132,12 @@ class Stats {
       for (final b in bars) b.start.isAfter(day) ? null : spentIn(expenses, b),
     ];
     current = bars.indexWhere((b) => _inside(day, b));
+    // Bars ended before the first entry ever: no data, not "spent nothing".
+    final first = entries
+        .where((t) => !t.deleted)
+        .map((t) => t.at)
+        .fold<DateTime?>(null, (m, a) => m == null || a.isBefore(m) ? a : m);
+    _live = [for (final b in bars) first == null || b.end.isAfter(first)];
     total = expenses.fold(0, (sum, t) => sum - t.amount);
 
     final byCat = <String?, StatsCategory>{};
@@ -146,13 +162,9 @@ class Stats {
     left = length - elapsed;
 
     final b = budget;
-    final set = [
-      for (final y in yearBudgets)
-        if (y != null && y > 0) y,
-    ];
     limit = period == StatsPeriod.year
         // Σ each period's own budget (ahead of now: today's, carried on).
-        ? (set.isEmpty ? null : set.fold<int>(0, (a, v) => a + v))
+        ? _yearLimit(yearBudgets)
         : b == null || b <= 0
         ? null
         : switch (period) {
@@ -165,6 +177,29 @@ class Stats {
 
   final StatsPeriod period;
   final Span span;
+
+  /// The year the year window is named after (januari starts in des).
+  int get year => monthKey.year;
+
+  late final List<bool> _live; // per bar: not before the first entry
+
+  /// Σ own budget of the bars with data; a bar with none uses the nearest
+  /// set one (earlier first), so a budget set mid-year doesn't leave the
+  /// months before it out of "jatah setahun" while their spending counts.
+  int? _yearLimit(List<int?> budgets) {
+    int? carry = budgets.firstWhere(
+      (y) => y != null && y > 0,
+      orElse: () => null,
+    );
+    if (carry == null) return null;
+    var sum = 0;
+    for (var i = 0; i < bars.length; i++) {
+      final y = i < budgets.length ? budgets[i] : null;
+      if (y != null && y > 0) carry = y;
+      if (_live[i]) sum += carry!;
+    }
+    return sum;
+  }
 
   /// The month label of the period [span] starts in (what the "bulan" tab
   /// calls it: 25 sep – 24 okt is "oktober").
@@ -182,9 +217,20 @@ class Stats {
   late final int elapsed, left; // days
   late final int? limit; // budget for this period; null = no budget
 
-  List<int> get _shown => [...spent.whereType<int>()];
+  /// Bars that count for rata²: finished and with data; the running one
+  /// only when nothing else is (it can still grow).
+  List<int> get _shown {
+    final done = [
+      for (var i = 0; i < spent.length; i++)
+        if (spent[i] != null && _live[i] && i != current) spent[i]!,
+    ];
+    if (done.isEmpty && current >= 0 && _live[current]) {
+      return [spent[current]!];
+    }
+    return done;
+  }
 
-  /// rata²: over bars that started, the current one included.
+  /// rata²: over the finished bars (see [_shown]).
   int get average => _shown.isEmpty
       ? 0
       : (_shown.fold(0, (a, b) => a + b) / _shown.length).round();
@@ -207,10 +253,10 @@ class Stats {
     if (total == 0) return null;
     int? best;
     for (var i = 0; i < spent.length; i++) {
-      if (spent[i] == null || i == current) continue;
+      if (spent[i] == null || !_live[i] || i == current) continue;
       if (best == null || spent[i]! < spent[best]!) best = i;
     }
-    return best ?? (current >= 0 ? current : null);
+    return best ?? (current >= 0 && _live[current] ? current : null);
   }
 
   /// "gara-gara": the biggest category in the [peak] bar; its emoji is the

@@ -61,8 +61,8 @@ void main() {
     expect(find.text('aman'), findsOneWidget);
     expect(find.text('masih ada Rp3,94jt buat 17 hari lagi'), findsOneWidget);
     expect(findMeta(['budget Rp8jt', 'jatah periode ini']), findsOneWidget);
-    // Bars run 7 days from the period's first day: 1–7, 8–14 okt so far.
-    expect(find.text('dari 2 minggu'), findsOneWidget);
+    // Bars run 7 days from the period's first day: only 1–7 okt is done (14 okt is the running bar).
+    expect(find.text('dari 1 minggu'), findsOneWidget);
     // sekilas: the biggest bar (8–14 okt: tokopedia) and why
     expect(find.text('paling boros'), findsOneWidget);
     expect(find.text('gara-gara'), findsOneWidget);
@@ -80,7 +80,7 @@ void main() {
     expect(find.text('selasa'), findsOneWidget); // paling boros
     expect(find.text('rata²/hari'), findsOneWidget);
     expect(find.text('senin'), findsOneWidget); // paling hemat (rab runs)
-    expect(find.text('dari 3 hari'), findsOneWidget);
+    expect(find.text('dari 2 hari'), findsOneWidget);
 
     await tester.tap(find.bySemanticsLabel('periode sebelumnya'));
     await settle(tester);
