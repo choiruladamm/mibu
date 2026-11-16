@@ -483,6 +483,7 @@ class FinanceRepository {
   /// First month with an entry (09.1 carousel start); null = none yet.
   Stream<DateTime?> watchFirstMonth({
     PeriodResolver periods = const CalendarMonthResolver(),
+    bool exact = false,
   }) {
     final first = _tx.at.min();
     final q = _db.selectOnly(_tx)
@@ -490,7 +491,8 @@ class FinanceRepository {
       ..where(_tx.deletedAt.isNull());
     return q.watchSingle().map(
       (r) => switch (r.read(first)) {
-        final at? => periods.periodOf(at).key,
+        final at? =>
+          exact ? periods.periodOf(at).start : periods.periodOf(at).key,
         null => null,
       },
     );

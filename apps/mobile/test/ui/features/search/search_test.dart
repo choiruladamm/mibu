@@ -80,7 +80,7 @@ void main() {
   ) async {
     await pump(tester);
     expect(find.text('cari'), findsOneWidget);
-    expect(findMeta(['di oktober']), findsOneWidget);
+    expect(findMeta(['di oktober', '1 okt – 31 okt']), findsOneWidget);
     expect(find.text('paling sering bulan ini'), findsOneWidget);
     for (final idea in ['gojek', 'petshop', 'warteg', 'ngopi', 'belanja']) {
       expect(find.text(idea), findsOneWidget);
@@ -119,7 +119,8 @@ void main() {
     await pump(tester);
     await type(tester, 'zzz');
     expect(find.text('“zzz” nggak ketemu'), findsOneWidget);
-    expect(find.text('di oktober'), findsNWidgets(2)); // header + sub
+    expect(findMeta(['di oktober', '1 okt – 31 okt']), findsOneWidget);
+    expect(find.text('di oktober'), findsOneWidget); // empty-state subtitle
     expect(find.textContaining('ada ', findRichText: true), findsNothing);
 
     await type(tester, 'petshp');
@@ -193,7 +194,7 @@ void main() {
     await tap(tester, find.text('pengeluaran'));
     await tap(tester, find.textContaining('liat '));
     expect(
-      find.text('→ /transaksi?month=2026-10&q=o&filter=expenses'),
+      find.text('→ /transaksi?month=2026-10&q=o&filter=expenses&at=2026-10-01'),
       findsOneWidget,
     );
   });

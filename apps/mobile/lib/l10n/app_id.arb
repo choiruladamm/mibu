@@ -1244,6 +1244,9 @@
   "peekClose": "tutup lagi",
   "amountHidden": "disembunyiin",
   "settingsData": "data",
+  "exportReminderTitle": "export catatan transaksi",
+  "exportReminderBody": "udah 14 hari belum export. csv cuma berisi transaksi, bukan pengaturan.",
+  "exportReminderDismiss": "tutup pengingat",
   "settingsExport": "export ke csv",
   "settingsExportHint": "semua catatan, satu file",
   "settingsImport": "import dari csv",
@@ -1444,7 +1447,7 @@
 "@statsPeakLabel": {"placeholders": {"name": {"type": "String"}, "amount": {"type": "String"}, "why": {"type": "String"}}},
   "statsLow": "paling hemat",
   "statsAvgDay": "rata²/hari",
-  "statsAvgWeek": "rata²/minggu",
+  "statsAvgRange": "rata²/rentang",
   "statsAvgMonth": "rata²/periode",
   "statsFromDays": "dari {n} hari",
   "@statsFromDays": {
@@ -1454,8 +1457,8 @@
       }
     }
   },
-  "statsFromWeeks": "dari {n} minggu",
-  "@statsFromWeeks": {
+  "statsFromRanges": "dari {n} rentang",
+  "@statsFromRanges": {
     "placeholders": {
       "n": {
         "type": "int"
@@ -1551,6 +1554,7 @@
   "statsTime": "waktu jalan",
   "statsNoBudget": "pasang budget biar ketauan kamu on track nggak",
   "statsSetBudget": "pasang budget",
+  "statsSeeTransactions": "lihat transaksi",
   "statsWhere": "larinya ke mana",
   "statsTop": "top {n}",
   "@statsTop": {
@@ -1959,5 +1963,15 @@
         "type": "String"
       }
     }
-  }
+  },
+  "statsLoading": "lagi muat statistik…",
+  "statsLoadError": "statistik belum bisa dimuat. coba lagi ya.",
+  "statsRetry": "coba lagi",
+  "saveError": "belum bisa disimpan",
+  "saveErrorRetry": "coba lagi ya, catatanmu masih di sini",
+  "settingsLoading": "lagi muat pengaturan…",
+  "settingsLoadError": "pengaturan belum bisa dimuat. coba lagi ya.",
+  "statsEmpty": "belum ada pengeluaran di periode ini. catatan pengeluaranmu bakal muncul di sini.",
+  "statsNoPastBudget": "budget belum tercatat untuk periode ini.",
+  "statsComparisonContext": "sejauh ini vs total periode sebelumnya"
 }

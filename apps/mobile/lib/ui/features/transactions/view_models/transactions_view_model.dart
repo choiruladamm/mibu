@@ -8,17 +8,45 @@ import '../../../core/clock.dart';
 import '../../../core/dates.dart';
 import '../../../core/finance_providers.dart';
 
+/// An exact statistics selection; null category means all or uncategorized.
+typedef TxDrill = ({
+  DateTime start,
+  DateTime end,
+  DateTime today,
+  bool categoryOnly,
+  String? categoryId,
+  String label,
+});
+
+List<Transaction> drillTransactions(List<Transaction> rows, TxDrill drill) => [
+  for (final t in rows)
+    if (!t.deleted &&
+        t.amount < 0 &&
+        !t.at.isBefore(drill.start) &&
+        t.at.isBefore(drill.end) &&
+        t.at.isBefore(
+          DateTime(drill.today.year, drill.today.month, drill.today.day + 1),
+        ) &&
+        (!drill.categoryOnly || t.categoryId == drill.categoryId))
+      t,
+];
+
 enum TxFilter { all, expenses, income }
 
 /// Month shown in 09.1; starts at [initial] (a deep link from 02.1) or the
 /// current month.
 class TxMonth extends Notifier<DateTime> {
-  TxMonth([this.initial]);
+  TxMonth([this.initial, this.exact = false]);
 
   final DateTime? initial;
+  final bool exact;
 
   @override
-  DateTime build() => initial ?? ref.read(currentMonthProvider);
+  DateTime build() => initial == null
+      ? ref.read(currentPeriodProvider).start
+      : exact
+      ? initial!
+      : ref.read(periodsProvider).periodForMonth(initial!).start;
 
   void select(DateTime month) => state = month;
 }
@@ -61,13 +89,30 @@ final monthTransactionsProvider =
     StreamProvider.family<List<Transaction>, DateTime>(
       (ref, month) => ref
           .watch(financeRepositoryProvider)
-          .watchPeriod(ref.watch(periodsProvider).periodForMonth(month)),
+          .watchPeriod(ref.watch(periodsProvider).periodOf(month)),
     );
+
+final periodTransactionsProvider =
+    StreamProvider.family<List<Transaction>, Period>(
+      (ref, period) => ref.watch(financeRepositoryProvider).watchPeriod(period),
+    );
+
+final periodSpendingProvider = Provider<Map<Period, int>>((ref) {
+  final resolver = ref.watch(periodsProvider);
+  final spending = <Period, int>{};
+  for (final t in ref.watch(allTransactionsProvider).value ?? <Transaction>[]) {
+    if (t.amount < 0) {
+      final period = resolver.periodOf(t.at);
+      spending[period] = (spending[period] ?? 0) - t.amount;
+    }
+  }
+  return spending;
+});
 
 final firstMonthProvider = StreamProvider<DateTime?>(
   (ref) => ref
       .watch(financeRepositoryProvider)
-      .watchFirstMonth(periods: ref.watch(periodsProvider)),
+      .watchFirstMonth(periods: ref.watch(periodsProvider), exact: true),
 );
 
 /// [income]: a pemasukan is in it, so [total] gives it away (05.1h).
@@ -93,7 +138,7 @@ class TransactionsState {
   });
 
   /// First entry's month … this month, plus next month (not yet).
-  final List<DateTime> months;
+  final List<Period> months;
   final int selected;
   final DateTime today;
   final Period period; // the budget period [month] is named after
@@ -102,24 +147,30 @@ class TransactionsState {
   final List<DayGroup> groups; // newest day first, filter applied
   final int count;
 
-  DateTime get month => months[selected];
+  DateTime get month => months[selected].key;
 
   /// The month label of the period we're in now (the last before the future
   /// one).
-  DateTime get current => months[months.length - 2];
+  Period get current => months[months.length - 2];
   bool get hasPrev => selected > 0;
   bool get nextIsFuture => selected + 1 >= months.length - 1;
 }
 
 /// Month labels from [first] to [now]'s (a month label: first of the month a
 /// budget period is named after), plus one future one.
-List<DateTime> txMonths(DateTime? first, DateTime now) {
-  final last = DateTime(now.year, now.month);
-  var m = first ?? last;
-  return [
-    for (; !m.isAfter(last); m = DateTime(m.year, m.month + 1)) m,
-    DateTime(last.year, last.month + 1),
-  ];
+List<Period> txPeriods(
+  DateTime? first,
+  Period current,
+  PeriodResolver resolver,
+) {
+  var p = first == null ? current : resolver.periodOf(first);
+  if (p.start.isAfter(current.start)) p = current;
+  final periods = <Period>[];
+  while (!p.start.isAfter(current.start)) {
+    periods.add(p);
+    p = resolver.next(p);
+  }
+  return [...periods, resolver.next(current)];
 }
 
 /// Entries grouped per day (input is newest first), with each day's net.
@@ -157,9 +208,16 @@ final transactionsProvider =
 
         final now = ref.watch(nowProvider);
         final periods = ref.watch(periodsProvider);
-        final period = periods.periodForMonth(month);
-        var months = txMonths(first.value, ref.watch(currentMonthProvider));
-        if (!months.contains(month)) months = [month, ...months]..sort();
+        final period = periods.periodOf(month);
+        var months = txPeriods(
+          first.value,
+          ref.watch(currentPeriodProvider),
+          periods,
+        );
+        if (!months.contains(period)) {
+          months = [period, ...months]
+            ..sort((a, b) => a.start.compareTo(b.start));
+        }
         final filter = ref.watch(txFilterProvider);
         final search = ref.watch(txSearchProvider);
         final shown = [
@@ -177,8 +235,13 @@ final transactionsProvider =
               })
                 t,
         ];
-        final totals = ref.watch(totalsProvider).value;
-        final prev = DateTime(month.year, month.month - 1);
+        final previous = ref.watch(
+          periodTransactionsProvider(periods.prev(period)),
+        );
+        if (previous.hasError) {
+          return AsyncError(previous.error!, previous.stackTrace!);
+        }
+        if (!previous.hasValue) return const AsyncLoading();
         int sum(bool Function(int) test) => rows.value!
             .map((t) => t.amount)
             .where(test)
@@ -186,13 +249,17 @@ final transactionsProvider =
         return AsyncData(
           TransactionsState(
             months: months,
-            selected: months.indexOf(month),
+            selected: months.indexOf(period),
             today: dateOnly(now),
             period: period,
             income: sum((v) => v > 0),
             expense: sum((v) => v < 0),
-            prevIncome: totals?.income[prev] ?? 0,
-            prevExpense: totals?.spent[prev] ?? 0,
+            prevIncome: previous.value!
+                .where((t) => t.amount > 0)
+                .fold(0, (sum, t) => sum + t.amount),
+            prevExpense: previous.value!
+                .where((t) => t.amount < 0)
+                .fold(0, (sum, t) => sum - t.amount),
             groups: groupByDay(shown),
             count: shown.length,
           ),

@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:drift/drift.dart' show DatabaseConnection;
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mibu/data/database/app_database.dart';
@@ -11,6 +14,10 @@ import 'package:mibu/ui/core/theme.dart';
 import 'package:mibu/ui/core/widgets/app_emoji.dart';
 import 'package:mibu/ui/features/stats/views/stats_view.dart';
 
+import 'package:mibu/data/repositories/finance_repository.dart';
+import 'package:mibu/domain/models/finance.dart';
+import 'package:mibu/ui/core/finance_providers.dart';
+
 import '../../../meta.dart';
 import '../../../db.dart';
 
@@ -18,7 +25,13 @@ void main() {
   // Fixture, rab 14 okt 2026, budget Rp8jt: okt Rp4,06jt (tokopedia 2,4jt +
   // gojek 163K on the 11th, dokter hewan 450K 12th, warteg + kopi + petshop
   // 1,02jt 13th, gojek 27K today); september Rp2,61jt.
-  Future<AppDatabase> pump(WidgetTester tester, {double width = 900}) async {
+  Future<AppDatabase> pump(
+    WidgetTester tester, {
+    double width = 900,
+    Stream<List<Transaction>> Function()? transactions,
+    bool noBudget = false,
+    Stream<int?> Function()? budgets,
+  }) async {
     tester.view.physicalSize = Size(width, 2400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -36,6 +49,14 @@ void main() {
         overrides: [
           appDatabaseProvider.overrideWithValue(db),
           clockProvider.overrideWithValue(() => now),
+          if (transactions != null)
+            allTransactionsProvider.overrideWith((ref) => transactions()),
+          if (budgets != null)
+            budgetInPeriodProvider.overrideWith((ref, period) => budgets()),
+          if (noBudget)
+            budgetInPeriodProvider.overrideWith(
+              (ref, period) => Stream.value(null),
+            ),
         ],
         child: MaterialApp(
           theme: AppTheme.light,
@@ -46,6 +67,10 @@ void main() {
         ),
       ),
     );
+    addTearDown(() async {
+      await tester.pumpWidget(const SizedBox());
+      await db.close();
+    });
     await settle(tester);
     return db;
   }
@@ -62,12 +87,12 @@ void main() {
     expect(find.text('masih ada Rp3,94jt buat 17 hari lagi'), findsOneWidget);
     expect(findMeta(['budget Rp8jt', 'jatah periode ini']), findsOneWidget);
     // Bars run 7 days from the period's first day: only 1–7 okt is done (14 okt is the running bar).
-    expect(find.text('dari 1 minggu'), findsOneWidget);
+    expect(find.text('dari 1 rentang'), findsOneWidget);
     // sekilas: the biggest bar (8–14 okt: tokopedia) and why
     expect(find.text('paling boros'), findsOneWidget);
     expect(find.text('gara-gara'), findsOneWidget);
     expect(find.text('belanja'), findsNWidgets(2)); // gara-gara + larinya
-    expect(find.text('rata²/minggu'), findsOneWidget);
+    expect(find.text('rata²/rentang'), findsOneWidget);
     expect(find.text('+ ngopi 4%'), findsOneWidget); // 5th of 5
   });
 
@@ -188,6 +213,94 @@ void main() {
       findsOneWidget,
     );
     expect(findMeta(['kepake september', '1 sep – 30 sep']), findsOneWidget);
+  });
+  testWidgets('past missing budget cannot edit the current budget', (
+    tester,
+  ) async {
+    await pump(tester, noBudget: true);
+    expect(find.text('pasang budget'), findsOneWidget);
+    await tester.tap(find.bySemanticsLabel('periode sebelumnya'));
+    await settle(tester);
+    expect(
+      find.text('budget belum tercatat untuk periode ini.'),
+      findsOneWidget,
+    );
+    expect(find.text('pasang budget'), findsNothing);
+  });
+
+  testWidgets('loading and errors do not show zero; retry recovers', (
+    tester,
+  ) async {
+    final stream = StreamController<List<Transaction>>();
+    addTearDown(stream.close);
+    var calls = 0;
+    await pump(
+      tester,
+      transactions: () {
+        calls++;
+        return calls == 1 ? stream.stream : Stream.value([]);
+      },
+    );
+    expect(find.text('lagi muat statistik…'), findsOneWidget);
+    expect(find.text('Rp0'), findsNothing);
+    stream.addError(StateError('read failed'));
+    await settle(tester);
+    expect(
+      find.text('statistik belum bisa dimuat. coba lagi ya.'),
+      findsOneWidget,
+    );
+    expect(find.text('Rp0'), findsNothing);
+    await tester.tap(find.text('coba lagi'));
+    await settle(tester);
+    expect(calls, 2);
+    expect(
+      find.textContaining('belum ada pengeluaran di periode ini.'),
+      findsOneWidget,
+    );
+    expect(find.text('paling boros'), findsNothing);
+  });
+
+  testWidgets('budget loading and failure never offer setup; retry recovers', (
+    tester,
+  ) async {
+    final stream = StreamController<int?>();
+    addTearDown(stream.close);
+    var calls = 0;
+    await pump(
+      tester,
+      budgets: () => ++calls == 1 ? stream.stream : Stream.value(8000000),
+    );
+    expect(find.text('lagi muat statistik…'), findsOneWidget);
+    expect(find.text('pasang budget'), findsNothing);
+    stream.addError(StateError('budget failed'));
+    await settle(tester);
+    expect(find.text('coba lagi'), findsOneWidget);
+    expect(find.text('pasang budget'), findsNothing);
+    await tester.tap(find.text('coba lagi'));
+    await settle(tester);
+    expect(find.text('aman'), findsOneWidget);
+  });
+
+  testWidgets('all stats sections fit phone widths with bundled fonts', (
+    tester,
+  ) async {
+    for (final (family, file) in [
+      ('Instrument Sans', 'InstrumentSans-400.ttf'),
+      ('Archivo', 'Archivo-900.ttf'),
+    ]) {
+      await (FontLoader(
+        family,
+      )..addFont(rootBundle.load('assets/fonts/$file'))).load();
+    }
+    await pump(tester, width: 390);
+    for (final width in [360.0, 390.0]) {
+      tester.view.physicalSize = Size(width, 2400);
+      for (final tab in ['minggu', 'tahun', 'bulan']) {
+        await tester.tap(find.text(tab));
+        await settle(tester);
+        expect(tester.takeException(), isNull);
+      }
+    }
   });
 }
 

@@ -61,22 +61,22 @@ class _StatsViewState extends ConsumerState<StatsView> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
     final now = ref.watch(nowProvider);
-    final entries = ref.watch(allTransactionsProvider).value ?? const [];
+    final transactions = ref.watch(allTransactionsProvider);
+    final entries = transactions.value ?? const [];
     final periods = ref.watch(periodsProvider);
     final span = _span ?? spanOf(_period, now, periods: periods);
     // The budget in force for the period being looked at, not today's: a
     // past september keeps september's budget. Week = its Monday's period.
-    final budget = ref
-        .watch(budgetInPeriodProvider(periods.periodOf(span.start)))
-        .value;
+    final budgetState = ref.watch(
+      budgetInPeriodProvider(periods.periodOf(span.start)),
+    );
+    final budget = budgetState.value;
     // tahun: each of its 12 periods' own budget, summed into "jatah setahun".
-    final yearBudgets = _period != StatsPeriod.year
-        ? const <int?>[]
+    final yearBudgetStates = _period != StatsPeriod.year
+        ? const <AsyncValue<int?>>[]
         : [
             for (final b in barsOf(_period, span, periods: periods))
-              ref
-                  .watch(budgetInPeriodProvider(periods.periodOf(b.start)))
-                  .value,
+              ref.watch(budgetInPeriodProvider(periods.periodOf(b.start))),
           ];
     final s = Stats(
       entries,
@@ -84,9 +84,18 @@ class _StatsViewState extends ConsumerState<StatsView> {
       span: span,
       today: now,
       budget: budget,
-      yearBudgets: yearBudgets,
+      yearBudgets: [for (final b in yearBudgetStates) b.value],
       periods: periods,
     );
+    final states = <AsyncValue<Object?>>[
+      transactions,
+      ref.watch(periodRulesProvider),
+      ref.watch(salaryDatesProvider),
+      budgetState,
+      ...yearBudgetStates,
+    ];
+    final failed = states.any((s) => s.hasError);
+    final loading = states.any((s) => !s.hasValue);
     final prev = shiftSpan(_period, span, -1, periods: periods);
     // Any entry before this window (first is a month label, not a date).
     final hasPrev = entries.any((t) => !t.deleted && t.at.isBefore(span.start));
@@ -113,31 +122,111 @@ class _StatsViewState extends ConsumerState<StatsView> {
                 ),
               ),
               const SizedBox(height: 26),
-              _Hero(
-                stats: s,
-                previous: spentIn(entries, prev),
-                prevSpan: prev,
-                prevMonthKey: periods.periodOf(prev.start).key,
-                onPrev: hasPrev ? () => _go(_period, prev) : null,
-                onNext: isNow
-                    ? null
-                    : () => _go(
-                        _period,
-                        shiftSpan(_period, span, 1, periods: periods),
+              if (failed || loading)
+                Padding(
+                  padding: const EdgeInsets.all(AppSpace.gutter),
+                  child: Column(
+                    spacing: 16,
+                    children: [
+                      Text(
+                        failed ? l.statsLoadError : l.statsLoading,
+                        style: AppText.body,
+                        textAlign: TextAlign.center,
                       ),
-              ),
-              const SizedBox(height: 26),
-              _Chart(
-                stats: s,
-                selected: _sel ?? (isNow ? s.current : null),
-                onPick: (i) => setState(() => _sel = i),
-              ),
-              _Glance(stats: s),
-              if (s.limit == null)
-                _NoBudget(onTap: () => editBudget(context, ref))
-              else
-                _Pace(stats: s, isNow: isNow),
-              if (s.categories.isNotEmpty) _Where(stats: s),
+                      if (failed)
+                        PrimaryButton(
+                          label: l.statsRetry,
+                          onPressed: () {
+                            ref.invalidate(allTransactionsProvider);
+                            ref.invalidate(periodRulesProvider);
+                            ref.invalidate(salaryDatesProvider);
+                            ref.invalidate(budgetInPeriodProvider);
+                          },
+                        ),
+                    ],
+                  ),
+                )
+              else ...[
+                _Hero(
+                  stats: s,
+                  previous: spentIn(
+                    entries
+                        .where(
+                          (t) => t.at.isBefore(
+                            DateTime(now.year, now.month, now.day + 1),
+                          ),
+                        )
+                        .toList(),
+                    prev,
+                  ),
+                  prevMonthKey: periods.periodOf(prev.start).key,
+                  onPrev: hasPrev ? () => _go(_period, prev) : null,
+                  onNext: isNow
+                      ? null
+                      : () => _go(
+                          _period,
+                          shiftSpan(_period, span, 1, periods: periods),
+                        ),
+                ),
+                const SizedBox(height: 26),
+                _Chart(
+                  stats: s,
+                  selected: _sel ?? (isNow ? s.current : null),
+                  onPick: (i) => setState(() => _sel = i),
+                ),
+                if ((_sel ?? (isNow ? s.current : null))
+                    case final int selected)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
+                    child: TextButton(
+                      onPressed: () {
+                        final bar = s.bars[selected];
+                        context.push(
+                          Routes.transactions,
+                          extra: (
+                            start: bar.start,
+                            end: bar.end,
+                            today: now,
+                            categoryOnly: false,
+                            categoryId: null,
+                            label: l.expense,
+                          ),
+                        );
+                      },
+                      child: Text(l.statsSeeTransactions),
+                    ),
+                  ),
+                if (s.total == 0)
+                  Padding(
+                    padding: const EdgeInsets.all(AppSpace.gutter),
+                    child: Text(l.statsEmpty, style: AppText.body),
+                  )
+                else
+                  _Glance(stats: s),
+                if (s.limit == null)
+                  _NoBudget(
+                    onTap: isNow ? () => editBudget(context, ref) : null,
+                  )
+                else
+                  _Pace(stats: s, isNow: isNow),
+                if (s.categories.isNotEmpty)
+                  _Where(
+                    stats: s,
+                    onCategory: (c) {
+                      context.push(
+                        Routes.transactions,
+                        extra: (
+                          start: span.start,
+                          end: span.end,
+                          today: now,
+                          categoryOnly: true,
+                          categoryId: c.id,
+                          label: c.category ?? l.uncategorized,
+                        ),
+                      );
+                    },
+                  ),
+              ],
             ],
           ),
           Align(
@@ -218,7 +307,6 @@ class _Hero extends StatelessWidget {
   const _Hero({
     required this.stats,
     required this.previous,
-    required this.prevSpan,
     required this.prevMonthKey,
     required this.onPrev,
     required this.onNext,
@@ -226,7 +314,6 @@ class _Hero extends StatelessWidget {
 
   final Stats stats;
   final int previous; // spent in the period before
-  final Span prevSpan;
   final DateTime prevMonthKey; // month label of the period before
   final VoidCallback? onPrev, onNext;
 
@@ -303,6 +390,12 @@ class _Hero extends StatelessWidget {
                   ),
                   child: Text(delta, style: AppText.caption),
                 ),
+                if (s.period != StatsPeriod.year && isNow)
+                  Text(
+                    l.statsComparisonContext,
+                    style: AppText.caption.copyWith(color: AppColors.muted),
+                    textAlign: TextAlign.center,
+                  ),
               ],
             ),
           ),
@@ -420,8 +513,8 @@ class _Chart extends StatelessWidget {
                           pillAlign: s.bars.length < 2
                               ? 0
                               : -1 + 2 * i / (s.bars.length - 1),
-                          // tahun: which dates the period covers.
-                          range: s.period == StatsPeriod.year
+                          // Month/year bars show the full date range.
+                          range: s.period != StatsPeriod.week
                               ? periodRange(b.start, b.end)
                               : null,
                           label:
@@ -709,7 +802,7 @@ class _Glance extends StatelessWidget {
     final peak = s.peak, low = s.low, top = s.peakTop;
     final (avgName, avgSub) = switch (s.period) {
       StatsPeriod.week => (l.statsAvgDay, l.statsFromDays(s.counted)),
-      StatsPeriod.month => (l.statsAvgWeek, l.statsFromWeeks(s.counted)),
+      StatsPeriod.month => (l.statsAvgRange, l.statsFromRanges(s.counted)),
       StatsPeriod.year => (l.statsAvgMonth, l.statsFromMonths(s.counted)),
     };
     final why = top == null ? null : top.category ?? l.uncategorized;
@@ -1158,7 +1251,7 @@ class _Stripes extends CustomPainter {
 class _NoBudget extends StatelessWidget {
   const _NoBudget({required this.onTap});
 
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -1175,41 +1268,42 @@ class _NoBudget extends StatelessWidget {
             children: [
               _Title(l.statsTrack),
               Text(
-                l.statsNoBudget,
+                onTap == null ? l.statsNoPastBudget : l.statsNoBudget,
                 style: AppText.body.copyWith(
                   fontSize: 20,
                   letterSpacing: -0.2,
                   height: 1.3,
                 ),
               ),
-              Semantics(
-                button: true,
-                child: GestureDetector(
-                  onTap: onTap,
-                  child: Container(
-                    height: AppSpace.minTouch,
-                    margin: const EdgeInsets.only(top: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 18),
-                    decoration: BoxDecoration(
-                      color: AppColors.ink,
-                      borderRadius: BorderRadius.circular(22),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          l.statsSetBudget,
-                          style: AppText.label.copyWith(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.paper,
+              if (onTap != null)
+                Semantics(
+                  button: true,
+                  child: GestureDetector(
+                    onTap: onTap,
+                    child: Container(
+                      height: AppSpace.minTouch,
+                      margin: const EdgeInsets.only(top: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 18),
+                      decoration: BoxDecoration(
+                        color: AppColors.ink,
+                        borderRadius: BorderRadius.circular(22),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            l.statsSetBudget,
+                            style: AppText.label.copyWith(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.paper,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
             ],
           ),
         ),
@@ -1220,9 +1314,10 @@ class _NoBudget extends StatelessWidget {
 
 /// larinya ke mana: top 4 categories, stacked bar + list.
 class _Where extends StatelessWidget {
-  const _Where({required this.stats});
+  const _Where({required this.stats, required this.onCategory});
 
   final Stats stats;
+  final ValueChanged<StatsCategory> onCategory;
 
   static const _shades = [
     AppColors.ink,
@@ -1277,57 +1372,60 @@ class _Where extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           for (final (i, c) in top.indexed)
-            Container(
-              height: AppSpace.row,
-              decoration: const BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: AppColors.track,
-                    width: AppStroke.hairline,
+            InkWell(
+              onTap: () => onCategory(c),
+              child: Container(
+                height: AppSpace.row,
+                decoration: const BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: AppColors.track,
+                      width: AppStroke.hairline,
+                    ),
                   ),
                 ),
-              ),
-              child: Row(
-                spacing: 12,
-                children: [
-                  Container(
-                    width: 10,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: _shades[i],
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: AppColors.line,
-                        width: AppStroke.hairline,
+                child: Row(
+                  spacing: 12,
+                  children: [
+                    Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: _shades[i],
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: AppColors.line,
+                          width: AppStroke.hairline,
+                        ),
                       ),
                     ),
-                  ),
-                  AppEmoji(c.emoji, size: 23),
-                  Expanded(
-                    child: Text(
-                      c.category ?? l.uncategorized,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppText.label.copyWith(
-                        fontWeight: FontWeight.w500,
+                    AppEmoji(c.emoji, size: 23),
+                    Expanded(
+                      child: Text(
+                        c.category ?? l.uncategorized,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppText.label.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
-                  ),
-                  Text(
-                    '${pct(c.spent)}%',
-                    style: AppText.label.copyWith(color: AppColors.muted),
-                  ),
-                  SizedBox(
-                    width: 96,
-                    child: Text(
-                      context.rpCompact(c.spent),
-                      textAlign: TextAlign.right,
-                      style: AppText.label.copyWith(
-                        fontWeight: FontWeight.w500,
+                    Text(
+                      '${pct(c.spent)}%',
+                      style: AppText.label.copyWith(color: AppColors.muted),
+                    ),
+                    SizedBox(
+                      width: 96,
+                      child: Text(
+                        context.rpCompact(c.spent),
+                        textAlign: TextAlign.right,
+                        style: AppText.label.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
         ],

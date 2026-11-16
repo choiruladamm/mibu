@@ -298,6 +298,67 @@ void main() {
     await tester.pumpWidget(const SizedBox());
     await db.close();
   });
+  testWidgets('failed save keeps draft and retry inserts once', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final now = DateTime(2026, 10, 14, 14, 50);
+    final db = AppDatabase(
+      DatabaseConnection(
+        NativeDatabase.memory(),
+        closeStreamsSynchronously: true,
+      ),
+      () => now,
+    );
+    final repo = _FailOnceRepository(db);
+    addTearDown(() async {
+      await tester.pumpWidget(const SizedBox());
+      await db.close();
+    });
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          appDatabaseProvider.overrideWithValue(db),
+          clockProvider.overrideWithValue(() => now),
+          financeRepositoryProvider.overrideWithValue(repo),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.light,
+          locale: const Locale('id'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const AddEntryView(),
+        ),
+      ),
+    );
+    Future<void> settle() async {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 50)),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+    }
+
+    await settle();
+    await tester.tap(find.bySemanticsLabel('5'));
+    await tester.pump();
+    final save = find.bySemanticsLabel('simpan pengeluaran');
+    await tester.tap(save);
+    await settle();
+    expect(find.text('belum bisa disimpan'), findsOneWidget);
+    expect(find.text('5'), findsWidgets);
+    expect(tester.getSemantics(save), isSemantics(isEnabled: true));
+    await tester.pump(const Duration(seconds: 6));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.tap(save);
+    await settle();
+    final rows = await tester.runAsync(
+      () =>
+          (db.select(db.transactions)..where((t) => t.amount.equals(-5))).get(),
+    );
+    expect(rows, hasLength(1));
+    expect(repo.attempts, 2);
+  });
 }
 
 class _HeldRepository extends FinanceRepository {
@@ -317,5 +378,29 @@ class _HeldRepository extends FinanceRepository {
   }) {
     adds++;
     return hold.future;
+  }
+}
+
+class _FailOnceRepository extends FinanceRepository {
+  _FailOnceRepository(super.db);
+  int attempts = 0;
+  @override
+  Future<void> addTransaction({
+    required int amount,
+    required String? categoryId,
+    required String place,
+    required String note,
+    required List<String> tags,
+    required DateTime at,
+  }) {
+    if (++attempts == 1) return Future.error(StateError('write failed'));
+    return super.addTransaction(
+      amount: amount,
+      categoryId: categoryId,
+      place: place,
+      note: note,
+      tags: tags,
+      at: at,
+    );
   }
 }

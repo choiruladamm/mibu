@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../domain/models/finance.dart';
+import '../../../../domain/period.dart';
+import '../../../../data/repositories/finance_repository.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../core/dates.dart';
 import '../../../core/finance_providers.dart';
@@ -26,13 +28,15 @@ String _short(DateTime m) => _monthShort.format(m).toLowerCase();
 
 /// 09.1 semua transaksi.
 class TransactionsView extends ConsumerStatefulWidget {
-  const TransactionsView({super.key, this.onOpen, this.onSearch});
+  const TransactionsView({super.key, this.onOpen, this.onSearch, this.drill});
+
+  final TxDrill? drill;
 
   /// Row tap → 08.2 struk.
   final ValueChanged<Transaction>? onOpen;
 
   /// Search button → 08.1 cari in the month being viewed.
-  final ValueChanged<DateTime>? onSearch;
+  final ValueChanged<Period>? onSearch;
 
   @override
   ConsumerState<TransactionsView> createState() => _TransactionsViewState();
@@ -52,6 +56,44 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
+    if (widget.drill case final drill?) {
+      final rows =
+          ref.watch(allTransactionsProvider).value ?? const <Transaction>[];
+      final shown = drillTransactions(rows, drill);
+      return Scaffold(
+        body: SafeArea(
+          child: Column(
+            children: [
+              NavHeader(
+                title: l.txTitle,
+                sub: [
+                  drill.label,
+                  periodRange(drill.start, drill.end),
+                  l.txCount(shown.length),
+                ],
+                backLabel: l.tabStats,
+              ),
+              Expanded(
+                child: ListView(
+                  children: [
+                    for (final g in groupByDay(shown))
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+                        child: _DayGroup(
+                          group: g,
+                          month: drill.start,
+                          today: dateOnly(drill.today),
+                          onOpen: widget.onOpen,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
     final s = _last = ref.watch(transactionsProvider).value ?? _last;
     final search = ref.watch(txSearchProvider);
     final onOpen = widget.onOpen;
@@ -75,7 +117,7 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
                   actionLabel: l.search,
                   onAction: s == null || widget.onSearch == null
                       ? null
-                      : () => widget.onSearch!(s.month),
+                      : () => widget.onSearch!(s.period),
                 ),
                 Expanded(
                   child: s == null
@@ -112,12 +154,18 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
                 followerAnchor: Alignment.topCenter,
                 offset: const Offset(0, 6),
                 child: MonthMenu(
+                  periods: ref.watch(periodsProvider),
                   selected: s.month,
-                  now: s.current,
+                  selectedPeriod: s.period,
+                  currentPeriod: s.current,
+                  now: s.current.key,
                   spent: ref.watch(totalsProvider).value?.spent ?? const {},
-                  min: s.months.first,
-                  onPick: (month) {
-                    ref.read(txMonthProvider.notifier).select(month);
+                  periodSpent: ref.watch(periodSpendingProvider),
+                  minPeriod: s.months.first,
+                  min: s.months.first.key,
+                  onPick: (_) {},
+                  onPickPeriod: (period) {
+                    ref.read(txMonthProvider.notifier).select(period.start);
                     setState(() => _menuOpen = false);
                   },
                 ),
@@ -150,7 +198,8 @@ class _Body extends ConsumerWidget {
     final l = AppLocalizations.of(context)!;
     final s = state;
     final month = _name(s.month);
-    void go(int i) => ref.read(txMonthProvider.notifier).select(s.months[i]);
+    void go(int i) =>
+        ref.read(txMonthProvider.notifier).select(s.months[i].start);
     void prev() {
       if (s.hasPrev) go(s.selected - 1);
     }
@@ -172,7 +221,7 @@ class _Body extends ConsumerWidget {
             state: s,
             onPick: go,
             onBackToNow: () =>
-                ref.read(txMonthProvider.notifier).select(s.current),
+                ref.read(txMonthProvider.notifier).select(s.current.start),
             titleLink: titleLink,
             menuOpen: menuOpen,
             onToggleMenu: onToggleMenu,
@@ -211,7 +260,7 @@ class _Body extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
             child: _DayGroup(
               group: g,
-              month: s.month,
+              month: s.period.start,
               today: s.today,
               onOpen: onOpen,
             ),
@@ -229,7 +278,9 @@ class _Body extends ConsumerWidget {
               Text(l.txAllShown(month), style: muted),
             if (s.hasPrev)
               _OutlinePill(
-                label: l.txSeeMonth(_label(s.months[s.selected - 1], s.month)),
+                label: l.txSeeMonth(
+                  _label(s.months[s.selected - 1].key, s.month),
+                ),
                 onTap: prev,
               ),
           ],
@@ -266,7 +317,7 @@ class _MonthCarousel extends StatelessWidget {
     final l = AppLocalizations.of(context)!;
     final s = state;
     final i = s.selected;
-    final notNow = s.month != s.current;
+    final notNow = s.period != s.current;
 
     Widget side({
       required String label,
@@ -299,7 +350,7 @@ class _MonthCarousel extends StatelessWidget {
       ),
     );
 
-    final next = s.months[i + 1];
+    final next = s.months[i + 1].key;
     return Column(
       children: [
         CompositedTransformTarget(
@@ -309,9 +360,9 @@ class _MonthCarousel extends StatelessWidget {
             child: Row(
               children: [
                 side(
-                  label: s.hasPrev ? _label(s.months[i - 1], s.month) : '',
+                  label: s.hasPrev ? _label(s.months[i - 1].key, s.month) : '',
                   semantics: s.hasPrev
-                      ? l.txSeeMonth(_name(s.months[i - 1]))
+                      ? l.txSeeMonth(_name(s.months[i - 1].key))
                       : l.txNoPrev,
                   onTap: s.hasPrev ? () => onPick(i - 1) : null,
                   left: true,
@@ -509,7 +560,7 @@ class _PeriodCard extends StatelessWidget {
     final hideIn = context.hidesAmount(income: true);
     final hideOut = context.hidesAmount();
     final hasPrev = s.hasPrev;
-    final prev = hasPrev ? _name(s.months[s.selected - 1]) : '';
+    final prev = hasPrev ? _name(s.months[s.selected - 1].key) : '';
     final income = s.income, spent = -s.expense;
     final net = income - spent;
     String delta(int now, int before) => now == before
@@ -851,7 +902,7 @@ class _DayGroup extends StatelessWidget {
                   tx: t,
                   onTap: onOpen == null ? null : () => onOpen!(t),
                   onTagTap: (tag) =>
-                      context.push(Routes.searchIn(month, q: tag)),
+                      context.push(Routes.searchIn(month, q: tag, exact: true)),
                 ),
             ],
           ),

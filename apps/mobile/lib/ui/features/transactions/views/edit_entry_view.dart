@@ -16,6 +16,7 @@ import '../../../core/widgets/day_strip.dart';
 import '../../../core/widgets/nav_header.dart';
 import '../../../core/widgets/note_sheet.dart';
 import '../../../core/widgets/sheet.dart';
+import '../../../core/widgets/toast.dart';
 import 'transaction_detail_view.dart';
 import '../../../core/widgets/app_emoji.dart';
 import '../../../core/finance_providers.dart';
@@ -113,17 +114,29 @@ class _EditFormState extends ConsumerState<_EditForm> {
       _o.at.minute,
       _o.at.second,
     );
-    await ref
-        .read(financeRepositoryProvider)
-        .updateTransaction(
-          _o.id,
-          amount: _o.amount < 0 ? -_value : _value,
-          categoryId: _category,
-          place: _place.text,
-          note: _note.text,
-          at: at,
-        );
-    if (mounted) Navigator.of(context).pop();
+    try {
+      await ref
+          .read(financeRepositoryProvider)
+          .updateTransaction(
+            _o.id,
+            amount: _o.amount < 0 ? -_value : _value,
+            categoryId: _category,
+            place: _place.text,
+            note: _note.text,
+            at: at,
+          );
+      if (mounted) Navigator.of(context).pop();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      final l = AppLocalizations.of(context)!;
+      showToast(
+        context,
+        icon: ToastIcon.trash,
+        title: l.saveError,
+        sub: l.saveErrorRetry,
+      );
+    }
   }
 
   Future<void> _delete() async {

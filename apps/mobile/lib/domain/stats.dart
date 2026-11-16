@@ -51,7 +51,7 @@ Span shiftSpan(
 }
 
 /// One bar per day (week), per 7 days from the period's first day (month:
-/// 25 sep, 2 okt … — the last one runs 7–9 days), per budget period
+/// 25 sep, 2 okt … — the last one runs 8–10 days), per budget period
 /// (year: januari … desember).
 List<Span> barsOf(
   StatsPeriod p,
@@ -108,7 +108,12 @@ enum BudgetPace { over, near, under, fine }
 
 /// One expense category in "larinya ke mana"; [category] null = tanpa
 /// kategori.
-typedef StatsCategory = ({String? category, String emoji, int spent});
+typedef StatsCategory = ({
+  String? id,
+  String? category,
+  String emoji,
+  int spent,
+});
 
 /// What 04.1 shows for [span] of [period] (today = [today]).
 class Stats {
@@ -123,9 +128,14 @@ class Stats {
   }) : bars = barsOf(period, span, periods: periods),
        monthKey = periods.periodOf(span.start).key {
     final day = DateTime(today.year, today.month, today.day);
+    final tomorrow = DateTime(day.year, day.month, day.day + 1);
     _expenses = [
       for (final t in entries)
-        if (!t.deleted && t.amount < 0 && _inside(t.at, span)) t,
+        if (!t.deleted &&
+            t.amount < 0 &&
+            _inside(t.at, span) &&
+            t.at.isBefore(tomorrow))
+          t,
     ];
     final expenses = _expenses;
     spent = [
@@ -134,7 +144,7 @@ class Stats {
     current = bars.indexWhere((b) => _inside(day, b));
     // Bars ended before the first entry ever: no data, not "spent nothing".
     final first = entries
-        .where((t) => !t.deleted)
+        .where((t) => !t.deleted && t.at.isBefore(tomorrow))
         .map((t) => t.at)
         .fold<DateTime?>(null, (m, a) => m == null || a.isBefore(m) ? a : m);
     _live = [for (final b in bars) first == null || b.end.isAfter(first)];
@@ -142,8 +152,9 @@ class Stats {
 
     final byCat = <String?, StatsCategory>{};
     for (final t in expenses) {
-      final c = byCat[t.category];
-      byCat[t.category] = (
+      final c = byCat[t.categoryId];
+      byCat[t.categoryId] = (
+        id: t.categoryId,
         category: t.category,
         emoji: t.emoji,
         spent: (c?.spent ?? 0) - t.amount,
@@ -267,18 +278,30 @@ class Stats {
     final m = <String?, StatsCategory>{};
     for (final t in _expenses) {
       if (!_inside(t.at, bars[i])) continue;
-      final c = m[t.category];
-      m[t.category] = (
+      final c = m[t.categoryId];
+      m[t.categoryId] = (
+        id: t.categoryId,
         category: t.category,
         emoji: t.emoji,
         spent: (c?.spent ?? 0) - t.amount,
       );
     }
-    return m.values.reduce((a, b) => b.spent > a.spent ? b : a);
+    return m.isEmpty
+        ? null
+        : m.values.reduce((a, b) => b.spent > a.spent ? b : a);
   }
 
   double get usedPct => limit == null ? 0 : total / limit! * 100;
-  double get timePct => elapsed / _days(span.start, span.end) * 100;
+  double get timePct {
+    if (period != StatsPeriod.year) {
+      return elapsed / _days(span.start, span.end) * 100;
+    }
+    final first = _live.indexOf(true);
+    if (first < 0) return 0;
+    final skipped = _days(span.start, bars[first].start);
+    final length = _days(bars[first].start, span.end);
+    return (elapsed - skipped).clamp(0, length) / length * 100;
+  }
 
   BudgetPace? get pace {
     final l = limit;

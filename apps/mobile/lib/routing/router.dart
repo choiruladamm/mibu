@@ -33,21 +33,28 @@ abstract final class Routes {
   static const settings = '/pengaturan';
   static const lock = '/pengaturan/kunci';
   static const search = '/cari';
-  static String searchIn(DateTime month, {String? q}) => Uri(
-    path: search,
-    queryParameters: {
-      'month': '${month.year}-${month.month.toString().padLeft(2, '0')}',
-      'q': ?q,
-    },
-  ).toString();
+  static String searchIn(DateTime month, {String? q, bool exact = false}) =>
+      Uri(
+        path: search,
+        queryParameters: {
+          'month': '${month.year}-${month.month.toString().padLeft(2, '0')}',
+          'q': ?q,
+          if (exact) 'at': _date(month),
+        },
+      ).toString();
 
   /// 08.1 on this month, opened by tapping a tag chip on a TxRow (00.4b).
   static String searchFor(String q) =>
       Uri(path: search, queryParameters: {'q': q}).toString();
   static const addEntry = '/catat';
   static const transactions = '/transaksi';
-  static String transactionsIn(DateTime month) =>
-      '$transactions?month=${month.year}-${month.month.toString().padLeft(2, '0')}';
+  static String transactionsIn(DateTime month, {bool exact = false}) => Uri(
+    path: transactions,
+    queryParameters: {
+      'month': '${month.year}-${month.month.toString().padLeft(2, '0')}',
+      if (exact) 'at': _date(month),
+    },
+  ).toString();
 
   /// 08.1 "liat N lagi": 09.1 in [month] narrowed to the search.
   static String transactionsFound(
@@ -55,6 +62,7 @@ abstract final class Routes {
     String q, {
     TxFilter filter = TxFilter.all,
     int? day,
+    bool exact = false,
   }) => Uri(
     path: transactions,
     queryParameters: {
@@ -62,11 +70,15 @@ abstract final class Routes {
       'q': q,
       if (filter != TxFilter.all) 'filter': filter.name,
       'day': ?day?.toString(),
+      if (exact) 'at': _date(month),
     },
   ).toString();
   static String transaction(String id) => '$transactions/$id';
   static String editEntry(String id) => '$transactions/$id/edit';
 }
+
+String _date(DateTime d) =>
+    '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
 /// Tab bar → tab route.
 // ponytail: plain go() between tabs (state resets); StatefulShellRoute in M5.
@@ -146,6 +158,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         // &q=%23kantor from a TxRow tag chip: opens already searched.
         builder: (_, state) => SearchView(
           month: _monthParam(state.uri.queryParameters['month']),
+          periodStart: DateTime.tryParse(state.uri.queryParameters['at'] ?? ''),
           initialQuery: state.uri.queryParameters['q'],
         ),
       ),
@@ -165,7 +178,12 @@ final routerProvider = Provider<GoRouter>((ref) {
           // &q=kopi&filter=expenses&day=13 from 08.1 "liat N lagi".
           overrides: [
             txMonthProvider.overrideWith(
-              () => TxMonth(_monthParam(state.uri.queryParameters['month'])),
+              () => TxMonth(
+                DateTime.tryParse(state.uri.queryParameters['at'] ?? '') ??
+                    _monthParam(state.uri.queryParameters['month']),
+                DateTime.tryParse(state.uri.queryParameters['at'] ?? '') !=
+                    null,
+              ),
             ),
             txFilterProvider.overrideWith(
               () => TxFilterNotifier(
@@ -181,8 +199,10 @@ final routerProvider = Provider<GoRouter>((ref) {
               )),
           ],
           child: TransactionsView(
+            drill: state.extra is TxDrill ? state.extra as TxDrill : null,
             onOpen: (t) => context.push(Routes.transaction(t.id)),
-            onSearch: (m) => context.push(Routes.searchIn(m)),
+            onSearch: (p) =>
+                context.push(Routes.searchIn(p.start, exact: true)),
           ),
         ),
         routes: [

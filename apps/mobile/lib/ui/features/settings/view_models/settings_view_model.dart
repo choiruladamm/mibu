@@ -1,11 +1,17 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../../l10n/app_localizations.dart';
+
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../../data/repositories/finance_repository.dart';
+import '../../../../data/repositories/app_lock_repository.dart';
+import '../../home/view_models/export_reminder.dart';
 import '../../../../domain/csv.dart';
 import '../../../../domain/models/finance.dart';
 import '../../../core/clock.dart';
@@ -39,12 +45,26 @@ final settingsProvider = Provider<AsyncValue<SettingsState>>((ref) {
   final profile = ref.watch(profileProvider);
   final categories = ref.watch(categoriesProvider);
   final pockets = ref.watch(pocketsProvider);
-  if (profile.value == null || categories.value == null) {
+  final usageState = ref.watch(categoryUsageProvider);
+  final salaries = ref.watch(salaryDatesProvider);
+  final rules = ref.watch(periodRulesProvider);
+  final states = <AsyncValue<Object?>>[
+    profile,
+    categories,
+    pockets,
+    usageState,
+    salaries,
+    rules,
+  ];
+  for (final state in states) {
+    if (state.hasError) return AsyncError(state.error!, state.stackTrace!);
+  }
+  if (states.any((state) => !state.hasValue)) {
     return const AsyncLoading();
   }
-  final limits = [...?pockets.value];
+  final limits = pockets.value!;
   // Most used first (entries, all time); ties keep the list order.
-  final usage = ref.watch(categoryUsageProvider).value ?? const {};
+  final usage = usageState.value!;
   final byUse = [...categories.value!]
     ..sort(
       (a, b) => (usage[b.id]?.count ?? 0).compareTo(usage[a.id]?.count ?? 0),
@@ -62,7 +82,7 @@ final settingsProvider = Provider<AsyncValue<SettingsState>>((ref) {
         now: ref.watch(nowProvider),
         payday: ref.watch(activePaydayProvider),
         shift: ref.watch(activeShiftProvider),
-        salaries: ref.watch(salaryDatesProvider).value ?? const [],
+        salaries: salaries.value!,
       ),
     ),
   );
@@ -74,12 +94,29 @@ final appVersionProvider = FutureProvider<String>(
 
 /// 05.1 ekspor ke csv: every live entry → share sheet as `mibu-yyyyMMdd.csv`.
 Future<void> exportCsv(WidgetRef ref) async {
-  final entries = await ref.read(financeRepositoryProvider).allTransactions();
-  final bytes = Uint8List.fromList(utf8.encode(transactionsCsv(entries)));
-  await SharePlus.instance.share(
-    ShareParams(
-      files: [XFile.fromData(bytes, mimeType: 'text/csv')],
-      fileNameOverrides: [csvFileName(ref.read(clockProvider)())],
-    ),
-  );
+  try {
+    final entries = await ref.read(financeRepositoryProvider).allTransactions();
+    final bytes = Uint8List.fromList(utf8.encode(transactionsCsv(entries)));
+    final result = await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile.fromData(bytes, mimeType: 'text/csv')],
+        fileNameOverrides: [csvFileName(ref.read(clockProvider)())],
+      ),
+    );
+    if (result.status == ShareResultStatus.success) {
+      await ref
+          .read(lockStoreProvider)
+          .write(
+            exportReminderKey,
+            ref.read(clockProvider)().toIso8601String(),
+          );
+      ref.invalidate(exportReminderProvider);
+    }
+  } on Exception {
+    if (ref.context.mounted) {
+      ScaffoldMessenger.of(ref.context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(ref.context)!.saveError)),
+      );
+    }
+  }
 }

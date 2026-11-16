@@ -9,7 +9,11 @@ import '../../../../domain/period.dart';
 import '../../../core/finance_providers.dart';
 import '../../transactions/view_models/transactions_view_model.dart';
 
-typedef HomeMonthSelection = ({DateTime selected, DateTime start});
+typedef HomeMonthSelection = ({
+  DateTime selected,
+  Period period,
+  DateTime start,
+});
 
 /// Month picked in the chart or in 00.8 (first of month, never after now)
 /// and the first month of the 6-period chart window.
@@ -21,12 +25,20 @@ class HomeMonth extends Notifier<HomeMonthSelection> {
   @override
   HomeMonthSelection build() {
     final now = ref.watch(currentMonthProvider);
-    return (selected: now, start: DateTime(now.year, now.month - 5));
+    return (
+      selected: now,
+      period: ref.watch(currentPeriodProvider),
+      start: DateTime(now.year, now.month - 5),
+    );
   }
 
-  void select(DateTime month) => state = (
-    selected: DateTime(month.year, month.month),
-    start: chartStart(now: _now, start: state.start, picked: month),
+  void select(DateTime month) =>
+      selectPeriod(ref.read(periodsProvider).periodForMonth(month));
+
+  void selectPeriod(Period period) => state = (
+    selected: period.key,
+    period: period,
+    start: chartStart(now: _now, start: state.start, picked: period.key),
   );
 }
 
@@ -132,21 +144,21 @@ final homeProvider = Provider<AsyncValue<HomeState>>((ref) {
   final cur = ref.watch(currentMonthProvider);
   final pick = ref.watch(homeMonthProvider);
   final month = pick.selected.isAfter(cur) ? cur : pick.selected;
-  final isCurrent = month == cur;
-  final prev = DateTime(cur.year, cur.month - 1);
+  final currentPeriod = ref.watch(currentPeriodProvider);
+  final isCurrent = pick.period == currentPeriod;
 
   final profile = ref.watch(profileProvider);
   final periods = ref.watch(periodsProvider);
-  final period = periods.periodForMonth(month);
+  final period = pick.period;
   final budgetIn = ref.watch(budgetInPeriodProvider(period));
   final totals = ref.watch(totalsProvider);
   final chart = ref.watch(homeChartProvider);
   final pockets = ref.watch(pocketsInPeriodProvider(period));
-  final own = ref.watch(monthTransactionsProvider(month));
+  final own = ref.watch(periodTransactionsProvider(period));
   // Early in the month "baru aja" reaches back into the last one.
   final spill =
       isCurrent && (own.value?.length ?? homeRecentLimit) < homeRecentLimit
-      ? ref.watch(monthTransactionsProvider(prev))
+      ? ref.watch(periodTransactionsProvider(periods.prev(period)))
       : null;
   final first = ref.watch(firstMonthProvider);
 
@@ -184,7 +196,9 @@ final homeProvider = Provider<AsyncValue<HomeState>>((ref) {
     );
     final noEntries = first.value == null;
     final budget = budgetIn.value;
-    final monthSpent = totals.spent[month] ?? 0;
+    final monthSpent = own
+        .where((t) => t.amount < 0)
+        .fold<int>(0, (sum, t) => sum - t.amount);
     final curPeriod = ref.watch(currentPeriodProvider);
     final budgetDaysLeft = curPeriod.daysLeft(today);
 

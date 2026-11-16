@@ -15,6 +15,7 @@ void main() {
     id: '${n++}',
     emoji: emoji,
     category: category,
+    categoryId: category,
     place: '',
     at: at,
     amount: amount,
@@ -22,6 +23,80 @@ void main() {
   );
 
   final today = DateTime(2026, 10, 16, 20); // jumat
+  test('categories with the same name retain their identity', () {
+    Transaction entry(String id, String? categoryId) => Transaction(
+      id: id,
+      emoji: '🍜',
+      category: categoryId == null ? null : 'makan',
+      categoryId: categoryId,
+      place: '',
+      at: DateTime(2026, 10, 14),
+      amount: -100,
+    );
+    final s = Stats(
+      [entry('1', 'a'), entry('2', 'b'), entry('3', null)],
+      period: StatsPeriod.month,
+      span: spanOf(StatsPeriod.month, today),
+      today: today,
+    );
+    expect(s.categories.map((c) => c.id).toSet(), {'a', 'b', null});
+  });
+
+  test('future expenses become actual on their date', () {
+    final future = tx(DateTime(2026, 10, 18, 23), -10000);
+    Stats at(DateTime day, List<Transaction> entries) => Stats(
+      entries,
+      period: StatsPeriod.week,
+      span: spanOf(StatsPeriod.week, DateTime(2026, 10, 14)),
+      today: day,
+    );
+    final empty = at(DateTime(2026, 10, 14), [future]);
+    expect((empty.total, empty.peak, empty.peakTop), (0, null, null));
+    expect(empty.spent, [0, 0, 0, null, null, null, null]);
+    final mixed = at(DateTime(2026, 10, 14), [
+      future,
+      tx(DateTime(2026, 10, 14, 23), -5000),
+    ]);
+    expect(
+      (mixed.total, mixed.categories.single.spent, mixed.peak),
+      (5000, 5000, 2),
+    );
+    final arrived = at(DateTime(2026, 10, 18), [future]);
+    expect(
+      (arrived.total, arrived.peak, arrived.peakTop!.spent),
+      (10000, 6, 10000),
+    );
+    final futureSpan = Stats(
+      [future],
+      period: StatsPeriod.week,
+      span: spanOf(StatsPeriod.week, DateTime(2026, 10, 18)),
+      today: DateTime(2026, 10, 1),
+    );
+    expect((futureSpan.peak, futureSpan.peakTop), (null, null));
+  });
+  test('future-only and mixed expenses across all periods', () {
+    final now = DateTime(2026, 10, 14);
+    final future = tx(DateTime(2026, 10, 18), -10000);
+    final actual = tx(DateTime(2026, 10, 14, 23), -5000);
+    for (final period in StatsPeriod.values) {
+      Stats stats(List<Transaction> entries, DateTime day) =>
+          Stats(entries, period: period, span: spanOf(period, now), today: day);
+      final empty = stats([future], now);
+      expect(
+        (empty.total, empty.peak, empty.low, empty.peakTop),
+        (0, null, null, null),
+      );
+      expect(empty.categories, isEmpty);
+      expect(empty.average, 0);
+      final mixed = stats([actual, future], now);
+      expect(mixed.total, 5000);
+      expect(mixed.categories.single.spent, 5000);
+      expect(mixed.peakTop!.spent, 5000);
+      final arrived = stats([actual, future], DateTime(2026, 10, 18));
+      expect(arrived.total, 15000);
+      expect(arrived.categories.single.spent, 15000);
+    }
+  });
   String span(Span s) =>
       '${s.start.month}/${s.start.day}–${s.end.month}/${s.end.day}';
 
@@ -223,5 +298,17 @@ void main() {
     expect(s.limit, 8000000 * 5); // ago … des; jan–jul had no data
     expect((s.peak, s.low), (7, 8)); // agustus boros, september hemat
     expect(s.average, 400000); // 2 finished months, not 9
+  });
+  test('year pace starts at the first budget-counted period', () {
+    final s = Stats(
+      [tx(DateTime(2026, 8, 3), -2000000)],
+      period: StatsPeriod.year,
+      span: spanOf(StatsPeriod.year, DateTime(2026, 8, 16)),
+      today: DateTime(2026, 8, 16),
+      yearBudgets: List.filled(12, 1000000),
+    );
+    expect(s.limit, 5000000);
+    expect(s.timePct, closeTo(16 / 153 * 100, 0.001));
+    expect(s.pace, BudgetPace.fine);
   });
 }

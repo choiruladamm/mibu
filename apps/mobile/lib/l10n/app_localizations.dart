@@ -2830,6 +2830,24 @@ abstract class AppLocalizations {
   /// **'data'**
   String get settingsData;
 
+  /// No description provided for @exportReminderTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'export catatan transaksi'**
+  String get exportReminderTitle;
+
+  /// No description provided for @exportReminderBody.
+  ///
+  /// In id, this message translates to:
+  /// **'udah 14 hari belum export. csv cuma berisi transaksi, bukan pengaturan.'**
+  String get exportReminderBody;
+
+  /// No description provided for @exportReminderDismiss.
+  ///
+  /// In id, this message translates to:
+  /// **'tutup pengingat'**
+  String get exportReminderDismiss;
+
   /// No description provided for @settingsExport.
   ///
   /// In id, this message translates to:
@@ -3184,11 +3202,11 @@ abstract class AppLocalizations {
   /// **'rata²/hari'**
   String get statsAvgDay;
 
-  /// No description provided for @statsAvgWeek.
+  /// No description provided for @statsAvgRange.
   ///
   /// In id, this message translates to:
-  /// **'rata²/minggu'**
-  String get statsAvgWeek;
+  /// **'rata²/rentang'**
+  String get statsAvgRange;
 
   /// No description provided for @statsAvgMonth.
   ///
@@ -3202,11 +3220,11 @@ abstract class AppLocalizations {
   /// **'dari {n} hari'**
   String statsFromDays(int n);
 
-  /// No description provided for @statsFromWeeks.
+  /// No description provided for @statsFromRanges.
   ///
   /// In id, this message translates to:
-  /// **'dari {n} minggu'**
-  String statsFromWeeks(int n);
+  /// **'dari {n} rentang'**
+  String statsFromRanges(int n);
 
   /// No description provided for @statsFromMonths.
   ///
@@ -3345,6 +3363,12 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'pasang budget'**
   String get statsSetBudget;
+
+  /// No description provided for @statsSeeTransactions.
+  ///
+  /// In id, this message translates to:
+  /// **'lihat transaksi'**
+  String get statsSeeTransactions;
 
   /// No description provided for @statsWhere.
   ///
@@ -4053,6 +4077,66 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'{bio} nyala lagi'**
   String lockToastBioOn(String bio);
+
+  /// No description provided for @statsLoading.
+  ///
+  /// In id, this message translates to:
+  /// **'lagi muat statistik…'**
+  String get statsLoading;
+
+  /// No description provided for @statsLoadError.
+  ///
+  /// In id, this message translates to:
+  /// **'statistik belum bisa dimuat. coba lagi ya.'**
+  String get statsLoadError;
+
+  /// No description provided for @statsRetry.
+  ///
+  /// In id, this message translates to:
+  /// **'coba lagi'**
+  String get statsRetry;
+
+  /// No description provided for @saveError.
+  ///
+  /// In id, this message translates to:
+  /// **'belum bisa disimpan'**
+  String get saveError;
+
+  /// No description provided for @saveErrorRetry.
+  ///
+  /// In id, this message translates to:
+  /// **'coba lagi ya, catatanmu masih di sini'**
+  String get saveErrorRetry;
+
+  /// No description provided for @settingsLoading.
+  ///
+  /// In id, this message translates to:
+  /// **'lagi muat pengaturan…'**
+  String get settingsLoading;
+
+  /// No description provided for @settingsLoadError.
+  ///
+  /// In id, this message translates to:
+  /// **'pengaturan belum bisa dimuat. coba lagi ya.'**
+  String get settingsLoadError;
+
+  /// No description provided for @statsEmpty.
+  ///
+  /// In id, this message translates to:
+  /// **'belum ada pengeluaran di periode ini. catatan pengeluaranmu bakal muncul di sini.'**
+  String get statsEmpty;
+
+  /// No description provided for @statsNoPastBudget.
+  ///
+  /// In id, this message translates to:
+  /// **'budget belum tercatat untuk periode ini.'**
+  String get statsNoPastBudget;
+
+  /// No description provided for @statsComparisonContext.
+  ///
+  /// In id, this message translates to:
+  /// **'sejauh ini vs total periode sebelumnya'**
+  String get statsComparisonContext;
 }
 
 class _AppLocalizationsDelegate

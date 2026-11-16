@@ -12,6 +12,7 @@ import '../../../../domain/search.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../routing/router.dart';
 import '../../../core/clock.dart';
+import '../../../core/dates.dart';
 import '../../../core/dashed.dart';
 import '../../../core/finance_providers.dart';
 import '../../../core/money.dart';
@@ -31,10 +32,16 @@ String _name(DateTime m) => _monthName.format(m).toLowerCase();
 /// the 00.14 summary card and the first 3 hits. Idle (08.1b): terakhir
 /// dicari + coba cari; nothing found (08.1c): ways out.
 class SearchView extends ConsumerStatefulWidget {
-  const SearchView({super.key, this.month, this.initialQuery});
+  const SearchView({
+    super.key,
+    this.month,
+    this.periodStart,
+    this.initialQuery,
+  });
 
   /// Month to search; null = this month.
   final DateTime? month;
+  final DateTime? periodStart;
 
   /// Opens already searched, e.g. from a TxRow tag chip.
   final String? initialQuery;
@@ -88,10 +95,14 @@ class _SearchViewState extends ConsumerState<SearchView> {
     final l = AppLocalizations.of(context)!;
     final now = ref.watch(nowProvider);
     final periods = ref.watch(periodsProvider);
-    final DateTime month = widget.month ?? ref.watch(currentMonthProvider);
-    final period = periods.periodForMonth(month);
+    final period = widget.periodStart != null
+        ? periods.periodOf(widget.periodStart!)
+        : widget.month != null
+        ? periods.periodForMonth(widget.month!)
+        : ref.watch(currentPeriodProvider);
+    final month = period.key;
     final monthName = _name(month);
-    final inMonth = ref.watch(monthTransactionsProvider(month)).value ?? [];
+    final inMonth = ref.watch(periodTransactionsProvider(period)).value ?? [];
     final all = ref.watch(allTransactionsProvider);
     final everything = all.value ?? [];
     final recent = ref.watch(profileProvider).value?.recentSearches ?? [];
@@ -131,8 +142,9 @@ class _SearchViewState extends ConsumerState<SearchView> {
       }
       context.push(
         Routes.transactionsFound(
-          month,
+          period.start,
           q,
+          exact: true,
           filter: switch (_kind) {
             null => TxFilter.all,
             CategoryKind.expense => TxFilter.expenses,
@@ -168,9 +180,9 @@ class _SearchViewState extends ConsumerState<SearchView> {
           ? const <Transaction>[]
           : [
               for (final t in searchEntries(everything, q, kind: _kind))
-                if (periods.periodOf(t.at).key != month) t,
+                if (periods.periodOf(t.at) != period) t,
             ];
-      final months = {for (final t in elsewhere) periods.periodOf(t.at).key};
+      final months = {for (final t in elsewhere) periods.periodOf(t.at)};
       final otherKind = _kind == null
           ? 0
           : searchEntries(pool, q).length; // no hits: all are the other kind
@@ -194,7 +206,9 @@ class _SearchViewState extends ConsumerState<SearchView> {
               pre: l.searchWayPre,
               em: l.searchWayIn(
                 elsewhere.length,
-                months.length == 1 ? _name(months.first) : l.searchOtherMonths,
+                months.length == 1
+                    ? _name(months.first.key)
+                    : l.searchOtherMonths,
               ),
               post: '',
               onTap: () => allMonths(true),
@@ -272,7 +286,10 @@ class _SearchViewState extends ConsumerState<SearchView> {
           children: [
             NavHeader(
               title: l.search,
-              sub: [_allMonths ? l.searchAllMonths : l.searchSub(monthName)],
+              sub: [
+                _allMonths ? l.searchAllMonths : l.searchSub(monthName),
+                if (!_allMonths) periodRange(period.start, period.end),
+              ],
               backLabel: l.home,
             ),
             Expanded(

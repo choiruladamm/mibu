@@ -23,6 +23,8 @@ import '../../../core/widgets/tab_bar.dart';
 import '../../../core/widgets/tx_row.dart';
 import '../../transactions/view_models/transactions_view_model.dart';
 import '../view_models/home_view_model.dart';
+import '../view_models/export_reminder.dart';
+import '../../settings/view_models/settings_view_model.dart';
 import '../../budget/views/budget_sheet.dart';
 import '../../../core/widgets/info_dialog.dart';
 import '../../../core/widgets/meta_line.dart';
@@ -131,6 +133,23 @@ class _HomeViewState extends ConsumerState<HomeView> {
                       ],
                     ),
                   ),
+                  if (ref.watch(exportReminderProvider).value == true)
+                    _gutter(
+                      Card(
+                        child: ListTile(
+                          title: Text(l.exportReminderTitle),
+                          subtitle: Text(l.exportReminderBody),
+                          onTap: () => exportCsv(ref),
+                          trailing: IconButton(
+                            tooltip: l.exportReminderDismiss,
+                            icon: const Icon(Icons.close),
+                            onPressed: () => ref
+                                .read(exportReminderDismissedProvider.notifier)
+                                .dismiss(),
+                          ),
+                        ),
+                      ),
+                    ),
                   const SizedBox(height: 18),
                   _Hero(
                     data: hero,
@@ -310,11 +329,16 @@ class _HomeViewState extends ConsumerState<HomeView> {
               top: (_sticky.value ? stickyTop + 40 : top + 44) + 8,
               child: Consumer(
                 builder: (context, ref, _) => MonthMenu(
+                  periods: ref.watch(periodsProvider),
                   selected: s.selected,
+                  selectedPeriod: s.period,
+                  currentPeriod: ref.watch(currentPeriodProvider),
                   now: ref.watch(currentMonthProvider),
                   spent: ref.watch(totalsProvider).value?.spent ?? const {},
-                  onPick: (month) {
-                    ref.read(homeMonthProvider.notifier).select(month);
+                  periodSpent: ref.watch(periodSpendingProvider),
+                  onPick: (_) {},
+                  onPickPeriod: (period) {
+                    ref.read(homeMonthProvider.notifier).selectPeriod(period);
                     setState(() => _menuOpen = false);
                   },
                 ),
@@ -967,7 +991,7 @@ class _Recent extends ConsumerWidget {
                 onTap: () => context.push(
                   s.isCurrent
                       ? Routes.transactions
-                      : Routes.transactionsIn(s.month),
+                      : Routes.transactionsIn(s.period.start, exact: true),
                 ),
                 child: Container(
                   height: 48,

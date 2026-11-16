@@ -125,6 +125,17 @@ void main() {
       expect(parsed.entries, hasLength(1));
     });
 
+    test('oversized nominal is skipped without losing valid rows', () {
+      final parsed = parseTransactionsCsv(
+        '$head'
+        '2026-10-02,07:05,pengeluaran,99999999999999999999999999999999999,,,,,\r\n'
+        '2026-10-02,07:05,pengeluaran,10000000000,,,,,\r\n'
+        '2026-10-02,07:05,pengeluaran,9999999999,,,,,\r\n',
+      )!;
+      expect(parsed.bad, 2);
+      expect(parsed.entries.single.amount, -9999999999);
+    });
+
     test('plan: dupes once per live entry, new buat apa by name + kind', () {
       final parsed = parseTransactionsCsv(
         '$head'
