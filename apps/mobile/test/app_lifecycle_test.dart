@@ -40,11 +40,6 @@ void main() {
         ],
       ),
     );
-    addTearDown(() async {
-      await tester.pumpWidget(const SizedBox());
-      container!.dispose();
-      await db.close();
-    });
     await tester.pumpWidget(
       UncontrolledProviderScope(container: container!, child: const MibuApp()),
     );
@@ -66,5 +61,8 @@ void main() {
     b.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pump();
     expect(container.read(nowProvider).day, 15);
+    await tester.pumpWidget(const SizedBox());
+    container.dispose();
+    await db.close();
   });
 }

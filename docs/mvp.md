@@ -235,15 +235,22 @@ step = 50K (budget ≤ 5jt) · 100K (≤ 20jt) · 250K (di atasnya)
 
 ### Statistik
 
+Perbaikan audit: [#33](https://github.com/choiruladamm/mibu/issues/33), bagian dari #6.
+- Persen waktu tahunan dihitung sejak awal periode catatan pertama, sama dengan rentang limit tahunan; tanpa catatan tetap satu tahun penuh.
+- Label bulan memakai rata²/rentang, karena panjang bar bisa berbeda. Tap bar menampilkan tanggal rentangnya.
+- Delta periode berjalan dibandingkan total periode sebelumnya, dengan keterangan eksplisit.
+- Loading dan error dipisahkan dari data kosong; error punya coba lagi. Periode tanpa pengeluaran menampilkan penjelasan, bukan kartu sekilas kosong.
+- Periode lama tanpa budget menampilkan informasi saja; pasang budget hanya dari periode sekarang.
+
 - Rata-rata dihitung dari bar yang udah lewat aja (bar yang lagi jalan baru ikut kalau dia satu-satunya), dan bar sebelum catatan pertama nggak dihitung (bukan "kepake 0").
-- Bar bulan = per 7 hari dari hari pertama periode; sisa 1–3 hari digabung ke bar terakhir (bar terakhir 7–9 hari), nggak ada bar sliver.
+- Bar bulan = per 7 hari dari hari pertama periode; sisa 1–3 hari digabung ke bar terakhir (bar terakhir 8–10 hari), nggak ada bar sliver.
 - Tahun = 12 periode bernama Januari … Desember (Januari mulai di desember kalau gajian ≥ 16): label tahun dan nama bar ikut nama periode, bukan tanggal mulainya. Limit tahun = Σ budget tiap periode yang ada datanya; periode tanpa budget pakai budget terdekat.
 - Ritme budget **[diupdate]** pakai `monthlyBudget` (B) aja, tanpa fallback ke Σ limit: total kepake ngitung semua pengeluaran, termasuk tanpa kategori & non-kantong, jadi Σ limit bukan pembanding yang adil.
 
 ```
 limit minggu = B × 7 ÷ panjang bulan   (minggu nyebrang bulan: bulan dari hari seninnya)
 limit bulan  = B
-limit tahun  = B × 12
+limit tahun  = Σ budget periode sejak periode catatan pertama sampai desember
 
 minggu / bulan:  kepake > limit → lewat budget
                  kepake ≥ 85% limit → hampir abis

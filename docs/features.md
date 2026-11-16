@@ -57,13 +57,15 @@ Tanda: **[diupdate]** = aturan/perilaku berubah dari design, **[perlu design]** 
   - `impian` (goals): kartu kosong `pasang target` — flow belum didesain.
 ## 04 · Statistik
 
+- Perbaikan state, ritme tahunan, dan konteks periode: [#33](https://github.com/choiruladamm/mibu/issues/33) (induk #6).
+
 - [ ] **04.1 statistik** — toggle minggu / bulan / tahun (04.1a/b/c).
   - Navigasi periode ‹ ›, total + delta vs periode lalu.
   - Bar chart (bar masa depan = `belum`), garis rata², tap bar → pill nominal.
-  - `sekilas`: paling boros · paling hemat · rata² harian/mingguan/bulanan.
+  - `sekilas`: paling boros · paling hemat · rata² harian/per rentang/bulanan.
   - `ritme budget`: uang kepake % vs waktu jalan %, status `aman` / `hampir abis` / `lewat budget` / `di bawah budget`. Basisnya `monthlyBudget` (lihat mvp.md › Statistik).
     - **[diupdate]** Status `hampir abis` (≥85% limit, minggu/bulan) ditambah.
-    - **[perlu design]** Budget kosong → section diganti kartu "pasang budget bulanan biar mibu bisa ngecek ritme kamu" → BudgetSheet 00.16.
+    - Budget kosong pada periode sekarang → section diganti kartu "pasang budget bulanan biar mibu bisa ngecek ritme kamu" → BudgetSheet 00.16.
   - `larinya ke mana`: 4 kategori teratas (stacked bar + list).
 ## 05 · Pengaturan
 

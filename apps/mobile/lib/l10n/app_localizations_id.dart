@@ -1719,6 +1719,16 @@ class AppLocalizationsId extends AppLocalizations {
   String get settingsData => 'data';
 
   @override
+  String get exportReminderTitle => 'export catatan transaksi';
+
+  @override
+  String get exportReminderBody =>
+      'udah 14 hari belum export. csv cuma berisi transaksi, bukan pengaturan.';
+
+  @override
+  String get exportReminderDismiss => 'tutup pengingat';
+
+  @override
   String get settingsExport => 'export ke csv';
 
   @override
@@ -1939,7 +1949,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get statsAvgDay => 'rata²/hari';
 
   @override
-  String get statsAvgWeek => 'rata²/minggu';
+  String get statsAvgRange => 'rata²/rentang';
 
   @override
   String get statsAvgMonth => 'rata²/periode';
@@ -1950,8 +1960,8 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
-  String statsFromWeeks(int n) {
-    return 'dari $n minggu';
+  String statsFromRanges(int n) {
+    return 'dari $n rentang';
   }
 
   @override
@@ -2040,6 +2050,9 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get statsSetBudget => 'pasang budget';
+
+  @override
+  String get statsSeeTransactions => 'lihat transaksi';
 
   @override
   String get statsWhere => 'larinya ke mana';
@@ -2491,4 +2504,35 @@ class AppLocalizationsId extends AppLocalizations {
   String lockToastBioOn(String bio) {
     return '$bio nyala lagi';
   }
+
+  @override
+  String get statsLoading => 'lagi muat statistik…';
+
+  @override
+  String get statsLoadError => 'statistik belum bisa dimuat. coba lagi ya.';
+
+  @override
+  String get statsRetry => 'coba lagi';
+
+  @override
+  String get saveError => 'belum bisa disimpan';
+
+  @override
+  String get saveErrorRetry => 'coba lagi ya, catatanmu masih di sini';
+
+  @override
+  String get settingsLoading => 'lagi muat pengaturan…';
+
+  @override
+  String get settingsLoadError => 'pengaturan belum bisa dimuat. coba lagi ya.';
+
+  @override
+  String get statsEmpty =>
+      'belum ada pengeluaran di periode ini. catatan pengeluaranmu bakal muncul di sini.';
+
+  @override
+  String get statsNoPastBudget => 'budget belum tercatat untuk periode ini.';
+
+  @override
+  String get statsComparisonContext => 'sejauh ini vs total periode sebelumnya';
 }

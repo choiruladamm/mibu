@@ -122,8 +122,8 @@ CsvEntry? _entry(List<String> r) {
   final at = _at(date.trim(), time.trim());
   if (at == null) return null;
   if (!_digits.hasMatch(nominal)) return null;
-  final n = int.parse(nominal);
-  if (n == 0) return null;
+  final n = int.tryParse(nominal);
+  if (n == null || n == 0 || n > 9999999999) return null;
   final sign = switch (kind) {
     'pengeluaran' => -1,
     'pemasukan' => 1,

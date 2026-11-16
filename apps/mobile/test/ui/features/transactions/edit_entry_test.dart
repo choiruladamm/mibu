@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mibu/data/database/app_database.dart';
 import 'package:mibu/l10n/app_localizations.dart';
+import 'package:mibu/data/repositories/finance_repository.dart';
 import 'package:mibu/ui/core/clock.dart';
 import 'package:mibu/ui/core/theme.dart';
 import 'package:mibu/ui/features/transactions/views/edit_entry_view.dart';
@@ -103,4 +104,110 @@ void main() {
     await tester.pumpWidget(const SizedBox());
     await db.close();
   });
+  testWidgets('failed edit keeps draft and retry updates once', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final now = DateTime(2026, 10, 14, 14, 50);
+    final db = AppDatabase(
+      DatabaseConnection(
+        NativeDatabase.memory(),
+        closeStreamsSynchronously: true,
+      ),
+      () => now,
+    );
+    final repo = _FailOnceRepository(db);
+    Future<TransactionRow> row() => (db.select(
+      db.transactions,
+    )..where((t) => t.at.equals(DateTime(2026, 10, 13, 14, 32)))).getSingle();
+    final id = (await tester.runAsync(row))!.id;
+    addTearDown(() async {
+      await tester.pumpWidget(const SizedBox());
+      await db.close();
+    });
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          appDatabaseProvider.overrideWithValue(db),
+          clockProvider.overrideWithValue(() => now),
+          financeRepositoryProvider.overrideWithValue(repo),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.light,
+          locale: const Locale('id'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: TextButton(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => EditEntryView(id: id),
+                  ),
+                ),
+                child: const Text('open'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    Future<void> settle() async {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 50)),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+    }
+
+    await tester.tap(find.text('open'));
+    await settle();
+    await tester.enterText(find.bySemanticsLabel('nominal').last, '500000');
+    await tester.enterText(find.bySemanticsLabel('di mana').last, 'vet');
+    await tester.tap(find.text('simpan'));
+    await settle();
+    expect(find.text('belum bisa disimpan'), findsOneWidget);
+    expect(find.text('500.000'), findsOneWidget);
+    expect(find.text('vet'), findsOneWidget);
+    expect((await tester.runAsync(row))!.amount, -450000);
+    await tester.pump(const Duration(seconds: 6));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.text('simpan'));
+    await settle();
+    expect(find.text('open'), findsOneWidget);
+    expect(
+      (
+        (await tester.runAsync(row))!.amount,
+        (await tester.runAsync(row))!.place,
+      ),
+      (-500000, 'vet'),
+    );
+    expect(repo.attempts, 2);
+  });
+}
+
+class _FailOnceRepository extends FinanceRepository {
+  _FailOnceRepository(super.db);
+  int attempts = 0;
+  @override
+  Future<void> updateTransaction(
+    String id, {
+    required int amount,
+    required String? categoryId,
+    required String place,
+    required String note,
+    required DateTime at,
+    List<String>? tags,
+  }) {
+    if (++attempts == 1) return Future.error(StateError('write failed'));
+    return super.updateTransaction(
+      id,
+      amount: amount,
+      categoryId: categoryId,
+      place: place,
+      note: note,
+      at: at,
+      tags: tags,
+    );
+  }
 }

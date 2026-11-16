@@ -14,6 +14,7 @@ import 'package:mibu/ui/core/money.dart';
 import 'package:mibu/ui/core/theme.dart';
 import 'package:mibu/ui/core/widgets/app_emoji.dart';
 import 'package:mibu/ui/features/settings/views/settings_view.dart';
+import 'package:mibu/ui/features/categories/view_models/categories_view_model.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:mibu/ui/core/widgets/meta_line.dart';
@@ -22,7 +23,11 @@ import '../../../lock_store.dart';
 import '../../../meta.dart';
 
 void main() {
-  Future<AppDatabase> pump(WidgetTester tester) async {
+  Future<AppDatabase> pump(
+    WidgetTester tester, {
+    bool failUsage = false,
+  }) async {
+    var attempts = 0;
     // Tests render with Ahem (1em per glyph), so 390 wide overflows rows that
     // fit with Instrument Sans.
     tester.view.physicalSize = const Size(900, 1400);
@@ -50,6 +55,13 @@ void main() {
           appDatabaseProvider.overrideWithValue(db),
           clockProvider.overrideWithValue(() => now),
           lockStoreProvider.overrideWithValue(MemoryLockStore()),
+          if (failUsage)
+            categoryUsageProvider.overrideWith((ref) {
+              if (++attempts == 1) {
+                return Stream.error(StateError('unavailable'));
+              }
+              return Stream.value({});
+            }),
         ],
         child: MaterialApp(
           theme: AppTheme.light,
@@ -76,6 +88,28 @@ void main() {
     await tester.pumpAndSettle();
     return db;
   }
+
+  testWidgets('settings dependency error offers retry and recovers', (
+    tester,
+  ) async {
+    final db = await pump(tester, failUsage: true);
+    addTearDown(() async {
+      await tester.pumpWidget(const SizedBox());
+      await db.close();
+    });
+    expect(
+      find.text('pengaturan belum bisa dimuat. coba lagi ya.'),
+      findsOneWidget,
+    );
+    expect(find.text('budget per periode'), findsNothing);
+    await tester.tap(find.text('coba lagi'));
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 50)),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('budget per periode'), findsOneWidget);
+    expect(find.text('Rp8jt'), findsOneWidget);
+  });
 
   testWidgets('05.1: budget hero, group rows, version; no deferred rows', (
     tester,

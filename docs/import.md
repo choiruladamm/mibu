@@ -48,6 +48,7 @@ Fungsi murni `parseTransactionsCsv` di `domain/csv.dart`.
 - File yang di-save ulang Excel (id) tetap kebaca: separator `;` (dilihat dari header), tanggal `d/M/yyyy`, jam `H:mm` / `HH:mm:ss` (detik dibuang). `MM/dd` (US) nggak didukung, ambigu sama `dd/MM`.
 - `tag` dipisah spasi.
 - Baris rusak: dilewatin + dihitung, impor nggak gagal semua.
+- Nominal dibatasi 1–9.999.999.999 rupiah, sama dengan batas 10 digit input; nominal di luar batas dihitung sebagai baris rusak ([#35](https://github.com/choiruladamm/mibu/issues/35)). Tanggal masa depan tetap disimpan; statistik menghitungnya saat harinya tiba.
 
 ## Duplikat: lewatin otomatis
 

@@ -16,9 +16,11 @@ import '../../../core/money.dart';
 import '../../../core/tokens.dart';
 import '../../../core/widgets/app_emoji.dart';
 import '../../../core/widgets/meta_line.dart';
+import '../../../core/widgets/sheet.dart';
 import '../../../core/widgets/tab_bar.dart';
 import '../../budget/views/budget_sheet.dart';
 import '../../categories/views/category_manage_sheet.dart';
+import '../../categories/view_models/categories_view_model.dart';
 import '../../lock/view_models/lock_labels.dart';
 import '../view_models/settings_view_model.dart';
 import 'hide_sheet.dart';
@@ -33,9 +35,33 @@ class SettingsView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final s = ref.watch(settingsProvider).value;
-    if (s == null) return const Scaffold();
     final l = AppLocalizations.of(context)!;
+    final state = ref.watch(settingsProvider);
+    final s = state.value;
+    if (state.hasError || s == null) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(state.hasError ? l.settingsLoadError : l.settingsLoading),
+              if (state.hasError)
+                PrimaryButton(
+                  label: l.statsRetry,
+                  onPressed: () {
+                    ref.invalidate(profileProvider);
+                    ref.invalidate(categoriesProvider);
+                    ref.invalidate(pocketsProvider);
+                    ref.invalidate(categoryUsageProvider);
+                    ref.invalidate(salaryDatesProvider);
+                    ref.invalidate(periodRulesProvider);
+                  },
+                ),
+            ],
+          ),
+        ),
+      );
+    }
     final version = ref.watch(appVersionProvider).value;
     final lock = ref.watch(appLockProvider).value;
     final bioKind = ref.watch(bioKindProvider).value ?? BioKind.none;

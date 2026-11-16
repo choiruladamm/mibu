@@ -5,6 +5,8 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:intl/intl.dart';
 
 import '../../../l10n/app_localizations.dart';
+import '../../../domain/period.dart';
+import '../dates.dart';
 import '../tokens.dart';
 
 /// 00.8 MonthMenu — popover under 00.7 MonthPicker: 12 months of a year with
@@ -18,6 +20,12 @@ class MonthMenu extends StatefulWidget {
     required this.spent,
     required this.onPick,
     this.min,
+    this.selectedPeriod,
+    this.currentPeriod,
+    this.onPickPeriod,
+    this.periodSpent,
+    this.minPeriod,
+    this.periods = const CalendarMonthResolver(),
   });
 
   /// First of the picked month.
@@ -31,6 +39,10 @@ class MonthMenu extends StatefulWidget {
   /// First month with entries (first of month); earlier months are locked
   /// and the year step stops at its year. Null = no lower limit.
   final DateTime? min;
+  final PeriodResolver periods;
+  final Period? selectedPeriod, currentPeriod, minPeriod;
+  final Map<Period, int>? periodSpent;
+  final ValueChanged<Period>? onPickPeriod;
 
   static const width = 300.0;
 
@@ -49,8 +61,30 @@ class _MonthMenuState extends State<MonthMenu> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
-    final peak = widget.spent.values.fold(0, math.max);
-    final onNow = widget.selected == _cur;
+    final peak = (widget.periodSpent?.values ?? widget.spent.values).fold(
+      0,
+      math.max,
+    );
+    final current = widget.currentPeriod ?? widget.periods.periodForMonth(_cur);
+    final selected =
+        widget.selectedPeriod ?? widget.periods.periodForMonth(widget.selected);
+    final onNow = selected == current;
+    final cells = <Period>[];
+    var p = widget.periods.periodForMonth(DateTime(_year, 1));
+    while (widget.periods.prev(p).key.year >= _year) {
+      p = widget.periods.prev(p);
+    }
+    while (p.key.year <= _year) {
+      if (p.key.year == _year) cells.add(p);
+      p = widget.periods.next(p);
+    }
+    void pick(Period period) {
+      if (widget.onPickPeriod case final callback?) {
+        callback(period);
+      } else {
+        widget.onPick(period.key);
+      }
+    }
 
     return Semantics(
       scopesRoute: true,
@@ -120,21 +154,31 @@ class _MonthMenuState extends State<MonthMenu> {
               crossAxisCount: 3,
               mainAxisSpacing: 6,
               crossAxisSpacing: 6,
-              mainAxisExtent: 52,
+              mainAxisExtent: 68,
               padding: EdgeInsets.zero,
               children: [
-                for (var m = 1; m <= 12; m++)
+                for (final p in cells)
                   _Cell(
-                    month: DateTime(_year, m),
-                    label: _short.format(DateTime(_year, m)).toLowerCase(),
-                    semantics: _semantics(l, DateTime(_year, m)),
-                    selected: DateTime(_year, m) == widget.selected,
-                    isNow: DateTime(_year, m) == _cur,
-                    locked: _isLocked(DateTime(_year, m)),
+                    month: p.key,
+                    label: _short.format(p.key).toLowerCase(),
+                    range: periodRange(p.start, p.end),
+                    semantics:
+                        '${_semantics(l, p.key)}, ${periodRange(p.start, p.end)}',
+                    selected: p == selected,
+                    isNow: p == current,
+                    locked:
+                        p.start.isAfter(current.start) ||
+                        (widget.minPeriod != null
+                            ? p.start.isBefore(widget.minPeriod!.start)
+                            : widget.min != null &&
+                                  p.key.isBefore(widget.min!)),
                     fill: peak == 0
                         ? 0
-                        : (widget.spent[DateTime(_year, m)] ?? 0) / peak,
-                    onTap: () => widget.onPick(DateTime(_year, m)),
+                        : (widget.periodSpent != null
+                                  ? widget.periodSpent![p] ?? 0
+                                  : widget.spent[p.key] ?? 0) /
+                              peak,
+                    onTap: () => pick(p),
                   ),
               ],
             ),
@@ -172,7 +216,7 @@ class _MonthMenuState extends State<MonthMenu> {
                 Semantics(
                   button: true,
                   child: GestureDetector(
-                    onTap: () => widget.onPick(_cur),
+                    onTap: () => pick(current),
                     child: Container(
                       height: 32,
                       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -258,6 +302,7 @@ class _Cell extends StatelessWidget {
   const _Cell({
     required this.month,
     required this.label,
+    required this.range,
     required this.semantics,
     required this.selected,
     required this.isNow,
@@ -267,7 +312,7 @@ class _Cell extends StatelessWidget {
   });
 
   final DateTime month;
-  final String label, semantics;
+  final String label, range, semantics;
   final bool selected, isNow, locked;
   final double fill; // 0–1, share of the busiest month
   final VoidCallback onTap;
@@ -306,7 +351,7 @@ class _Cell extends StatelessWidget {
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            spacing: 6,
+            spacing: 3,
             children: [
               Text(
                 label,
@@ -317,6 +362,11 @@ class _Cell extends StatelessWidget {
                       : FontWeight.w400,
                   color: fg,
                 ),
+              ),
+              Text(
+                range,
+                maxLines: 1,
+                style: AppText.caption.copyWith(fontSize: 10, color: fg),
               ),
               if (!locked)
                 Container(

@@ -15,6 +15,7 @@ import '../../../core/widgets/date_sheet.dart';
 import '../../../core/widgets/day_strip.dart';
 import '../../../core/widgets/note_sheet.dart';
 import '../../../core/widgets/sheet.dart';
+import '../../../core/widgets/toast.dart';
 import '../../../core/finance_providers.dart';
 import '../view_models/add_entry_view_model.dart';
 import 'category_picker_sheet.dart';
@@ -91,8 +92,20 @@ class _AddEntryViewState extends ConsumerState<AddEntryView> {
     // A second tap before the pop would insert the entry twice.
     if (_saving) return;
     setState(() => _saving = true);
-    await _vm.save();
-    if (mounted) Navigator.of(context).pop();
+    try {
+      await _vm.save();
+      if (mounted) Navigator.of(context).pop();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      final l = AppLocalizations.of(context)!;
+      showToast(
+        context,
+        icon: ToastIcon.trash,
+        title: l.saveError,
+        sub: l.saveErrorRetry,
+      );
+    }
   }
 
   @override
