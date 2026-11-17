@@ -16,8 +16,8 @@ class Category {
 
   final String id, emoji, name;
   final CategoryKind kind;
-  final int? monthlyLimit; // set = kantong
-  final bool isPayday; // gajian: can't be deleted, counts the payday
+  final int? monthlyLimit; // A limit makes this a pocket.
+  final bool isPayday; // Payday category: protected and used for payday dates.
 }
 
 /// "terakhir" in 06.2: a category + place logged recently.
@@ -33,15 +33,15 @@ class PeriodPoint {
   const PeriodPoint({required this.month, required this.amount});
 
   final DateTime month; // the period's month label (first of month)
-  final int amount; // kepake: spent in that period, positive
+  final int amount; // Spending in that period, positive.
 }
 
-/// 05.1 sembunyiin nominal (05.1h): what turns into `Rp•••`. [income] =
-/// pemasukan and the figures it can be read back from; [all] = everything.
+/// Amount visibility options (05.1). [income] hides income and related
+/// figures; [all] hides every amount.
 enum HideAmounts { none, income, all }
 
-/// No saldo here: mibu is a ledger per payday period, so nothing carries
-/// over and there's no opening balance (docs/period-ledger.md).
+/// The ledger is per payday period: no carryover or opening balance
+/// (docs/period-ledger.md).
 class Profile {
   const Profile({
     required this.payday,
@@ -53,19 +53,20 @@ class Profile {
     this.pocketsIntroSeen = false,
   });
 
-  /// Before 01.4 atur awal has run.
+  /// Before setup (01.4) has run.
   static const empty = Profile(payday: 0);
 
-  final int payday; // 1–31, 31 = akhir (legacy 0 too)
-  final int? monthlyBudget; // budget bulanan, set by the user; null = not set
+  final int payday; // 1–31; 31 or legacy 0 means month end.
+  final int? monthlyBudget; // User-set monthly budget; null = unset.
   final HideAmounts hideAmounts;
-  final bool onboarded; // 01.4 atur awal done (or skipped with "nanti aja")
+  final bool onboarded; // 01.4 setup complete (or skipped with "nanti aja").
   final DateTime? onboardedAt; // when: a payday change in that period is a fix
   final List<String> recentSearches; // 08.1b terakhir dicari, newest first
-  final bool pocketsIntroSeen; // 03.1l kenalan kantong dismissed with "oke"
+  final bool
+  pocketsIntroSeen; // 03.1l pocket introduction dismissed with "oke".
 }
 
-/// 01.4b kantong pertama: presets with the board's monthly limits.
+/// 01.4b starter pockets with the design board's monthly limits.
 const setupPockets = [
   ('🍜', 'makan', 1500000),
   ('☕', 'ngopi', 300000),
@@ -77,7 +78,7 @@ const setupPockets = [
   ('✈️', 'liburan', 500000),
 ];
 
-/// A category with a monthly limit, plus what's spent this month.
+/// A category's monthly limit and spending for the current period.
 class Pocket {
   const Pocket({
     required this.id,
@@ -110,7 +111,7 @@ enum PocketStatus {
   over,
   unused;
 
-  /// ≥ 85% kepake: ink chip / pill, bold "sisa".
+  /// At least 85% used: dark chip or pill, bold "sisa".
   bool get ink => this == almostOut || this == over;
 }
 
@@ -118,8 +119,8 @@ enum PocketStatus {
 int budgetPrefill(int pocketsTotal) =>
     (pocketsTotal + 499999) ~/ 500000 * 500000;
 
-/// "pasang limit" default for a category that already spent [spent] this
-/// month: 1,4× rounded up to Rp100K, at least Rp300K.
+/// Suggested limit for a category with [spent] already spent this period:
+/// 1.4× rounded up to Rp100K, with a Rp300K minimum.
 int suggestedLimit(int spent) {
   final v = (spent * 14 + 999999) ~/ 1000000 * 100000;
   return v < 300000 ? 300000 : v;
@@ -165,9 +166,9 @@ class Transaction {
   });
 
   final String id, emoji, place, note;
-  final String? category, categoryId; // null = tanpa kategori
+  final String? category, categoryId; // Null = uncategorized.
   final DateTime at;
-  final int amount; // negative = pengeluaran
+  final int amount; // Negative = expense.
   final List<String> tags;
   final bool deleted; // soft-deleted, still shown stamped on 08.2
 
@@ -175,7 +176,7 @@ class Transaction {
       amount < 0 ? CategoryKind.expense : CategoryKind.income;
 }
 
-/// "gajian telat" shows this many days at most, then quietly rolls on.
+/// Maximum days to show the late-payday state before rolling on.
 const paydayLateMaxDays = 7;
 
 enum PaydayStatus { upcoming, today, late }
@@ -183,7 +184,7 @@ enum PaydayStatus { upcoming, today, late }
 /// Where [now] stands against payday. [next] = the payday the money has to
 /// last until (exclusive); [daysToNext] = days from today to it, today
 /// included (always ≥ 1); [daysLeft] = the same while [status] is upcoming,
-/// 0 on payday / telat (no "gajian lagi n hari" then); [lateDays] > 0 only
+/// 0 on payday or late (no "gajian lagi n hari" then); [lateDays] > 0 only
 /// when late.
 typedef PaydayInfo = ({
   PaydayStatus status,
@@ -193,10 +194,10 @@ typedef PaydayInfo = ({
   int lateDays,
 });
 
-/// [payday] 1–31 (31 = akhir; a day past the month's end = its last day). A
+/// [payday] is 1–31 (31 or a day past month-end means its last day). A
 /// payday on Saturday / Sunday is paid the Friday before, unless [shift] is
-/// none (tetap tanggalnya, docs/payday-weekend.md). [salaries] = dates
-/// of live gajian income (any order): one logged up to [paydayEarlyDays]
+/// none (keep the date; docs/payday-weekend.md). [salaries] are dates
+/// of live salary income (any order): one logged up to [paydayEarlyDays]
 /// early starts the cycle that day, so the money lasts until the next one.
 /// On the scheduled day or after it with no salary logged yet: today / late;
 /// late needs a salary logged before (people who never log it don't get
@@ -254,11 +255,10 @@ PaydayInfo paydayInfo({
   return upcoming;
 }
 
-/// Today's share of what's left of the budget, before today's spending:
-/// (sisa budget + spent today) ÷ days left in the period, today included.
-/// Null without a budget: aman jajan only ever comes from the budget the
-/// user set, never from income. Also shown by "dari mana angkanya?" so the
-/// explanation can't drift from the figure.
+/// Daily budget share before today's spending: (remaining budget + today's
+/// spending) ÷ days left, including today. Null without a user-set budget;
+/// income is never used. Also shown in "dari mana angkanya?" to keep the
+/// explanation consistent with the figure.
 int? safeShare({
   required int? budgetLeft,
   required int spentToday,

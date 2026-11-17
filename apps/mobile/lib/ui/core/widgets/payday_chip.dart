@@ -19,7 +19,7 @@ class PaydayChip extends StatelessWidget {
     this.label,
   });
 
-  final int day; // 1–31, 31 = akhir
+  final int day; // 1–31; 31 means month-end.
   final bool on;
   final VoidCallback onTap;
   final String? label; // overrides the day / "akhir" text ("lainnya")

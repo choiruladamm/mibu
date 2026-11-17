@@ -24,7 +24,7 @@ import '../../../core/widgets/info_dialog.dart';
 import '../../../core/widgets/meta_line.dart';
 import '../../../core/widgets/app_emoji.dart';
 
-/// 03.1 kantong. Isi ulang and impian are post-MVP.
+/// 03.1 pockets. Top-ups and goals are post-MVP.
 class PocketsView extends ConsumerStatefulWidget {
   const PocketsView({super.key, this.initial});
 
@@ -114,8 +114,8 @@ class _PocketsViewState extends ConsumerState<PocketsView> {
                           child: Row(
                             children: [
                               Flexible(
-                                // Sisa budget, same figure as beranda; without
-                                // a budget, what's left in the jars.
+                                // Remaining budget, as on Home; without a budget,
+                                // show what's left in the jars.
                                 child: Text(
                                   switch (s.budgetLeft) {
                                     null => l.pocketsJarsTitle(month),
@@ -127,7 +127,7 @@ class _PocketsViewState extends ConsumerState<PocketsView> {
                                   style: muted,
                                 ),
                               ),
-                              // How sisa jajan and sisa budget differ: 03.1k.
+                              // Explains the difference between remaining pocket and total budget: 03.1k.
                               InfoDisc(onTap: () => _info(context, s)),
                             ],
                           ),
@@ -150,7 +150,7 @@ class _PocketsViewState extends ConsumerState<PocketsView> {
                       ),
                     ),
                   ),
-                  // 03.1l kenalan kantong: once, until "oke".
+                  // 03.1l pocket intro: shown once until dismissed.
                   if (!s.introSeen && s.pockets.isNotEmpty)
                     gutter(
                       Padding(
@@ -257,9 +257,9 @@ class _DaysChip extends StatelessWidget {
   }
 }
 
-/// "Rp2,34jt dari Rp7,4jt kepake · budget Rp8jt ›" — opens 00.16.
-/// "?" on the hero: where sisa jajan comes from, and why it can differ from
-/// the sisa budget on the beranda.
+/// "Rp2,34jt dari Rp7,4jt kepake · budget Rp8jt ›" opens 00.16.
+/// "?" on the hero explains the remaining pocket amount and how it differs
+/// from the remaining budget on Home.
 void _info(BuildContext context, PocketsState s) => showNumbersInfo(
   context,
   from: NumbersFrom.pockets,
@@ -443,7 +443,7 @@ class _Amount extends StatelessWidget {
   }
 }
 
-/// Toples per kantong: fill = % kepake. Left-aligned, always scrollable, a
+/// One jar per pocket: fill = percentage spent. Left-aligned and scrollable; a
 /// dashed "limit" jar closes the row. "geser ›" and the right fade show only
 /// while there's more to scroll to.
 class _Jars extends StatefulWidget {
@@ -684,8 +684,8 @@ class _DashedBox extends CustomPainter {
 }
 
 /// 03.1d: no limits yet; the whole card opens "pasang limit ke…".
-/// 03.1l kenalan kantong: what a kantong is, the budget split into this
-/// user's kantong, and how much of it is still unassigned.
+/// 03.1l pocket intro: what a pocket is, how the budget is split across the
+/// user's pockets, and how much remains unassigned.
 class _Intro extends StatelessWidget {
   const _Intro({required this.state, required this.onOk});
 
@@ -756,7 +756,7 @@ class _Intro extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            // The budget split into kantong, in the jars' order.
+            // The budget split across pockets, in jar order.
             ExcludeSemantics(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(4),
@@ -1143,7 +1143,7 @@ class _Jar extends StatelessWidget {
                       color: AppColors.ink,
                     ),
                   ),
-                  // Lewat limit: white "!" pill low in the full jar.
+                  // Over limit: white "!" pill near the bottom of the full jar.
                   if (pocket.status == PocketStatus.over)
                     Positioned(
                       left: 7,
@@ -1194,7 +1194,7 @@ class _Jar extends StatelessWidget {
   }
 }
 
-/// Kartu kantong yang dipilih.
+/// Card for the selected pocket.
 class _Detail extends StatelessWidget {
   const _Detail({
     required this.pocket,
@@ -1205,7 +1205,7 @@ class _Detail extends StatelessWidget {
 
   final Pocket pocket;
   final int daysLeft;
-  final VoidCallback onManage; // atur / naikin limit → 07.3
+  final VoidCallback onManage; // Set or raise limit → 07.3.
   final VoidCallback onRelease; // copot limit
 
   @override
@@ -1355,7 +1355,7 @@ class _StatusChip extends StatelessWidget {
   }
 }
 
-/// 96px progress ring: ink arc of % kepake on a 9px track; past 100% a thin
+/// 96px progress ring: ink arc for percentage spent on a 9px track; past 100% a thin
 /// outer arc (r 46, 3px) shows the excess. Icon + the real % in the middle.
 class _UsageRing extends StatelessWidget {
   const _UsageRing({required this.pocket});

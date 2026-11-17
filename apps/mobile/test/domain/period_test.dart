@@ -43,7 +43,7 @@ void main() {
     for (final day in [1, 15, 25, 28, 0]) {
       tiles(PaydayCycleResolver(day));
     }
-    // akhir = last day: feb 2028 has 29.
+    // "akhir" means the month's last day; February 2028 has 29 days.
     expect(
       const PaydayCycleResolver(0).periodOf(DateTime(2028, 3, 10)).start,
       DateTime(2028, 2, 29),
@@ -96,7 +96,7 @@ void main() {
         paydayDay: 25,
         shift: PaydayShift.none,
       ),
-      // Switched in okt, applies from the end of the running month.
+      // A November switch takes effect at the end of the current period.
       (
         effectiveFrom: DateTime(2026, 11),
         mode: PeriodMode.payday,
@@ -105,7 +105,7 @@ void main() {
       ),
     ]);
     expect(r.periodOf(DateTime(2026, 10, 16)).start, DateTime(2026, 10));
-    // Siklus pertama: clipped to the switch, then full cycles.
+    // The first cycle is clipped at the switch; later cycles are full.
     final first = r.periodOf(DateTime(2026, 11, 5));
     expect(
       (first.start, first.end),
@@ -114,8 +114,8 @@ void main() {
     expect(r.next(first).start, DateTime(2026, 11, 25));
     tiles(r);
 
-    // Payday day changed later: the sliver to the new anchor would also be
-    // "november", so it joins the running cycle (docs/payday-change.md).
+    // A later payday change creates a sliver with the same name, so it joins
+    // the running cycle (docs/payday-change.md).
     final changed = SegmentedResolver([
       (
         effectiveFrom: DateTime(2020),
@@ -193,9 +193,8 @@ void main() {
       paydayDay: 25,
       shift: shift,
     );
-    // 25 okt 2026 is a Sunday: jumat ends the period on 23 okt; switching to
-    // tetap from there gives a "oktober" sliver that joins it, and the result
-    // is just the tetap cycle: a normal period, nothing prorated.
+    // 25 Oct 2026 is Sunday: Friday 23 Oct ends the period. Switching to
+    // "tetap" creates an "oktober" sliver that joins it without proration.
     final r = SegmentedResolver([
       calendarBase,
       pay(periodsFromStart, PaydayShift.previousWorkday),

@@ -15,7 +15,7 @@ import '../../settings/view_models/settings_view_model.dart';
 import '../view_models/lock_labels.dart';
 import 'lock_flow_sheet.dart';
 
-/// 99.10b–d kunci app: on / off, how it opens, when it asks again, blur.
+/// 99.10b–d app lock: on / off, how it opens, when it asks again, blur.
 class LockSettingsView extends ConsumerWidget {
   const LockSettingsView({super.key});
 

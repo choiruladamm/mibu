@@ -35,7 +35,7 @@ class TransactionsView extends ConsumerStatefulWidget {
   /// Row tap → 08.2 struk.
   final ValueChanged<Transaction>? onOpen;
 
-  /// Search button → 08.1 cari in the month being viewed.
+  /// Search button → 08.1 search in the month being viewed.
   final ValueChanged<Period>? onSearch;
 
   @override
@@ -542,7 +542,7 @@ class _BackToNow extends StatelessWidget {
   }
 }
 
-/// 09.1 kartu periode (ink): sisa pemasukan = income − spending, against
+/// 09.1 period card (ink): remaining income = income − spending, compared with
 /// the period before; nothing carries over. No income yet → "—" and a nudge
 /// to log the salary (09.1d).
 class _PeriodCard extends StatelessWidget {

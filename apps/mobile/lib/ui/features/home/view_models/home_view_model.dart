@@ -110,7 +110,7 @@ class HomeState {
   final List<DayGroup> groups; // newest day first, ≤ 5 rows; empty "today" ok
   final int count; // entries in [month]
   final DateTime today;
-  final PaydayInfo payday; // today, telat, or how long until gajian
+  final PaydayInfo payday; // Today, late, or days until payday.
   final int? safeToSpendToday; // negative = overspent today; null = no budget
   final int? safe; // today's share behind it, for "dari mana angkanya?"
   final Period period; // the budget period [month] is named after
@@ -120,7 +120,7 @@ class HomeState {
   final int budgetDaysLeft; // days left in the current period, today included
   final bool noEntries; // nothing ever logged
 
-  /// budget − spent in [month]; negative = kelewat. Null without a budget.
+  /// Budget minus spending in [month]; negative means over budget. Null without a budget.
   int? get budgetLeft => budget == null ? null : budget! - monthSpent;
 
   /// Budget gone this month (current month only).
@@ -132,11 +132,11 @@ class HomeState {
   int get todayNet =>
       groups.where((g) => g.day == today).fold(0, (sum, g) => sum + g.total);
 
-  /// A pemasukan today: [todayNet] gives it away (05.1h).
+  /// Today's income: [todayNet] can reveal it (05.1h).
   bool get todayIncome => groups.any((g) => g.day == today && g.income);
 }
 
-/// 02.1 beranda state. Errors come back as [AsyncError] so the view can
+/// 02.1 Home state. Errors come back as [AsyncError] so the view can
 /// show them — rethrowing here crash-looped (drift stack traces are
 /// package:stack_trace chains Flutter can't demangle).
 final homeProvider = Provider<AsyncValue<HomeState>>((ref) {
@@ -214,7 +214,7 @@ final homeProvider = Provider<AsyncValue<HomeState>>((ref) {
       groups.insert(0, (day: today, total: 0, income: false, rows: const []));
     }
 
-    // Aman jajan comes from the budget only, counted to the period's end.
+    // Safe-to-spend comes from the budget only, counted through the period's end.
     final budgetLeft = isCurrent && budget != null ? budget - monthSpent : null;
     return AsyncData(
       HomeState(

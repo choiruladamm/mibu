@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
-/// Fase 0 siklus gajian: period copy ("bulan ini") lives in app_id.arb only,
+/// Payday-cycle phase 0: period copy ("bulan ini") lives in app_id.arb only,
 /// so a payday-cycle mode can change it in one place. Comments are fine.
 void main() {
   test('no "bulan ini" string literal in lib/ui', () {

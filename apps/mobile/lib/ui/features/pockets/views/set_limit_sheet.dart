@@ -21,8 +21,8 @@ import '../../../core/widgets/meta_line.dart';
 import '../../../core/widgets/app_emoji.dart';
 
 /// 03.1 "pasang limit ke…". With [pick] it opens straight on its limit step
-/// (the "belum ada limit" chips). Saves, selects the jar and shows the toast
-/// with batalin; "bikin kategori baru" hands over to 07.2 (from kantong).
+/// (the "no limit" chips). Saves, selects the jar, and shows an undo toast;
+/// "create category" opens 07.2 from Pockets.
 Future<void> showSetLimit(
   BuildContext context,
   WidgetRef ref, {
@@ -52,9 +52,9 @@ Future<void> showSetLimit(
   );
 }
 
-/// Copot limit (03.1 kartu detail, 07.3): LimitOffSheet first; on copot
-/// clears it right away, toast with batalin puts [limit] back (then runs
-/// [onUndo]). False = nggak jadi, nothing changed.
+/// Remove a limit (03.1 pocket detail, 07.3): show LimitOffSheet first; on confirmation
+/// clears it immediately; undo restores [limit] and calls [onUndo]. False means
+/// cancelled with no changes.
 Future<bool> releaseLimit(
   BuildContext context,
   WidgetRef ref, {

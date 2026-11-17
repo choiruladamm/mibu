@@ -1,4 +1,4 @@
-/// Kunci app rules (99.10): pin shape, wrong-pin holds, when to lock again.
+/// App lock rules (99.10): PIN format, failed-attempt holds, and relocking.
 /// Pure; the repository stores the state, the UI shows it.
 library;
 
@@ -29,8 +29,8 @@ bool isWeakPin(String pin) {
   return true;
 }
 
-/// The hold a wrong pin starts: 5 wrong → 30 dtk, 10 → 1 mnt, 15 → 5 mnt,
-/// 20 and on → 15 mnt. Null between those.
+/// Hold after failed PIN attempts: 5 → 30 sec, 10 → 1 min, 15 → 5 min,
+/// 20+ → 15 min. Null between thresholds.
 Duration? holdAfter(int wrongTries) {
   if (wrongTries <= 0 || wrongTries % triesPerHold != 0) return null;
   final i = wrongTries ~/ triesPerHold - 1;

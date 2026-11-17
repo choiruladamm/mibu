@@ -12,7 +12,7 @@ import '../../../core/widgets/pin_pad.dart';
 import '../../../core/widgets/sheet.dart';
 import '../hold_clock.dart';
 
-/// 99.10j–n: what stands between the app and its notes. Face id / sidik jari
+/// 99.10j–n: app lock screen. Face ID / fingerprint
 /// comes up by itself; a miss or a cancel leaves the pin pad. Five wrong pins
 /// hold the pad (the biometric key stays live), longer each round.
 ///

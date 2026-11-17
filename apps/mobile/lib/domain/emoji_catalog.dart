@@ -25,7 +25,7 @@ typedef CatalogEmoji = ({
 
 /// The only icons mibu shows: every emoji in the app comes from here.
 const emojiCatalog = <CatalogEmoji>[
-  // makan
+  // Food
   (
     emoji: '☕',
     group: EmojiGroup.makan,
@@ -184,7 +184,7 @@ const emojiCatalog = <CatalogEmoji>[
     keywords: ['resto', 'restoran', 'makan', 'malam'],
   ),
   (emoji: '🥢', group: EmojiGroup.makan, keywords: ['sumpit']),
-  // jalan
+  // Transport
   (
     emoji: '🛵',
     group: EmojiGroup.jalan,
@@ -245,7 +245,7 @@ const emojiCatalog = <CatalogEmoji>[
     group: EmojiGroup.jalan,
     keywords: ['ekspedisi', 'kirim', 'barang', 'pindahan'],
   ),
-  // rumah
+  // Home
   (emoji: '🏠', group: EmojiGroup.rumah, keywords: ['rumah']),
   (emoji: '🏡', group: EmojiGroup.rumah, keywords: ['rumah', 'keluarga']),
   (emoji: '🏢', group: EmojiGroup.rumah, keywords: ['kos', 'apartemen']),
@@ -295,7 +295,7 @@ const emojiCatalog = <CatalogEmoji>[
   (emoji: '🌱', group: EmojiGroup.rumah, keywords: ['kebun']),
   (emoji: '🔋', group: EmojiGroup.rumah, keywords: ['baterai']),
   (emoji: '🕯️', group: EmojiGroup.rumah, keywords: ['lilin']),
-  // belanja
+  // Shopping
   (
     emoji: '🛒',
     group: EmojiGroup.belanja,
@@ -343,7 +343,7 @@ const emojiCatalog = <CatalogEmoji>[
   ),
   (emoji: '🧸', group: EmojiGroup.belanja, keywords: ['mainan', 'boneka']),
   (emoji: '🌂', group: EmojiGroup.belanja, keywords: ['payung']),
-  // hiburan
+  // Entertainment
   (
     emoji: '🎬',
     group: EmojiGroup.hiburan,
@@ -402,7 +402,7 @@ const emojiCatalog = <CatalogEmoji>[
   (emoji: '🪁', group: EmojiGroup.hiburan, keywords: ['layangan']),
   (emoji: '🏆', group: EmojiGroup.hiburan, keywords: ['lomba']),
   (emoji: '✨', group: EmojiGroup.hiburan, keywords: ['lain-lain', 'lainnya']),
-  // hewan
+  // Pets
   (emoji: '🐶', group: EmojiGroup.hewan, keywords: ['anjing']),
   (emoji: '🐱', group: EmojiGroup.hewan, keywords: ['kucing']),
   (emoji: '🐈', group: EmojiGroup.hewan, keywords: ['kucing']),
@@ -428,7 +428,7 @@ const emojiCatalog = <CatalogEmoji>[
   (emoji: '🐔', group: EmojiGroup.hewan, keywords: ['ayam']),
   (emoji: '🐄', group: EmojiGroup.hewan, keywords: ['sapi', 'kurban']),
   (emoji: '🐐', group: EmojiGroup.hewan, keywords: ['kambing', 'kurban']),
-  // duit
+  // Money
   (emoji: '💰', group: EmojiGroup.duit, keywords: ['gaji', 'gajian', 'uang']),
   (emoji: '💵', group: EmojiGroup.duit, keywords: ['uang', 'tunai', 'cash']),
   (emoji: '💸', group: EmojiGroup.duit, keywords: ['transfer', 'boros']),
@@ -460,7 +460,7 @@ const emojiCatalog = <CatalogEmoji>[
   (emoji: '🪪', group: EmojiGroup.duit, keywords: ['ktp', 'dokumen']),
   (emoji: '📒', group: EmojiGroup.duit, keywords: ['buku', 'kas']),
   (emoji: '🧮', group: EmojiGroup.duit, keywords: ['hitung']),
-  // sehat
+  // Health
   (emoji: '💊', group: EmojiGroup.sehat, keywords: ['obat', 'apotek']),
   (emoji: '💉', group: EmojiGroup.sehat, keywords: ['vaksin', 'suntik']),
   (emoji: '🩺', group: EmojiGroup.sehat, keywords: ['dokter', 'periksa']),
@@ -485,7 +485,7 @@ const emojiCatalog = <CatalogEmoji>[
   (emoji: '💪', group: EmojiGroup.sehat, keywords: ['olahraga']),
   (emoji: '🩸', group: EmojiGroup.sehat, keywords: ['donor', 'darah']),
   (emoji: '🤰', group: EmojiGroup.sehat, keywords: ['hamil']),
-  // sekolah
+  // School
   (emoji: '📚', group: EmojiGroup.sekolah, keywords: ['buku', 'pelajaran']),
   (emoji: '📖', group: EmojiGroup.sekolah, keywords: ['buku']),
   (emoji: '✏️', group: EmojiGroup.sekolah, keywords: ['alat', 'tulis']),
@@ -508,7 +508,7 @@ const emojiCatalog = <CatalogEmoji>[
   (emoji: '🖍️', group: EmojiGroup.sekolah, keywords: ['krayon', 'anak']),
   (emoji: '📓', group: EmojiGroup.sekolah, keywords: ['buku', 'tulis']),
   (emoji: '🖨️', group: EmojiGroup.sekolah, keywords: ['print', 'fotokopi']),
-  // kerja
+  // Work
   (emoji: '💼', group: EmojiGroup.kerja, keywords: ['kerja', 'kantor']),
   (emoji: '💻', group: EmojiGroup.kerja, keywords: ['laptop']),
   (emoji: '🖥️', group: EmojiGroup.kerja, keywords: ['komputer']),
@@ -520,7 +520,7 @@ const emojiCatalog = <CatalogEmoji>[
   (emoji: '📧', group: EmojiGroup.kerja, keywords: ['email']),
   (emoji: '☎️', group: EmojiGroup.kerja, keywords: ['telepon']),
   (emoji: '👔', group: EmojiGroup.kerja, keywords: ['kerja', 'formal']),
-  // sosial
+  // Social
   (emoji: '🎁', group: EmojiGroup.sosial, keywords: ['kado', 'hadiah']),
   (emoji: '🎀', group: EmojiGroup.sosial, keywords: ['kado']),
   (emoji: '💐', group: EmojiGroup.sosial, keywords: ['bunga']),

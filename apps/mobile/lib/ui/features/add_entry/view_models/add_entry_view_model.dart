@@ -22,11 +22,11 @@ class AddEntryState {
   final CategoryKind kind;
   final DateTime day; // date-only
   final AmountDraft draft; // keypad input, "+" parts included
-  final Category? category; // null = tanpa kategori
+  final Category? category; // Null means uncategorized.
   final String place;
   final Note note;
 
-  /// The amount is a suggestion (last gajian), not typed: shown muted, and
+  /// The amount is a suggestion (last payday), not typed: shown muted, and
   /// the first key replaces it.
   final bool suggested;
 
@@ -52,7 +52,7 @@ class AddEntryState {
   );
 }
 
-/// 06.1 catat.
+/// 06.1 add entry.
 class AddEntry extends Notifier<AddEntryState> {
   @override
   AddEntryState build() => AddEntryState(
@@ -64,7 +64,7 @@ class AddEntry extends Notifier<AddEntryState> {
     kind: kind,
     // Income categories only show for income and vice versa.
     category: state.category?.kind == kind ? null : () => null,
-    // A gajian suggestion makes no sense under the other kind.
+    // A payday suggestion makes no sense for the other entry kind.
     draft: state.suggested && kind != state.kind ? emptyDraft : null,
     suggested: state.suggested && kind == state.kind,
   );
@@ -83,7 +83,7 @@ class AddEntry extends Notifier<AddEntryState> {
 
   void clear() => state = state.copyWith(draft: emptyDraft, suggested: false);
 
-  /// Beranda "catat gajian": a pemasukan under the gajian category, the last
+  /// Home "record payday": income under the Salary category, with the last
   /// salary as the amount to change.
   Future<void> startSalary() async {
     final repo = ref.read(financeRepositoryProvider);
@@ -106,7 +106,7 @@ class AddEntry extends Notifier<AddEntryState> {
 
   void setNote(Note note) => state = state.copyWith(note: note);
 
-  /// "catat lagi": same kind, category and place; amount and day stay fresh.
+  /// "Add again": same kind, category, and place; amount and date stay fresh.
   Future<void> again(Transaction t) async {
     final cats = await ref
         .read(financeRepositoryProvider)

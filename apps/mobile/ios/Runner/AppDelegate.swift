@@ -16,9 +16,8 @@ import UIKit
     registerLockChannel(engineBridge.pluginRegistry)
   }
 
-  // Kunci app (99.10s): has a face / fingerprint been enrolled since face id
-  // was switched on? iOS only says so through evaluatedPolicyDomainState, which
-  // changes when the enrolled set does. local_auth does not expose it.
+  // App lock (99.10s): iOS exposes enrollment changes through evaluatedPolicyDomainState;
+  // local_auth does not expose this value.
   private static let domainStateKey = "mibu.biometricDomainState"
 
   private func registerLockChannel(_ registry: FlutterPluginRegistry) {

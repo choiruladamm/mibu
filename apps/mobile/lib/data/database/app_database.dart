@@ -12,8 +12,8 @@ part 'app_database.g.dart';
 
 const _uuid = Uuid();
 
-/// UUID id + timestamps on every table so a backend can sync rows later
-/// (upload where updatedAt > lastSync, deletedAt included). See mvp.md.
+/// UUID IDs and timestamps on every table support future sync, including
+/// soft-deleted rows. See mvp.md.
 mixin SyncColumns on Table {
   TextColumn get id => text().clientDefault(_uuid.v4)();
   DateTimeColumn get createdAt => dateTime().clientDefault(DateTime.now)();
@@ -27,13 +27,13 @@ mixin SyncColumns on Table {
 @DataClassName('ProfileRow')
 class Profiles extends Table with SyncColumns {
   IntColumn get payday =>
-      integer()(); // 1–31, 31 = akhir; past month end = last day
+      integer()(); // 1–31; 31 means month end, capped at the last day.
   IntColumn get hideAmounts =>
       intEnum<HideAmounts>().withDefault(const Constant(0))(); // 0 = none
   DateTimeColumn get onboardedAt => dateTime().nullable()();
   TextColumn get recentSearches =>
       text().withDefault(const Constant(''))(); // newline-separated, ≤ 5
-  // 03.1l kenalan kantong: shown until "oke".
+  // 03.1l pocket intro: shown until dismissed with "oke".
   BoolColumn get pocketsIntroSeen =>
       boolean().withDefault(const Constant(false))();
 }
@@ -44,7 +44,7 @@ class Categories extends Table with SyncColumns {
   TextColumn get name => text()();
   TextColumn get kind => textEnum<CategoryKind>()();
   IntColumn get sortOrder => integer().withDefault(const Constant(0))();
-  // Salary income: will start payday cycles and auto-detect (fase 1+).
+  // Marks salary income used to resolve payday cycles.
   BoolColumn get isPayday => boolean().withDefault(const Constant(false))();
 }
 
@@ -52,9 +52,9 @@ class Categories extends Table with SyncColumns {
 @TableIndex(name: 'transactions_at', columns: {#at})
 @TableIndex(name: 'transactions_category', columns: {#categoryId})
 class Transactions extends Table with SyncColumns {
-  IntColumn get amount => integer()(); // negative = pengeluaran
+  IntColumn get amount => integer()(); // Negative = expense.
   TextColumn get categoryId =>
-      text().nullable().references(Categories, #id)(); // null = tanpa kategori
+      text().nullable().references(Categories, #id)(); // Null = uncategorized.
   TextColumn get place => text().withDefault(const Constant(''))();
   TextColumn get note => text().withDefault(const Constant(''))();
   TextColumn get tags =>
@@ -62,10 +62,10 @@ class Transactions extends Table with SyncColumns {
   DateTimeColumn get at => dateTime()();
 }
 
-/// Budget bulanan per period (00.16). The one in force for a period is the
-/// row with the latest [periodStart] ≤ the period's start, so a period
-/// without its own row keeps the last one; old rows are never touched.
-/// [amount] null = hapus budget from that period on.
+/// Monthly budget by period (00.16). The row with the latest [periodStart]
+/// at or before a period's start is in force; periods without their own row
+/// keep the previous value without changing historical rows. Null [amount] removes the
+/// budget from that period onward.
 @DataClassName('BudgetRow')
 class Budgets extends Table with SyncColumns {
   DateTimeColumn get periodStart => dateTime()(); // date-only
@@ -73,8 +73,8 @@ class Budgets extends Table with SyncColumns {
   IntColumn get amount => integer().nullable()();
 }
 
-/// A category's monthly limit per period, same lookup as [Budgets]. A
-/// category with a limit in force = kantong; [amount] null = copot limit.
+/// A category's monthly limit by period, resolved like [Budgets]. A category
+/// with an active limit is a pocket. Null [amount] removes the limit.
 @DataClassName('LimitRow')
 @TableIndex(name: 'limits_category', columns: {#categoryId})
 class Limits extends Table with SyncColumns {
@@ -84,9 +84,9 @@ class Limits extends Table with SyncColumns {
   IntColumn get amount => integer().nullable()();
 }
 
-/// Budget period settings, append-only: a change is a new row from the end
-/// of the running period, so past periods keep their rules. Empty = calendar
-/// months (v1). See [SegmentedResolver].
+/// Append-only period rules: changes start at the end of the running period,
+/// preserving past periods. Empty means calendar months (v1). See
+/// [SegmentedResolver].
 @DataClassName('PeriodRuleRow')
 class PeriodRules extends Table with SyncColumns {
   DateTimeColumn get effectiveFrom => dateTime()(); // date-only
@@ -110,20 +110,20 @@ class AppDatabase extends _$AppDatabase {
   final DateTime Function() _now;
 
   // Sample data, debug only (see MIBU_SEED below); a release build starts
-  // empty and goes through 01.4 atur awal.
+  // empty and completes setup in 01.4.
   final Seed _seed;
 
   // Debug: wipe every row on open, then seed again (MIBU_RESET below).
   final bool _reset;
 
-  // Released (data on real phones): v1 is the baseline (tag release-baseline).
-  // Change a table = bump this, add a `from < N` step in onUpgrade, add the
-  // old schema + a case in test/data/migration_test.dart. Never edit in place.
+  // v1 is released and has real user data (tag release-baseline). Table
+  // changes require a version bump, an onUpgrade step, and a migration
+  // test with the old schema. Never edit a released schema in place.
   @override
   int get schemaVersion => 1;
 
-  /// Soft-deleted rows older than a day are gone for good (undo is over).
-  /// A category stays while any entry still points at it.
+  /// Permanently remove rows soft-deleted over a day ago. Keep categories
+  /// referenced by any entry.
   Future<void> purgeDeleted() async {
     final cutoff = _now().subtract(const Duration(days: 1));
     await (delete(

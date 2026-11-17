@@ -37,8 +37,8 @@ String _range(Span s) {
       : '${_lower(_dayMonth, s.start)} – ${_lower(_dayMonth, last)}';
 }
 
-/// 04.1 statistik: minggu / bulan / tahun, ‹ › through periods, bars,
-/// sekilas, on track nggak? (ritme budget) and larinya ke mana.
+/// 04.1 statistics: week / month / year navigation, charts, overview,
+/// budget pace, and spending categories.
 class StatsView extends ConsumerStatefulWidget {
   const StatsView({super.key});
 
@@ -788,8 +788,8 @@ String _barName(Stats s, int i) {
   };
 }
 
-/// sekilas: ink card for paling boros (+ gara-gara), mist cards for paling
-/// hemat and rata² per bar.
+/// Overview: ink card for the highest spending (+ reason), mist cards for
+/// the lowest spending and average per bar.
 class _Glance extends StatelessWidget {
   const _Glance({required this.stats});
 
@@ -1031,7 +1031,7 @@ class _MiniTile extends StatelessWidget {
   }
 }
 
-/// on track nggak? — kepake vs waktu jalan against the period's budget.
+/// Budget pace: spending to date compared with elapsed time and the period budget.
 class _Pace extends StatelessWidget {
   const _Pace({required this.stats, required this.isNow});
 
@@ -1216,7 +1216,7 @@ class _Meter extends StatelessWidget {
   }
 }
 
-/// waktu jalan: 135° ink stripes on paper, ink edge.
+/// Elapsed time: 135° ink stripes on paper with an ink edge.
 class _Stripes extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -1312,7 +1312,7 @@ class _NoBudget extends StatelessWidget {
   }
 }
 
-/// larinya ke mana: top 4 categories, stacked bar + list.
+/// Spending breakdown: top four categories, stacked bar, and list.
 class _Where extends StatelessWidget {
   const _Where({required this.stats, required this.onCategory});
 

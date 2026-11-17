@@ -7,7 +7,7 @@ import '../../domain/models/finance.dart';
 import '../../domain/period.dart';
 import 'clock.dart';
 
-/// Finance data several features read (beranda, kantong, catat, budget, …);
+/// Finance data shared by Home, Pockets, Add Entry, Budget, and other features;
 /// lives here so features don't import each other's view models.
 final profileProvider = StreamProvider<Profile>(
   (ref) => ref
@@ -61,8 +61,7 @@ final _activePaydayRule = Provider<PeriodRule?>((ref) {
   ).lastOrNull;
 });
 
-/// The gajian day the periods run on today: the rule in force, else the
-/// profile's.
+/// Payday used for today's periods: the active rule, or the profile setting.
 final activePaydayProvider = Provider<int>(
   (ref) =>
       ref.watch(_activePaydayRule)?.paydayDay ??
@@ -80,13 +79,13 @@ final paydayShiftProvider = Provider<PaydayShift>(
   (ref) => _paydayRules(ref).lastOrNull?.shift ?? PaydayShift.previousWorkday,
 );
 
-/// The month label of the budget period now falls in ("oktober" while it's
-/// 25 sep – 24 okt): what the beranda, 09.1 and the menus start on.
+/// Month label for the current budget period ("October" for 25 Sep–24 Oct),
+/// used as the starting month on Home, 09.1, and month menus.
 final currentMonthProvider = Provider<DateTime>(
   (ref) => ref.watch(currentPeriodProvider).key,
 );
 
-/// The budget period [nowProvider] falls in: "bulan ini" everywhere.
+/// The budget period containing [nowProvider], used for "this month" copy.
 final currentPeriodProvider = Provider<Period>(
   (ref) => ref.watch(periodsProvider).periodOf(ref.watch(nowProvider)),
 );
@@ -100,7 +99,7 @@ final budgetInPeriodProvider = StreamProvider.family<int?, Period>(
       .map((b) => b == null ? null : prorate(b, period)),
 );
 
-/// Dates of logged gajian, for [paydayInfo] (cair duluan, telat).
+/// Logged payday dates for [paydayInfo] (early or late).
 final salaryDatesProvider = StreamProvider<List<DateTime>>(
   (ref) => ref.watch(financeRepositoryProvider).watchSalaryDates(),
 );
@@ -116,7 +115,7 @@ final pocketsProvider = StreamProvider<List<Pocket>>(
       .watchPockets(ref.watch(currentPeriodProvider)),
 );
 
-/// 05.1 sembunyiin nominal: tap a hero amount or "intip 5 detik" (09.1g) to
+/// 05.1 hide amounts: tap a hero amount or "peek for 5 seconds" (09.1g) to
 /// peek; it closes after 5s, on another tap, or when routing resets it.
 class Peek extends Notifier<bool> {
   static const window = Duration(seconds: 5);

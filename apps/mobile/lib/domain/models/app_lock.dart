@@ -1,5 +1,4 @@
-/// Kunci app (99.10) as the UI sees it. The pin hash never leaves the
-/// repository.
+/// App lock state for the UI (99.10). The PIN hash stays in the repository.
 class AppLockState {
   const AppLockState({
     this.enabled = false,
@@ -11,22 +10,22 @@ class AppLockState {
     this.heldUntil,
   });
 
-  /// Kunci mati: nothing stored.
+  /// Lock is disabled; nothing is stored.
   static const off = AppLockState();
 
   final bool enabled;
 
-  /// Face id / sidik jari on top of the pin.
+  /// Face ID or fingerprint is enabled in addition to the PIN.
   final bool bio;
 
   /// A new face / fingerprint was enrolled: [bio] went off until the pin
   /// turns it back on.
   final bool bioChanged;
 
-  /// "kunci lagi setelah ditinggal"; zero = langsung.
+  /// "kunci lagi setelah ditinggal"; zero means immediately.
   final Duration after;
 
-  /// "blur pas pindah app".
+  /// "blur pas pindah app" setting.
   final bool blur;
 
   /// Wrong pins since the last success, across restarts.

@@ -65,8 +65,8 @@ void main() {
   ) async {
     final db = await pump(tester, const Size(390, 844));
 
-    // Big figure = sisa budget, same as beranda: 8jt − 4,059jt kepake.
-    // The jars (Σ limit 3,3jt − Σ kepake 1,66jt) are the small line.
+    // The large figure is remaining budget, as on home: 8M − 4.059M spent.
+    // The small line shows jars (Σ limits 3.3M − Σ spent 1.66M).
     expect(find.text('sisa budget oktober'), findsOneWidget);
     expect(find.text('3.941.000'), findsOneWidget);
     expect(find.text('18 hari lagi'), findsOneWidget); // 14 okt, today incl.
@@ -78,7 +78,7 @@ void main() {
       findsOneWidget,
     );
 
-    // anabul 90% → hampir abis
+    // Anabul at 90% is almost depleted.
     expect(find.text('anabul'), findsOneWidget);
     expect(find.text('hampir abis'), findsOneWidget);
     expect(find.text('Rp100K'), findsOneWidget);
@@ -167,7 +167,7 @@ void main() {
       findsWidgets,
     );
 
-    // Hapus → toast with batalin.
+    // Delete shows a toast with an undo action.
     await openSheet();
     await tester.tap(find.text('hapus budget'));
     await settle();
@@ -431,7 +431,7 @@ void main() {
     );
     expect(find.textContaining('× catat'), findsNothing);
 
-    // nggak jadi: nothing changes.
+    // Cancel leaves everything unchanged.
     await tester.tap(find.text('nggak jadi'));
     await settle(tester);
     expect(await limitOf(db, 'anabul'), 1000000);
@@ -492,7 +492,7 @@ void main() {
       ),
       findsOneWidget,
     );
-    // NumbersSheet 00.25, opened from kantong: its card is the ink one.
+    // NumbersSheet 00.25 opened from pockets: its card uses the ink style.
     expect(
       find.text('total limit Rp3,3jt − kepake di kantong Rp1,66jt'),
       findsOneWidget,
@@ -508,13 +508,13 @@ void main() {
     await tester.tap(find.text('oke, ngerti'));
     await settle(tester);
 
-    // Budget Rp5jt: Rp941K left, less than sisa jajan, still no "!".
+    // Budget Rp5M: Rp941K remains, below the safe-to-spend amount; still no "!".
     await tester.runAsync(() => setBudgetOf(db, 5000000));
     await settle(tester);
     expect(find.text('!'), findsNothing);
     await tester.tap(find.bySemanticsLabel('dari mana angkanya?'));
     await settle(tester);
-    expect(find.text('Rp941K'), findsOneWidget); // sisa budget card
+    expect(find.text('Rp941K'), findsOneWidget); // Remaining budget card.
   });
 
   testWidgets('03.1l kenalan kantong: shown until oke, then never again', (
@@ -536,7 +536,7 @@ void main() {
       find.text('kantong = budget kamu, dipecah per toples'),
       findsOneWidget,
     );
-    // 4 kantong Rp3,3jt of the Rp8jt budget.
+    // Four pockets totaling Rp3.3M of the Rp8M budget.
     expect(
       findMeta(['4 kantong Rp3,3jt', 'Rp4,7jt belum dijatah']),
       findsOneWidget,

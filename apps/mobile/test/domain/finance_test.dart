@@ -26,7 +26,7 @@ void main() {
     test('weekend payday is paid the Friday before', () {
       final p = at(DateTime(2026, 10, 16));
       expect((p.next, p.daysLeft), (DateTime(2026, 10, 23), 7));
-      // akhir (31) in feb 2026 → 28 feb, a Saturday → Fri 27.
+      // "akhir" (31) in February 2026 is Saturday the 28th, so payday is Friday the 27th.
       expect(at(DateTime(2026, 2, 10), payday: 31).next, DateTime(2026, 2, 27));
       expect(at(DateTime(2026, 4, 10), payday: 31).next, DateTime(2026, 4, 30));
     });
@@ -43,7 +43,7 @@ void main() {
         (fri.status, fri.next, fri.daysLeft),
         (PaydayStatus.upcoming, DateTime(2026, 10, 25), 2),
       );
-      // jumat would already call Saturday late (salary not in yet).
+      // With the Friday shift, Saturday is already late if salary is not logged.
       expect(
         at(DateTime(2026, 10, 24), paid: [DateTime(2026, 9, 25)]).status,
         PaydayStatus.late,
@@ -143,7 +143,7 @@ void main() {
     expect(start(def, DateTime(2026, 10)), def);
     expect(start(def, DateTime(2026, 8)), def);
     expect(start(def, DateTime(2026, 3)), DateTime(2025, 12)); // 4th: mar
-    // Never runs past now: okt stays the last point.
+    // The series never extends beyond today; October remains the last point.
     expect(start(DateTime(2025, 12), DateTime(2026, 9)), DateTime(2026, 5));
   });
 

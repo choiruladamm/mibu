@@ -14,7 +14,7 @@ import '../../categories/views/category_form_sheet.dart';
 import '../../categories/views/category_manage_sheet.dart';
 import '../../../core/widgets/app_emoji.dart';
 
-/// 06.2 buat apa? — resolves to the category + place, or null.
+/// 06.2 choose a category — resolves to the category and place, or null.
 Future<RecentPick?> showCategoryPicker(
   BuildContext context, {
   required CategoryKind kind,
@@ -379,7 +379,7 @@ class _CategoryTile extends StatelessWidget {
                         .leftAmount(rupiahCompact(p.left)),
               maxLines: 1,
               style: AppText.micro.copyWith(
-                // ≥ 85% kepake or lewat: bold ink.
+                // At least 85% spent or over limit: bold ink.
                 fontWeight: p.status.ink ? FontWeight.w600 : FontWeight.w400,
                 color: p.status.ink ? AppColors.ink : AppColors.subtle,
               ),

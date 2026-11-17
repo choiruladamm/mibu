@@ -32,8 +32,7 @@ class MainActivity : FlutterFragmentActivity() {
             }
     }
 
-    // Kunci app (99.10): blur in the app list, and no screenshots, while the
-    // lock and its blur setting are on.
+    // App lock (99.10): hide app previews and block screenshots while the lock and blur setting are on.
     private fun setSecure(on: Boolean) {
         if (on) {
             window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
@@ -42,9 +41,8 @@ class MainActivity : FlutterFragmentActivity() {
         }
     }
 
-    // Kunci app (99.10s): a Keystore key that Android invalidates for good once
-    // a new fingerprint / face is enrolled. Made when biometrics are switched
-    // on, tried whenever the lock screen shows.
+    // App lock (99.10s): Android invalidates this Keystore key when biometrics are enrolled or removed.
+    // Create it when biometrics are enabled and check it whenever the lock screen appears.
     private fun createKey() {
         try {
             val generator =

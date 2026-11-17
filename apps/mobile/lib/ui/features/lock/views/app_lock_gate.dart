@@ -8,11 +8,9 @@ import '../../../core/app_lock_providers.dart';
 import '../../../core/tokens.dart';
 import 'lock_screen.dart';
 
-/// Kunci app over the whole app. [child] (the router) stays mounted, so
-/// opening mibu again lands where the user was, but it is hidden and out of
-/// reach while the lock screen is up. With "blur pas pindah app" on, the
-/// content is covered whenever the app is not in front, so the app switcher
-/// snapshot shows the wordmark instead of notes.
+/// Covers the app while locked. [child] (the router) stays mounted so the user
+/// returns to the same screen, hidden from interaction until unlock. When
+/// "blur when leaving the app" is on, the switcher snapshot shows the wordmark.
 class AppLockGate extends ConsumerStatefulWidget {
   const AppLockGate({super.key, required this.child});
 

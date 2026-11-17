@@ -1,11 +1,9 @@
-/// Budget periods: every "bulan ini" number (budget, limits, aman jajan,
-/// stats "bulan", month picker) goes through one [PeriodResolver]: from one
-/// payday to the next (gajian 1 = calendar months). A period is named after
-/// the month most of its days fall in ("oktober" = 25 sep – 24 okt): paydays
-/// from the 16th take the month they end in, earlier ones the month they
-/// start in. That keeps names one per month, in a row (a rule on the midpoint
-/// skips a month when February is short).
-/// See the doc "mibu · rencana siklus gajian".
+/// All budget-period values use one [PeriodResolver]: from payday to payday
+/// (payday 1 matches calendar months when its boundary is not shifted).
+/// A period uses the month containing most of
+/// its days ("oktober" = 25 sep – 24 okt): paydays from the 16th use the
+/// ending month; earlier paydays use the starting month. This keeps labels
+/// consecutive, including when February is short. See the payday-cycle plan.
 library;
 
 /// "2026-10": label / analytics only, never a database key.
@@ -58,9 +56,9 @@ class Period {
   String toString() => 'Period($id, $start – $end)';
 }
 
-/// [amount] (budget, kantong limit: set per normal period) for [p]: a
-/// transition period gets length ÷ [Period.normalDays] of it, so aman jajan
-/// per day stays what a normal period gives. See docs/payday-change.md.
+/// Prorate a budget or pocket limit for [p]. Transition periods use their
+/// length divided by [Period.normalDays], preserving the normal daily amount.
+/// See docs/payday-change.md.
 int prorate(int amount, Period p) =>
     p.normalDays == null ? amount : (amount * p.length / p.normalDays!).round();
 
@@ -97,14 +95,15 @@ class CalendarMonthResolver extends PeriodResolver {
 
 enum PaydayShift { none, previousWorkday }
 
-/// Salary logged up to this many days before a payday counts as that payday
-/// (cair duluan): the period starts on the day the money came in.
+/// A salary logged up to this many days before payday counts as that payday; the
+/// period starts on the date it arrived.
 const paydayEarlyDays = 3;
 
-/// [paydayDay] 1–31 (31 = akhir; a day past the month's end, and legacy 0,
-/// = its last day). Each cycle runs from one payday to the next. [salaries]
-/// = dates of logged gajian: one inside the [paydayEarlyDays] before a
-/// scheduled payday moves that cycle's start to it (the earliest one).
+/// [paydayDay] is 1–31 (31 or legacy 0 means the month's last day; dates
+/// beyond the month's length are clamped). Cycles
+/// run from payday to payday. A salary in [salaries] logged within
+/// [paydayEarlyDays] days before payday moves that cycle's start to its date
+/// (the earliest matching salary).
 class PaydayCycleResolver extends PeriodResolver {
   const PaydayCycleResolver(
     this.paydayDay, {
@@ -177,10 +176,9 @@ typedef PeriodRule = ({
   PaydayShift shift,
 });
 
-/// A rule that covers all history: setup writes its payday rule from here,
-/// so entries back-filled before the install day fall in the same periods
-/// (a rule starting on install day left a calendar-month sliver before it,
-/// with the same name as the period after it).
+/// Setup starts its payday rule here so back-filled entries use the same
+/// periods. Starting on install day would leave a calendar-month fragment
+/// with the same label as the following period.
 final DateTime periodsFromStart = DateTime(1971);
 
 /// Before any saved rule: calendar months.
@@ -191,11 +189,10 @@ final PeriodRule calendarBase = (
   shift: PaydayShift.none,
 );
 
-/// Picks the rule in force on a date (latest [PeriodRule.effectiveFrom] ≤
-/// it), so past periods keep the rules of their time. A period that straddles
-/// a rule change is clipped to it, or merged with its neighbour when they'd
-/// share a name (see [periodOf]). Dates before the first
-/// rule use it anyway.
+/// Selects the latest rule effective on a date, preserving historical rules.
+/// A period crossing a rule change is clipped or merged with a neighbour
+/// when both have the same label (see [periodOf]). Dates before the first
+/// rule use that rule.
 class SegmentedResolver extends PeriodResolver {
   SegmentedResolver(List<PeriodRule> rules, {this.salaries = const []})
     : assert(rules.isNotEmpty),
@@ -203,7 +200,7 @@ class SegmentedResolver extends PeriodResolver {
         ..sort((a, b) => a.effectiveFrom.compareTo(b.effectiveFrom));
 
   final List<PeriodRule> _rules;
-  final List<DateTime> salaries; // logged gajian, for payday rules
+  final List<DateTime> salaries; // Logged salary dates for payday rules.
 
   PeriodResolver _of(PeriodRule r) => switch (r.mode) {
     PeriodMode.calendar => const CalendarMonthResolver(),
@@ -236,10 +233,8 @@ class SegmentedResolver extends PeriodResolver {
     return Period(p.id, start, end);
   }
 
-  /// A payday change leaves a sliver between the running period and the new
-  /// rule's first full cycle. Named like its neighbour, it's merged into it
-  /// (one name, one period); either way the period around a switch is a
-  /// transition, scaled by [Period.normalDays].
+  /// Merge a change's same-label sliver into its neighboring period and scale
+  /// the resulting transition period by [Period.normalDays].
   // ponytail: only the periods touching a switch are checked; a salary
   // logged early that moves the old rule's last end off the switch isn't
   // merged (rare: payday changed and paid early in the same cycle).
@@ -267,11 +262,10 @@ class SegmentedResolver extends PeriodResolver {
   }
 }
 
-/// When a payday change made on [today] starts (05.1 tanggal gajian). Null =
-/// at once: no payday rule yet, or still in the period the app was set up in
-/// ([setUpOn]), so a wrong pick at setup is a one-tap fix. Else the change
-/// already queued (updated, not stacked: merged with its sliver the running
-/// period can reach past it) or the end of the running period [current].
+/// Returns when a payday-date change made on [today] starts (05.1).
+/// Null means immediately: no payday rule exists yet, or setup is still in
+/// its initial period. Otherwise returns the queued change date or the end
+/// of [current]. A queued change is replaced, not stacked.
 DateTime? paydayChangeFrom(
   List<PeriodRule> rules, {
   required Period current,

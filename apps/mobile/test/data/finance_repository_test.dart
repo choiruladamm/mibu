@@ -107,7 +107,7 @@ void main() {
   test(
     'totals follow the payday periods; a payday change starts later',
     () async {
-      // Fresh install on 14 okt: gajian 25 from today.
+      // Fresh install on 14 Oct: payday 25 starts today.
       final fresh = AppDatabase(
         DatabaseConnection(
           NativeDatabase.memory(),
@@ -138,8 +138,8 @@ void main() {
       expect((after.length, after.single.paydayDay), (1, 10));
       expect((await r.watchProfile(cal(now)).first).payday, 10);
 
-      // Spending lands in the period named for its month: 24 sep (payday 25
-      // → "oktober" 25 sep – 24 okt) is the same period as 5 okt.
+      // Spending uses the period's label month: 24 Sep (payday 25,
+      // "oktober" = 25 Sep–24 Oct) is in the same period as 5 Oct.
       final p25 = SegmentedResolver([
         (
           effectiveFrom: DateTime(2026, 1, 1),
@@ -168,7 +168,7 @@ void main() {
   test(
     'back-filled "kemarin" after a fresh install lands in this period',
     () async {
-      // Installed 3 okt, gajian 25; yesterday's lunch is logged afterwards.
+      // Installed on Oct 3 with payday on the 25th; yesterday's lunch is logged afterwards.
       final today = DateTime(2026, 10, 3, 10);
       final fresh = AppDatabase(
         DatabaseConnection(
@@ -207,10 +207,10 @@ void main() {
       expect(periods.periodOf(today), oct);
       final rows = await r.watchPeriod(oct).first;
       expect(rows.map((t) => t.at.day), containsAll([2, 3]));
-      // Both count against the kantong and the budget...
+      // Both count against the pocket and the budget...
       final pocket = (await r.watchPockets(oct).first).single;
       expect(pocket.spent, 50000);
-      // ...and so does sisa budget.
+      // ...and both contribute to the remaining budget.
       expect(await r.watchBudget(oct).first, 4500000);
       // Salary back-filled to 25 sep is still this period's income: no
       // opening date cuts it off (docs/period-ledger.md).

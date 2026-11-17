@@ -12,7 +12,7 @@ import '../../../core/widgets/sheet.dart';
 import '../../../core/widgets/toast.dart';
 import '../../../core/finance_providers.dart';
 
-/// Opens 00.16 and applies the result: saved → toast, hapus → toast with
+/// Opens 00.16 and applies the result: saved → toast, deleted → toast with
 /// batalin. Entry points: 03.1 hero, 00.15 PocketLimit, 04.1, 05.1.
 Future<void> editBudget(BuildContext context, WidgetRef ref) async {
   final l = AppLocalizations.of(context)!;
@@ -53,7 +53,7 @@ Future<void> editBudget(BuildContext context, WidgetRef ref) async {
   }
 }
 
-/// 00.16 budget bulanan. Pops the new budget, 0 for "hapus budget", or
+/// 00.16 monthly budget. Pops the new budget, 0 to delete it, or
 /// null when closed.
 class BudgetSheet extends StatefulWidget {
   const BudgetSheet({
@@ -140,7 +140,7 @@ class _BudgetSheetState extends State<BudgetSheet> {
                           color: AppColors.mist,
                           borderRadius: BorderRadius.circular(18),
                         ),
-                        // total limit left · ketik / belum dijatah / kurang right.
+                        // Total limit left; right side shows entered, unassigned, or over.
                         child: Semantics(
                           liveRegion: true,
                           child: Row(

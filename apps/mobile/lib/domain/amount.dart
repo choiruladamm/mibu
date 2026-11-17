@@ -51,7 +51,8 @@ const _ones = [
   'sebelas',
 ];
 
-/// 1250000 → "satu juta dua ratus lima puluh ribu". 0 → "nol".
+/// Converts an amount to words (for example, 1250000 → "satu juta dua ratus
+/// lima puluh ribu"; 0 → "nol").
 String terbilang(int n) {
   if (n == 0) return 'nol';
   String say(int n) {

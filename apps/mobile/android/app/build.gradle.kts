@@ -6,9 +6,8 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-// key.properties (gitignored) = release keystore. Tanpa itu release jatuh ke
-// debug key, sama seperti build yang sekarang ter-install di HP (jangan ganti
-// signature sembarangan: update-install gagal, data hilang).
+// Without the gitignored release keystore, the release build uses the debug key.
+// Keep its signature aligned with installed builds or updates will fail and data may be lost.
 val keyProps = Properties().apply {
     rootProject.file("key.properties").takeIf { it.exists() }?.inputStream()?.use { load(it) }
 }
@@ -53,7 +52,7 @@ android {
         resValues = true
     }
 
-    // Dua app: mibu (prod, data asli) dan mibu dev (id, data & ikon terpisah).
+    // Separate production and development apps, with isolated data and icons.
     flavorDimensions += "env"
     productFlavors {
         create("prod") {

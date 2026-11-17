@@ -9,7 +9,7 @@ import 'meta_line.dart';
 import 'app_emoji.dart';
 
 /// 00.4 TxRow — always 64 tall, two symmetric columns. Left: buat apa + tag
-/// chip (first tag + "+n") over tempat • catatan. Right: nominal over jam.
+/// chip (first tag + "+n") above place • note. Right: amount above time.
 /// Tap opens 08.2 detail, tap the tag chip opens 08.1 on that tag.
 class TxRow extends StatelessWidget {
   const TxRow({
@@ -55,7 +55,7 @@ class TxRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Expanded(
-                    // no tempat and no catatan: buat apa centers alone
+                    // With no place or note, center the category alone.
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       spacing: 2,

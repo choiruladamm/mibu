@@ -22,9 +22,9 @@ import '../../../core/widgets/icon_sheet.dart';
 /// Where a new category is made from (07.2 / 07.2b / 07.2c / 07.2d).
 enum CategoryOrigin { catat, kantong, atur }
 
-/// 07.2 bikin baru (no [category]) / 07.3 edit. Saves and pops the
+/// 07.2 create (no [category]) / 07.3 edit. Saves and pops the
 /// saved category, or null on batal. Copot limit keeps it open. [origin] picks the 07.2
-/// variant; [CategoryOrigin.kantong] always has a limit (07.2b), the others
+/// variant; [CategoryOrigin.kantong] always has a limit (07.2b), others
 /// start without one.
 Future<Category?> showCategoryForm(
   BuildContext context, {
@@ -83,7 +83,7 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
     _locked = true;
   });
 
-  /// 00.21 semua ikon.
+  /// 00.21 all icons.
   Future<void> _openIcons() async {
     final e = await showIconSheet(context, selected: _emoji);
     if (e != null) _pickEmoji(e);
@@ -709,7 +709,7 @@ class _KindSegment extends StatelessWidget {
   });
 
   final CategoryKind kind;
-  final (String, String) labels; // pengeluaran, pemasukan
+  final (String, String) labels; // Expense and income labels.
   final ValueChanged<CategoryKind> onPick;
 
   @override

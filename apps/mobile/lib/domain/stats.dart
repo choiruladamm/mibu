@@ -1,14 +1,14 @@
 import 'models/finance.dart';
 import 'period.dart';
 
-/// 04.1 statistik toggle.
+/// 04.1 statistics period selector.
 enum StatsPeriod { week, month, year }
 
 /// Half-open window [start, end), local midnights.
 typedef Span = ({DateTime start, DateTime end});
 
-/// The [p] window holding [d]: Monday week, budget period ([periods]), and
-/// a year of 12 budget periods (januari … desember by name).
+/// The [p] window containing [d]: Monday-based week, budget period
+/// ([periods]), or 12 budget periods named January through December.
 Span spanOf(
   StatsPeriod p,
   DateTime d, {
@@ -24,7 +24,8 @@ Span spanOf(
 
 Span _span(Period p) => (start: p.start, end: p.end);
 
-/// The periods named januari … desember [y]: gajian 25 → 25 des – 24 des.
+/// The periods named January through December in [y] (for example, payday
+/// 25 gives 25 Dec–24 Dec).
 Span _yearSpan(int y, PeriodResolver periods) => (
   start: periods.periodForMonth(DateTime(y)).start,
   end: periods.periodForMonth(DateTime(y, 12)).end,
@@ -50,9 +51,8 @@ Span shiftSpan(
   return spanOf(p, DateTime(s.start.year, s.start.month, s.start.day + 7 * by));
 }
 
-/// One bar per day (week), per 7 days from the period's first day (month:
-/// 25 sep, 2 okt … — the last one runs 8–10 days), per budget period
-/// (year: januari … desember).
+/// Bars cover one day (week), seven days from the period start (month; the
+/// final bar may span 8–10 days), or one budget period (year).
 List<Span> barsOf(
   StatsPeriod p,
   Span s, {
@@ -76,8 +76,7 @@ List<Span> barsOf(
     bars.add((start: a, end: b));
     a = b;
   }
-  // A 29–31 day period leaves a 1–3 day tail: fold it into the last full
-  // bar, a sliver would skew rata², paling boros and paling hemat.
+  // Fold a 1–3 day tail into the prior bar; a sliver would skew the extremes.
   if (p == StatsPeriod.month && bars.length > 1) {
     final tail = bars.last;
     if (_days(tail.start, tail.end) < 4) {
@@ -103,11 +102,11 @@ int spentIn(List<Transaction> entries, Span s) => entries
     .where((t) => !t.deleted && t.amount < 0 && _inside(t.at, s))
     .fold(0, (sum, t) => sum - t.amount);
 
-/// ritme budget (on track nggak?), see mvp.md › Statistik.
+/// Budget pace (on track?), see mvp.md › Statistik.
 enum BudgetPace { over, near, under, fine }
 
-/// One expense category in "larinya ke mana"; [category] null = tanpa
-/// kategori.
+/// One expense category in "larinya ke mana"; null [category] means
+/// uncategorized.
 typedef StatsCategory = ({
   String? id,
   String? category,
@@ -189,14 +188,14 @@ class Stats {
   final StatsPeriod period;
   final Span span;
 
-  /// The year the year window is named after (januari starts in des).
+  /// The year label for the window (January starts in December).
   int get year => monthKey.year;
 
   late final List<bool> _live; // per bar: not before the first entry
 
-  /// Σ own budget of the bars with data; a bar with none uses the nearest
-  /// set one (earlier first), so a budget set mid-year doesn't leave the
-  /// months before it out of "jatah setahun" while their spending counts.
+  /// Sum each bar's budget. Bars without a budget use the nearest set value,
+  /// preferring earlier values, so spending before a mid-year budget is
+  /// included in the annual allowance.
   int? _yearLimit(List<int?> budgets) {
     int? carry = budgets.firstWhere(
       (y) => y != null && y > 0,
@@ -228,7 +227,7 @@ class Stats {
   late final int elapsed, left; // days
   late final int? limit; // budget for this period; null = no budget
 
-  /// Bars that count for rata²: finished and with data; the running one
+  /// Bars counted for the average: finished bars with data; the running one
   /// only when nothing else is (it can still grow).
   List<int> get _shown {
     final done = [
@@ -241,14 +240,14 @@ class Stats {
     return done;
   }
 
-  /// rata²: over the finished bars (see [_shown]).
+  /// Average over the finished bars (see [_shown]).
   int get average => _shown.isEmpty
       ? 0
       : (_shown.fold(0, (a, b) => a + b) / _shown.length).round();
 
   int get counted => _shown.length; // "dari 5 hari"
 
-  /// paling boros: biggest bar so far; null = nothing spent.
+  /// Highest-spending bar so far; null = nothing spent.
   int? get peak {
     if (total == 0) return null;
     var best = 0;
@@ -258,7 +257,7 @@ class Stats {
     return best;
   }
 
-  /// paling hemat: smallest finished bar (the running one can still grow);
+  /// Lowest-spending finished bar (the running one can still grow);
   /// the current bar only when it's the only one.
   int? get low {
     if (total == 0) return null;

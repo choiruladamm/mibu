@@ -20,7 +20,7 @@ import '../../../core/widgets/icon_sheet.dart';
 import '../../../core/widgets/toast.dart';
 import '../../../core/finance_providers.dart';
 
-/// 07.1 buat apa aja — from 06.2 "atur" and 05.1. Its own messenger, so
+/// 07.1 categories — opened from 06.2 "manage" and 05.1. Its own messenger, so
 /// "ikon diganti" floats over the sheet instead of behind it.
 Future<void> showCategoryManage(BuildContext context) => showAppSheet(
   context,
@@ -47,7 +47,7 @@ class CategoryManageSheet extends ConsumerStatefulWidget {
 
 class _CategoryManageSheetState extends ConsumerState<CategoryManageSheet>
     with SingleTickerProviderStateMixin {
-  // Mode hapus (07.1d): tiles wiggle ±2°, out of phase by column. Only runs
+  // Delete mode (07.1d): tiles wiggle ±2°, out of phase by column. Only runs
   // while deleting, so normal mode has no endless animation.
   late final _wiggle = AnimationController(
     vsync: this,
@@ -84,7 +84,7 @@ class _CategoryManageSheetState extends ConsumerState<CategoryManageSheet>
     });
   }
 
-  /// Tap ikon: IconSheet, saved right away, toast with batalin.
+  /// Tap the icon to open IconSheet; changes save immediately with an undo toast.
   Future<void> _swapIcon(Category c) async {
     setState(() => _iconFor = c.id);
     final emoji = await showIconSheet(context, selected: c.emoji);
@@ -201,8 +201,8 @@ class _CategoryManageSheetState extends ConsumerState<CategoryManageSheet>
                       if (mounted) setState(() => _order = null);
                     },
                   ),
-                // "lain-lain": entries without a buat apa. Not a row in the
-                // database, so it can't be edited, dragged or deleted.
+                // "other": entries without a category. Not a database row, so
+                // it can't be edited, dragged, or deleted.
                 Padding(
                   padding: const EdgeInsets.only(top: 6),
                   child: _Tile(
@@ -245,7 +245,7 @@ class _CategoryManageSheetState extends ConsumerState<CategoryManageSheet>
   }
 }
 
-/// Outlined 40px tong sampah in the header: enters mode hapus.
+/// Outlined 40px trash icon in the header; enters delete mode.
 class _DeleteModeButton extends StatelessWidget {
   const _DeleteModeButton({required this.label, required this.onTap});
 
@@ -314,10 +314,10 @@ class _DoneButton extends StatelessWidget {
   }
 }
 
-/// Tahan & geser: long-press picks a tile up; hovering another moves it
-/// there; dropping saves the order. Tap ikon = IconSheet, tap nama = 07.3.
-/// In mode hapus ([del]) tiles wiggle, can't be dragged, and tap − = 07.4;
-/// gajian is locked there.
+/// Long-press and drag to reorder tiles; hovering over another moves the tile
+/// there; dropping saves the order. Tap an icon to open IconSheet; tap a name for 07.3.
+/// In delete mode ([del]) tiles wiggle, can't be dragged, and tap − opens 07.4;
+/// Salary is locked in delete mode.
 class _DraggableTile extends StatelessWidget {
   const _DraggableTile({
     super.key,
@@ -413,7 +413,7 @@ class _DraggableTile extends StatelessWidget {
   }
 }
 
-/// Corner badge on a tile in mode hapus: − (delete) or 🔒 (locked).
+/// Corner badge on a tile in delete mode: − (delete) or 🔒 (locked).
 enum _Badge { delete, locked }
 
 class _Tile extends StatelessWidget {
@@ -436,7 +436,7 @@ class _Tile extends StatelessWidget {
   final bool iconOpen; // its IconSheet is up: paper disc, ink ring
   final bool system; // plain disc: no pencil, name isn't a link
   final _Badge? badge;
-  final bool dim; // locked in mode hapus
+  final bool dim; // Locked in delete mode.
   final VoidCallback? onIcon, onTap, onBadge; // null = not tappable
 
   @override
@@ -619,7 +619,7 @@ class _Tile extends StatelessWidget {
   }
 }
 
-/// Mode hapus footer: why lain-lain and gajian can't go.
+/// Delete-mode footer explaining why uncategorized entries and salary cannot be deleted.
 class _LockedNote extends StatelessWidget {
   const _LockedNote();
 
@@ -662,7 +662,7 @@ class _LockedNote extends StatelessWidget {
   }
 }
 
-/// 🫙 "yang ada limit jadi toples di tab kantong." + the income note.
+/// 🫙 Categories with limits appear as jars on the Pockets tab, with an income note.
 class _JarNote extends StatelessWidget {
   const _JarNote({required this.income});
 

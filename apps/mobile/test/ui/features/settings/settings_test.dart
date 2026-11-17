@@ -118,7 +118,7 @@ void main() {
 
     expect(find.text('pengaturan'), findsWidgets); // title + tab
     expect(find.text('budget per periode'), findsOneWidget);
-    // buat apa aja: hint + the 3 most used icons stacked, then the rest.
+    // The purpose-category hint stacks the 3 most-used icons, then the rest.
     expect(find.text('nama, ikon & limit'), findsOneWidget);
     expect(find.text('+3'), findsOneWidget); // fixture: 6 buat apa
     final row = find.ancestor(
@@ -131,13 +131,13 @@ void main() {
     );
     expect(find.text('Rp8jt'), findsOneWidget);
     expect(find.text('/ periode'), findsOneWidget);
-    // Chips: the running period (fixture: calendar months) and the kantong.
+    // Chips: the current period (fixture: calendar months) and the pockets.
     expect(find.text('periode 1 okt – 31 okt'), findsOneWidget);
     expect(find.text('4 kantong'), findsOneWidget);
     expect(find.text('buat apa aja'), findsOneWidget);
     expect(find.text('limit kantong'), findsOneWidget);
     expect(find.text('sembunyiin nominal'), findsOneWidget);
-    // 99.10a: kunci app, its hint = how it opens (here: off).
+    // 99.10a: app lock hint reflects how it opens (off here).
     expect(find.text('kunci app'), findsOneWidget);
     expect(find.text('mati'), findsOneWidget);
     expect(find.text('export ke csv'), findsOneWidget);
@@ -184,7 +184,7 @@ void main() {
     expect(find.text('oke'), findsOneWidget); // nothing changed yet
     expect(find.text('+Rp20jt'), findsOneWidget);
 
-    // Live example: pemasukan aja hides the salary, not the spending.
+    // Income-only mode hides salary, not spending.
     await tester.tap(find.text('pemasukan aja'));
     await tester.pumpAndSettle();
     expect(find.text('+Rp•••'), findsOneWidget);
@@ -193,7 +193,7 @@ void main() {
     await settle();
     expect(await saved(), HideAmounts.income);
     expect(find.text('pemasukan disembunyiin'), findsOneWidget);
-    expect(find.text('Rp8jt'), findsOneWidget); // budget isn't pemasukan
+    expect(find.text('Rp8jt'), findsOneWidget); // Budget is not income.
 
     await tester.tap(find.text('batalin'));
     await settle();
@@ -282,7 +282,7 @@ void main() {
     await settle();
     expect(await saved(), 25);
 
-    // lainnya → grid 1–31; akhir; nggak jadi changes nothing.
+    // "lainnya" shows days 1–31; "akhir" selects month-end; cancel changes nothing.
     await tester.tap(find.text('tanggal gajian'));
     await settle();
     await tester.tap(find.text('lainnya'));
@@ -314,7 +314,7 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    // A lived-in setup: gajian 25 since January (not in its first period).
+    // A lived-in setup: payday on the 25th since January (not in its first period).
     await tester.runAsync(
       () => db
           .into(db.periodRules)
@@ -335,8 +335,8 @@ void main() {
     await settle();
     await tester.tap(find.text('10'));
     await tester.pump();
-    // 14 okt: the running period ("oktober", 25 sep – 22 okt) ends 23 okt.
-    // The 10th's cycle there (9 okt – 9 nov) is "oktober" too, so it joins
+    // On 14 Oct, the running period ("oktober", 25 Sep–22 Oct) ends 23 Oct.
+    // The cycle starting on the 10th (9 Oct–9 Nov) is also "oktober", so it joins
     // the running period; the preview says so before saving.
     expect(find.text('periode ini jadi 25 sep – 9 nov'), findsOneWidget);
     expect(
@@ -391,7 +391,7 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    // Lived-in: gajian 25, jumat. 25 okt 2026 is a Sunday → jum 23 okt.
+    // Existing setup: payday 25, previous Friday. 25 Oct 2026 is Sunday, so payday is 23 Oct.
     await tester.runAsync(
       () => db
           .into(db.periodRules)
