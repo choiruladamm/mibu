@@ -1,5 +1,7 @@
+import 'package:cross_file/cross_file.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -21,6 +23,47 @@ import 'package:mibu/ui/core/widgets/meta_line.dart';
 
 import '../../../lock_store.dart';
 import '../../../meta.dart';
+
+base class _CsvFile extends PlatformFile {
+  _CsvFile(this.contents) : uri = Uri.file('/backup.csv');
+
+  final String contents;
+  @override
+  String get name => 'backup.csv';
+  @override
+  final Uri uri;
+  @override
+  XFile get xFile => XFile.fromData(Uint8List.fromList(contents.codeUnits));
+  @override
+  int? lengthSync() => contents.length;
+  @override
+  Future<int?> length() async => contents.length;
+  @override
+  Future<Uint8List> readAsBytes() async =>
+      Uint8List.fromList(contents.codeUnits);
+  @override
+  Stream<Uint8List> readAsByteStream() =>
+      Stream.value(Uint8List.fromList(contents.codeUnits));
+}
+
+class _CsvPicker extends FilePickerPlatform {
+  _CsvPicker(this.file);
+  final PlatformFile file;
+  @override
+  Future<PlatformFile?> pickFile({
+    String? dialogTitle,
+    String? initialDirectory,
+    FileType type = FileType.any,
+    List<String>? allowedExtensions,
+    Function(FilePickerStatus)? onFileLoading,
+    int compressionQuality = 0,
+    AndroidOptions androidOptions = const AndroidOptions(),
+    DarwinOptions darwinOptions = const DarwinOptions(),
+    WindowsOptions windowsOptions = const WindowsOptions(),
+    LinuxOptions linuxOptions = const LinuxOptions(),
+    WebOptions webOptions = const WebOptions(),
+  }) async => file;
+}
 
 void main() {
   Future<AppDatabase> pump(
@@ -109,6 +152,61 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('budget per periode'), findsOneWidget);
     expect(find.text('Rp8jt'), findsOneWidget);
+  });
+
+  testWidgets('05.1l–o: import summary, add records, then undo', (
+    tester,
+  ) async {
+    final originalPicker = FilePickerPlatform.instance;
+    final csv = [
+      'tanggal,jam,jenis,nominal,kategori,emoji,tempat,catatan,tag',
+      '2026-10-12,12:30,pengeluaran,45000,es kopi,☕,kantor,ngopi,kerja',
+    ].join('\n');
+    FilePickerPlatform.instance = _CsvPicker(_CsvFile(csv));
+    addTearDown(() => FilePickerPlatform.instance = originalPicker);
+    final db = await pump(tester);
+    Future<void> settle() async {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 50)),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    addTearDown(() async {
+      await tester.pumpWidget(const SizedBox());
+      await db.close();
+    });
+
+    final importRow = find.text('import dari csv');
+    await tester.ensureVisible(importRow);
+    await tester.tap(importRow);
+    await settle();
+    expect(find.text('backup.csv'), findsOneWidget);
+    expect(find.text('catatan baru'), findsOneWidget);
+    expect(find.text('es kopi'), findsOneWidget);
+    expect(find.text('1 pengeluaran'), findsOneWidget);
+    await tester.tap(find.text('import 1 catatan'));
+    await settle();
+
+    expect(find.text('1 catatan masuk'), findsOneWidget);
+    var imported = await tester.runAsync(
+      () => db.select(db.transactions).get(),
+    );
+    expect(imported!.where((row) => row.note == 'ngopi'), hasLength(1));
+    await tester.tap(find.text('batalin'));
+    await settle();
+    imported = await tester.runAsync(() => db.select(db.transactions).get());
+    expect(
+      imported!.singleWhere((row) => row.note == 'ngopi').deletedAt,
+      isNot(equals(null)),
+    );
+    final categories = await tester.runAsync(
+      () => db.select(db.categories).get(),
+    );
+    expect(
+      categories!.singleWhere((row) => row.name == 'es kopi').deletedAt,
+      isNot(equals(null)),
+    );
   });
 
   testWidgets('05.1: budget hero, group rows, version; no deferred rows', (
