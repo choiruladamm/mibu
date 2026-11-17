@@ -1,62 +1,62 @@
-# mibu — gajian jatuh weekend: jumat atau tetap
+# mibu — payday on a weekend: Friday or keep the date
 
-Keputusan 2026-10-03, udah jalan (board 00.24, 05.1j–k). Nambahin [payday-cycle.md](payday-cycle.md) (v1: weekend digeser ke jumat otomatis) dan pakai mekanisme ganti tanggal di [payday-change.md](payday-change.md).
+Decision made 2026-10-03 and implemented (boards 00.24, 05.1j–k). This adds to [payday-cycle.md](payday-cycle.md) (weekends are shifted to Friday in v1) and uses the change mechanism in [payday-change.md](payday-change.md).
 
-## Masalah
+## Problem
 
-Gajian yang jatuh sabtu / minggu selalu dihitung jumat sebelumnya (`PaydayShift.previousWorkday`). Kebanyakan kantor memang begitu, tapi ada juga yang tetap transfer di hari sabtu. Buat user kayak gitu, mibu nutup periode di hari kamis, padahal gajinya baru masuk sabtu:
+A payday falling on Saturday or Sunday is always treated as the previous Friday (`PaydayShift.previousWorkday`). Most employers do that, but some transfer on Saturday. For those users, mibu closes the period on Thursday even though the salary arrives Saturday:
 
-- dari jumat sampai sabtu, beranda nampilin "gajian telat 1 hari" (`paydayInfo`), padahal gajinya belum telat
-- periode baru mulai di hari jumat, padahal duit gajinya belum masuk
-- aman jajan di periode lama dihitung kurang 1–2 hari
+- From Friday to Saturday, the home screen says “gajian telat 1 hari” (`paydayInfo`) even though payday is not late.
+- The new period starts Friday, before the salary arrives.
+- Safe-to-spend for the old period is calculated with one or two fewer days.
 
-## Keputusan
+## Decision
 
-1. **Dua pilihan:** *mundur ke jumat* (default, kayak sekarang) dan *tetap di tanggalnya*. "Maju ke senin" belum dibikin, nunggu ada yang minta. Tanggal merah tetap fase 2 (butuh data kalender), jadi pengaturan ini cuma soal sabtu / minggu.
-2. **Disimpan per aturan periode.** Tiap aturan di `periodRules` udah punya `shift`. Nggak perlu kolom baru, nggak perlu migrasi.
-3. **Mulai berlaku kapan: sama kayak ganti tanggal gajian.** Pengaturan ini bisa ngegeser batas periode (contoh: 25 okt jatuh minggu, jadi 23 okt kalau "jumat", 25 okt kalau "tetap"). Jadi berlaku mulai periode berikutnya, kecuali masih di periode setup. Waktu mulainya diputusin `paydayChangeFrom`. Potongan periode, penggabungan, dan budget proporsi ikut jalan, karena buat mesin periode ini cuma satu aturan baru.
-4. **Cuma bisa diatur di 05.1**, nggak ditanya pas setup 01.4. Default "jumat" udah pas buat kebanyakan orang, dan setup nggak perlu nambah pertanyaan.
+1. **Two choices:** *shift back to Friday* (default, current behavior) and *keep the date*. “Shift forward to Monday” is not implemented unless requested. Public holidays remain phase 2 (calendar data is needed), so this setting covers Saturday and Sunday only.
+2. **Stored per period rule.** Each `periodRules` row already has `shift`; no new column or migration is needed.
+3. **Effective date follows payday changes.** This setting can move a period boundary (for example, Sunday Oct 25 becomes Oct 23 with “Friday”, or Oct 25 with “keep date”). It therefore takes effect from the next period, except while still in the setup period. `paydayChangeFrom` determines when. Period splits, merges, and prorated budgets apply too: the period engine sees one new rule.
+4. **Configured only in 05.1**, not asked during setup 01.4. The default “Friday” fits most users and avoids another setup question.
 
 ## UI
 
 **00.24 PaydaySheet**
 
-- Di bawah kartu ink "gajian berikutnya" ada label kecil "kalau jatuh sabtu / minggu", di bawahnya dua chip [mundur ke jumat] [tetap tanggalnya] (`PaydayChip`, sama kayak chip tanggal). Kalau label dan chip dijejer satu baris, nggak muat di lebar 350. Bagian ini selalu tampil, karena pengaturannya berlaku buat bulan-bulan berikutnya juga, nggak cuma bulan ini.
-- Kartu ink ngikutin pilihan:
-  - jumat: "jum 23 okt" + catatan "tgl 25 jatuh hari minggu → dihitung jumat" (kayak sekarang)
-  - tetap: "min 25 okt", tanpa catatan
-- Tombol simpan aktif kalau tanggal **atau** pengaturan weekend berubah. Labelnya:
-  - tanggal berubah: "simpan tgl 28"
-  - cuma weekend yang berubah: "simpan"
-  - nggak ada yang berubah: "oke"
-- Preview "periode ini jadi …" (payday-change.md) ikut ngitung pengaruh pengaturan weekend.
-- Catatan di bawah: "budget & limit ngikut gajian. ganti tanggal atau weekend berlaku mulai periode berikutnya."
+- Below the ink “next payday” card, show the small label “kalau jatuh sabtu / minggu” and two chips [mundur ke jumat] [tetap tanggalnya] (`PaydayChip`, same as date chips). The label and chips do not fit together on a 350-wide line. Always show this setting because it applies to future months too.
+- The ink card reflects the choice:
+  - Friday: “jum 23 okt” with note “tgl 25 jatuh hari minggu → dihitung jumat” (current behavior).
+  - Keep date: “min 25 okt”, without a note.
+- Enable save when either the date **or** weekend setting changes. Labels:
+  - Date changed: “simpan tgl 28”
+  - Only weekend setting changed: “simpan”
+  - No changes: “oke”
+- The “periode ini jadi …” preview ([payday-change.md](payday-change.md)) also accounts for the weekend setting.
+- Note below: “budget & limit ngikut gajian. ganti tanggal atau weekend berlaku mulai periode berikutnya.”
 
 **Toast**
 
-- Tanggal berubah: "gajian jadi tgl 28" (kayak sekarang)
-- Cuma weekend yang berubah: "gajian tetap di tgl 25" / "weekend dihitung jumat". Dibikin pendek biar judulnya muat di samping tombol batalin.
-- Subjudul toast sama kayak ganti tanggal: "berlaku mulai …, periode ini selesai dulu" atau "periode ini jadi sampai …"
+- Date changed: “gajian jadi tgl 28” (as before).
+- Only weekend setting changed: “gajian tetap di tgl 25” / “weekend dihitung jumat”. Keep it short so the title fits beside the undo button.
+- Toast subtitle follows payday changes: “berlaku mulai …, periode ini selesai dulu” or “periode ini jadi sampai …”.
 
-**05.1 pengaturan**
+**05.1 settings**
 
-Baris tanggal gajian tetap "tiap tgl 25". Kalau ditambah "• weekend tetap", lebarnya nggak muat. Lagian tanggal di subjudulnya udah ngikutin pengaturan ("min 25 okt" vs "jum 23 okt"), jadi bedanya tetap kelihatan.
+The payday row stays “tiap tgl 25”. Adding “• weekend tetap” would not fit. The date in its subtitle already reflects the setting (“min 25 okt” vs “jum 23 okt”), so the difference remains visible.
 
-**Contoh board** (hari ini 16 okt, gajian 25 "jumat" diganti ke "tetap", 05.1j–k): periode jalan 25 sep – 22 okt jadi 25 sep – 24 okt. Ujungnya pas sama siklus baru, jadi ini periode normal dan budgetnya nggak diproporsi. Preview: "periode ini jadi 25 sep – 24 okt", "30 hari • budget Rp8jt". Toast: "gajian tetap di tgl 25", subjudul "periode ini jadi sampai sab 24 okt".
+**Board example** (today is Oct 16; payday is the 25th, changed from “Friday” to “keep date”, 05.1j–k): the current period changes from Sep 25–Oct 22 to Sep 25–Oct 24. It now ends at the new cycle boundary, so this is a normal period and its budget is not prorated. Preview: “periode ini jadi 25 sep – 24 okt”, “30 hari • budget Rp8jt”. Toast: “gajian tetap di tgl 25”, subtitle “periode ini jadi sampai sab 24 okt”.
 
-## Yang udah ketangani tanpa kode baru
+## Already handled without new code
 
-- **Pilih "tetap", tapi kantor ternyata transfer jumat:** aturan cair duluan (gaji dicatat ≤ 3 hari lebih awal) udah otomatis mulai periodenya dari hari jumat itu.
-- **Pilih "jumat", tapi gaji baru masuk sabtu:** tetap muncul "telat 1 hari". Ini justru alasan pengaturan ini dibikin, dan pilihan "tetap" langsung beresin.
+- **“Keep date” is selected, but the employer transfers Friday:** the early-payday rule (salary recorded up to 3 days early) already starts the period on Friday.
+- **“Friday” is selected, but salary arrives Saturday:** it still shows “telat 1 hari”. This is the reason for the setting; choosing “keep date” resolves it.
 
-## Urutan kerja
+## Work sequence
 
-1. ✅ **Desain:** 00.24 (pilihan weekend, kartu ink, label simpan, catatan), artboard baru 05.1j (sheet) dan 05.1k (kesimpen + batalin), toast, tanggal di 05.1, note baris 02.
-2. ✅ **Domain + test:** `paydayInfo` nerima `shift` (sekarang hardcode `previousWorkday`). Provider yang ngasih tanggal gajian aktif juga ngasih shift aturan yang berlaku.
-3. ✅ **Data:** `setPayday(day, shift)` nulis shift ke aturan (sekarang selalu `previousWorkday`). Sama kayak ganti tanggal: aturan yang udah antri diupdate.
-4. ✅ **UI:** pilihan weekend di 00.24, catatan shift (`_shiftNote`) ikut pilihan, preview + toast, tanggal di 05.1 ikut shift, copy di `app_id.arb`.
+1. ✅ **Design:** 00.24 (weekend choice, ink card, save label, note), new 05.1j (sheet) and 05.1k (saved + undo) boards, toast, date in 05.1, note in row 02.
+2. ✅ **Domain + test:** `paydayInfo` accepts `shift` (previously hardcoded to `previousWorkday`). The provider supplying the active payday date also supplies the applicable shift.
+3. ✅ **Data:** `setPayday(day, shift)` writes the shift (previously always `previousWorkday`). A queued rule is updated, as with date changes.
+4. ✅ **UI:** weekend choice in 00.24, `_shiftNote` follows the choice, preview and toast, date in 05.1 follows shift, copy in `app_id.arb`.
 
-Catatan implementasi:
+Implementation notes:
 
-- `activeShiftProvider` = shift aturan yang berlaku hari ini, dipakai `paydayInfo` di beranda dan 05.1. `paydayShiftProvider` = shift yang terakhir di-set, termasuk yang masih antri. Ini yang diedit di 00.24, sama kayak `Profile.payday` buat tanggal.
-- Sheet ngembaliin `(day, shift)`. `setPayday(day, shift:)` nulis keduanya, dan batalin balik ke dua-duanya.
+- `activeShiftProvider` is the shift rule effective today, used by `paydayInfo` on home and 05.1. `paydayShiftProvider` is the most recently selected shift, including one queued for later. 00.24 edits this, just as `Profile.payday` holds the date.
+- The sheet returns `(day, shift)`. `setPayday(day, shift:)` writes both; undo restores both.

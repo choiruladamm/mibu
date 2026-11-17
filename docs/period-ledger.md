@@ -1,154 +1,103 @@
-# mibu — buku catatan per periode gajian
+# mibu — ledger by payday period
 
-Keputusan 2026-10-03. Logic sama UI sementaranya udah jalan, desain final nyusul (lihat [Status](#status)). Gantiin model "saldo kumulatif" (saldo awal + semua catatan) yang ada di [mvp.md](mvp.md) dan hero toggle di [features.md](features.md). Dasar periodenya tetap [payday-cycle.md](payday-cycle.md).
+Decision made 2026-10-03. The logic and interim UI are implemented; final design followed (see [Status](#status)). This replaces the “cumulative balance” model (opening balance + all entries) in [mvp.md](mvp.md) and the hero toggle in [features.md](features.md). Period rules remain in [payday-cycle.md](payday-cycle.md).
 
-## Ringkasan
+## Summary
 
-mibu itu **buku catatan pemasukan dan pengeluaran per periode gajian**, bukan cermin rekening bank. Saldo bank bukan urusan app ini. Tugasnya: nyatet, batesin budget per periode, dan ngasih tau berapa jajan yang aman.
+mibu is a **ledger of income and spending for each payday period**, not a mirror of a bank account. Bank balance is outside this app's scope. Its job is to record transactions, set a budget per period, and show how much is safe to spend.
 
-User-nya orang kantoran, atau kantoran + freelance, yang tau kapan gajiannya. Tanggal gajian itu patokan satu-satunya buat semua angka. Nggak ada angka yang kebawa lintas periode.
+The intended user is an employee, or an employee who also freelances, who knows when payday is. Payday is the single reference point for all figures. No amount carries across periods.
 
 ## Status
 
-Logic + desain final (canvas 2026-10-03) udah masuk:
+Logic and final design (canvas 2026-10-03) are implemented:
 
-| Bagian | Board | Isi |
+| Area | Board | Details |
 |---|---|---|
-| Domain + skema + repository | — | saldo, saldo awal, hero toggle dibuang; `Totals` = `income` + `spent` per periode; aman jajan budget aja |
-| Hero | HeroBudget 00.23 / 00.23b | sisa budget + "?" di samping label · "dari budget Rp… • gajian lagi N hari" (periode lalu: range tanggal) · budget kosong → kartu putus-putus "atur budget periode ini" + chip "isi budget biar dapet aman jajan" |
-| Grafik beranda | PeriodBars 00.26 (opsi a) | kepake per periode, garis putus-putus = budget periode berjalan, 6 periode sampai yang berjalan, pill "berjalan • okt" / "lewat budget", nggak ada prediksi |
-| Dari mana angkanya | NumbersSheet 00.25 | 3 kartu (sisa budget · aman jajan per hari · sisa jajan kantong), kartu dari layar pembuka di-ink, dipakai beranda & kantong |
-| Setup | 01.4 / 01.4c / 01.4d | tanggal gajian dulu + kartu "periode sekarang", budget opsional tanpa chip cepat, preview aman jajan cuma kalau diisi; 01.4b "/periode", tanpa budget "total limit per periode" |
-| Sheet budget | 00.16 | "budget per periode", "periode lalu kepake Rp…", "Rp… / periode" |
-| Sheet gajian | 00.24 | tanpa baris aman jajan, catatan "tgl 25 jatuh hari minggu → dihitung jumat" |
-| Catat | 06.1b–d | "sisa budget abis ini" / "pemasukan periode ini jadi" / bar ilang tanpa budget |
-| 09.1 | 09.1 / 09.1d | range di bawah judul, kartu ink sisa pemasukan + naik/turun, pemasukan & pengeluaran vs periode lalu, "—" + "catat gajian dulu" |
+| Domain + schema + repository | — | Cumulative balance, opening balance, and hero toggle removed; `Totals` = `income` + `spent` per period; safe-to-spend uses budget only |
+| Hero | HeroBudget 00.23 / 00.23b | Remaining budget + “?” beside label · “dari budget Rp… • gajian lagi N hari” (date range for past periods) · when budget is empty, dashed “atur budget periode ini” card + “isi budget biar dapet aman jajan” chip |
+| Home chart | PeriodBars 00.26 (option a) | Spending per period, dashed line = current-period budget, 6 periods through current, pill “berjalan • okt” / “lewat budget”, no forecast |
+| Number explanation | NumbersSheet 00.25 | 3 cards (remaining budget · safe-to-spend per day · remaining pocket allowance); opening-screen card is ink; used on home and pockets |
+| Setup | 01.4 / 01.4c / 01.4d | Payday date first + “current period” card, optional budget without quick chips, safe-to-spend preview only when a budget is entered; 01.4b “/periode”, without budget “total limit per periode” |
+| Budget sheet | 00.16 | “budget per periode”, “periode lalu kepake Rp…”, “Rp… / periode” |
+| Payday sheet | 00.24 | No safe-to-spend row, note “tgl 25 jatuh hari minggu → dihitung jumat” |
+| Add transaction | 06.1b–d | “sisa budget abis ini” / “pemasukan periode ini jadi” / hide bar when no budget |
+| 09.1 | 09.1 / 09.1d | Date range under title, ink remaining-income card + change, income and spending vs previous period, “—” + “catat gajian dulu” |
 
-Belum (toast budget: #22): nama user di judul 01.4 (app belum punya nama), toast budget versi beranda ("budget Rp… kepasang"), dan mvp.md / features.md ditulis ulang (masih nunjuk ke sini).
+The proposed home budget toast is tracked in [#22](https://github.com/choiruladamm/mibu/issues/22).
 
-Ganti tanggal gajian tetap berlaku **mulai periode berikutnya** (kecuali masih di periode setup), diputusin 2026-10-03 dan catatan di sheet 00.24 udah disamain. Alasannya: kalau langsung, periode yang lagi jalan ganti panjang di tengah jalan, catatan pindah periode, dan budget periode itu bisa kepake dobel (25 → 10 tgl 16 okt: periode lama tutup 9 okt, periode baru dapet budget penuh lagi).
+Payday changes take effect **from the next period** (immediately if still in the setup period); decided 2026-10-03 and reflected in the 00.24 sheet note. If they took effect immediately, the running period would change length midstream, move entries between periods, and could grant the period's budget twice (25 → 10 on Oct 16: old period ends Oct 9, new period gets a full budget again).
 
-## Kenapa ganti
+## Why change the model
 
-Saldo kumulatif = `openingBalance` + catatan sejak `openingAt`. Di pemakaian nyata itu bermasalah:
+Cumulative balance = `openingBalance` + entries since `openingAt`. In real use this creates problems:
 
-- Gajian tgl 25 sep dicatat tgl 3 okt nggak masuk saldo (`at < openingAt`), padahal user nganggep itu bagian periodenya.
-- Kalau dihitung semua, angkanya dobel dengan saldo awal yang diketik user (udah termasuk gaji itu).
-- Skip saldo awal (0) bikin saldo cuma dari catatan, tapi catatan lama tetap dibuang.
-- "Saldo" kebaca saldo bank, padahal mibu nggak tau isi rekening.
-- Pemasukan itu bukan budget. Gaji 20jt nggak berarti boleh dihabisin 20jt.
+- Salary on Sep 25 entered on Oct 3 is excluded from balance (`at < openingAt`), although the user considers it part of that period.
+- Counting all entries duplicates the amount the user typed as opening balance (which already included that salary).
+- Skipping opening balance (0) means balance comes only from entries, but old entries are still discarded.
+- “Balance” sounds like a bank balance, which mibu cannot know.
+- Income is not a budget. A 20m salary does not mean the user can spend 20m.
 
-Semua itu hilang kalau angkanya murni "catatan di periode ini".
+These issues disappear when amounts represent only “entries in this period”.
 
-## Keputusan
+## Decisions
 
-1. **Periode gajian mutlak.** Satu-satunya sumbu waktu di seluruh app (budget, limit, kantong, aman jajan, statistik, cari, grafik).
-2. **Nggak ada saldo kumulatif, saldo awal, atau carryover.** Sisa uang periode lalu nggak kebawa. Bank bukan urusan mibu.
-3. **Sisa pemasukan = analitik.** Label "sisa pemasukan", bukan "sisa gaji", karena freelance, bonus, dan lain-lain ikut. Tampil di statistik, bukan di hero.
-4. **Budget acuan harian.** Hero cuma sisa budget. Aman jajan cuma turun dari budget, **nggak pernah** ditebak dari pemasukan.
-5. **Budget kosong → ajakan, bukan tebakan.** Hero dan chip ngajak "atur budget periode ini". Fitur lain tetap jalan.
-6. **Onboarding nggak ngewajibin apa pun.** Semua boleh dilewatin, default aman. Budget nggak harus diisi di setup.
-7. **Pemasukan non-gaji ikut** dihitung ke pemasukan periode.
-8. **Sheet budget nunjukin "periode lalu kepake Rp…"** sebagai petunjuk (mulai periode kedua). Pemasukan nggak dipakai buat saran budget, biar nggak kesan "habisin gaji".
+1. **Payday periods are authoritative.** The only time axis throughout the app: budget, limits, pockets, safe-to-spend, stats, search, and charts.
+2. **No cumulative balance, opening balance, or carryover.** Money left from the previous period does not carry forward. Bank balance is outside mibu's scope.
+3. **Remaining income is analytics.** Label it “sisa pemasukan”, not “sisa gaji”, because freelance income, bonuses, and other income count too. Show it in stats, not the hero.
+4. **Budget is the daily reference.** The hero shows remaining budget only. Safe-to-spend draws only from budget and is **never** inferred from income.
+5. **No budget → prompt, not guess.** Hero and chip invite the user to “atur budget periode ini”. Other features continue to work.
+6. **Setup requires nothing.** Everything can be skipped and defaults are safe. A budget is optional during setup.
+7. **Non-salary income counts** toward period income.
+8. **Budget sheet shows “periode lalu kepake Rp…”** as a hint (starting with the second period). Income is not used to suggest a budget, avoiding the impression “spend your salary”.
 
-## Rumus
+## Formulas
 
-Semua per periode `P` (aturan periode: [period.dart](../apps/mobile/lib/domain/period.dart)), tanggal catatan yang nentuin masuk periode mana, `deletedAt` null, **nggak ada filter `openingAt`**.
+All values are for period `P` (period rules: [period.dart](../apps/mobile/lib/domain/period.dart)). The entry date determines its period; `deletedAt` must be null. **There is no `openingAt` filter.**
 
 ```
-pemasukan(P)      = Σ amount transaksi pemasukan di P
-kepake(P)         = Σ pengeluaran di P
-sisaPemasukan(P)  = pemasukan(P) − kepake(P)              -- analitik
-sisaBudget(P)     = budget yang berlaku di P − kepake(P)
-sisaJajan(P)      = Σ limit kantong − kepake di kantong   -- 03.1, nggak berubah
+income(P)           = Σ income transaction amounts in P
+spent(P)            = Σ expenses in P
+remainingIncome(P)  = income(P) − spent(P)                  -- analytics
+remainingBudget(P)  = budget in force for P − spent(P)
+remainingPocket(P)  = Σ pocket limits − spending in pockets -- 03.1, unchanged
 
-aman = floor((sisaBudget + pengeluaranHariIni) / hariSisaPeriode) − pengeluaranHariIni
+safe = floor((remainingBudget + spendingToday) / daysLeftInPeriod) − spendingToday
 ```
 
-`hariSisaPeriode` = hari sampai akhir periode, hari ini ikut (`period.daysLeft`). Aturan lain aman jajan tetap: budget kelewat → "rem dulu ya", `aman ≤ 0` → "kebablasan", hari gajian / telat → ajakan catat gajian (`paydayInfo`). Beda sekarang: **nggak ada sisi saldo**, jadi nggak ada `min(saldo, budget)`.
+`daysLeftInPeriod` means days through the end of the period, including today (`period.daysLeft`). Other safe-to-spend rules remain: budget exceeded → “rem dulu ya”; `safe < 0` → “kebablasan”; payday / late payday → prompt to record salary (`paydayInfo`). The difference is **no balance side**, so there is no `min(balance, budget)`.
 
-Contoh: gaji 15jt tgl 25 sep, freelance 2jt tgl 2 okt, budget 7jt, udah kepake 3jt.
+Example: salary 15m on Sep 25, freelance 2m on Oct 2, budget 7m, 3m already spent.
 
-| | Nilai |
+| | Value |
 |---|---|
-| pemasukan periode | 15jt + 2jt = 17jt |
-| sisa pemasukan | 17jt − 3jt = **14jt** |
-| sisa budget | 7jt − 3jt = **4jt** |
-| selisih gaji − budget | jatah yang nggak dialokasiin (tabungan) |
+| period income | 15m + 2m = 17m |
+| remaining income | 17m − 3m = **14m** |
+| remaining budget | 7m − 3m = **4m** |
+| salary − budget difference | amount not allocated (savings) |
 
-Freelance naikin sisa pemasukan, **nggak nyentuh budget** kecuali user naikin sendiri.
+Freelance income increases remaining income; it **does not affect the budget** unless the user raises it.
 
-## Yang gugur
+## Removed
 
-- Saldo kumulatif, `profiles.openingBalance`, `profiles.openingAt`, dan langkah saldo di 01.4.
-- Hero toggle saldo ⇄ sisa budget: `BalanceMode`, `profiles.heroMode`, `profiles.heroHintSeen`, hint "tap buat liat sisa budget".
-- Sisi saldo di aman jajan (`safeShare` jadi budget aja).
-- Prediksi saldo bulan depan (butuh saldo kumulatif).
-- Catatan "saldo tetap cuma ngitung sejak saldo awal" di mvp.md.
+- Cumulative balance, `profiles.openingBalance`, `profiles.openingAt`, and the balance step in 01.4.
+- Hero toggle balance ⇄ remaining budget: `BalanceMode`, `profiles.heroMode`, `profiles.heroHintSeen`, hint “tap buat liat sisa budget”.
+- Balance side of safe-to-spend (`safeShare` becomes budget-only).
+- Next-month balance forecast (requires cumulative balance).
+- The note in mvp.md that “balance only counts entries since opening balance”.
 
-## Perubahan per area
+## Edge cases
 
-| Area | Perubahan |
-|---|---|
-| Skema ([app_database.dart](../apps/mobile/lib/data/database/app_database.dart)) | Drop `openingBalance`, `openingAt`, `heroMode`, `heroHintSeen`. Pre-release: edit di tempat di `schemaVersion` 1, data dev di-wipe, `build_runner`. |
-| Repository ([finance_repository.dart](../apps/mobile/lib/data/repositories/finance_repository.dart)) | `watchTotals`: per periode `income`, `spent`, `nets` tanpa filter `openingAt`; `balance` dibuang, `spentToday` tetap. `completeSetup` tanpa saldo. `setHeroMode` / `markHeroHintSeen` dibuang. |
-| Domain ([finance.dart](../apps/mobile/lib/domain/models/finance.dart)) | `safeShare` / `safeToSpendToday` budget aja, budget null → null (bukan 0). `monthEndBalance`, `balanceSeries`, prediksi diganti seri per periode atau dibuang. Fungsi murni + unit test. |
-| Hero 02.1 | Sisa budget, tanpa pill toggle. Budget kosong → kartu "atur budget periode ini" → sheet budget yang udah ada. Chip aman jajan: ajakan yang sama. Baris kecil: "gajian lagi N hari" / "dari budget Rp…". |
-| Info dialog | Isi diganti: sisa budget, aman jajan (sisa budget ÷ hari sisa), sisa jajan kantong. Nggak ada lagi penjelasan "saldo". |
-| Setup 01.4 | Tanggal gajian (25 udah kepilih) + budget per periode **opsional** (boleh kosong). Nggak ada saldo. `nanti aja` tetap. 01.4b kantong tetap, opsional. |
-| Ringkasan 01.4b | "belum dijatah … dari saldo" / "lebih … dari saldo" dibandingin ke budget (kalau diisi), tanpa budget cuma total limit. |
-| Bar dampak 06.1 | "saldo abis ini" (pengeluaran non-kantong + pemasukan) diganti: pengeluaran → "sisa budget abis ini", pemasukan → "pemasukan periode ini jadi Rp…". Tanpa budget: bar disembunyiin. |
-| Copy (`app_id.arb`) | 16 key yang nyebut "saldo" (`balanceLabel`, `homeMonthlyBalance`, `infoSaldo*`, `infoSafeBody*`, `heroModeSaldo`, `homeBalanceEnd`, `balanceAfter`, `setupBalance*`, `setupFree`, `setupOver`, `setupBack`, …) dibuang atau ditulis ulang. |
-| Sheet budget (05.1) | Petunjuk "periode lalu kepake Rp…" kalau periode sebelumnya punya pengeluaran. Teks aja, nggak ngisi otomatis. |
-| Sheet tanggal gajian (05.1e–g) | Kartu "aman jajan sebelum → sesudah" bergantung saldo. Usulan: sisain tanggal berikutnya + "N hari lagi", buang before/after (sisi budget hampir nggak gerak). |
-| Statistik 09.1 | Kartu per periode: pemasukan, pengeluaran, sisa pemasukan, dibanding periode sebelumnya. |
-| Grafik 02.1 | Grafik "saldo per bulan" nggak punya basis. Usulan: grafik pindah ke statistik jadi sisa pemasukan per periode; posisinya di beranda diputusin bareng desain. |
-| Seed & test | `seedFixture` / `seedDemo` tanpa saldo awal. Test yang nge-assert saldo ditulis ulang (hero fixture "design numbers" ikut berubah, desainnya diupdate dulu). |
-| Docs | mvp.md (Turunan, Aman jajan), features.md (01.4, 02.1), memory. |
-
-## Edge case
-
-| # | Kasus | Penanganan |
+| # | Case | Handling |
 |---|---|---|
-| 1 | Gaji belum dicatat di periode baru | Pemasukan periode 0 → sisa pemasukan tampil "—", bukan angka negatif. Chip "catat gajian" yang udah ada jadi pengingat. |
-| 2 | Pengeluaran > pemasukan di periode | Sisa pemasukan negatif, ditampilin apa adanya di statistik. |
-| 3 | Pemasukan sehari sebelum gajian (mis. freelance tgl 23) | Jatuh ke periode sebelumnya. Wajar, tanggal yang nentuin. |
-| 4 | Gaji cair duluan | Aturan `paydayEarlyDays` tetap: periode mulai di tanggal gaji dicatat, pemasukannya ikut periode baru. |
-| 5 | Catat mundur sebelum install / sebelum gajian pertama | Tetap punya periode lewat `periodsFromStart`, masuk riwayat dan statistik. Nggak perlu hint khusus lagi. |
-| 6 | Budget kosong, aman jajan | Ajakan atur budget, nggak ada angka. |
-| 7 | Ganti tanggal gajian di tengah periode | Aturan lama: berlaku periode berikutnya (langsung kalau masih periode setup). Potongan periode di titik pergantian + budget proporsi: [payday-change.md](payday-change.md). |
-| 8 | Data lama (punya saldo awal) | Kolom dibuang, saldo nggak dihitung. Pre-release, jadi cukup `make fresh` / `make reset`. |
+| 1 | Salary has not been recorded in the new period | Period income 0 → remaining income shows “—”, not a negative value. Existing “record salary” chip is a reminder. |
+| 2 | Spending exceeds income for the period | Remaining income is negative; show it as-is in stats. |
+| 3 | Income the day before payday (e.g. freelance on the 23rd) | Belongs to the previous period. The entry date decides. |
+| 4 | Salary arrives early | `paydayEarlyDays` remains: period starts on the recorded payday date, and the income belongs to the new period. |
+| 5 | Backdated entry before install / first payday | It still belongs to a period via `periodsFromStart`, and appears in history and stats. No special hint is needed. |
+| 6 | No budget, safe-to-spend | Prompt to set a budget; show no amount. |
+| 7 | Change payday mid-period | Existing rule: effective next period (immediately if still in setup period). Split at the change and prorate budget: [payday-change.md](payday-change.md). |
 
-## Urutan kerja
+## Pockets
 
-1. **Domain + test:** aman jajan budget aja, sisa pemasukan per periode (fungsi murni).
-2. **Skema + seed:** drop kolom, `build_runner`, seed tanpa saldo awal.
-3. **Repository:** `watchTotals`, `completeSetup`, buang hero mode.
-4. **Hero + chip + info dialog:** sisa budget, state budget kosong.
-5. **Setup 01.4:** tanggal gajian + budget opsional.
-6. **Sheet budget:** petunjuk periode lalu.
-7. **Kantong 03.1:** cuma copy dialog yang nyebut saldo. Perilaku kantong nggak diubah (lihat [Ditunda](#ditunda)).
-8. **Sheet tanggal gajian:** sederhanain preview.
-9. **Statistik:** kartu sisa pemasukan + banding.
-10. **Grafik beranda:** setelah desain.
-11. **Docs:** sinkronin mvp.md, features.md, hapus catatan lama.
-
-## Ditunda
-
-**Kantong (03.1) nggak ikut dirombak** di putaran ini, fiturnya belakangan. Yang tetap: kantong = kategori yang punya limit, seksi "belum ada limit", dan "!" waktu sisa jajan > sisa budget. Entri lain-lain (tanpa kategori) tetap cuma ngurangin sisa budget dan belum tampil di 03.1.
-
-Ide yang diparkir buat nanti:
-
-- **Kantong virtual "lain-lain"**: limit = budget − Σ limit kantong asli, kepake = entri tanpa kategori + kategori tanpa limit. Hasilnya Σ limit = budget dan sisa jajan = sisa budget, jadi dua angka itu nggak bisa beda lagi. Tanpa kantong sama sekali, tab jadi satu kantong yang isinya sama dengan sisa budget. Tanpa budget: ajakan atur budget.
-- Σ limit > budget: nggak diblok, limit lain-lain tampil 0 dan peringatan yang ada tetap muncul.
-
-## Butuh desain dulu
-
-Hero tanpa toggle + state budget kosong · 01.4 baru · petunjuk di sheet budget · kartu sisa pemasukan di statistik · info dialog baru · pengganti grafik saldo di beranda · sheet tanggal gajian yang disederhanain.
-
-## Terbuka
-
-- **Grafik beranda:** pindah ke statistik, diganti pengeluaran vs budget per periode, atau dibuang.
-- **Preview sheet tanggal gajian:** setuju dibuang jadi tanggal + "N hari lagi"?
-- **Petunjuk "periode lalu kepake":** teks aja, atau bisa di-tap buat ngisi angkanya.
-- **Label range tanggal** ("25 sep – 24 okt") di menu bulan / 09.1 / statistik, masih utang dari periode gajian.
+Pockets are categories with limits. The pockets screen shows the no-limit section and warns when remaining pocket allowance exceeds remaining budget. Uncategorized entries reduce remaining budget but do not appear as a pocket. The virtual “other” pocket proposal is tracked in [#43](https://github.com/choiruladamm/mibu/issues/43).

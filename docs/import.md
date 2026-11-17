@@ -1,98 +1,81 @@
-# mibu — impor data
+# mibu — data import
 
-**Udah dieksekusi 3 okt 2026** (05.1l–o, ImportSheet 00.30). Masuk [mvp.md](mvp.md#import-csv).
+**Implemented on 3 Oct 2026** (05.1l–o, ImportSheet 00.30). Included in [mvp.md](mvp.md#csv-import).
 
-## Prinsip
+## Principles
 
-User mibu itu casual. Impor harus **satu tap, nol keputusan**. Yang bisa ditebak, tebak. Kalau tebakannya salah, user benerin belakangan pakai fitur yang udah ada (kelola buat apa, undo).
+mibu users are casual. Import should take **one tap, with no decisions**. Guess what can be guessed. If a guess is wrong, the user can fix it later with existing features (manage categories, undo).
 
 ## Scope
 
-| opsi | effort | catatan |
+| option | effort | notes |
 |---|---|---|
-| **A. CSV mibu sendiri** (round-trip ekspor) | kecil | format udah fix ([mvp.md › Ekspor CSV](mvp.md#ekspor-csv)), parser = kebalikan `transactionsCsv` |
-| B. CSV app lain (Money Lover, Spendee, Wallet) | sedang | tiap app beda kolom, perlu mapping kolom / preset per app |
-| C. mutasi bank (BCA/Mandiri PDF/CSV) | besar | format berantakan, kategori harus ditebak dari deskripsi. skip |
-| D. backup penuh (JSON semua tabel, #13) | sedang | ikut budget, limit, period rules, profile. ini fitur "backup & pulihin" yang ditunda |
+| **A. mibu's own CSV** (export round-trip) | small | format is fixed ([mvp.md › CSV export](mvp.md#csv-export)); parser is the inverse of `transactionsCsv` |
+| B. Other apps' CSV (Money Lover, Spendee, Wallet) | medium | columns vary by app; needs column mapping / presets per app ([#44](https://github.com/choiruladamm/mibu/issues/44)) |
+| C. Bank statements (BCA/Mandiri PDF/CSV) | large | messy formats; categories must be guessed from descriptions ([#44](https://github.com/choiruladamm/mibu/issues/44)) |
+| D. Full backup (JSON of all tables, #13) | medium | includes budget, limits, period rules, and profile. This is the deferred "backup & pulihin" feature |
 
-**Pilih A dulu.**
+**Start with A.**
 
-- Kasus nyata: ganti HP / reinstall. Yang sakit kalau ilang itu riwayat transaksi. Budget + limit 1 menit diset ulang (01.4).
-- D nyambung ke "backup & pulihin" nanti. Format beda, jangan dicampur.
-- B buat narik user baru. Nanti tinggal nambah mapping kolom di atas parser A, kerjaan A nggak kebuang.
+- Real use case: changing phones / reinstalling. Transaction history is what hurts to lose. Budget + limits take 1 minute to set up again (01.4).
+- D connects to "backup & pulihin" later. The formats differ, so keep them separate.
+- B helps bring in new users. Later, column mappings can be added on top of parser A, without wasting the work on A.
 
 ## Flow
 
 `pengaturan 05.1 → impor dari csv → pilih file → sheet ringkasan → impor → toast "142 masuk" + batalin`
 
-1. Tile `impor dari csv` di bawah `ekspor ke csv`.
+1. `impor dari csv` tile below `ekspor ke csv`.
 2. File picker → parse.
-3. Sheet ringkasan (read-only):
-   - `142 transaksi baru` + rentang tanggal
+3. Summary sheet (read-only):
+   - `142 transaksi baru` + date range
    - `5 udah ada, dilewatin`
-   - `3 buat apa baru` + emoji + nama
-   - `2 baris nggak kebaca` (kalau ada)
-4. Tap `impor` → insert dalam satu Drift `transaction()`.
+   - `3 buat apa baru` + emoji + name
+   - `2 baris nggak kebaca` (if any)
+4. Tap `impor` → insert in one Drift `transaction()`.
 5. Toast + `batalin`.
 
-Keputusan user cuma satu: jadi impor atau nggak.
+The user makes only one decision: import or not.
 
 ## Parsing
 
-Fungsi murni `parseTransactionsCsv` di `domain/csv.dart`.
+Pure function `parseTransactionsCsv` in `domain/csv.dart`.
 
-- Buang BOM, terima CRLF/LF, quoting RFC 4180 (field multiline juga).
-- Header wajib persis `csvHeader`. Beda → tolak dengan pesan jelas, jangan nebak.
-- `jenis`: `pengeluaran` → amount negatif, `pemasukan` → positif.
-- `tanggal` + `jam` → `at` waktu lokal.
-- File yang di-save ulang Excel (id) tetap kebaca: separator `;` (dilihat dari header), tanggal `d/M/yyyy`, jam `H:mm` / `HH:mm:ss` (detik dibuang). `MM/dd` (US) nggak didukung, ambigu sama `dd/MM`.
-- `tag` dipisah spasi.
-- Baris rusak: dilewatin + dihitung, impor nggak gagal semua.
-- Nominal dibatasi 1–9.999.999.999 rupiah, sama dengan batas 10 digit input; nominal di luar batas dihitung sebagai baris rusak ([#35](https://github.com/choiruladamm/mibu/issues/35)). Tanggal masa depan tetap disimpan; statistik menghitungnya saat harinya tiba.
+- Remove BOM, accept CRLF/LF, RFC 4180 quoting (including multiline fields).
+- Header must exactly match `csvHeader`. If it differs → reject with a clear message; do not guess.
+- `jenis`: `pengeluaran` → negative amount, `pemasukan` → positive.
+- `tanggal` + `jam` → local `at` time.
+- Files re-saved by Excel (id) remain readable: separator `;` (detected from the header), date `d/M/yyyy`, time `H:mm` / `HH:mm:ss` (seconds are dropped). `MM/dd` (US) is unsupported because it is ambiguous with `dd/MM`.
+- `tag` is space-separated.
+- Corrupt rows: skip and count them; do not fail the entire import.
+- Amounts are limited to 1–9,999,999,999 rupiah, matching the 10-digit input limit; amounts outside the limit count as corrupt rows ([#35](https://github.com/choiruladamm/mibu/issues/35)). Future dates are still stored; statistics count them when their date arrives.
 
-## Duplikat: lewatin otomatis
+## Duplicates: skip automatically
 
-- Key: `at` (menit) + `amount` + nama kategori + `note`.
-- Yang udah ada dilewatin, cuma tampil jumlahnya di ringkasan. Nggak ada review per baris.
-- Impor file yang sama dua kali aman (idempotent).
-- Ceiling: dua transaksi identik di menit yang sama ke-dedup jadi satu. Jarang, diterima.
+- Key: `at` (minute) + `amount` + category name + `note`.
+- Existing rows are skipped; only the count appears in the summary. No per-row review.
+- Importing the same file twice is safe (idempotent).
+- Ceiling: two identical transactions in the same minute are deduplicated into one. Rare, accepted.
 
-## Buat apa: bikin otomatis
+## Categories: create automatically
 
-- Cocokin nama + `jenis` ke kategori yang ada (case-insensitive, trim). Impor balik dari ekspor mibu sendiri = 100% nyambung, nggak nambah apa-apa.
-- Nggak ketemu → bikin baru pakai `emoji` dari CSV (kosong → emoji lain-lain). Tanpa limit (bukan kantong).
-- `kategori` kosong → lain-lain.
-- Gabung / ganti nama → layar kelola buat apa yang udah ada. Nggak ada UI mapping di ringkasan.
+- Match name + `jenis` against existing categories (case-insensitive, trim). Re-importing mibu's own export matches 100%, adding nothing.
+- No match → create a new one using `emoji` from the CSV (empty → miscellaneous emoji). No limit (not a pocket).
+- Empty `kategori` → miscellaneous.
+- Merge / rename → use the existing category management screen. No mapping UI in the summary.
 
-## Yang nggak ikut
+## Excluded
 
-- Budget, limit, period rules, profile. CSV cuma transaksi.
-- Saldo tetap dihitung dari transaksi ([period-ledger.md](period-ledger.md)), jadi pemasukan yang diimpor otomatis kebaca di periodenya.
+- Budget, limits, period rules, and profile. CSV contains transactions only.
+- Imported income is included in its period totals ([period-ledger.md](period-ledger.md)).
 
 ## Undo
 
-Simpen ID transaksi + kategori baru di memori. `batalin` = soft delete ID itu. Pola toast undo yang udah ada, nggak perlu kolom `importId`.
+Keep transaction IDs + new categories in memory. `batalin` = soft-delete those IDs. Use the existing undo toast pattern; no `importId` column is needed.
 
-## Kode
+## Code
 
-- `domain/csv.dart`: `parseTransactionsCsv` (null = header beda) + `planImport` (dobel, buat apa baru).
-- Repo: `importCsv(plan)` → ID yang ditulis; `undoImport` = soft delete.
-- UI: `settings/views/import_sheet.dart` (`importCsv`, ImportSheet 00.30), baris di 05.1.
-- Dep: `file_picker` (`FilePicker.pickFile`, filter `.csv`).
-
-## Design brief: 99.7 import dari csv
-
-Draft di artifact "mibu", baris 99 proposal: 99.7a alur, 99.7b–d state sheet, 99.7e `ImportSheet` (calon komponen 00.30). Copy ngikut app: "import dari csv" (pasangan "export ke csv"). Kalau acc: pindah ke baris 05.1 (05.1l–o), hapus [DRAFT]. Gaya sheet 05.1h (sembunyiin nominal). Pakai komponen yang ada: `SheetFrame`, `PrimaryButton`, `AppEmoji`, `MetaLine` 00.19, toast 00.18. Tile `impor dari csv` di section data, di bawah ekspor (ikon upload). Copy di bawah cuma draft.
-
-| state | isi | tombol |
-|---|---|---|
-| j1 normal | judul `impor dari csv`, angka besar `142 transaksi`, rentang `1 jan – 3 okt 2026`, list buat apa baru (emoji + nama), `MetaLine`: `5 udah ada` · `2 nggak kebaca` | `impor 142` |
-| j2 semua udah ada | `semua udah ada di mibu`, sub `nggak ada yang baru dari file ini` | `oke` |
-| j3 file salah | `file-nya bukan dari mibu`, sub `ekspor dulu dari mibu, terus impor file itu` | `oke` |
-
-Setelah impor: toast `142 transaksi masuk` + `batalin`.
-
-## Pertanyaan terbuka (usul default)
-
-- Tanggal masa depan: **terima** (back-fill udah didukung).
-- Batas ukuran file: **skip**, tambah kalau kerasa lambat.
+- `domain/csv.dart`: `parseTransactionsCsv` (`null` = different header) + `planImport` (duplicates, new categories).
+- Repo: `importCsv(plan)` → IDs written; `undoImport` = soft delete.
+- UI: `settings/views/import_sheet.dart` (`importCsv`, ImportSheet 00.30), row in 05.1.
+- Dependency: `file_picker` (`FilePicker.pickFile`, `.csv` filter).
