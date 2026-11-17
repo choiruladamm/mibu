@@ -30,17 +30,17 @@ class SettingsState {
     required this.paydayInfo,
   });
 
-  final int? budget; // budget bulanan; null = not set
+  final int? budget; // Monthly budget; null = not set.
   final HideAmounts hideAmounts;
   final List<String> topIcons; // 3 most used buat apa, for the row's stack
   final int moreCategories; // the rest: "+8"
   final int limits; // those with a limit
   final int limitTotal; // Σ monthly limits
-  final int payday; // 1–31, 31 = akhir
+  final int payday; // 1–31; 31 means month-end.
   final PaydayInfo paydayInfo; // "gajian lagi n hari" / hari ini / telat
 }
 
-/// 05.1 pengaturan state.
+/// 05.1 Settings state.
 final settingsProvider = Provider<AsyncValue<SettingsState>>((ref) {
   final profile = ref.watch(profileProvider);
   final categories = ref.watch(categoriesProvider);
@@ -92,7 +92,7 @@ final appVersionProvider = FutureProvider<String>(
   (ref) async => (await PackageInfo.fromPlatform()).version,
 );
 
-/// 05.1 ekspor ke csv: every live entry → share sheet as `mibu-yyyyMMdd.csv`.
+/// 05.1 CSV export: every active entry → share sheet as `mibu-yyyyMMdd.csv`.
 Future<void> exportCsv(WidgetRef ref) async {
   try {
     final entries = await ref.read(financeRepositoryProvider).allTransactions();

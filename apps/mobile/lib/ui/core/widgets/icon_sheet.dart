@@ -73,7 +73,7 @@ class _IconSheetState extends ConsumerState<IconSheet> {
     final term = _q.text.trim().toLowerCase();
     final typing = term.isNotEmpty;
 
-    // terakhir dipakai: categories of the latest entries, then the rest.
+    // Recently used: categories from the latest entries, followed by the rest.
     final recent = <String>{
       for (final p in ref.watch(recentPicksProvider).value ?? const [])
         catalogEmoji(p.category.emoji),
@@ -310,7 +310,7 @@ class _SearchField extends StatelessWidget {
   }
 }
 
-/// 48 disc in terakhir dipakai.
+/// 48px disc in the recently used section.
 class _Disc extends StatelessWidget {
   const _Disc({
     required this.emoji,

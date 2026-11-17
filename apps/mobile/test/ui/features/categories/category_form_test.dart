@@ -204,7 +204,7 @@ void main() {
     await tester.tap(find.bySemanticsLabel('bikin “gym”'));
     await settle(tester);
 
-    // From catat: no limit by default.
+    // From entry: no limit by default.
     expect(find.text('limit bulanan'), findsOneWidget);
     expect(find.text('opsional, bisa nanti'), findsOneWidget);
     expect(find.text('maks Rp100jt per limit'), findsNothing);

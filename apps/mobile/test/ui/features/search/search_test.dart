@@ -133,7 +133,7 @@ void main() {
     await tap(tester, find.text('ada 1 di pengeluaran', findRichText: true));
     expect(findMeta(['1 hasil']), findsOneWidget);
 
-    await type(tester, 'kantor'); // gajian, past months only
+    await type(tester, 'kantor'); // Salary, past months only.
     await tap(tester, find.text('ada 3 di bulan lain', findRichText: true));
     expect(findMeta(['di semua bulan']), findsOneWidget);
     expect(find.text('3 hasil di semua bulan'), findsOneWidget);

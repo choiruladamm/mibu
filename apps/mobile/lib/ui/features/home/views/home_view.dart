@@ -35,7 +35,7 @@ final _dayTitle = DateFormat('EEE d MMM', 'id');
 
 String _name(DateTime m) => _monthFull.format(m).toLowerCase();
 
-/// 02.1 beranda.
+/// 02.1 Home.
 class HomeView extends ConsumerStatefulWidget {
   const HomeView({super.key});
 
@@ -366,8 +366,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
   );
 
   /// What the hero shows for [s]: label, amount, the small line under it and
-  /// the chip (02.1p, 00.23b). Sisa budget; without a budget, what's been
-  /// spent and a nudge to set one (docs/period-ledger.md).
+  /// the chip (02.1p, 00.23b). Remaining budget; without a budget, spending
+  /// so far and a prompt to set one (docs/period-ledger.md).
   _HeroData _hero(HomeState s, AppLocalizations l) {
     final month = _name(s.month);
     final left = s.budgetLeft;
@@ -388,7 +388,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
       amount = s.monthSpent;
     }
 
-    // small line: "dari budget Rp8jt • gajian lagi 7 hari" (past: the range)
+    // Small line: "from Rp8jt budget • payday in 7 days" (past period: date range).
     final range = periodRange(s.period.start, s.period.end);
     final (payday, late) = switch (s.payday.status) {
       PaydayStatus.today => (l.paydayToday, false),
@@ -400,7 +400,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
       s.isCurrent ? payday : range,
     ];
 
-    // chip: aman jajan, or what to do instead
+    // Chip: safe-to-spend amount or an alternative action.
     _ChipData? chip;
     if (!s.isCurrent) {
       final avg = (s.monthSpent / s.periodDays / 1000).round() * 1000;
@@ -413,7 +413,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
       );
     } else if (s.payday.status == PaydayStatus.today ||
         s.payday.status == PaydayStatus.late) {
-      // Days left is 0 here: no division, ask for the salary instead.
+      // With no days left, avoid division and prompt for payday instead.
       chip = (
         text: s.payday.status == PaydayStatus.today
             ? l.heroCatatGajian
@@ -456,7 +456,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
       amount: amount,
       sub: sub,
       subWarn: s.isCurrent && late,
-      // No budget this period: the dashed "atur budget" card instead.
+      // No budget this period: show the dashed "atur budget" card instead.
       empty: s.isCurrent && s.budget == null
           ? (
               meta: [month, range, payday],
@@ -526,7 +526,7 @@ typedef _HeroData = ({
 });
 
 /// 02.1 hero (HeroBudget 00.23): label + "?", amount, one small line, and
-/// the chip; no budget → the dashed "atur budget periode ini" card.
+/// the chip; no budget → the dashed "set this period's budget" card.
 class _Hero extends StatelessWidget {
   const _Hero({
     required this.data,
@@ -656,7 +656,7 @@ class _Hero extends StatelessWidget {
     );
   }
 
-  /// Aman jajan, rata²/hari: filled ink + ✓. Rem dulu / catat gajian: ring +
+  /// Safe to spend, daily average: filled ink + ✓. Pause / record payday: ring +
   /// disc glyph. Tap goes where the number comes from.
   static Widget _chipPill(_ChipData chip) {
     final ink = chip.outline ? AppColors.paper : AppColors.ink;
@@ -1217,7 +1217,7 @@ typedef _Frame = ({
   double? budgetY,
 });
 
-/// PeriodBars 00.26 "kepake per periode": curve through what was spent in
+/// PeriodBars 00.26 "kepake per periode": curve through spending in
 /// each period, dashed line = the running period's budget, tap to peek.
 /// Curve, marker and pill share one controller so they always move together,
 /// also when the 6-month window slides.

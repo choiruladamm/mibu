@@ -78,13 +78,13 @@ void main() {
     expect(find.text('3.941.000'), findsOneWidget); // 8jt − 4.059.000
     expect(find.text('sisa budget'), findsOneWidget);
     expect(find.text('oktober'), findsOneWidget);
-    // 25 okt = minggu → paid Fri 23.
+    // 25 Oct is Sunday, so payday moves to Friday the 23rd.
     expect(
       findMeta(['dari budget Rp8jt', 'gajian lagi 9 hari']),
       findsOneWidget,
     );
     // Aman jajan from the budget only:
-    // (8jt − 4.059.000 kepake + 27.000 hari ini) ÷ 18 hari − 27.000.
+    // (8M − 4,059,000 spent + 27,000 today) ÷ 18 days − 27,000.
     expect(find.textContaining('Rp193K', findRichText: true), findsOneWidget);
 
     expect(find.text('kantong'), findsOneWidget);
@@ -97,7 +97,7 @@ void main() {
     expect(findMeta(['hari ini', 'rab 14 okt']), findsOneWidget);
     expect(findMeta(['kemarin', 'sel 13 okt']), findsOneWidget);
     expect(find.text('sen 12 okt'), findsOneWidget);
-    expect(find.text('-Rp1,02jt'), findsOneWidget); // kemarin: 3 entries
+    expect(find.text('-Rp1,02jt'), findsOneWidget); // yesterday: 3 entries
     // 00.4: tempat left, jam right
     expect(findMeta(['gojek']), findsOneWidget);
     expect(findMeta(['11:05']), findsOneWidget);
@@ -115,7 +115,7 @@ void main() {
 
     expect(find.text('kepake per periode'), findsOneWidget);
     expect(find.text('budget Rp8jt'), findsOneWidget);
-    // mei … okt: the running period is the last point, nothing ahead.
+    // May–October: the current period is the last point; no future periods.
     expect(findMeta(['berjalan', 'okt']), findsOneWidget);
     expect(find.text('Rp4,06jt'), findsOneWidget);
     expect(find.text('mei'), findsOneWidget);
@@ -155,7 +155,7 @@ void main() {
     Finder cell(String m) =>
         find.descendant(of: find.byType(MonthMenu), matching: find.text(m));
 
-    // des is after the current month: locked, tapping does nothing.
+    // December is after the current month: locked; tapping does nothing.
     await tester.tap(cell('des'));
     await tester.pumpAndSettle();
     expect(find.text('pilih bulan'), findsOneWidget);

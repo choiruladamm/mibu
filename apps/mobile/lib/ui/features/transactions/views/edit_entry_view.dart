@@ -24,7 +24,7 @@ import '../../../core/finance_providers.dart';
 final _dots = NumberFormat('#,##0', 'id_ID');
 final _headerDay = DateFormat('EEE d MMM', 'id');
 
-/// 08.3 edit catatan. Kind stays; tags are kept (no field for them here).
+/// 08.3 edit entry. Kind stays unchanged; tags are preserved (no field here).
 class EditEntryView extends ConsumerWidget {
   const EditEntryView({super.key, required this.id});
 

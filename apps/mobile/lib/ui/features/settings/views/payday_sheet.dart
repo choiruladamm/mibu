@@ -21,8 +21,8 @@ final _nextDay = DateFormat('EEE d MMM', 'id');
 
 typedef _Pick = ({int day, PaydayShift shift});
 
-/// 05.1e–k tanggal gajian: PaydaySheet (00.24), the day and what a weekend
-/// payday does (docs/payday-weekend.md); save → toast with batalin.
+/// 05.1e–k payday date: PaydaySheet (00.24), the day and what a weekend
+/// payday does (docs/payday-weekend.md); save → undo toast.
 Future<void> editPayday(BuildContext context, WidgetRef ref) async {
   final repo = ref.read(financeRepositoryProvider);
   final saved = _normal(ref.read(profileProvider).value?.payday ?? 25);
@@ -54,7 +54,7 @@ Future<void> editPayday(BuildContext context, WidgetRef ref) async {
   showToast(
     context,
     icon: ToastIcon.check,
-    // Only the weekend changed: say that, short enough beside "batalin".
+    // Only the weekend rule changed; keep the message short beside "undo".
     title: day != saved
         ? l.paydaySavedTitle(_label(l, day))
         : shift == PaydayShift.none

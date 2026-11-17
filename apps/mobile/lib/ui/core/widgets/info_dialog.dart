@@ -14,12 +14,12 @@ import 'sheet.dart';
 /// Where [showNumbersInfo] was opened from: its cards are the ink ones.
 enum NumbersFrom { hero, pockets }
 
-/// NumbersSheet 00.25 "dari mana angkanya?": sisa budget, aman jajan per
-/// hari and sisa jajan (kantong) for [period], with this user's numbers.
+/// NumbersSheet 00.25 "where do these numbers come from?": remaining budget,
+/// daily safe-to-spend, and remaining pocket amounts for [period].
 /// [budget] null = no budget (no aman jajan); [share] = today's aman jajan
 /// share before today's spending (null outside the running period);
 /// [days] = days left in the period; [limits] / [pocketSpent] = Σ kantong
-/// limits and what they spent (no kantong card when [limits] is 0).
+/// limits and spending (no pocket card when [limits] is 0).
 Future<void> showNumbersInfo(
   BuildContext context, {
   required NumbersFrom from,

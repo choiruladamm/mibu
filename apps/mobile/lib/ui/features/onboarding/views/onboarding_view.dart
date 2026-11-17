@@ -14,7 +14,7 @@ import '../../../core/widgets/app_emoji.dart';
 class OnboardingView extends StatefulWidget {
   const OnboardingView({super.key, required this.onDone, this.initialStep = 1});
 
-  /// lewati / mulai sekarang → 01.2 masuk.
+  /// Skip / start now → 01.2 sign-in.
   final VoidCallback onDone;
   final int initialStep;
 
@@ -254,7 +254,7 @@ class _Segments extends StatelessWidget {
   }
 }
 
-/// Step 1: gaji → three pocket jars. Amounts are sample data.
+/// Step 1: salary split across three pocket jars. Amounts are sample data.
 class _PocketsIllustration extends StatelessWidget {
   const _PocketsIllustration();
 

@@ -15,8 +15,7 @@ import 'lock_store.dart';
 
 const lockPin = '483917';
 
-/// A phone with face id / sidik jari, or none; counts how often the system
-/// prompt came up.
+/// Fake biometrics that counts system authentication prompts.
 class FakeBiometrics implements Biometrics {
   FakeBiometrics({this.has = BioKind.none, this.passes = true});
 

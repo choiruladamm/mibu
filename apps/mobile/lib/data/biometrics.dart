@@ -5,20 +5,20 @@ import 'package:local_auth/local_auth.dart';
 
 import '../domain/models/app_lock.dart';
 
-/// Face id / sidik jari, as far as the lock needs it. The pin is our own, so
-/// the phone's passcode is never offered as a fallback.
+/// Face ID or fingerprint support needed by the app lock. The app uses its
+/// own PIN, so the device passcode is never offered as a fallback.
 abstract interface class Biometrics {
-  /// What the phone can use right now (none = nothing enrolled / allowed).
+  /// Biometrics currently available (none = unavailable or not enrolled).
   Future<BioKind> kind();
 
   /// Shows the system prompt; false on failure, cancel or anything odd.
   Future<bool> authenticate(String reason);
 
-  /// Remembers the biometrics enrolled now, as the ones the lock trusts.
+  /// Records current enrollment as the biometrics trusted by the lock.
   Future<void> snapshot();
 
-  /// Whether a face / fingerprint was enrolled since [snapshot]. False when
-  /// there is nothing to compare with, or it cannot be told.
+  /// Whether biometrics were enrolled since [snapshot]. False if there is
+  /// nothing to compare or enrollment changes cannot be detected.
   Future<bool> enrollmentChanged();
 }
 
@@ -35,13 +35,12 @@ class LocalAuthBiometrics implements Biometrics {
       final types = await _auth.getAvailableBiometrics();
       if (types.contains(BiometricType.face)) return BioKind.face;
       if (types.contains(BiometricType.fingerprint)) return BioKind.finger;
-      // Android reports "strong" / "weak" for whatever is enrolled: in
-      // practice a fingerprint. iOS names its biometrics.
+      // Android reports strength, usually for fingerprints; iOS names the type.
       if (types.isNotEmpty && defaultTargetPlatform != TargetPlatform.iOS) {
         return BioKind.finger;
       }
     } on Exception {
-      // unavailable: same as none
+      // Treat unavailable as none.
     }
     return BioKind.none;
   }

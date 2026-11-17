@@ -27,7 +27,7 @@ void main() {
     );
     c.listen(homeMonthProvider, (_, _) {});
 
-    // User browsed back to august.
+    // The user browsed back to August.
     c.read(homeMonthProvider.notifier).select(DateTime(2026, 8));
     expect(c.read(homeMonthProvider).selected, DateTime(2026, 8));
 
@@ -52,7 +52,7 @@ void main() {
         closeStreamsSynchronously: true,
       ),
       () => clock,
-      seedDemo, // has the payday rule: gajian tgl 25
+      seedDemo, // includes the payday rule: day 25
     );
     final c = ProviderContainer(
       overrides: [

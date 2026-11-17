@@ -13,8 +13,8 @@ String csvFileName(DateTime now) =>
 String _field(String s) =>
     s.contains(RegExp('[",\r\n]')) ? '"${s.replaceAll('"', '""')}"' : s;
 
-/// Ekspor CSV: UTF-8 BOM (so Excel reads the emoji), CRLF rows, [entries]
-/// as given (callers pass newest first). See mvp.md › Ekspor CSV.
+/// CSV export: UTF-8 BOM for Excel emoji support, CRLF rows, and [entries]
+/// in caller-provided order (newest first). See mvp.md › Ekspor CSV.
 String transactionsCsv(List<Transaction> entries) {
   final date = DateFormat('yyyy-MM-dd');
   final time = DateFormat('HH:mm');
@@ -36,8 +36,8 @@ String transactionsCsv(List<Transaction> entries) {
   return '﻿${rows.join('\r\n')}\r\n';
 }
 
-/// One row of a mibu export, read back (import dari csv, 05.1l). [category]
-/// empty = tanpa kategori; [amount] signed like [Transaction.amount].
+/// One row read from a mibu export (05.1l). Empty [category] means
+/// uncategorized; [amount] uses the sign convention of [Transaction.amount].
 typedef CsvEntry = ({
   DateTime at,
   int amount,
@@ -164,7 +164,8 @@ CsvEntry? _entry(List<String> r) {
   return (entries: entries, bad: bad);
 }
 
-/// A buat apa the import makes (not in mibu yet), with its entry count.
+/// A category created by import because it does not yet exist in mibu,
+/// with its entry count.
 typedef CsvNewCategory = ({
   String name,
   String emoji,
@@ -172,8 +173,8 @@ typedef CsvNewCategory = ({
   int count,
 });
 
-/// What 05.1m shows and the import writes: rows not in mibu yet ([entries]),
-/// ones already there ([dupes], skipped) and buat apa to make.
+/// Import preview and write plan (05.1m): new rows ([entries]), existing
+/// rows to skip ([dupes]), and categories to create.
 class CsvImport {
   const CsvImport({
     required this.entries,
@@ -195,11 +196,11 @@ CategoryKind csvKind(CsvEntry e) =>
 String _dupeKey(DateTime at, int amount, String category, String note) =>
     '${DateFormat('yyyy-MM-dd HH:mm').format(at)}|$amount|$category|$note';
 
-/// Matches [parsed] against mibu: an entry with the same minute, amount,
-/// buat apa and catatan as a live one ([existing]) is skipped, once per
-/// live entry, so importing the same file twice adds nothing. Buat apa
-/// match by name + kind ([categories] = the live ones); the rest are made
-/// with the file's emoji (outside the catalog → [fallbackEmoji]).
+/// Matches [parsed] against mibu. Entries matching a live row by minute,
+/// amount, category and note ([existing]) are skipped once per live row, so
+/// re-importing a file adds nothing. Categories match by name and kind
+/// ([categories] are live); others use the file emoji, or [fallbackEmoji]
+/// when it is outside the catalog.
 CsvImport planImport(
   ({List<CsvEntry> entries, int bad}) parsed, {
   required List<Transaction> existing,

@@ -20,7 +20,7 @@ import '../ui/features/transactions/views/edit_entry_view.dart';
 import '../ui/features/transactions/views/transaction_detail_view.dart';
 import '../ui/features/transactions/views/transactions_view.dart';
 
-/// How /catat opens when it isn't blank.
+/// Prefill data for `/catat`.
 enum AddEntryStart { salary }
 
 abstract final class Routes {
@@ -56,7 +56,7 @@ abstract final class Routes {
     },
   ).toString();
 
-  /// 08.1 "liat N lagi": 09.1 in [month] narrowed to the search.
+  /// 08.1 "see N more": open 09.1 in [month], narrowed to the search.
   static String transactionsFound(
     DateTime month,
     String q, {
@@ -103,7 +103,7 @@ DateTime? _monthParam(String? s) {
 
 final routerProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
-    // First run until 01.4 atur awal is done; main() loads the profile
+    // First run until setup 01.4 is done; main() loads the profile
     // before the router exists.
     initialLocation: ref.read(profileProvider).value?.onboarded ?? false
         ? Routes.home
@@ -111,7 +111,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(
         path: Routes.onboarding,
-        // TODO: onDone → 01.2 masuk once login is sliced.
+        // TODO: Navigate to 01.2 when login is implemented.
         builder: (context, _) =>
             OnboardingView(onDone: () => context.go(Routes.setup)),
       ),
@@ -174,8 +174,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.transactions,
         builder: (context, state) => ProviderScope(
-          // ?month=2026-09 from 02.1 "liat semua di september";
-          // &q=kopi&filter=expenses&day=13 from 08.1 "liat N lagi".
+          // ?month=2026-09 from 02.1 "see all in September";
+          // &q=kopi&filter=expenses&day=13 from 08.1 "see N more".
           overrides: [
             txMonthProvider.overrideWith(
               () => TxMonth(

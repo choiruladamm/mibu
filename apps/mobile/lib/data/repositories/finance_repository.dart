@@ -7,9 +7,8 @@ import '../../domain/models/finance.dart';
 import '../../domain/period.dart';
 import '../database/app_database.dart';
 
-/// Balance-related sums; everything derived from `transactions`.
-/// Per budget period, keyed by its month label. No saldo: nothing carries
-/// over between periods (docs/period-ledger.md).
+/// Balance-related sums derived from `transactions`, keyed by period label.
+/// Nothing carries over between periods (docs/period-ledger.md).
 class Totals {
   const Totals({
     required this.income,
@@ -21,15 +20,15 @@ class Totals {
   final Map<DateTime, int> spent; // month label → expenses, positive
   final int spentToday; // positive
 
-  /// Sisa pemasukan per period: income − spending.
+  /// Remaining income per period: income − spending.
   Map<DateTime, int> get nets => {
     for (final m in {...income.keys, ...spent.keys})
       m: (income[m] ?? 0) - (spent[m] ?? 0),
   };
 }
 
-/// An expense category without a limit, with this month's spending and
-/// entry count ("belum ada limit" + "pasang limit ke…" in 03.1).
+/// An unlimited expense category with current-period spending and entry
+/// count ("belum ada limit" and "pasang limit ke…" in 03.1).
 typedef FreeCategory = ({Category category, int spent, int count});
 
 const _uuid = Uuid();
@@ -66,8 +65,8 @@ class FinanceRepository {
     });
   }
 
-  /// The row in force for [p]: latest start ≤ the period's (its own row, or
-  /// the last one before it). Reads never write a row.
+  /// The row in force for [p]: latest start on or before it. Reads never
+  /// write a row.
   Expression<int> _budgetIn(Period p) {
     final b = _db.budgets;
     return subqueryExpression<int>(
@@ -203,18 +202,17 @@ class FinanceRepository {
       );
 
   /// Budget periods in force: calendar months until the first rule, then
-  /// each saved rule from its date on. [salaries] = logged gajian, which
-  /// pull a payday period's start forward when it came in early.
+  /// each saved rule from its effective date. Early logged salaries can move
+  /// a payday period's start forward.
   Stream<PeriodResolver> watchPeriods({List<DateTime> salaries = const []}) =>
       watchPeriodRules().map(
         (rules) =>
             SegmentedResolver([calendarBase, ...rules], salaries: salaries),
       );
 
-  /// 01.4 / 01.4b: writes the profile, the [budget] if one was typed (none
-  /// is required) and the starter categories — every preset (picked ones
-  /// become kantong with their limit) plus 💰 gajian. Categories are only
-  /// added to an empty table.
+  /// 01.4 / 01.4b: writes the profile, optional [budget], and starter
+  /// categories: all presets (selected ones become pockets) plus 💰 salary.
+  /// Categories are added only when the table is empty.
   Future<void> completeSetup({
     int? budget,
     required int payday,
@@ -222,8 +220,7 @@ class FinanceRepository {
     required DateTime now,
   }) => _db.transaction(() async {
     final p = _db.profiles;
-    // The period gajian puts [now] in: where the starter limits are stamped,
-    // so they're in force right away (not under a calendar month).
+    // Stamp starter limits in the period containing [now], so they apply now.
     final period = PaydayCycleResolver(
       payday,
       shift: PaydayShift.previousWorkday,
@@ -249,8 +246,8 @@ class FinanceRepository {
           );
     }
 
-    // Periods follow gajian from the start of time, so a back-filled entry
-    // lands in the right period. Re-running setup keeps the rule it has.
+    // Cover all history so back-filled entries use payday periods. Repeated
+    // setup preserves the existing rule.
     final rules = _db.periodRules;
     if (await (_db.selectOnly(rules)..addColumns([rules.id.count()]))
             .map((r) => r.read(rules.id.count()))
@@ -313,9 +310,8 @@ class FinanceRepository {
     });
   });
 
-  /// Income and spending per period, plus today's spending. Every live
-  /// entry counts in the period its date falls in, whenever it was logged
-  /// (a gajian back-filled to 25 sep is still that period's income).
+  /// Income and spending per period, plus today's spending. Live entries
+  /// count in the period of their date, even when logged later.
   // ponytail: reads every entry and sums in Dart (local-time periods; SQL
   // strftime is UTC). Fine for years of daily use; move to a cached
   // per-period table if it ever shows.
@@ -464,7 +460,7 @@ class FinanceRepository {
           .watch()
           .map((rows) => rows.map(_transaction).toList());
 
-  /// 08.1 cari di semua bulan: every live entry, newest first.
+  /// 08.1 search all months: every live entry, newest first.
   Stream<List<Transaction>> watchAll() =>
       _joined(_tx.deletedAt.isNull())
           .watch()
@@ -474,7 +470,8 @@ class FinanceRepository {
   Future<List<Transaction>> allTransactions() async =>
       (await _joined(_tx.deletedAt.isNull()).get()).map(_transaction).toList();
 
-  /// 08.2: one entry, soft-deleted included (stamped "dihapus" + batalin).
+  /// 08.2: one entry, including soft-deleted rows (shown as "dihapus" with
+  /// an undo action).
   Stream<Transaction?> watchTransaction(String id) =>
       _joined(_tx.id.equals(id))
           .watchSingleOrNull()
@@ -522,7 +519,7 @@ class FinanceRepository {
     );
   }
 
-  /// Amount of the newest live gajian income (null = never logged), the
+  /// Amount of the newest live salary income (null = never logged), the
   /// starting suggestion when logging the next one.
   Future<int?> lastSalary() async {
     final c = _db.categories;
@@ -541,7 +538,7 @@ class FinanceRepository {
     return row?.readTable(_tx).amount;
   }
 
-  /// Dates of live gajian income (payday categories), newest first.
+  /// Dates of live salary income (payday categories), newest first.
   Stream<List<DateTime>> watchSalaryDates() {
     final c = _db.categories;
     final q =
@@ -664,7 +661,7 @@ class FinanceRepository {
     ),
   );
 
-  /// 08.2b soft delete; [restoreTransaction] is its batalin.
+  /// 08.2b soft delete; [restoreTransaction] undoes it.
   Future<void> deleteTransaction(String id) => _setDeleted(id, DateTime.now());
 
   Future<void> restoreTransaction(String id) => _setDeleted(id, null);
@@ -677,9 +674,9 @@ class FinanceRepository {
         ),
       );
 
-  /// 05.1l import dari csv: makes [plan]'s new buat apa (no limit, at the
-  /// end of the list), then adds its entries, in one go. Returns what it
-  /// wrote, for [undoImport].
+  /// 05.1l CSV import: creates categories from [plan] (no limit, appended),
+  /// then adds its entries in one operation. Returns written IDs for
+  /// [undoImport].
   Future<({List<String> txIds, List<String> categoryIds})> importCsv(
     CsvImport plan,
   ) => _db.transaction(() async {
@@ -749,7 +746,7 @@ class FinanceRepository {
         );
       });
 
-  /// Budget bulanan (00.16) from [period] on; null = hapus budget.
+  /// Monthly budget (00.16) from [period] onward; null removes it.
   Future<void> setMonthlyBudget(int? budget, Period period) =>
       _setBudgetRow(period, budget);
 
@@ -771,11 +768,10 @@ class FinanceRepository {
         .map((r) => r?.amount);
   }
 
-  /// 05.1 tanggal gajian (00.24): 1–31, 31 = akhir. Periods already lived
-  /// stay as they were: the new day starts with the next period. Right after
-  /// 01.4 (still in the first period, or no payday rule yet) it applies at
-  /// once, so a wrong pick at setup is a one-tap fix. Returns the date it
-  /// starts on, null = applies now.
+  /// 05.1 payday date (00.24): 1–31, with 31 meaning month end. Past periods
+  /// stay unchanged; the new date starts next period. During the initial
+  /// setup period, it applies immediately so a mistaken choice is easy to
+  /// correct. Returns the effective date, or null if it applies now.
   Future<DateTime?> setPayday(
     int day, {
     PaydayShift shift = PaydayShift.previousWorkday,
@@ -841,7 +837,7 @@ class FinanceRepository {
     return from;
   });
 
-  /// 03.1l kenalan kantong: "oke" retires the card for good.
+  /// 03.1l pocket intro: "oke" permanently dismisses the card.
   Future<void> markPocketsIntroSeen() =>
       (_db.update(_db.profiles)..where((p) => p.deletedAt.isNull())).write(
         ProfilesCompanion(
@@ -850,7 +846,7 @@ class FinanceRepository {
         ),
       );
 
-  /// 05.1 sembunyiin nominal.
+  /// 05.1 hide amounts.
   Future<void> setHideAmounts(HideAmounts hide) =>
       (_db.update(_db.profiles)..where((p) => p.deletedAt.isNull())).write(
         ProfilesCompanion(
@@ -859,7 +855,7 @@ class FinanceRepository {
         ),
       );
 
-  /// 08.1b terakhir dicari.
+  /// 08.1b recent searches.
   Future<void> setRecentSearches(List<String> recent) =>
       (_db.update(_db.profiles)..where((p) => p.deletedAt.isNull())).write(
         ProfilesCompanion(
@@ -868,8 +864,8 @@ class FinanceRepository {
         ),
       );
 
-  /// Entries and expense (positive) of one category in [period], for the
-  /// copot limit sheet.
+  /// Entries and positive expenses for one category in [period], used by the
+  /// remove-limit sheet.
   Future<({int count, int spent})> periodUsage(String id, Period period) async {
     final count = _tx.id.count();
     final spent = _tx.amount.sum(filter: _tx.amount.isSmallerThanValue(0));
@@ -885,8 +881,8 @@ class FinanceRepository {
     return (count: r.read(count) ?? 0, spent: -(r.read(spent) ?? 0));
   }
 
-  /// Per category: entries (all time) and expense this year, positive.
-  /// "12 catatan · Rp840K tahun ini" in 07.1 / 07.3 / 07.4.
+  /// Per category: all-time entry count and positive expenses this year.
+  /// Shown as "12 catatan · Rp840K tahun ini" in 07.1 / 07.3 / 07.4.
   Stream<Map<String, ({int count, int spentThisYear})>> watchCategoryUsage(
     DateTime now,
   ) {
@@ -962,8 +958,8 @@ class FinanceRepository {
     }
   });
 
-  /// Pasang / atur / copot limit (03.1, 07.3) from [period] on; null =
-  /// copot. Income categories are left alone.
+  /// Add, edit, or remove a limit (03.1, 07.3) from [period] onward; null
+  /// removes it. Income categories are unchanged.
   Future<void> setLimit(String id, int? limit, Period period) async {
     final c = await (_db.select(
       _db.categories,
@@ -972,7 +968,7 @@ class FinanceRepository {
     await _setLimitRow(id, period, limit);
   }
 
-  /// Pockets track spending only, so income categories never keep a limit.
+  /// Pockets track spending only; income categories cannot have limits.
   static int? _limitFor(CategoryKind kind, int? limit) =>
       kind == CategoryKind.income ? null : limit;
 
@@ -988,8 +984,8 @@ class FinanceRepository {
     }
   });
 
-  /// 07.4: moves the category's entries to [moveTo] (null = tanpa kategori),
-  /// then soft-deletes it. Returns the moved entry ids for [undoDeleteCategory].
+  /// 07.4: moves the category's entries to [moveTo] (null = uncategorized),
+  /// then soft-deletes it. Returns moved entry IDs for [undoDeleteCategory].
   Future<List<String>> deleteCategory(String id, {required String? moveTo}) =>
       _db.transaction(() async {
         final now = DateTime.now();

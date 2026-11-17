@@ -33,7 +33,7 @@ List<CatalogEmoji> _ranked(Map<CatalogEmoji, int> score) {
   );
 }
 
-/// 00.20 cari ikon: icons whose keywords fit every typed word, best first.
+/// 00.20 icon search: icons matching every typed word, best first.
 List<CatalogEmoji> searchEmoji(String query) {
   final words = _words(query);
   if (words.isEmpty) return const [];
@@ -64,7 +64,7 @@ String? emojiRetry(String query) {
   return null;
 }
 
-/// 07.2 saran: [n] icons for a category name, any word counting
+/// 07.2 suggestions: [n] icons for a category name; any matching word counts
 /// ("makan siang" → 🍜 …); padded with ✨ 🧾 📦.
 List<String> suggestEmoji(String name, {int n = 3}) {
   final score = <CatalogEmoji, int>{};

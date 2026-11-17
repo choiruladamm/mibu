@@ -10,7 +10,7 @@ import '../money.dart';
 import '../tokens.dart';
 
 /// 00.15 PocketLimit — type, slide or pick a preset. Rules in mvp.md
-/// (Batas kantong); the scale comes from [pocketLimitScale].
+/// (pocket limits); the scale comes from [pocketLimitScale].
 class PocketLimit extends StatefulWidget {
   const PocketLimit({
     super.key,
@@ -26,7 +26,7 @@ class PocketLimit extends StatefulWidget {
   static const cap = 100000000; // batas keras Rp100jt
 
   final int value;
-  final int? budget; // budget bulanan; null = not set
+  final int? budget; // Monthly budget; null = not set.
   final int others; // Σ limits of the other pockets
   final int monthDays; // "≈ Rp… sehari" divides by this
   final ValueChanged<int> onChanged;

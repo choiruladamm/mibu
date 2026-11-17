@@ -58,7 +58,7 @@ void main() {
     expect(find.text('buat apa aja'), findsOneWidget);
     expect(find.text('4 catatan'), findsOneWidget); // belanja, no limit
     expect(find.text('limit Rp1jt'), findsOneWidget); // anabul
-    expect(find.text('3 catatan'), findsOneWidget); // gajian
+    expect(find.text('3 catatan'), findsOneWidget); // Salary.
     expect(
       find.text(
         'yang ada limit jadi toples di tab kantong. '
@@ -90,7 +90,7 @@ void main() {
     await settle();
     expect(await tester.runAsync(ngopi), '☕');
 
-    // lain-lain: entries without a buat apa, locked in both modes.
+    // "lain-lain" entries have no purpose and stay locked in both modes.
     final loose = (await tester.runAsync(
       () => (db.select(
         db.transactions,
@@ -103,7 +103,7 @@ void main() {
     );
     expect(find.bySemanticsLabel('dikunci'), findsOneWidget);
 
-    // Mode hapus 07.1d: − on each, gajian + lain-lain locked, no baru.
+    // Delete mode 07.1d: each row has a minus; salary and "lain-lain" stay locked.
     await tester.tap(find.bySemanticsLabel('hapus buat apa'));
     await settle();
     expect(find.text('hapus yang mana?'), findsOneWidget);

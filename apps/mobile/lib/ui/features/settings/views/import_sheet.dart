@@ -18,8 +18,8 @@ import '../../../core/widgets/toast.dart';
 
 final _day = DateFormat('d MMM y', 'id');
 
-/// 05.1l import dari csv: pick a file → ImportSheet 00.30 (ringkasan 05.1m,
-/// semua udah ada 05.1n, bukan dari mibu 05.1o) → import → toast + batalin.
+/// 05.1l CSV import: choose a file → ImportSheet 00.30 (summary 05.1m,
+/// all entries already exist 05.1n, or not a Mibu export 05.1o) → import → undo toast.
 Future<void> importCsv(BuildContext context, WidgetRef ref) async {
   final repo = ref.read(financeRepositoryProvider);
   while (true) {
@@ -39,7 +39,7 @@ Future<void> importCsv(BuildContext context, WidgetRef ref) async {
             categories: await ref.read(categoriesProvider.future),
           );
     if (!context.mounted) return;
-    // true = import, false = pilih file lain, null = closed.
+    // true = import, false = choose another file, null = closed.
     final go = await showAppSheet<bool>(
       context,
       _ImportSheet(

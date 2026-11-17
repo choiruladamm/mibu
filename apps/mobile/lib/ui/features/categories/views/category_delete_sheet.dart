@@ -13,7 +13,7 @@ import '../../../core/widgets/meta_line.dart';
 import '../../../core/widgets/app_emoji.dart';
 import '../../../core/finance_providers.dart';
 
-/// 07.4 hapus kategori. True when it ended deleted (beres or dismissed
+/// 07.4 delete category. True when deletion completed (done or dismissed
 /// after the delete); false when cancelled or undone.
 Future<bool> showCategoryDelete(
   BuildContext context,
@@ -42,7 +42,7 @@ class _CategoryDeleteSheetState extends ConsumerState<CategoryDeleteSheet>
       if (s == AnimationStatus.completed) _delete();
     });
 
-  Category? _target; // null = tanpa kategori
+  Category? _target; // Null means uncategorized.
   List<String>? _moved; // set once deleted; ids for batalin
   int _movedCount = 0; // live entries moved, for the done text
 
@@ -396,7 +396,7 @@ class _MoveSummary extends StatelessWidget {
   }
 }
 
-/// Tahan buat hapus: ink fills over [AppMotion.hold]; letting go early
+/// Hold to delete: ink fills over [AppMotion.hold]; letting go early
 /// resets. Screen readers get a long-press action instead.
 class _HoldButton extends StatelessWidget {
   const _HoldButton({

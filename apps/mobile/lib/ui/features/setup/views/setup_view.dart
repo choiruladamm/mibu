@@ -22,8 +22,7 @@ final _monthFull = DateFormat.MMMM('id');
 final _nextDay = DateFormat('EEE d MMM', 'id');
 const _maxDigits = 12;
 
-/// 01.4 atur awal (tanggal gajian + budget, nothing required) → 01.4b
-/// kantong pertama.
+/// 01.4 initial setup (payday and budget, both optional) → 01.4b first pocket.
 class SetupView extends ConsumerStatefulWidget {
   const SetupView({super.key, required this.onDone});
 
@@ -64,7 +63,7 @@ class _SetupViewState extends ConsumerState<SetupView> {
     _setBalance(int.tryParse(digits) ?? 0);
   }
 
-  /// "nanti aja" keeps what's filled in so far, minus the kantong on step 1.
+  /// "Later" keeps entered values, except the pocket from step 1.
   Future<void> _finish({required bool withPockets}) async {
     if (_saving) return;
     setState(() => _saving = true);

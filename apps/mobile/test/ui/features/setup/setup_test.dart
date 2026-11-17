@@ -63,8 +63,8 @@ void main() {
     final (db, done) = await pump(tester);
     final repo = FinanceRepository(db);
 
-    // Payday first, with the period it puts today in (25 okt is a Sunday →
-    // paid Fri 23: "oktober" = 25 sep – 22 okt).
+    // Payday comes first, with today's resulting period (25 Oct is Sunday,
+    // so payday is Fri 23: "oktober" = 25 Sep–22 Oct).
     expect(find.text('gajian tiap tanggal berapa?'), findsOneWidget);
     expect(find.text('periode sekarang'), findsOneWidget);
     expect(find.text('oktober'), findsOneWidget);
@@ -83,7 +83,7 @@ void main() {
 
     await tester.tap(find.bySemanticsLabel('akhir bulan'));
     await tester.pump();
-    // sat 31 → fri 30: 16 days, "oktober" ends 29 okt.
+    // Sat 31 shifts to Fri 30: 16 days; "oktober" ends 29 Oct.
     expect(findMeta(['sampai gajian', '16 hari lagi']), findsOneWidget);
     expect(find.text('Rp188K'), findsOneWidget); // 3.000.000 ÷ 16
 
@@ -109,7 +109,7 @@ void main() {
     expect(
       (p.onboarded, p.monthlyBudget, p.payday),
       (true, 3000000, 31),
-    ); // akhir = 31
+    ); // "akhir" = 31
     final pockets = (await tester.runAsync(
       () => repo.watchPockets(cal(now)).first,
     ))!;
@@ -132,7 +132,7 @@ void main() {
     await settle(tester);
     expect(done, [1]);
     final p = (await tester.runAsync(() => repo.watchProfile(cal(now)).first))!;
-    // Nothing is required: no budget, no kantong.
+    // Nothing is required: no budget or pockets.
     expect((p.onboarded, p.monthlyBudget, p.payday), (true, null, 25));
     expect(
       await tester.runAsync(() => repo.watchPockets(cal(now)).first),

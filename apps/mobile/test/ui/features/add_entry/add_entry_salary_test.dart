@@ -11,12 +11,12 @@ import 'package:mibu/ui/core/money.dart';
 import 'package:mibu/ui/core/theme.dart';
 import 'package:mibu/ui/features/add_entry/views/add_entry_view.dart';
 
-/// Beranda "catat gajian" opens /catat as a pemasukan under gajian with the
+/// The home screen's "catat gajian" action opens /catat as income under salary with the
 /// last salary suggested.
 void main() {
-  final now = DateTime(2026, 10, 23, 9); // hari gajian
+  final now = DateTime(2026, 10, 23, 9); // payday
   late AppDatabase db;
-  late int last; // newest gajian in the fixture
+  late int last; // Most recent salary in the fixture.
 
   Future<void> settle(WidgetTester tester) async {
     await tester.runAsync(

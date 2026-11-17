@@ -1,4 +1,4 @@
-// Tokens from design board 00.1 · fondasi. Only use these — no new colors/sizes.
+// Tokens from design board 00.1. Add colors and sizes here first.
 import 'package:flutter/animation.dart';
 import 'package:flutter/painting.dart';
 
@@ -17,7 +17,7 @@ abstract final class AppColors {
   static const paper = Color(0xFFFFFFFF); // semua screen
   static const scrim = Color(0x73111111); // ink 45%
 
-  // Putih di atas ink.
+  // White on ink.
   static const onInk = paper; // bar sekarang, pill nilai
   static const onInk72 = Color(0xB8FFFFFF); // bar kepilih
   static const onInk45 = Color(0x73FFFFFF); // garis rata-rata
@@ -65,16 +65,16 @@ abstract final class AppStroke {
 }
 
 abstract final class AppShadows {
-  // flat = no shadow.
+  // flat: no shadow.
   // float: tab bar capsule. Pair with Border.all(color: AppColors.divider).
   static const float = [
     BoxShadow(color: Color(0x1F111111), offset: Offset(0, 10), blurRadius: 30),
   ];
-  // lift: tombol +.
+  // Lift: the + button.
   static const lift = [
     BoxShadow(color: Color(0x40111111), offset: Offset(0, 10), blurRadius: 24),
   ];
-  // paper: struk, pill nilai.
+  // Paper: receipts and amount pills.
   static const paper = [
     BoxShadow(color: Color(0x14111111), offset: Offset(0, 12), blurRadius: 24),
   ];
@@ -175,7 +175,7 @@ abstract final class AppText {
     fontFeatures: _tnum,
   );
 
-  // wordmark "mibu" — onboarding, beranda, pengaturan. Archivo 900 / -6%.
+  // "mibu" wordmark on onboarding, Home, and Settings. Archivo 900 / -6%.
   static TextStyle wordmark(double size) => TextStyle(
     fontFamily: 'Archivo',
     fontSize: size,
@@ -210,7 +210,7 @@ abstract final class AppIcons {
     ],
   ];
 
-  /// Face id (99.10, 00.31 PinPad).
+  /// Face ID (99.10, 00.31 PinPad).
   static const faceId = [
     [
       'path',
@@ -222,7 +222,7 @@ abstract final class AppIcons {
     ],
   ];
 
-  /// Sidik jari (99.10, 00.31 PinPad).
+  /// Fingerprint (99.10, 00.31 PinPad).
   static const fingerprint = [
     [
       'path',

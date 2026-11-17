@@ -1,7 +1,8 @@
 import 'models/finance.dart';
 
-/// 08.1 cari: entries whose category, place, note or a tag contains [term]
-/// (case-insensitive), newest first. [kind] null = semua. Empty term = none.
+/// 08.1 search: entries whose category, place, note, or tag contains [term]
+/// (case-insensitive), newest first. Null [kind] means all kinds; empty term
+/// returns none.
 List<Transaction> searchEntries(
   List<Transaction> all,
   String term, {
@@ -129,7 +130,7 @@ class SearchSummary {
 
   final int count, today;
   final Map<int, SearchDay> byDay; // day number in the period → its hits
-  final int total; // signed; negative = pengeluaran
+  final int total; // Signed; negative = expense.
   final int income, expense; // expense ≤ 0
 
   int get days => byDay.length;

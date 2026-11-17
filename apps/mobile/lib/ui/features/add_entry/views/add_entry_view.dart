@@ -21,14 +21,14 @@ import '../view_models/add_entry_view_model.dart';
 import 'category_picker_sheet.dart';
 import '../../../core/widgets/app_emoji.dart';
 
-/// 06.1 catat — opened from + on every tab; pops on close / save.
+/// 06.1 add entry — opened from + on every tab; closes on cancel or save.
 class AddEntryView extends ConsumerStatefulWidget {
   const AddEntryView({super.key, this.again, this.salary = false});
 
-  /// "catat lagi" (08.2): start with this entry's kind, category and place.
+  /// "Add again" (08.2): prefill this entry's kind, category, and place.
   final Transaction? again;
 
-  /// "catat gajian" (02.1): a pemasukan under gajian, last salary suggested.
+  /// "Record payday" (02.1): income under Salary, with the last salary suggested.
   final bool salary;
 
   @override
@@ -416,9 +416,9 @@ class _AmountState extends State<_Amount> with SingleTickerProviderStateMixin {
   }
 }
 
-/// Pocket bar: what's spent + this entry, then "sisa" / "kelebihan". An
-/// expense outside a kantong shows the period's sisa budget after it (none
-/// without a budget); income shows the period's income after it.
+/// Pocket bar: spending plus this entry, then remaining or over-limit. An
+/// expense outside a pocket shows remaining period budget after entry (if any);
+/// income shows period income after entry.
 class _Impact extends ConsumerWidget {
   const _Impact({required this.state});
 
@@ -451,7 +451,7 @@ class _Impact extends ConsumerWidget {
           : l.overAmount(rupiahCompact(-left));
     } else if (s.kind == CategoryKind.income) {
       final after = (totals?.income[period.key] ?? 0) + v;
-      // 06.1e: what's being typed stays, the period total and its share don't.
+      // 06.1e: keep the current input; the period total and its share exclude it.
       if (context.hidesAmount(income: true)) {
         prev = 1;
         add = 0;

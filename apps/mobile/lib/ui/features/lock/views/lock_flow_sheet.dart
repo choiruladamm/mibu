@@ -14,15 +14,15 @@ import '../../../core/widgets/sheet.dart';
 import '../hold_clock.dart';
 import '../view_models/lock_labels.dart';
 
-/// The pin sheets of 99.10 kunci app.
+/// PIN sheets for 99.10 App Lock.
 enum LockFlow {
-  /// 99.10f–i: bikin pin, ketik lagi, pakai face id juga?
+  /// 99.10f–i: create a PIN, confirm it, then optionally enable Face ID.
   enable,
 
-  /// 99.10e: masukin pin dulu, then off.
+  /// 99.10e: enter the PIN before disabling the lock.
   disable,
 
-  /// 99.10t: pin lama, pin baru, ketik lagi.
+  /// 99.10t: enter the old PIN, then create and confirm a new one.
   change,
 
   /// 99.10s-b: face id changed, the pin turns it back on.
@@ -276,7 +276,7 @@ class _LockFlowSheetState extends ConsumerState<_LockFlowSheet> with HoldClock {
   }
 }
 
-/// 99.10h: pakai face id juga? Yes asks the system once.
+/// 99.10h: asks once whether to enable Face ID.
 class _BioChoice extends StatelessWidget {
   const _BioChoice({required this.kind, required this.onChoose});
 

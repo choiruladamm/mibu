@@ -37,22 +37,22 @@ class PocketsState {
   final List<Pocket> pockets;
   final Pocket? selected; // null = no pockets yet
   final int daysLeft; // in this month, today included
-  final int? budget; // budget bulanan; null = not set
+  final int? budget; // Monthly budget; null = not set.
   final int monthSpent; // every expense this month, pockets or not
-  final List<FreeCategory> free; // tanpa kantong
-  final int spentToday; // for aman jajan in "dari mana angkanya?"
-  final bool introSeen; // 03.1l kenalan kantong dismissed
+  final List<FreeCategory> free; // Categories without pockets.
+  final int spentToday; // Safe-to-spend amount in "dari mana angkanya?".
+  final bool introSeen; // 03.1l pocket introduction dismissed.
 
   int get limit => pockets.fold(0, (sum, p) => sum + p.budget);
   int get spent => pockets.fold(0, (sum, p) => sum + p.spent);
   int get left => limit - spent; // "sisa jajan"
   int get freeSpent => free.fold(0, (sum, f) => sum + f.spent);
 
-  /// budget − every expense this month; negative = kelewat. Null without one.
+  /// Budget minus this month's expenses; negative means over budget. Null without a budget.
   int? get budgetLeft => budget == null ? null : budget! - monthSpent;
 }
 
-/// 03.1 kantong state.
+/// State for 03.1 Pockets.
 final pocketsScreenProvider = Provider<AsyncValue<PocketsState>>((ref) {
   final now = ref.watch(nowProvider);
   final period = ref.watch(currentPeriodProvider);

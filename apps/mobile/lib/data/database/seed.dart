@@ -27,13 +27,13 @@ Future<void> seedFixture(AppDatabase db, DateTime now) async {
       db.profiles,
       ProfilesCompanion.insert(
         payday: 25,
-        // Set up when the sample data starts: a lived-in app, not its first
-        // period (a payday change waits for the next one).
+        // Start with an established app, not its first period; payday changes
+        // take effect in the next period.
         onboardedAt: Value(DateTime(now.year, now.month - 3)),
         pocketsIntroSeen: const Value(true),
       ),
     );
-    // Budget + limits from the first seeded month, so past months have them.
+    // Set the budget and limits from the first seeded month onward.
     final from = DateTime(now.year, now.month - 3);
     final until = DateTime(from.year, from.month + 1);
     b.insert(
@@ -93,7 +93,7 @@ Future<void> seedFixture(AppDatabase db, DateTime now) async {
     );
 
     b.insertAll(db.transactions, [
-      // Past months: gajian in, belanja out → design's month balances.
+      // Past months: salary income and expenses match the design balances.
       for (final (offset, out) in [
         (-3, 7954000),
         (-2, 9344500),
@@ -112,7 +112,7 @@ Future<void> seedFixture(AppDatabase db, DateTime now) async {
           -out,
         ),
       ],
-      // This month: pockets at 90 / 60 / 38 / 26 %.
+      // Current month: pocket usage at 90 / 60 / 38 / 26%.
       tx(
         'belanja',
         'tokopedia',
@@ -136,11 +136,11 @@ Future<void> seedFixture(AppDatabase db, DateTime now) async {
   });
 }
 
-/// Lived-in data for a dev phone: a young Jakarta employee (gaji Rp8,5jt on
-/// the 25th, ngekos, has a dog) over 3 past months + this month, ~80 entries
-/// a month. Rule-based with a fixed [Random] seed, so a given [now] always
-/// gives the same data. This month ngopi ends ~90% (hampir abis), ojol ~105%
-/// (over) and hiburan untouched, whatever day it is.
+/// Realistic dev data for a young Jakarta employee (Rp8.5M salary on the
+/// 25th, renting a room, with a dog): about 80 entries per month across three
+/// past months and the current month. A fixed [Random] seed makes results
+/// repeatable for a given [now]. Current-month coffee ends near 90%, ojol
+/// near 105%, and entertainment remains untouched on any day.
 Future<void> seedDemo(AppDatabase db, DateTime now) async {
   final rnd = Random(25);
   T pick<T>(List<T> xs) => xs[rnd.nextInt(xs.length)];
@@ -206,7 +206,7 @@ Future<void> seedDemo(AppDatabase db, DateTime now) async {
     final weekend = d.weekday >= DateTime.saturday;
     final past = d.isBefore(thisMonth);
 
-    // Monthly fixed.
+    // Monthly recurring expenses.
     switch (d.day) {
       case 1:
         tx('kos', 'ibu kos', at(8, 0), -1800000, note: 'kos bulan ini');
@@ -276,7 +276,7 @@ Future<void> seedDemo(AppDatabase db, DateTime now) async {
       }
     }
 
-    // Occasional, past months only so this month stays believable.
+    // Occasional expenses only in past months, keeping this month realistic.
     if (!past) continue;
     if (d.day == d.month) {
       tx(
@@ -327,7 +327,7 @@ Future<void> seedDemo(AppDatabase db, DateTime now) async {
     }
   }
 
-  // Top up so the pocket states show on any day, even the 1st.
+  // Ensure pocket states are visible on every day, including the 1st.
   final topUpAt = now.subtract(const Duration(hours: 1)).isBefore(thisMonth)
       ? thisMonth
       : now.subtract(const Duration(hours: 1));
@@ -350,8 +350,8 @@ Future<void> seedDemo(AppDatabase db, DateTime now) async {
         pocketsIntroSeen: const Value(true),
       ),
     );
-    // Stamped from the start of time like the payday rule, so the first
-    // (partial) period has them too.
+    // Apply from the same start as the payday rule, including the first
+    // partial period.
     final from = periodsFromStart;
     final until = DateTime(start.year, start.month + 1);
     b.insert(
@@ -362,7 +362,7 @@ Future<void> seedDemo(AppDatabase db, DateTime now) async {
         amount: const Value(6500000),
       ),
     );
-    // Realistic data lives in gajian periods, like a real first run.
+    // Realistic sample entries follow payday periods, like a fresh setup.
     b.insert(
       db.periodRules,
       PeriodRulesCompanion.insert(

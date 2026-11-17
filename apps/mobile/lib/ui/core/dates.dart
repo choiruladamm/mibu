@@ -20,8 +20,7 @@ final _dayLabel = DateFormat('EEE, d MMM', 'id');
 /// "sel, 13 okt".
 String dayLabel(DateTime d) => _dayLabel.format(d).toLowerCase();
 
-/// "hari ini" · "kemarin" · "3 hari lalu" · "minggu lalu" …, for [day]
-/// relative to [today].
+/// Relative label for [day] vs [today], e.g. "today", "yesterday", "3 days ago".
 String relativeDay(AppLocalizations l, DateTime day, DateTime today) {
   final n = daysBetween(today, day);
   return switch (n) {

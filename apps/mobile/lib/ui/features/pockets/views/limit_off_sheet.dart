@@ -9,11 +9,11 @@ import '../../../core/tokens.dart';
 import '../../../core/widgets/app_emoji.dart';
 import '../../../core/widgets/sheet.dart';
 
-/// "sering dicatat": this many entries this month gets the ink warning card.
+/// "sering dicatat": this many entries this month triggers the ink warning card.
 const busyEntries = 10;
 
-/// LimitOffSheet — "copot limit X?" before a limit is dropped (03.1 kartu
-/// detail, 07.3). True = copot.
+/// LimitOffSheet — "copot limit X?" before a limit is dropped (03.1 pocket
+/// detail, 07.3). True = remove the limit.
 Future<bool> showLimitOff(
   BuildContext context, {
   required String emoji,
@@ -267,7 +267,7 @@ class _OffJar extends StatelessWidget {
   }
 }
 
-/// Where it lands: a plain "buat apa" chip with this month's spend.
+/// Destination: a plain category chip with this month's spending.
 class _Chip extends StatelessWidget {
   const _Chip({required this.emoji, required this.name, required this.spent});
 

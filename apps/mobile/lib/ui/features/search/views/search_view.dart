@@ -28,9 +28,9 @@ final _monthName = DateFormat('MMMM', 'id');
 
 String _name(DateTime m) => _monthName.format(m).toLowerCase();
 
-/// 08.1 cari: category / place / note / tag in one month (or all months),
-/// the 00.14 summary card and the first 3 hits. Idle (08.1b): terakhir
-/// dicari + coba cari; nothing found (08.1c): ways out.
+/// 08.1 search: category, place, note, or tag in one or all months, with the
+/// 00.14 summary and first three matches. Idle (08.1b): recent and suggested
+/// searches; no matches (08.1c): alternate search suggestions.
 class SearchView extends ConsumerStatefulWidget {
   const SearchView({
     super.key,
@@ -67,7 +67,7 @@ class _SearchViewState extends ConsumerState<SearchView> {
     super.dispose();
   }
 
-  /// Picking a day or "liat N lagi" only holds for the current results.
+  /// A picked day or "see N more" applies only to the current results.
   void _reset() {
     _day = null;
     _expanded = false;
@@ -533,7 +533,7 @@ class _Summary extends StatelessWidget {
           ),
         )
         .toLowerCase();
-    // Any pemasukan in the hits: every figure here can give it away (05.1h).
+    // Any income in the hits: every figure here can give it away (05.1h).
     String money(int v) => context.rpSigned(v, income: s.income > 0);
 
     final right = s.count == 1
@@ -902,8 +902,8 @@ class _MoreButton extends StatelessWidget {
 
 typedef _Way = ({String pre, String em, String post, VoidCallback onTap});
 
-/// 08.1c nggak ketemu: search glyph, the line, where it looked, and the
-/// ways out (maksud kamu …? / ada N di september / ada N di pemasukan).
+/// 08.1c no matches: search glyph, query, search scope, and alternate routes
+/// (did you mean …? / N in September / N in income).
 class _None extends StatelessWidget {
   const _None({required this.title, required this.sub, required this.ways});
 
@@ -1029,7 +1029,7 @@ class _SectionTitle extends StatelessWidget {
   }
 }
 
-/// 08.1b terakhir dicari: tap = search again, × = forget it.
+/// 08.1b recent searches: tap to search again, × to remove.
 class _Recent extends StatelessWidget {
   const _Recent({
     required this.recent,
@@ -1201,7 +1201,7 @@ class _Ideas extends StatelessWidget {
   }
 }
 
-/// 08.1b2 user baru: nothing to search yet → catat.
+/// 08.1b2 new user: no search history yet → add an entry.
 class _Empty extends StatelessWidget {
   const _Empty({required this.onTap});
 

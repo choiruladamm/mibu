@@ -227,7 +227,7 @@ void main() {
 
     testWidgets('a phone without face id says how to get it', (tester) async {
       await open(tester, on: true, bio: BioKind.none, useBio: false);
-      expect(find.byType(AppSwitch), findsNWidgets(2)); // kunci + blur
+      expect(find.byType(AppSwitch), findsNWidgets(2)); // Lock and blur.
       expect(
         find.textContaining('hp ini belum ada face id / sidik jari'),
         findsOne,

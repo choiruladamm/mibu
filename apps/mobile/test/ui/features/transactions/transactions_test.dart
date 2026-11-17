@@ -61,7 +61,7 @@ void main() {
     // No income yet: "—" + a nudge to log the salary, not a negative figure.
     expect(find.text('catat gajian dulu'), findsOneWidget);
     expect(find.text('belum ada'), findsOneWidget);
-    expect(find.text('Rp4,06jt'), findsOneWidget); // pengeluaran
+    expect(find.text('Rp4,06jt'), findsOneWidget); // spending
     expect(find.text('naik Rp1,45jt dari september'), findsOneWidget);
     expect(
       find.text('dihitung per periode, sisa september nggak kebawa'),
@@ -80,10 +80,10 @@ void main() {
     await tester.tap(find.text('sep'));
     await settle();
     expect(find.text('september'), findsOneWidget);
-    // sisa pemasukan = 8,5jt − 2.612.500
+    // Remaining income = 8.5M − 2,612,500.
     expect(find.text('Rp5,89jt'), findsOneWidget);
-    expect(find.text('Rp8,5jt'), findsOneWidget); // pemasukan in the card
-    // filter stays on pemasukan: day total, row
+    expect(find.text('Rp8,5jt'), findsOneWidget); // income in the card
+    // The income filter remains active: day total and row.
     expect(find.text('+Rp8,5jt'), findsNWidgets(2));
     await tester.scrollUntilVisible(find.text('liat agu'), 200);
     expect(find.text('udah semua di september'), findsOneWidget);
@@ -274,7 +274,7 @@ void main() {
     await tester.tap(find.text('sep'));
     await settle();
 
-    // sisa pemasukan, pemasukan + both deltas hidden; pengeluaran stays.
+    // Remaining income, income, and both deltas are hidden; spending remains.
     expect(find.text('Rp5,89jt'), findsNothing);
     expect(find.text('Rp8,5jt'), findsNothing);
     expect(find.text('Rp•••'), findsNWidgets(2));
