@@ -1,21 +1,19 @@
-# Verifikasi statistik
+# Statistics verification
 
-Skill testing yang dipakai sudah terpasang: `flutter-add-widget-test` dan `flutter-add-integration-test`.
-
-Dari `apps/mobile`, jalankan test cepat:
+From `apps/mobile`, run the focused tests:
 
 ```sh
 fvm flutter test test/domain/stats_test.dart test/domain/period_test.dart test/ui/features/stats/stats_test.dart test/ui/features/budget test/ui/copy_guard_test.dart --timeout 30s
 ```
 
-Integration test pada simulator/emulator yang tersedia:
+Run the integration test on an available simulator or emulator:
 
 ```sh
 fvm flutter test integration_test/stats_test.dart --flavor dev -d <device-id> --timeout 60s
 ```
 
-Test menggunakan mibu dev, database SQLite in-memory, seed fixture, dan waktu tetap. Data produksi tidak dibaca atau diubah. Entry point khusus ini menguji layar statistik bersama provider, repository, database, dan rendering native; tidak melewati onboarding atau kunci aplikasi.
+The integration test uses mibu dev, an in-memory SQLite database, fixture data, and a fixed clock. It does not read or change production data. It exercises the statistics screen with providers, repositories, the database, and native rendering; it does not traverse onboarding or app lock.
 
-Cakupan: navigasi minggu/bulan/tahun, nilai periode sebelumnya, pembaruan total melalui stream database, pemilihan bar, scroll ke kategori, serta transaksi CSV masa depan yang tersimpan dan muncul setelah tanggal berganti. Widget test mencakup loading/error/retry transaksi dan budget, budget historis, empty state, serta layout 360/390 dengan font bundled. Domain test memeriksa periode gajian, batas budget, rata-rata, dan basis waktu tahunan.
+Coverage includes week, month, and year navigation, previous-period values, database stream updates, bar selection, category scrolling, and future CSV transactions becoming visible when the date changes. Widget tests cover loading, errors, retry, historical budgets, empty states, and 360/390 layouts with bundled fonts. Domain tests cover payday periods, budget boundaries, averages, and yearly time bases.
 
-Test tidak membuktikan semua flow aplikasi, aksesibilitas penuh, atau perilaku hardware biometrik.
+These tests do not cover every app flow, full accessibility, or biometric hardware behavior.
