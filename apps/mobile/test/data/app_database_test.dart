@@ -41,7 +41,9 @@ void main() {
     final file = File('${dir.path}/mibu.sqlite');
     final now = DateTime(2026, 10, 14, 14, 50);
     final old = now.subtract(const Duration(days: 2));
-    final recent = now.subtract(const Duration(hours: 1));
+    // The purge condition is strictly older than 24 hours; the exact cutoff
+    // must remain recoverable.
+    final recent = now.subtract(const Duration(days: 1));
 
     final db = AppDatabase(NativeDatabase(file), () => now, seedFixture);
     final txs = await db.select(db.transactions).get();
