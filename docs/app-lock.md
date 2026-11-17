@@ -1,53 +1,53 @@
-# mibu — kunci app
+# mibu — app lock
 
-Design: board 99.10a–u + komponen 00.31 PinPad di artifact "mibu". Issue: #3 (induk), #25–#28.
+Design: boards 99.10a–u + component 00.31 PinPad in the “mibu” artifact. Issues: #3 (parent), #25–#28.
 
-## Kenapa
+## Why
 
-Hp bisa dipinjem atau diambil orang. Kunci app nutup catatan dan nominal di mibu tanpa login (semua data lokal).
+A phone may be borrowed or taken. The app lock protects mibu’s records and amounts without requiring an account (all data stays local).
 
 ## Model
 
-PIN 6 digit wajib; face id (iPhone) / sidik jari (Android) opsional di atasnya. Semua state kunci disimpen di `flutter_secure_storage` sebagai satu nilai JSON (`lock.v1`): hash pin + salt (HMAC-SHA256), hitungan salah, ditahan sampai, nyala bio, bio berubah, kunci lagi setelah, blur. **Bukan di Drift**: `schemaVersion` tetap, nggak ada migrasi. Kunci mati = nilainya dihapus (setelan ikut hilang).
+A 6-digit PIN is required; Face ID (iPhone) / fingerprint (Android) is optional on top of it. All lock state is stored in `flutter_secure_storage` as one JSON value (`lock.v1`): PIN hash + salt (HMAC-SHA256), failed-attempt count, lockout expiry, biometrics enabled, biometrics changed, relock delay, and blur. **Not in Drift**: `schemaVersion` stays the same, with no migration. Turning the lock off deletes this value (settings are removed too).
 
-Keychain iOS bertahan setelah uninstall, database enggak. `bootstrap()` kosongin secure storage kalau profil belum onboarded (instal baru), lalu muat state kunci sebelum frame pertama. Android: file secure storage dikecualikan dari auto-backup (`backup_rules.xml`, `data_extraction_rules.xml`), `allowBackup` tetap nyala buat database.
+iOS Keychain data survives uninstall; the database does not. `bootstrap()` clears secure storage when the profile has not been onboarded (a fresh install), then loads lock state before the first frame. On Android, secure-storage files are excluded from auto-backup (`backup_rules.xml`, `data_extraction_rules.xml`); `allowBackup` stays enabled for the database.
 
-## Aturan
+## Rules
 
-| apa | aturan |
+| Item | Rule |
 |---|---|
-| pin | tepat 6 digit. Ditolak: semua digit sama, atau urut naik / turun (boleh nyebrang 9→0): 111111, 123456, 654321, 890123 |
-| penahanan | salah 5× → 30 dtk, 10× → 1 mnt, 15× → 5 mnt, 20× dst → 15 mnt (mentok). Sisa "N× lagi" = 5 − (salah mod 5) |
-| reset hitungan | cuma kalau pin bener atau biometrik berhasil. Matiin paksa app nggak mereset |
-| satu counter | layar kunci, sheet matiin, ganti pin (pin lama), nyalain biometrik lagi |
-| pas ditahan | digit + hapus redup 35% dan nggak jalan, tombol biometrik tetap jalan |
-| jam | `ditahan sampai` disimpen sebagai timestamp. Jam hp dimundurin tetap ditahan |
-| kapan kunci | cold start selalu. Balik dari background kunci kalau ditinggal ≥ "kunci lagi setelah" (langsung / 1 / 5 / 15 mnt, default 1). `hidden`, bukan `inactive`: prompt face id nggak dihitung ninggalin app. Jam mundur = kunci |
-| nyalain lewat pengaturan | sesi yang baru nyalain nggak langsung kekunci |
-| blur | default nyala. App ketutup wordmark tiap nggak di depan (daftar app) |
-| biometrik berubah | face id / sidik jari baru ke-enroll → biometrik mati sampai pin masukin lagi (flag `bioChanged`) |
-| lupa pin | nggak ada reset. Jalan satu-satunya instal ulang, catatan balik cuma dari file export csv |
+| PIN | Exactly 6 digits. Reject all identical digits and ascending/descending sequences (including wraparound 9→0): 111111, 123456, 654321, 890123 |
+| Lockout | 5 failures → 30 sec, 10 → 1 min, 15 → 5 min, 20 and above → 15 min (maximum). “N attempts left” = 5 − (failures mod 5) |
+| Reset counter | Only after a correct PIN or successful biometrics. Force-quitting the app does not reset it |
+| Shared counter | Lock screen, turn-off sheet, change PIN (old PIN), re-enable biometrics |
+| During lockout | Digits and delete are dimmed to 35% and disabled; the biometrics button stays active |
+| Clock | `locked until` is stored as a timestamp. Moving the phone clock backward does not end the lockout |
+| When to lock | Always on cold start. On return from background, lock if away for at least the configured delay (immediately / 1 / 5 / 15 min; default 1). Use `hidden`, not `inactive`: a Face ID prompt does not count as leaving the app. Clock moved backward = lock |
+| Enabling in settings | The session that enabled the lock is not locked immediately |
+| Blur | On by default. When the app is not in front, replace it with the wordmark in the app switcher |
+| Biometrics changed | Newly enrolled Face ID / fingerprint disables biometrics until the PIN is entered again (`bioChanged` flag) |
+| Forgotten PIN | No reset. Reinstall is the only option; records can only be restored from an exported CSV file |
 
-Rumus ada di `lib/domain/app_lock.dart` (tes: `test/domain/app_lock_test.dart`).
+Rules are in `lib/domain/app_lock.dart` (tests: `test/domain/app_lock_test.dart`).
 
-## Alur
+## Flows
 
-- **Nyalain:** bikin pin → ketik lagi (beda = ulang dari awal) → "pakai face id juga?" (kalau hp punya) → toast. Pin baru disimpen di langkah terakhir. Sistem diminta sekali buat biometrik (izin iOS); kalau ditolak, nyala dengan pin aja.
-- **Matiin:** masukin pin dulu.
-- **Ganti pin:** pin lama → pin baru → ketik lagi.
-- **Nyalain biometrik lagi** (setelah berubah): masukin pin dulu.
-- **Layar kunci:** biometrik langsung muncul, gagal / batal pindah ke pin pad. Link "lupa pin?" buka sheet penjelasan (digambar di tempat, layar kunci ada di atas Navigator).
+- **Enable:** create PIN → enter it again (if different, restart) → “use Face ID too?” (if supported) → toast. Save the new PIN only at the final step. The system biometrics prompt is shown once (iOS permission); if declined, enable PIN-only.
+- **Disable:** enter PIN first.
+- **Change PIN:** old PIN → new PIN → enter it again.
+- **Re-enable biometrics** (after enrollment changed): enter PIN first.
+- **Lock screen:** show biometrics immediately; on failure or cancellation, switch to the PIN pad. “forgot PIN?” opens an explanatory sheet (built in place; the lock screen is above the Navigator).
 
-## Native
+## Native implementation
 
-Satu method channel `com.mibu/lock` (Dart: `lockChannel` di `lib/data/biometrics.dart`), sisi native di `ios/Runner/AppDelegate.swift` dan `android/.../MainActivity.kt`:
+One method channel, `com.mibu/lock` (Dart: `lockChannel` in `lib/data/biometrics.dart`), with native code in `ios/Runner/AppDelegate.swift` and `android/.../MainActivity.kt`:
 
-| method | iOS | Android |
+| Method | iOS | Android |
 |---|---|---|
-| `snapshot` | simpan `evaluatedPolicyDomainState` di UserDefaults | bikin key Keystore AES yang di-invalidate kalau ada biometrik baru (`setInvalidatedByBiometricEnrollment`) |
-| `enrollmentChanged` | bandingin domain state sekarang vs simpanan | `Cipher.init` pakai key itu; `KeyPermanentlyInvalidatedException` = berubah |
-| `secure(bool)` | nggak ngapa-ngapain | `FLAG_SECURE` nyala selama kunci + blur nyala |
+| `snapshot` | Store `evaluatedPolicyDomainState` in UserDefaults | Create a Keystore AES key invalidated by new biometric enrollment (`setInvalidatedByBiometricEnrollment`) |
+| `enrollmentChanged` | Compare current domain state with the stored state | Run `Cipher.init` with that key; `KeyPermanentlyInvalidatedException` means enrollment changed |
+| `secure(bool)` | No operation | Enable `FLAG_SECURE` while the lock and blur are on |
 
-`snapshot` dipanggil tiap biometrik dinyalain (`AppLockController.enable` / `setBio(true)`), `enrollmentChanged` tiap layar kunci muncul sebelum prompt otomatis. Belum ada baseline = dianggap nggak berubah. Error native = dianggap nggak berubah / nggak ngapa-ngapain.
+Call `snapshot` whenever biometrics are enabled (`AppLockController.enable` / `setBio(true)`), and `enrollmentChanged` whenever the lock screen appears, before the automatic prompt. If there is no baseline, treat enrollment as unchanged. Native errors are treated as unchanged / no-op.
 
-Swift udah dicek tipe-nya lawan header Flutter (`swiftc -typecheck`). Kotlin dan perilaku di device belum pernah dijalanin: cek manualnya ada di #30.
+Swift was type-checked against Flutter headers (`swiftc -typecheck`). Kotlin and on-device behavior have not been run; manual checks are in #30.

@@ -1,86 +1,86 @@
-# mibu — ganti tanggal gajian: potongan periode
+# mibu — changing payday: transition periods
 
-Keputusan 2026-10-03, udah jalan. Board 00.24, 00.25, 05.1e–g dan note baris 02 udah disamain. Nambahin [payday-cycle.md](payday-cycle.md) (aturan 4: ganti gajian mulai periode berikutnya) dan [period-ledger.md](period-ledger.md) kasus 7. Di sana nama dobel ditulis "jarang, dibiarin dulu". Ternyata efeknya lebih dari sekadar nama.
+Decision made 2026-10-03 and implemented. Boards 00.24, 00.25, 05.1e–g and the note in row 02 have been aligned. This extends [payday-cycle.md](payday-cycle.md) (rule 4: a payday change starts next period) and case 7 in [period-ledger.md](period-ledger.md). That document called duplicate period names “rare, leave it for now”; the effects turned out to go beyond naming.
 
-## Masalah
+## Problem
 
-Ganti tanggal gajian nulis aturan baru mulai `current.end` (`setPayday`). `SegmentedResolver` ngitung siklus aturan baru di tanggal itu, lalu awalnya dipotong. Hasilnya ada **potongan (S)** antara periode jalan (P) dan periode penuh pertama aturan baru (Q).
+Changing payday writes a new rule starting at `current.end` (`setPayday`). `SegmentedResolver` computes the new rule's cycle at that date, clipping its start. This creates a **transition sliver (S)** between the running period (P) and the first full period under the new rule (Q).
 
-Contoh periode jalan di oktober 2026, tanpa geser weekend:
+Example: current period is in October 2026, with no weekend shift:
 
-| ganti | P | S | Q | nama S |
+| change | P | S | Q | S label |
 |---|---|---|---|---|
-| 25→1 | okt 25/9–25/10 | 25/10–1/11, 7 hari | nov 1/11–1/12 | **okt (dobel)** |
-| 25→10 | okt 25/9–25/10 | 25/10–10/11, 16 hari | nov 10/11–10/12 | **okt (dobel)** |
-| 28→15 | okt 28/9–28/10 | 28/10–15/11, 18 hari | nov 15/11–15/12 | **okt (dobel)** |
-| 16→15 | nov 16/10–16/11 | 16/11–15/12, 29 hari | des 15/12–15/1 | **nov (dobel)** |
-| 31→1 | okt 30/9–31/10 | 31/10–1/11, 1 hari | nov 1/11–1/12 | **okt (dobel)** |
-| 25→20 | okt 25/9–25/10 | 25/10–20/11, 26 hari | des 20/11–20/12 | nov |
-| 15→16 | okt 15/10–15/11 | 15/11–16/11, **1 hari** | des 16/11–16/12 | nov |
-| 10→25 | okt 10/10–10/11 | 10/11–25/11, 15 hari | des 25/11–25/12 | nov |
-| 1→25 | okt 1/10–1/11 | 1/11–25/11, 24 hari | des 25/11–25/12 | nov |
+| 25→1 | Oct 25/9–25/10 | 25/10–1/11, 7 days | Nov 1/11–1/12 | **Oct (duplicate)** |
+| 25→10 | Oct 25/9–25/10 | 25/10–10/11, 16 days | Nov 10/11–10/12 | **Oct (duplicate)** |
+| 28→15 | Oct 28/9–28/10 | 28/10–15/11, 18 days | Nov 15/11–15/12 | **Oct (duplicate)** |
+| 16→15 | Nov 16/10–16/11 | 16/11–15/12, 29 days | Dec 15/12–15/1 | **Nov (duplicate)** |
+| 31→1 | Oct 30/9–31/10 | 31/10–1/11, 1 day | Nov 1/11–1/12 | **Oct (duplicate)** |
+| 25→20 | Oct 25/9–25/10 | 25/10–20/11, 26 days | Dec 20/11–20/12 | Nov |
+| 15→16 | Oct 15/10–15/11 | 15/11–16/11, **1 day** | Dec 16/11–16/12 | Nov |
+| 10→25 | Oct 10/10–10/11 | 10/11–25/11, 15 days | Dec 25/11–25/12 | Nov |
+| 1→25 | Oct 1/10–1/11 | 1/11–25/11, 24 days | Dec 25/11–25/12 | Nov |
 
-Polanya: kalau gajian dimundurin ke tanggal yang lebih awal (atau nyebrang 16 ke bawah), S kebagian **nama yang sama** dengan P. Kalau dimajuin, nama tetap urut, tapi S bisa sependek 1 hari.
+Pattern: when payday moves earlier (or crosses from the 16th to 15th), S gets **the same label** as P. When moved later, labels remain ordered, but S can be as short as one day.
 
-## Efek ke fitur yang ada
+## Effects on existing features
 
-Nama dobel (S = P):
+Duplicate name (S = P):
 
-- **09.1, menu bulan, search:** `periodForMonth(okt)` balikin P, jadi S nggak bisa dibuka. Catatan di S kelihatan hilang dari daftar, walau di DB aman. Ini berlaku juga sesudah S lewat, selamanya di riwayat.
-- **Beranda:** `totals.spent` dikunci per nama, jadi pengeluaran P + S digabung di "okt" dengan budget 1×. Hari tersisa pakai S.
-- **Kantong:** pakai `currentPeriodProvider` = S aja, dengan budget penuh lagi. Angkanya beda dengan beranda.
-- **Stats:** aman, navigasinya lewat `periodOf`.
+- **09.1, month menu, search:** `periodForMonth(okt)` returns P, so S cannot be opened. Entries in S appear missing from the list although they remain in the database. This remains true after S passes.
+- **Home:** `totals.spent` is keyed by period label, so P + S spending is combined under “Oct” with one budget. Remaining days use S.
+- **Pockets:** use `currentPeriodProvider` = S, with a full budget again. Its numbers differ from home.
+- **Stats:** safe because navigation uses `periodOf`.
 
-S pendek (nama urut):
+Short S (ordered label):
 
-- Budget penuh buat periode 1 hari, jadi aman jajan hari itu = seluruh budget. Ini yang mau dicegah aturan "mulai periode berikutnya".
-- Limit mingguan stats = `budget × 7 ÷ panjang`, jadi 7× budget.
+- A full budget is available for a one-day period, so safe-to-spend that day equals the entire budget. The “starts next period” rule is meant to prevent this.
+- Weekly stats limit = `budget × 7 ÷ length`, so it becomes 7× the budget.
 
-Frekuensi: cuma pas user ganti tanggal gajian di luar periode setup. Jarang, dan nggak ada data yang hilang. Tapi kalau kejadian, kelihatannya kayak data hilang.
+Frequency: only when a user changes payday outside the setup period. It is rare and loses no data, but looks like data loss when it occurs.
 
-## Batasan
+## Constraints
 
-- Kode nyari periode lewat nama bulan (`homeMonthProvider`, `monthTransactionsProvider(month)`, `totals.spent[key]`). Jadi **satu nama = satu periode** wajib dijaga, atau semua tempat itu harus diubah.
-- Periode yang udah lewat nggak boleh berubah (aturan 4).
-- Kenyataannya, S itu periode antara dua gaji asli (gaji 25 okt lalu 1 nov). Jadi periode pendek nggak salah. Yang salah cuma nama dan budgetnya.
+- Code looks up periods by month name (`homeMonthProvider`, `monthTransactionsProvider(month)`, `totals.spent[key]`). Therefore **one name = one period** must hold, unless all these locations are changed.
+- A period in the past must not change (rule 4).
+- In reality, S is the period between two actual paydays (salary on Oct 25, then Nov 1). A short period is valid. Its name and budget are the problems.
 
-## Opsi
+## Options
 
-**A. S dobel digabung ke P.** Kalau nama S = nama P, P diperpanjang sampai awal Q. Untuk 25→1: okt = 25/9–1/11, 37 hari. Nama tetap unik, budget nggak dobel, cukup ubah `SegmentedResolver.periodOf` (+ `prev`).
-Kurangnya: makin jauh mundurnya, makin panjang P (25→10: 46 hari, 16→15: 60 hari). Dua gaji juga masuk satu periode, jadi sisa pemasukan P kegedean.
+**A. Merge duplicate S into P.** If S has P's label, extend P through the start of Q. For 25→1, October becomes Sep 25–Nov 1 (37 days). The label stays unique and the budget is not duplicated; change `SegmentedResolver.periodOf` (+ `prev`).
+Downside: moving payday earlier can make P much longer (25→10: 46 days, 16→15: 60 days). Two salaries also land in one period, making P's remaining-income total large.
 
-**B. A + budget S diproporsi.** S yang namanya urut tetap periode sendiri, tapi budgetnya `budget × panjang S ÷ panjang Q`. Contoh 15→16, 1 hari: budget/31. Nambah satu titik di `watchBudget` / view model dan kalimat di "dari mana angkanya?".
+**B. A + prorate S budget.** Keep ordered-label S as its own period, but set its budget to `budget × length of S ÷ length of Q`. Example: 15→16, one day: budget/31. Adds one point in `watchBudget` / view model and a sentence in “where did this number come from?”.
 
-**C. Nama S digeser (+1), Q dan seterusnya ikut geser.** Semua periode tetap pendek atau normal, tapi nama sesudah ganti meleset sebulan selamanya (16→15: 15/12–15/1 jadi "jan"). Aturan nama "bulan yang paling banyak harinya" jadi rusak.
+**C. Shift S label forward (+1); shift Q and later periods too.** Periods remain short or normal, but all labels after the change are permanently one month off (16→15: Dec 15–Jan 15 becomes “Jan”). This breaks the rule “month with the most days”.
 
-**D. Ubah semua kunci dari nama bulan ke periode.** Paling benar, tapi kena hampir semua provider dan menu bulan. Kegedean buat pre-release.
+**D. Replace all month-name keys with periods.** Most correct, but touches nearly every provider and the month menu. Too large before release.
 
-## Keputusan
+## Decision
 
-Opsi **B**. Yang belum kepake di sini:
+Option **B**. The details:
 
-1. **S dobel digabung ke P.** Kalau nama S = nama P, P diperpanjang sampai awal Q (25→1: okt = 25/9–1/11). S yang namanya urut tetap periode sendiri. Kalau S urut ikut digabung, namanya hilang di menu bulan (15→16: okt sampai 16/11, lalu des, jadi nov kelewat).
-2. **Periode panjang boleh, nggak ditolak.** Tanggal gajian biasanya diganti kantor, bukan pilihan user. Rentang itu memang berisi dua gaji, jadi periode 46–60 hari itu bener. Yang bikin aneh cuma budget, dan itu ditangani di poin 3. Biar user nggak kaget, rentang barunya ditampilin sebelum simpan (poin 4).
-3. **Budget periode transisi diproporsi.** Periode transisi = periode yang ada batas aturan di dalamnya atau di ujungnya: P yang digabung, atau S yang berdiri sendiri. Q = periode penuh pertama dari aturan baru.
-   - Budget = `budget × panjang periode transisi ÷ panjang Q`, dibulatkan ke rupiah. Satu rumus buat yang pendek maupun yang panjang: 7 hari dapet 7/30, 60 hari dapet 60/30, jadi aman jajan per hari tetap sama dengan periode normal.
-   - Pembaginya Q, bukan rata-rata 30, karena Q itu periode normal pertama dengan ritme gajian yang baru.
-   - **Limit kantong pakai faktor yang sama.** Kalau nggak, total limit kantong bisa lebih gede dari budget, dan angka kantong beda dengan beranda. Kurangnya: kantong yang bayarnya sekali sebulan (kos) ikut kepotong di periode pendek. Cuma sekali kejadian, dan limitnya bisa diubah di periode itu.
-   - Faktornya dihitung, nggak disimpan (aturan nilai turunan). Budget dan limit yang disimpan tetap angka per periode normal. 00.16 dan "dari mana angkanya?" nampilin angka hasil proporsi plus satu baris penjelasan.
-4. **Preview di sheet 00.24, bukan sheet konfirmasi tambahan.** Begitu user milih tanggal, di bawah pilihan tanggal langsung muncul "periode ini jadi 25 sep – 31 okt", diikuti "37 hari" dan "budget Rp…", disusun pakai `MetaLine`. Baris ini cuma muncul kalau periode jalan memang berubah (di luar periode setup). Toast + batalin tetap jadi jaring pengaman.
+1. **Merge duplicate S into P.** When S shares P's label, extend P through the start of Q (25→1: October = Sep 25–Nov 1). Keep ordered-label S as a separate period. Merging ordered S too would hide its name from the month menu (15→16: October runs through Nov 16, then December, so November is skipped).
+2. **Allow long periods.** Payday usually changes because of an employer, not user choice. A 46–60 day interval contains two salaries and is valid. Only its budget is unusual, handled in item 3. Show the new range before saving to avoid surprises (item 4).
+3. **Prorate the transition-period budget.** A transition period is one with a rule boundary inside it or at its end: merged P, or standalone S. Q is the first full period under the new rule.
+   - Budget = `budget × transition period length ÷ Q length`, rounded to rupiah. One formula handles both short and long periods: 7 days gets 7/30; 60 days gets 60/30, so safe-to-spend per day stays the same as a normal period.
+   - Divide by Q, not an average 30, because Q is the first normal period on the new payday rhythm.
+   - **Pocket limits use the same factor.** Otherwise total pocket limits can exceed the budget, and pocket figures disagree with home. Downside: a monthly expense such as rent is also prorated in a short period. This happens once, and its limit can be changed for that period.
+   - Calculate the factor; do not store it (derived values are not persisted). Stored budget and limit values remain normal-period amounts. 00.16 and “where did this number come from?” show the prorated amount with an explanatory line.
+4. **Preview in sheet 00.24, no extra confirmation sheet.** As soon as the user picks a date, show “periode ini jadi 25 sep – 31 okt” below it, followed by “37 hari” and “budget Rp…” using `MetaLine`. Show only if the running period changes (outside setup period). Toast + undo remains as a safety net.
 
-Hasilnya: satu nama = satu periode tetap terjaga, nggak ada bulan yang kelewat, dan nggak ada periode yang dapet budget penuh di luar panjang normalnya.
+This preserves one period per label, skips no month, and avoids granting a full budget to a period that is not a normal length.
 
-## Urutan kerja
+## Work sequence
 
-1. ✅ **Domain + test:** `SegmentedResolver` gabung S dobel ke P (`periodOf`, `prev`, `next`). Ditambah fungsi murni faktor periode transisi (null buat periode normal). Satu test per baris tabel [Masalah](#masalah): rentang, nama, faktor.
-2. ✅ **Data:** faktor dipakai di titik baca budget (`budgetInPeriodProvider` / `watchBudget`) dan limit kantong (`watchPockets`, `watchCategories`). Stats ikut otomatis lewat budget periode.
-3. ✅ **UI:** preview 00.24, baris penjelasan di 00.16 dan "dari mana angkanya?", copy di `app_id.arb`.
+1. ✅ **Domain + test:** `SegmentedResolver` merges duplicate S into P (`periodOf`, `prev`, `next`). Added a pure transition-period factor function (null for normal periods). One test per row in [Problem](#problem): range, label, factor.
+2. ✅ **Data:** factor is applied when reading budgets (`budgetInPeriodProvider` / `watchBudget`) and pocket limits (`watchPockets`, `watchCategories`). Stats follow automatically via period budget.
+3. ✅ **UI:** 00.24 preview, explanatory line in 00.16 and “where did this number come from?”, copy in `app_id.arb`.
 
-Catatan implementasi:
+Implementation notes:
 
-- `Period.normalDays` (null = periode normal) dan `prorate(amount, period)` ada di `domain/period.dart`. Angka yang diproporsi: `budgetInPeriodProvider`, budget di kantong, dan `Pocket.budget`. Sheet edit (00.16, limit, form kategori, total limit di 05.1) tetap pakai angka yang di-set: `Profile.monthlyBudget` dan `Pocket.limit`.
-- `setPayday`: kalau udah ada aturan yang antri, aturan itu yang diupdate (tanggal mulainya nggak berubah). Habis digabung, `current.end` bisa lewat dari tanggal aturan itu, jadi kalau masih pakai `current.end` bakal kebikin aturan ketiga.
-- Kapan ganti gajian mulai berlaku diputusin `paydayChangeFrom` (domain), dipakai `setPayday` dan preview 00.24. Preview ngitung periode lewat `withPayday` + `SegmentedResolver`, jadi angkanya sama persis dengan yang kesimpen.
-- Preview 00.24 dua baris: "periode ini jadi 25 sep – 27 okt" (15/600), di bawahnya `MetaLine` "33 hari • budget Rp8,8jt" (13, abu).
-- Toast 00.24: kalau periode jalan berubah, bunyinya "periode ini jadi sampai sen 9 nov". Kalau nggak berubah, tetap "berlaku mulai …, periode ini selesai dulu".
-- 00.25: kartu sisa budget dapet catatan "periode peralihan n hari, budget dihitung n/30".
+- `Period.normalDays` (null = normal period) and `prorate(amount, period)` are in `domain/period.dart`. Prorated values: `budgetInPeriodProvider`, pocket budget, and `Pocket.budget`. Edit sheets (00.16, limit, category form, total limits in 05.1) continue using the configured values: `Profile.monthlyBudget` and `Pocket.limit`.
+- `setPayday`: if a rule is already queued, update it (its start date stays the same). After a merge, `current.end` may extend past that rule date, so using `current.end` would create a third rule.
+- `paydayChangeFrom` (domain) determines when the change takes effect; `setPayday` and the 00.24 preview use it. Preview calculates periods through `withPayday` + `SegmentedResolver`, so its values match the saved state.
+- 00.24 preview has two lines: “periode ini jadi 25 sep – 27 okt” (15/600), then `MetaLine` “33 hari • budget Rp8,8jt” (13, gray).
+- 00.24 toast: if the running period changes, “periode ini jadi sampai sen 9 nov”. Otherwise it remains “berlaku mulai …, periode ini selesai dulu”.
+- 00.25 remaining-budget card shows “periode peralihan n hari, budget dihitung n/30”.

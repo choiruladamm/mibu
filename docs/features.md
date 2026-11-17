@@ -1,174 +1,165 @@
-# mibu — daftar fitur
+# mibu — feature catalog
 
-Sumber: Claude Design "mibu" (https://claude.ai/artifact/25RLRcYScmmPDzjBvg9Zz8). Nomor = id screen di canvas (board direstrukturisasi 2026-10-10: tiap modul 1 angka, 02 beranda · 03 kantong · 04 statistik · 05 pengaturan · 06 catat · 07 buat apa · 08 cari/detail/edit · 09 transaksi · 10 showcase · 99 proposal), pakai di tiket.
-Semua nominal di design = data contoh.
+Source: Claude Design “mibu” (https://claude.ai/artifact/25RLRcYScmmPDzjBvg9Zz8). Screen numbers are canvas IDs (boards reorganized 2026-10-10: one leading number per module, 02 home · 03 pockets · 04 stats · 05 settings · 06 entry · 07 categories · 08 search/detail/edit · 09 transactions · 10 showcase · 99 proposals); use them in issues. All amounts in the design are sample data.
 
-Tanda: **[diupdate]** = aturan/perilaku berubah dari design, **[perlu design]** = belum ada di canvas, nunggu board.
+This catalog records the design and current product rules. It is not an implementation checklist: implemented screens are marked **Built**, deferred or proposal items are labeled explicitly. Period and budget behavior follows [period-ledger.md](period-ledger.md) and [mvp.md](mvp.md); the app uses payday periods, not opening balances or a cumulative monthly-balance model.
 
-## Aturan global
+## Global rules
 
-- Locale `id-ID`, IDR tanpa desimal, titik ribuan (`Rp4.530.000`), minggu mulai senin.
-- Format pendek: ≥1jt → `Rp4,53jt`, ≥100K → `Rp450K`, ≥1K → `Rp6,7K`. Pengeluaran `-`, pemasukan `+`, prediksi `± `. Angka tabular.
-- Copy huruf kecil, santai, di `id.arb`. Pakai "pengeluaran / pemasukan", bukan "keluar / masuk".
-- Ikon: hugeicons, stroke rounded 1.5.
-- Tanggal/bulan masa depan nggak bisa dipilih di mana pun.
+- Locale `id-ID`, whole-rupiah IDR, thousands separator (`Rp4.530.000`), week starts Monday.
+- Compact format: ≥1jt → `Rp4,53jt`, ≥100K → `Rp450K`, ≥1K → `Rp6,7K`. Expenses use `-`, income `+`, forecasts `± `. Tabular numerals.
+- UI copy is lowercase and casual, in `app_id.arb`. Use “pengeluaran / pemasukan”, not “keluar / masuk”.
+- Icons: HugeIcons, rounded stroke 1.5.
+- Future dates cannot be selected for entries; available period navigation depends on the screen.
 
-## 01 · Onboarding & auth
+## 01 · Onboarding and account
 
-- [ ] **01.1 onboarding** — 3 slide (kantong · jatah harian · catat 3 detik), progress ala stories, tap segmen buat lompat, `lewati` / `mulai sekarang` → 01.2.
-- [ ] **01.2 masuk** — satu tombol buat masuk & daftar, tanpa email/password.
-  - iOS: `lanjut pakai apple` (utama) + `lanjut pakai google`. Android: google aja.
-  - Pakai tombol resmi brand. Stiker emoji muter pelan di ilustrasi (40s).
-  - 01.2c / 01.2d = sheet sistem (Google Credential Manager / Sign in with Apple), bukan UI kita.
-- [ ] **01.2e berhasil masuk** — `halo, {nama} 👋`. Akun baru → 01.4, akun lama → 02.1.
+- **01.1 onboarding — Built.** Three slides (pockets · daily allowance · log in 3 seconds), story-style progress, tap a segment to jump, `lewati` / `mulai sekarang` → 01.2.
+- **01.2 sign in — Deferred.** One button for sign-in and sign-up, no email/password.
+  - iOS: `lanjut pakai apple` (primary) + `lanjut pakai google`. Android: Google only.
+  - Use official brand buttons. Emoji stickers rotate slowly in the illustration (40s).
+  - 01.2c / 01.2d are system sheets (Google Credential Manager / Sign in with Apple), not app UI.
+- **01.2e signed in — Deferred.** `halo, {nama} 👋`. New account → 01.4, existing account → 02.1.
 
-## 01.4 · Atur awal
+## 01.4 · Initial setup
 
-> **Diganti (2026-10-03, logic udah, desain final nyusul):** 01.4 nggak nanya saldo lagi (tanggal gajian + budget opsional, nggak ada yang wajib), hero cuma sisa budget tanpa toggle, grafik saldo + prediksi diganti. Lihat [period-ledger.md](period-ledger.md).
+The shipped setup asks for a payday and optionally a period budget; it does not ask for an opening balance. See [period-ledger.md](period-ledger.md). First-run flow is implemented in `apps/mobile/lib/ui/features/onboarding/` and `setup/`.
 
-- [ ] **01.4 saldo + gajian** — input saldo (maks 12 digit, font mengecil), chip cepat 500K/1jt/2,5jt/5jt, tanggal gajian (1, 10, 15, 25, 28, akhir). Preview live "aman jajan per hari" = saldo ÷ hari sampai gajian. `nanti aja` → beranda.
-- [ ] **01.4b kantong pertama** — "mau mulai pasang limit ke apa?": multi-select preset (makan, ngopi, ojol, tagihan, hiburan, belanja, anabul, liburan) dengan limit bulanan, "N dikasih limit", "ringkasan limit". Ringkasan total vs saldo ("sisa bebas …" / "lebih … dari saldo").
+- **01.4 payday and budget — Built.** Payday choices 1, 10, 15, 25, 28, end of month; budget may be skipped. `nanti aja` continues to home.
+- **01.4b first pockets — Built.** “mau mulai pasang limit ke apa?”: multi-select presets (makan, ngopi, ojol, tagihan, hiburan, belanja, anabul, liburan) with monthly limits; “N dikasih limit”, “ringkasan limit”. Summary compares total limits with the budget when one is set.
 
-## 02 · Beranda
+## 02 · Home
 
-> **Diganti (2026-10-03, logic udah, desain final nyusul):** 01.4 nggak nanya saldo lagi (tanggal gajian + budget opsional, nggak ada yang wajib), hero cuma sisa budget tanpa toggle, grafik saldo + prediksi diganti. Lihat [period-ledger.md](period-ledger.md).
+**02.1 home — Built.** The hero shows remaining budget for the selected payday period; there is no opening-balance toggle or cumulative balance chart. The period budget is optional. See [period-ledger.md](period-ledger.md).
 
-- [ ] **02.1 beranda**
-  - Header: logo, MonthPicker, tombol cari → 08.1.
-  - Hero (HeroSaldo 00.23b): pill `saldo kamu ⇄` di-tap → `sisa budget` (budget − kepake bulan itu). Default saldo (kumulatif, sisa bulan lalu kebawa), pilihan terakhir diinget buat semua bulan. Tanpa budget cuma saldo, pill jadi label biasa + "• pasang budget". Hint "tap buat liat sisa budget · oke" sekali. Tap → angka count-up + haptic ringan.
-  - Ikut mode: angka + label hero, baris kecil di bawahnya ("gajian lagi 9 hari" / "dari budget Rp8jt" / "per 30 sep"), header sticky (tap juga ganti).
-  - "?" di ujung baris kecil → dialog pendek "dari mana angkanya?": saldo, sisa budget, dan jatah aman jajan (saldo ÷ hari sampai gajian vs sisa budget ÷ sisa hari, yang lebih kecil) dengan angka user sendiri.
-  - Nggak ikut mode: grafik saldo per bulan + prediksi, chip, kantong, statistik.
-  - Chip: `aman jajan hari ini · Rp…` (versi ketat, lihat mvp.md › Aman jajan); budget kelewat → `rem dulu ya · N hari lagi` (+ baris kecil "! budget bulan ini kelewat Rp…"); hari gajian belum dicatat → "gajian hari ini" + `udah gajian? catat`; lewat gajian → "! gajian telat n hari" + `gajian belum masuk? catat` (dua chip ini buka 06.1 langsung sebagai pemasukan, kategori gajian, nominal gaji terakhir abu-abu "kayak gaji terakhir, ketik buat ganti": angka pertama menggantikan, simpan tanpa ngetik = nominal itu); bulan lalu → `rata²/hari · Rp…`. Bulan depan di grafik cuma intip (pill "± Rp…"), hero nggak pindah.
-  - Grafik `saldo per bulan` 6 bulan, tap bulan buat intip; bulan depan = prediksi (±). Sinkron dua arah sama MonthMenu.
-  - 4 kantong teratas (% kepake), `lihat semua` → 03.1.
-  - `baru aja`: 2 transaksi terakhir → 08.2, `lihat semua` → 09.1.
-## 03 · Kantong
+- Header: logo, MonthPicker, search button → 08.1.
+- Hero: remaining budget; the “?” opens “dari mana angkanya?” explaining the calculation with the user’s values.
+- Payday-period context and safe-to-spend chip follow [mvp.md](mvp.md#safe-to-spend-today); weekend paydays can be shifted to Friday or kept on their scheduled date. Payday income logged up to three days early starts the period on its actual date; a late payday does not extend a period.
+- When the budget is exceeded, show `rem dulu ya · N hari lagi` and the amount over budget. On payday, show `gajian hari ini` + `udah gajian? catat`; when late, show `! gajian telat n hari` + `gajian belum masuk? catat`. These open 06.1 as income in the payday category, with the last salary shown as a hint; typing replaces it, and saving without typing uses that amount.
+- For a prior period, `rata²/hari · Rp…`. The home view clamps its selected month to the current month.
+- Four leading pockets (% used), `lihat semua` → 03.1.
+- `baru aja`: up to five latest transactions → 08.2, `lihat semua` → 09.1.
 
-- [ ] **03.1 kantong**
-  - Hero `sisa jajan {bulan}` = Σlimit − Σkepake.
-  - **[perlu design]** Sub-baris hero bisa di-tap: "Rp2,34jt dari Rp7,4jt kepake · budget Rp6,9jt" → BudgetSheet 00.16. Budget kosong → "pasang budget".
-  - **[v2]** Toples per buat apa yang pakai limit (isi = % kepake, animasi 300ms), "N pakai limit · urut dari yang paling kepake", toples putus-putus `limit` → sheet pasang limit. "?" di hero → dialog "dari mana angkanya?" (sisa jajan = Σ limit − kepake kantong; sisa budget = budget − semua pengeluaran, termasuk yang di luar kantong). Kalau sisa jajan lebih gede dari sisa budget, "?" jadi "!" ink + baris "sisa budget cuma Rp…" / "budget udah kelewat Rp…" + catatan "pegang yang lebih kecil". Pilih satu → kartu detail: status `aman` / `hampir abis` (≥85%) / `belum kepake`, "jatah sisa dari Rp…", "kira-kira Rp… sehari".
-  - **[v2]** Kartu detail (03.1, 03.1j): kiri nama, nominal 36, "jatah sisa • limit Rp…", "≈ Rp…/hari sampai akhir bulan"; kanan chip status di atas cincin 96 (ikon + %). Kelewat (> 100%): chip ink "! lewat limit", nominal = kelebihan + "kelewat • limit Rp…", "masih N hari lagi, rem dulu ya", cincin penuh + busur tipis luar sepanjang kelebihan, tombol ink `naikin limit` (→ 07.3), toples dapet label "!", chip 06.2 "lewat Rp…" tebal.
-  - **[v2]** Kartu detail: `atur limit` → 07.3, `copot limit` → LimitOffSheet ("copot limit X?", dampak: nggak ada peringatan, limit balik ke belum dijatah, N catatan bulan ini tetap aman; kartu "kamu udah N× catat X bulan ini" kalau ≥10 catatan bulan ini; toples redup + badge "−") → `copot limit` + toast "limit X dicopot · X & N catatannya tetap ada · batalin" / `nggak jadi`.
-  - **[v2]** Header `+ pasang limit` → sheet "pasang limit ke…": buat apa pengeluaran yang belum pakai limit, urut paling kepake bulan ini ("N catatan · Rp… udah kepake bulan ini"), pilih → PocketLimit + "toples langsung keisi X% · sisa jatah Rp…" → `pasang limit Rp…` + toast "limit X Rp… kepasang · N catatan bulan ini langsung keitung · batalin". Kosong: "semua buat apa udah pakai limit". Bawah: `bikin kategori baru` → 07.2, "pemasukan (gajian dkk) nggak bisa dikasih limit".
-  - **[v2]** "belum ada limit · Rp… bulan ini" + `semua` → 07.1: 2 chip teratas → langsung ke step limit, `+N` → sheet. Belum ada sama sekali → kartu "pasang limit pertama".
-  - `isi ulang` ditunda.
-  - `impian` (goals): kartu kosong `pasang target` — flow belum didesain.
-## 04 · Statistik
+## 03 · Pockets
 
-- Perbaikan state, ritme tahunan, dan konteks periode: [#33](https://github.com/choiruladamm/mibu/issues/33) (induk #6).
+**03.1 pockets — Built.** A pocket is an expense category with a limit; it is not a separate data entity. Budget and limits apply to the selected payday period.
 
-- [ ] **04.1 statistik** — toggle minggu / bulan / tahun (04.1a/b/c).
-  - Navigasi periode ‹ ›, total + delta vs periode lalu.
-  - Bar chart (bar masa depan = `belum`), garis rata², tap bar → pill nominal.
-  - `sekilas`: paling boros · paling hemat · rata² harian/per rentang/bulanan.
-  - `ritme budget`: uang kepake % vs waktu jalan %, status `aman` / `hampir abis` / `lewat budget` / `di bawah budget`. Basisnya `monthlyBudget` (lihat mvp.md › Statistik).
-    - **[diupdate]** Status `hampir abis` (≥85% limit, minggu/bulan) ditambah.
-    - Budget kosong pada periode sekarang → section diganti kartu "pasang budget bulanan biar mibu bisa ngecek ritme kamu" → BudgetSheet 00.16.
-  - `larinya ke mana`: 4 kategori teratas (stacked bar + list).
-## 05 · Pengaturan
+- Hero `sisa jajan {bulan}` = sum of pocket limits − spending in those pockets.
+- “?” explains pocket allowance (sum of limits minus pocket spending) versus remaining budget (budget minus all expenses, including expenses outside pockets). If pocket allowance exceeds remaining budget, show the warning and tell the user to follow the smaller amount.
+- Jars represent limited categories, filled by percentage used and ordered by most spent. Categories without limits appear separately. Statuses: `aman`, `hampir abis` (≥85%), `belum kepake`; show remaining allowance and approximate daily amount through the period end. Over 100%: `! lewat limit`, amount over the limit, days remaining, and `naikin limit` → 07.3.
+- `atur limit` → 07.3. `copot limit` opens LimitOffSheet; removing a limit keeps the category and its transactions. Confirmation reports the effect, and the toast has `batalin`.
+- `+ pasang limit` opens a sheet listing expense categories without limits, ordered by current-period spending, with usage details. Selecting one opens PocketLimit; existing transactions count immediately. The empty state says `semua buat apa udah pakai limit`; `bikin kategori baru` → 07.2. Income categories cannot have limits.
+- “belum ada limit · Rp… bulan ini” + `semua` → 07.1. If none exist, show `pasang limit pertama`.
+- `isi ulang` is deferred. `impian` (goals) is a proposal; its flow is not designed.
 
-- [ ] **05.1 pengaturan**
-  - Kartu setup: `budget bulanan` → BudgetSheet 00.16, `N limit` → 03.1 (board masih "N kantong"). Chip `mulai tgl 1` nggak bisa di-tap, **[ditunda]** dibuang dari build.
-  - duit: `buat apa aja · nama, ikon & limit` + tumpukan 3 ikon paling sering dipakai (+n sisanya) → 07.1 (ganti ikon = 2 tap), `limit bulanan` → 03.1.
-  - `tanggal gajian` · "jum 23 okt • 9 hari lagi" (tanggal yang beneran dihitung, biar gajian weekend yang digeser nggak keliatan salah hitung) / "gajian hari ini" / "gajian telat n hari" · "tiap tgl 25" → PaydaySheet 00.24 (05.1e–g): chip 1 · 10 · 15 · 25 (tag "umum") · 28 · akhir · lain… (grid 1–31), kartu ink "gajian berikutnya rab 28 okt · 14 hari lagi" + "aman jajan jadi Rp… → Rp…/hari", catatan "budget & limit tetap per bulan, 1–31", `simpan tgl 28` → toast "gajian jadi tgl 28 · batalin". Tanggal gajian jatuh sabtu / minggu dihitung jumat sebelumnya; opsi "cair duluan kalau libur" + tanggal merah fase 2.
-  - kebiasaan: `pengingat harian` (21.00, switch), `rekap mingguan` (switch). **[ditunda]**
-  - privasi: `sembunyiin nominal` (tampil ••• sampai di-tap). `kunci app ›` (99.10, sub = mode: face id + pin / sidik jari + pin / pin aja / mati), [app-lock.md](app-lock.md).
-  - tampilan: `mode` terang / gelap / auto. **[ditunda]** (light only)
-  - data: `ekspor ke csv` (board nulis "export"), `import dari csv` (05.1l–o, [import.md](import.md)). `backup & pulihin` (iCloud) **[ditunda]**.
-  - Footer versi.
+## 04 · Statistics
 
-## 06 · Catat
+**04.1 statistics — Built.** Period, yearly rhythm, and context work: [#33](https://github.com/choiruladamm/mibu/issues/33) (parent #6).
 
-- [ ] **06.1 catat** (dari tombol + di semua tab)
-  - Segmented pengeluaran / pemasukan, tombol kalender → DateSheet, DayStrip buat pilih tanggal cepat.
-  - Keypad rupiah: 1–9, `000`, 0, backspace. Maks 10 digit, titik ribuan otomatis, font 68 → 54 → 44.
-  - Bar dampak: "🍜 jatah makan abis ini · sisa X" / "kelebihan X". Pemasukan: "saldo abis ini".
-  - Chip buat apa → 06.2, `+ catatan` → NoteSheet.
-  - `simpan pengeluaran` / `simpan pemasukan` → 02.1.
-- [ ] **06.2 buat apa?** (sheet) — **[v2]** judul "buat apa?", "cari atau bikin…", chip yang pakai limit dapet "sisa Rp…" (tebal kalau ≥85%), boleh dilewati (tanpa kategori), `terakhir` (kategori + tempat sekali tap), grid kategori, field `di mana`, `atur` → 07.1.
-## 07 · Buat apa
+- Week / month / year toggle (04.1a/b/c), period navigation ‹ ›, total and change versus the prior period.
+- Bar chart; future bars are `belum`, with average line and tap-to-see amount.
+- `sekilas`: highest spend · lowest spend · daily / period / monthly averages.
+- `ritme budget`: spending percentage versus elapsed-time percentage; states `aman` / `hampir abis` / `lewat budget` / `di bawah budget`. Uses the user-set period budget, not the sum of pocket limits; see [mvp.md](mvp.md#statistics). For week/month, `hampir abis` starts at ≥85%. If the current period has no budget, show `pasang budget bulanan biar mibu bisa ngecek ritme kamu` → BudgetSheet 00.16.
+- `larinya ke mana`: four leading categories (stacked bar + list).
 
-- [ ] **07.1 buat apa aja** — **[v2]** grid; yang pakai limit dapet chip ink "limit Rp…", sisanya "N catatan" / "belum dipakai"; footer 🫙 "yang ada limit jadi toples di tab kantong…"; tap ikon (badge pensil) = IconSheet 00.21, langsung kesimpan + toast "ikon X diganti" `batalin`; tap nama = edit 07.3; tahan & geser = urutin. Tombol tong sampah di header → mode hapus (07.1d): judul "hapus yang mana?", badge − (tile goyang), tap − → 07.4, `selesai` keluar. "lain-lain" (catatan tanpa buat apa, bukan baris database) selalu 🔒, tile redup; "gajian" 🔒 cuma di mode hapus (nama & ikon masih bisa diganti, nggak ada tombol hapus di 07.3). Footer mode hapus: "lain-lain & gajian nggak bisa dihapus…".
-- [ ] **07.2 bikin baru / 07.3 edit** (satu widget, `mode=new|edit`)
-  - Nama + emoji otomatis dari kata kunci (makan, kopi, kucing, bensin, …) sampai user pilih manual. Saran 3 emoji + palet 16.
-  - `masuk ke`: pengeluaran / pemasukan.
-  - **[v2]** Switch `limit bulanan` (hint "nggak wajib, bisa dipasang nanti" / "jadi toples · mibu ngingetin kalau mau abis"), default mati kecuali dari 03.1. Edit + limit nyala → link `copot limit` → LimitOffSheet → kesimpan langsung, 07.3 tetap kebuka (switch mati) + toast batalin (switch nyala lagi).
-  - PocketLimit 00.15 (ketik / geser / preset Rp100K · 300K · 600K · 1jt). **[diupdate]** Switch cuma buat kategori pengeluaran. Kategori pemasukan (gajian) cuma muncul pas catat pemasukan.
-  - Edit: info pemakaian ("12 catatan · Rp840K tahun ini") + tombol hapus → 07.4.
-- [ ] **07.4 hapus kategori** — wajib pindahin catatan ke kategori lain / tanpa kategori, tombol **tahan buat hapus** (1 detik), state sukses + `batalin`.
+## 05 · Settings
 
-## 08 · Cari, detail & edit
+**05.1 settings — Built.**
 
-- [ ] **08.1 cari** — cari kategori/tempat di bulan ini, filter tipe, SearchSummary (total, rata², insight, tick per hari yang bisa di-drag buat filter hari), 3 hasil pertama + `liat N lagi`, saran pencarian, empty state.
-- [ ] **08.2 struk (detail)** — kartu struk: tempat, kategori, nominal, waktu, jenis, berulang, catatan, foto struk. Dampak ke kantong. Aksi: hapus, `patungan`, `catat lagi`, edit → 08.3.
-- [ ] **08.2b/c hapus** — ConfirmModal (dampak kantong sebelum → sesudah), lalu kartu stempel `dihapus` + toast `batalin`.
-- [ ] **08.3 edit catatan** — nominal, buat apa (bisa diganti / dikosongin), di mana, kapan, catatan, berulang (nggak / mingguan / bulanan). Badge `diubah` per field, "N perubahan · batalin", `simpan perubahan` nonaktif kalau belum ada perubahan.
+- Setup cards: `budget bulanan` → BudgetSheet 00.16, `N limit` → 03.1. The `mulai tgl 1` control is deferred and not in the build.
+- Money: `buat apa aja · nama, ikon & limit` + stack of three frequently used icons (+n remaining) → 07.1; `limit bulanan` → 03.1.
+- Payday: date and next-payday status → PaydaySheet 00.24 (05.1e–g), with choices 1 · 10 · 15 (tag `umum`) · 25 · 28 · end · other… (1–31 grid). Weekend dates can be shifted to the previous Friday or kept unchanged. Holiday-calendar support is an undecided idea ([#42](https://github.com/choiruladamm/mibu/issues/42)). Changes apply according to [payday-change.md](payday-change.md).
+- Habits: `pengingat harian` (21.00, switch), `rekap mingguan` (switch) — deferred.
+- Privacy: `sembunyiin nominal` → three modes in [hide-income.md](hide-income.md). `kunci app ›` → app-lock settings in [app-lock.md](app-lock.md).
+- Appearance: light / dark / auto — deferred; current build is light only.
+- Data: `ekspor ke csv`, `import dari csv` (05.1l–o, [import.md](import.md)). Full `backup & pulihin` is deferred.
+- Version footer.
 
-## 09 · Transaksi
+## 06 · Entry
 
-- [ ] **09.1 semua transaksi** — carousel bulan (swipe / tap kiri-kanan = ±1 bulan, label lintas tahun `des 24`; tap judul `oktober ▾` → MonthMenu 00.8 dengan bulan sebelum transaksi pertama dikunci; chip `balik ke okt 2026 ›` kalau bukan bulan ini; tanpa dots), tile pemasukan / pengeluaran / selisih, filter semua / pengeluaran / pemasukan, grup per hari (hari ini · kemarin · sen 12 okt) + total harian, empty state, akhir list `liat {bulan lalu}`.
+- **06.1 add entry — Built.** Open from the + button on every tab.
+  - Segmented expense / income control, calendar button → DateSheet, DayStrip for quick date selection.
+  - Rupiah keypad: 1–9, `000`, 0, backspace. Maximum 10 digits; automatic thousands separators; font scales 68 → 54 → 44.
+  - Impact bar: `🍜 jatah makan abis ini · sisa X` / `kelebihan X`. Income shows the period impact.
+  - Category chip → 06.2, `+ catatan` → NoteSheet.
+  - `simpan pengeluaran` / `simpan pemasukan` → home.
+- **06.2 “buat apa?” sheet — Built.** Search or create categories; limited categories show `sisa Rp…` (bold at ≥85%). Category is optional. `terakhir` offers the last category + place in one tap; category grid, `di mana` field, `atur` → 07.1.
 
-## 00 · Komponen bersama
+## 07 · Categories (“buat apa”)
 
-| id | komponen | catatan |
+- **07.1 manage categories — Built.** Grid; limited categories show `limit Rp…`, others show `N catatan` / `belum dipakai`. Footer: 🫙 “yang ada limit jadi toples di tab kantong…”. Tap icon (pencil badge) → IconSheet 00.21, saves immediately with undo toast; tap name → edit 07.3; long-press and drag to reorder. Trash button enters delete mode (07.1d): `hapus yang mana?`, − badge (tiles wobble), tap − → 07.4, `selesai` exits. `lain-lain` (uncategorized transactions; not a database row) is locked. `gajian` is locked only in delete mode; its name and icon remain editable. Neither can be deleted.
+- **07.2 create / 07.3 edit — Built.** One widget (`mode=new|edit`). Name + emoji suggested from keywords (makan, kopi, kucing, bensin, …), with three emoji suggestions and a 16-icon palette. `masuk ke`: expense / income.
+  - Optional monthly limit switch; default off except when opened from 03.1. Limits apply only to expense categories. PocketLimit 00.15 supports typing, slider, and presets Rp100K · 300K · 600K · 1jt.
+  - Edit shows usage (e.g. `12 catatan · Rp840K tahun ini`) and delete action → 07.4. Removing a limit is immediate with undo and leaves the edit screen open.
+- **07.4 delete category — Built.** Transactions must be moved to another category or left uncategorized. Hold `hapus` for one second; success state includes `batalin`.
+
+## 08 · Search, detail, and edit
+
+- **08.1 search — Built.** Search category/place in the selected period, type filter, SearchSummary (total, average, insight, draggable daily ticks to filter a day), first three results + `liat N lagi`, search suggestions, empty state.
+- **08.2 receipt/detail — Built.** Receipt card: place, category, amount, time, type, recurring status, note, receipt photo (photo feature deferred). Pocket impact. Actions: delete, `patungan` (deferred), `catat lagi`, edit → 08.3.
+- **08.2b/c delete — Built.** ConfirmModal shows before/after pocket impact, then a `dihapus` stamp and undo toast.
+- **08.3 edit transaction — Built.** Amount, category (change or clear), place, date, note; recurring controls are deferred. Per-field `diubah` badge, `N perubahan · batalin`, and disabled `simpan perubahan` when unchanged.
+
+## 09 · Transactions
+
+**09.1 all transactions — Built.** Month carousel (swipe / left-right tap = ±1 month, cross-year label `des 24`); tap `oktober ▾` → MonthMenu 00.8, with months before the first transaction locked; `balik ke okt 2026 ›` when away from the current period; no dots. Tiles for income / expenses / difference; all / expense / income filters; daily groups (hari ini · kemarin · sen 12 okt) + daily total; empty state; end-of-list `liat {bulan lalu}`. “Month” navigation maps to payday periods; see [period-ledger.md](period-ledger.md).
+
+## 00 · Shared components
+
+| ID | Component | Notes |
 |---|---|---|
-| 00.3 | TabBar | kapsul ngambang 4 tab + tombol + terpisah |
-| 00.4 | TxRow | 2 kolom simetris, selalu 64: kiri buat apa + chip tag (tag pertama + "+n") / tempat • catatan, kanan nominal / jam; href (default 08.2), tap chip → 08.1 |
-| 00.5 | NavHeader | back, title, sub, aksi search/close/edit |
-| 00.6 | ConfirmModal | bar dampak before/after, selalu dipasangin toast undo |
-| 00.7–8 | MonthPicker + MonthMenu | grid 3×4, mini bar per bulan, bulan depan dikunci |
-| 00.9 | TextField | floating label, state focus/error/disabled, tipe text/search/rupiah |
-| 00.10 | AmountField | input nominal besar + hint sisa/kelebihan |
-| 00.11 | DayStrip | 1 minggu, swipe ganti minggu, caption relatif |
-| 00.12 | DateSheet | kalender bulan, titik jumlah catatan, peringatan dobel |
-| 00.13 | NoteSheet | maks 80 karakter, maks 3 tag, catatan terakhir |
-| 00.14 | SearchSummary | insight + tick harian yang bisa di-drag |
-| 00.15 | PocketLimit | input limit ("limit per bulan"): ketik, slider (garis sisa budget), preset chip. Dipakai 07.2/07.3, nanti 01.4b. **[perlu design]** budget kosong → garis diganti link "pasang budget bulanan" → 00.16 |
-| 00.16 | BudgetSheet | **[perlu design]** sheet "budget bulanan": AmountField + keypad (maks 12 digit), info live kiri "total limit Rp…", kanan "ketik budget kamu" / "belum dijatah Rp…" / "kurang Rp…" (tebal), prefill Σlimit dibulatin ke atas per 500K kalau kosong, `simpan` / `hapus budget`. Dibuka dari 00.15, 03.1, 04.1, 05.1 |
-| 00.19 | MetaLine | metadata 1 baris dipisah titik bulat 3px (#BDBDBD, di ink #737373), bukan karakter "·". Judul section nggak pakai titik: judul 15/600 kiri, info 13 muted kanan (+ › kalau bisa di-tap) |
-| 00.17 | AmountKeypad | keypad rupiah 1–9, `000`, 0, backspace |
-| 00.18 | UndoToast | toast `batalin` |
-| 00.20–21 | Ikon + IconSheet | library ikon, sheet pilih ikon |
-| 00.22 | LimitOffSheet | copot limit, dampak sebelum konfirmasi |
-| 00.23 | HeroBudget | sisa budget beranda (spek 00.23b) |
-| 00.24 | PaydaySheet | tanggal gajian, [payday-cycle.md](payday-cycle.md) |
-| 00.25 | NumbersSheet | "dari mana angkanya" |
-| 00.26 | PeriodBars | kepake per periode |
-| 00.29 | HideSheet | sembunyiin nominal, [hide-income.md](hide-income.md) |
-| 00.30 | ImportSheet | import dari csv, [import.md](import.md) |
-| 00.31 | PinPad | 6 titik + keypad 3×4, slot kiri bawah = biometrik (kosong kalau pin aja). `state`: normal / locked (digit + hapus redup 35%, biometrik tetap aktif) / bioHidden. Dipakai kunci app (#3) |
+| 00.3 | TabBar | Floating capsule, four tabs + separate + button |
+| 00.4 | TxRow | Symmetric two columns, fixed height 64: left category + tag chip (first tag + “+n”) / place • note; right amount / time; default href 08.2, tap chip → 08.1 |
+| 00.5 | NavHeader | Back, title, subtitle, search/close/edit actions |
+| 00.6 | ConfirmModal | Before/after impact bar; paired with undo toast |
+| 00.7–8 | MonthPicker + MonthMenu | 3×4 grid, mini bar per month, future periods locked in MonthMenu |
+| 00.9 | TextField | Floating label; focus/error/disabled; text/search/rupiah types |
+| 00.10 | AmountField | Large amount input + remaining/overage hint |
+| 00.11 | DayStrip | One week, swipe to change week, relative caption |
+| 00.12 | DateSheet | Month calendar, dots for transaction count, duplicate warning |
+| 00.13 | NoteSheet | Max 80 characters, max 3 tags, recent notes |
+| 00.14 | SearchSummary | Insight + draggable daily ticks |
+| 00.15 | PocketLimit | Limit input (“limit per bulan”): typing, slider (remaining-budget line), preset chips; used in 07.2/07.3 and 01.4b |
+| 00.16 | BudgetSheet | “budget bulanan”: AmountField + keypad (max 12 digits), live total limits and budget comparison; empty budget prefills sum of limits rounded up to Rp500K; `simpan` / `hapus budget`; opened from 00.15, 03.1, 04.1, 05.1 |
+| 00.19 | MetaLine | One-line metadata separated by 3px round dots (#BDBDBD, #737373 on ink), never literal `·`; section title left (15/600), muted info right (13, + › if tappable) |
+| 00.17 | AmountKeypad | Rupiah keypad: 1–9, `000`, 0, backspace |
+| 00.18 | UndoToast | `batalin` toast |
+| 00.20–21 | Icons + IconSheet | Icon library and icon picker sheet |
+| 00.22 | LimitOffSheet | Remove limit; show impact before confirmation |
+| 00.23 | HeroBudget | Home remaining-budget hero |
+| 00.24 | PaydaySheet | Payday date; [payday-cycle.md](payday-cycle.md) |
+| 00.25 | NumbersSheet | “dari mana angkanya” |
+| 00.26 | PeriodBars | Spending by period |
+| 00.29 | HideSheet | Hide amounts; [hide-income.md](hide-income.md) |
+| 00.30 | ImportSheet | CSV import; [import.md](import.md) |
+| 00.31 | PinPad | Six dots + 3×4 keypad; lower-left slot is biometrics (empty for PIN-only). States: normal / locked (digits + delete dimmed 35%, biometrics remains active) / bioHidden. Used by app lock (#3) |
 
-## 99 · Proposal (board drafting, belum diputusin)
+## 99 · Proposals
 
-| id | proposal |
+Draft boards; not decided or implemented unless stated otherwise.
+
+| ID | Proposal |
 |---|---|
-| 99.1 | Duit periode ini: DuitCard (00.27) + AlurSheet (00.28) di beranda |
-| 99.2 | Akses transaksi dari beranda: ikon di header (A) / "kepake ›" di hero (B) / C pembanding |
-| 99.3 | Catatan + tag di detail transaksi (A bawah rincian, B di header), ubah via NoteSheet |
-| 99.4 | (#4, #5) Tag: daftar, bikin, ganti nama, gabung, hapus + batalin, tag cepat di NoteSheet, TagManage |
-| 99.6 | Label budget di grafik yang ketutup pill (opsi A / B / C) |
-| 99.10 | (#3) Kunci app: Face ID / sidik jari + PIN, layar kunci, ditahan 30 dtk → 15 mnt, PinPad (00.31), [app-lock.md](app-lock.md) |
+| 99.1 | Period income card and flow sheet ([#39](https://github.com/choiruladamm/mibu/issues/39)) |
+| 99.2 | Access transactions from home ([#40](https://github.com/choiruladamm/mibu/issues/40)) |
+| 99.3 | Notes + tags on transaction detail ([#5](https://github.com/choiruladamm/mibu/issues/5)) |
+| 99.4 | (#4, #5) Tags: list, create, rename, merge, delete + undo, quick tags in NoteSheet, TagManage |
+| 99.6 | Budget label and chart pill overlap ([#41](https://github.com/choiruladamm/mibu/issues/41)) |
+| 99.10 | (#3) App lock: Face ID / fingerprint + PIN, lock screen, lockout from 30 sec → 15 min, PinPad (00.31), [app-lock.md](app-lock.md) |
 
-## Entitas
+## Data entities
 
-- **User** — uid, nama, email (bisa relay Apple), provider google/apple.
-- **Profil budget** — saldo, tanggal gajian, budget bulanan, awal siklus.
-- **Category** — emoji, nama, jenis (pengeluaran/pemasukan), `monthlyLimit` (null = cuma dicatat), urutan. Di UI namanya "buat apa"; yang pakai limit = toples di tab kantong. Lihat mvp.md › Buat apa, limit, kantong.
-- **Transaction** — tipe, nominal (int IDR), kategori, tempat, tanggal + jam, catatan (≤80), tag (≤3), berulang, foto struk, no. struk. Perlu soft delete buat undo.
-- **Goal (impian)** — field belum jelas.
-- **Settings** — pengingat + jam, rekap mingguan, sembunyiin nominal, kunci app (#3), tema.
+- **User** — uid, name, email (may be Apple relay), Google/Apple provider. No account or backend in the current app.
+- **Profile / budget** — payday, period budget, and period settings. There is no opening-balance field in the current model.
+- **Category** — emoji, name, type (expense/income), order. In UI, called “buat apa”; expense categories with a limit appear as pockets. See [mvp.md](mvp.md#categories-limits-and-pockets).
+- **Transaction** — type, amount (integer IDR), category, place, date + time, note (≤80), tags (≤3), recurring status, receipt photo, receipt number. Soft delete supports undo; recurring, receipt photo, and receipt number remain deferred/absent where not implemented.
+- **Goal** — fields not defined; proposal only.
+- **Settings** — reminders + time, weekly summary, hidden amounts, app lock (#3), theme. Several settings are deferred; see 05.1.
 
-## Belum jelas / belum didesain
+## Deferred and unresolved
 
-- Backend: Firebase vs Supabase, offline/sync, backup Android (iCloud doang di design).
-- Rumus "aman jajan hari ini": basisnya saldo atau sisa budget? Angka di beranda nggak cocok sama dua-duanya.
-- Siklus budget: tanggal 1 vs tanggal gajian. Budget bulanan = angka yang diisi user (05.1), bukan Σlimit kantong.
-- Flow belum ada: edit gajian/saldo (budget → 00.16), pilih jam pengingat, isi ulang, patungan, target impian, foto struk, logout, hapus akun.
-- Algoritma prediksi saldo bulan depan.
-- Threshold notif kantong (asumsi 85%).
-- Recurring: engine auto-create, edit satu vs semua. Catat (06.1) belum ada kontrol berulang.
-- Durasi undo, Face ID versi Android, palet dark mode.
-- State loading/error/empty pertama kali (beranda/statistik/kantong tanpa data).
-- Inkonsisten kecil: "jajan" di daftar pindah kategori nggak ada di set kategori; "gajian" muncul di picker mode pengeluaran; 08.3 nggak pakai DayStrip (build pakai DayStrip 00.11); tombol 08.3 "simpan perubahan" + pill "2 perubahan · batalin" nggak muat di 390 (build: "simpan"); ConfirmModal 00.6 masih copy inggris "now 90% used / after 45%" (build: "sekarang 90% kepake / abis ini 45%"); struk 08.2 "#0413" belum ada kolom no. struk (build: tanggal aja).
+- Backend, offline sync, and full backup/restore.
+- Reminder schedule and weekly summary; recurring-entry engine and edit-one/edit-all behavior.
+- Top-up, split payment, goals, receipt photo/number, logout, account deletion.
+- Dark palette and Android biometric-specific behavior need device/design work.
+- SearchSummary daily ticks are implemented; further interaction proposals are separate.
